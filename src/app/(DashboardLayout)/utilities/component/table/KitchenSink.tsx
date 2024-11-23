@@ -38,8 +38,6 @@ import type { DataType } from "./data";
 
 // Component Imports
 
-
-
 // Style Imports
 import styles from "../../../../styles/table.module.css";
 
@@ -48,6 +46,7 @@ import defaultData from "./data";
 import TablePaginationComponent from "../pagination/TablePaginationComponent";
 import CustomTextField from "../textField/TextField";
 import { ChevronRight } from "@mui/icons-material";
+import { Box } from "@mui/material";
 
 // Column Definitions
 const columnHelper = createColumnHelper<DataType>();
@@ -239,45 +238,65 @@ const KeuanganTable = () => {
   }, [table.getState().columnFilters[0]?.id]);
 
   return (
-    <Card>
+    <Card
+      sx={{
+        paddingY: "2rem",
+      }}
+    >
       <CardHeader
-        title='Keuangan'
         action={
           <DebouncedInput
-            value={globalFilter ?? ''}
-            onChange={value => setGlobalFilter(String(value))}
-            placeholder='Search all columns...'
+            value={globalFilter ?? ""}
+            onChange={(value) => setGlobalFilter(String(value))}
+            placeholder="Search all columns..."
           />
         }
       />
-      <div className='overflow-x-auto'>
+      <div className="overflow-x-auto">
         <table className={styles.table}>
           <thead>
-            {table.getHeaderGroups().map(headerGroup => (
+            {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => {
+                {headerGroup.headers.map((header) => {
                   return (
                     <th key={header.id} className={styles.tableTh}>
                       {header.isPlaceholder ? null : (
                         <>
                           <div
                             className={classnames({
-                              'flex items-center': header.column.getIsSorted(),
-                              'cursor-pointer select-none': header.column.getCanSort()
+                              "flex items-center": header.column.getIsSorted(),
+                              "cursor-pointer select-none":
+                                header.column.getCanSort(),
                             })}
                             onClick={header.column.getToggleSortingHandler()}
                           >
-                            {flexRender(header.column.columnDef.header, header.getContext())}
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
                             {{
-                              asc: <ChevronRight fontSize='1.25rem' className='-rotate-90' />,
-                              desc: <ChevronRight fontSize='1.25rem' className='rotate-90' />
-                            }[header.column.getIsSorted() as 'asc' | 'desc'] ?? null}
+                              asc: (
+                                <ChevronRight
+                                  fontSize="1.25rem"
+                                  className="-rotate-90"
+                                />
+                              ),
+                              desc: (
+                                <ChevronRight
+                                  fontSize="1.25rem"
+                                  className="rotate-90"
+                                />
+                              ),
+                            }[header.column.getIsSorted() as "asc" | "desc"] ??
+                              null}
                           </div>
-                          {header.column.getCanFilter() && <Filter column={header.column} table={table} />}
+                          {header.column.getCanFilter() && (
+                            <Filter column={header.column} table={table} />
+                          )}
                         </>
                       )}
                     </th>
-                  )
+                  );
                 })}
               </tr>
             ))}
@@ -285,37 +304,52 @@ const KeuanganTable = () => {
           {table.getFilteredRowModel().rows.length === 0 ? (
             <tbody>
               <tr>
-                <td colSpan={table.getVisibleFlatColumns().length} className='text-center '>
+                <td
+                  colSpan={table.getVisibleFlatColumns().length}
+                  className="text-center "
+                >
                   No data available
                 </td>
               </tr>
             </tbody>
           ) : (
             <tbody className={styles.tableTbody}>
-              {table.getRowModel().rows.map(row => {
+              {table.getRowModel().rows.map((row) => {
                 return (
                   <tr key={row.id}>
-                    {row.getVisibleCells().map(cell => {
-                      return <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                    {row.getVisibleCells().map((cell) => {
+                      return (
+                        <td key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </td>
+                      );
                     })}
                   </tr>
-                )
+                );
               })}
             </tbody>
           )}
         </table>
       </div>
-      <TablePagination
-        component={() => <TablePaginationComponent table={table} />}
-        count={table.getFilteredRowModel().rows.length}
-        rowsPerPage={table.getState().pagination.pageSize}
-        page={table.getState().pagination.pageIndex}
-        onPageChange={(_, page) => {
-          table.setPageIndex(page)
-        }}
-      />
+      <Box sx={{ 
+        marginTop: '1rem',
+        paddingX: '1rem'
+       }}>
+        <TablePagination
+          component={() => <TablePaginationComponent table={table} />}
+          count={table.getFilteredRowModel().rows.length}
+          rowsPerPage={table.getState().pagination.pageSize}
+          page={table.getState().pagination.pageIndex}
+          onPageChange={(_, page) => {
+            table.setPageIndex(page);
+          }}
+        />
+      </Box>
     </Card>
-  )
+  );
 };
 
 export default KeuanganTable;
