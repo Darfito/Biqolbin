@@ -1,0 +1,78 @@
+/* table.module.css */
+
+/* Kelas lokal untuk table */
+.table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.table [align='right'] > * {
+  text-align: end;
+}
+
+.table [align='center'] > * {
+  text-align: center;
+}
+
+.table thead {
+  text-transform: uppercase;
+  color: var(--mui-palette-text-primary);
+  border-block-start: 1px solid var(--border-color);
+}
+
+/* Kelas lokal untuk th */
+.tableTh {
+  font-weight: 500;
+  font-size: 0.8125rem;
+  letter-spacing: 0.2px;
+  line-height: 1.8462;
+  text-align: start;
+  block-size: 56px;
+}
+
+.tableTh:not(:first-of-type):not(:last-of-type) {
+  padding-block: 0.5rem;
+  padding-inline: 1rem;
+}
+
+.tableTh:first-of-type {
+  padding-block: 0.5rem;
+  padding-inline: 1.5rem 1rem;
+}
+
+.tableTh:last-of-type {
+  padding-block: 0.5rem;
+  padding-inline: 1rem 1.5rem;
+}
+
+/* Kelas lokal untuk tbody dan td */
+.tableTbody {
+  color: var(--mui-palette-text-secondary);
+}
+
+.tableTbody td,
+.tableTbody th {
+  font-size: 0.9375rem;
+  line-height: 1.4667;
+  block-size: 50px;
+}
+
+.tableTbody td:first-of-type {
+  padding-block: 0.5rem;
+  padding-inline: 1.5rem 1rem;
+}
+
+.tableTbody td:last-of-type {
+  padding-block: 0.5rem;
+  padding-inline: 1rem 1.5rem;
+}
+
+.tableTbody tr:not(:last-child) {
+  border-block-end: 1px solid var(--border-color);
+}
+
+.tableTbody tr {
+  border-block-start: 1px solid var(--border-color);
+}
