@@ -10,8 +10,7 @@ import KitchenSink from "../../utilities/component/table/KitchenSink";
 const Keuangan = () => {
   return (
     <>
-      <PageContainer title="Keuangan">
-        <DashboardCard>
+ 
         <Grid sx={{ 
           justifyContent: "center",
           alignItems: "center",
@@ -29,11 +28,9 @@ const Keuangan = () => {
               </Grid>
             ))}
           </Grid>
-        </DashboardCard>
+
+      <PageContainer title="Keuangan">
         <KitchenSink />
-        <Box className="font-bold text-3xl">
-          testing
-        </Box>
       </PageContainer>
     </>
   );
