@@ -20,6 +20,7 @@ export type DataType = {
     sisaTagihan: number
     tanggalPembayaran: Date
     status: StatusType
+    action?: string; // Optional field for action
   }
   
   export type metodePembayaranType = 'Cicilan' | 'Tunai' | 'Tabungan'
