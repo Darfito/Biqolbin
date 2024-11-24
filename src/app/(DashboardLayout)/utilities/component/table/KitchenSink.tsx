@@ -42,14 +42,15 @@ import type { DataType } from "./data";
 import styles from "../../../../styles/table.module.css";
 
 // Data Imports
-import defaultData from "./data";
+import defaultData, { KeuanganData } from "./data";
 import TablePaginationComponent from "../pagination/TablePaginationComponent";
 import CustomTextField from "../textField/TextField";
 import { ChevronRight } from "@mui/icons-material";
 import { Box } from "@mui/material";
+import { KeuanganType } from "./type";
 
 // Column Definitions
-const columnHelper = createColumnHelper<DataType>();
+const columnHelper = createColumnHelper<KeuanganType>();
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -102,6 +103,7 @@ const DebouncedInput = ({
 
   return (
     <CustomTextField
+      variant="outlined"
       {...props}
       value={value}
       onChange={(e) => setValue(e.target.value)}
@@ -163,7 +165,7 @@ const Filter = ({
   ) : (
     <CustomTextField
       fullWidth
-      sx={{ minInlineSize: 100 }}
+      sx={{paddingLeft:"0px!important", minInlineSize: 100 }}
       value={(columnFilterValue ?? "") as string}
       onChange={(e) => column.setFilterValue(e.target.value)}
       placeholder="Search..."
@@ -176,35 +178,35 @@ const KeuanganTable = () => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
 
-  const [data, setData] = useState<DataType[]>(() => defaultData);
+  const [data, setData] = useState<KeuanganType[]>(() => KeuanganData); // Menggunakan KeuanganData sebagai default
 
   // Hooks
-  const columns = useMemo<ColumnDef<DataType, any>[]>(
-    () => [
-      columnHelper.accessor("fullName", {
-        cell: (info) => info.getValue(),
-        header: "Name",
-      }),
-      columnHelper.accessor("email", {
-        cell: (info) => info.getValue(),
-        header: "Email",
-      }),
-      columnHelper.accessor("start_date", {
-        cell: (info) => info.getValue(),
-        header: "Date",
-      }),
-      columnHelper.accessor("experience", {
-        cell: (info) => info.getValue(),
-        header: "Experience",
-      }),
-      columnHelper.accessor("age", {
-        cell: (info) => info.getValue(),
-        header: "Age",
-      }),
-    ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  const columns = useMemo<ColumnDef<KeuanganType, any>[]>(() => [
+    columnHelper.accessor("nama", {
+      cell: (info) => info.getValue(),
+      header: "Nama",
+    }),
+    columnHelper.accessor("metodePembayaran", {
+      cell: (info) => info.getValue(),
+      header: "Metode Pembayaran",
+    }),
+    columnHelper.accessor("jumlahTagihan", {
+      cell: (info) => `Rp ${info.getValue().toLocaleString()}`,
+      header: "Jumlah Tagihan",
+    }),
+    columnHelper.accessor("sisaTagihan", {
+      cell: (info) => `Rp ${info.getValue().toLocaleString()}`,
+      header: "Sisa Tagihan",
+    }),
+    columnHelper.accessor("tanggalPembayaran", {
+      cell: (info) => new Date(info.getValue()).toLocaleDateString("id-ID"),
+      header: "Tanggal Pembayaran",
+    }),
+    columnHelper.accessor("status", {
+      cell: (info) => info.getValue(),
+      header: "Status",
+    }),
+  ], []);
 
   const table = useReactTable({
     data,
@@ -228,18 +230,10 @@ const KeuanganTable = () => {
     getFacetedMinMaxValues: getFacetedMinMaxValues(),
   });
 
-  useEffect(() => {
-    if (table.getState().columnFilters[0]?.id === "fullName") {
-      if (table.getState().sorting[0]?.id !== "fullName") {
-        table.setSorting([{ id: "fullName", desc: false }]);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [table.getState().columnFilters[0]?.id]);
-
   return (
     <Card
       sx={{
+        marginY: "1rem",
         paddingY: "2rem",
       }}
     >
@@ -262,19 +256,19 @@ const KeuanganTable = () => {
                     <th key={header.id} className={styles.tableTh}>
                       {header.isPlaceholder ? null : (
                         <>
-                          <div
-                            className={classnames({
-                              "flex items-center": header.column.getIsSorted(),
-                              "cursor-pointer select-none":
-                                header.column.getCanSort(),
-                            })}
-                            onClick={header.column.getToggleSortingHandler()}
-                          >
-                            {flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                            {{
+                        <div
+                          className={classnames({
+                            "flex items-center": header.column.getIsSorted(),
+                            "cursor-pointer select-none": header.column.getCanSort(),
+                          })}
+                          onClick={header.column.getToggleSortingHandler()}
+                        >
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                          {header.column.getIsSorted() && (
+                            {
                               asc: (
                                 <ChevronRight
                                   fontSize="1.25rem"
@@ -287,12 +281,10 @@ const KeuanganTable = () => {
                                   className="rotate-90"
                                 />
                               ),
-                            }[header.column.getIsSorted() as "asc" | "desc"] ??
-                              null}
-                          </div>
-                          {header.column.getCanFilter() && (
-                            <Filter column={header.column} table={table} />
+                            }[header.column.getIsSorted() as "asc" | "desc"]
                           )}
+                        </div>
+                        {header.column.getCanFilter() && <Filter column={header.column} table={table} />}
                         </>
                       )}
                     </th>
@@ -306,7 +298,7 @@ const KeuanganTable = () => {
               <tr>
                 <td
                   colSpan={table.getVisibleFlatColumns().length}
-                  className="text-center "
+                  className="text-center"
                 >
                   No data available
                 </td>
@@ -314,30 +306,28 @@ const KeuanganTable = () => {
             </tbody>
           ) : (
             <tbody className={styles.tableTbody}>
-              {table.getRowModel().rows.map((row) => {
-                return (
-                  <tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => {
-                      return (
-                        <td key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
+              {table.getRowModel().rows.map((row) => (
+                <tr key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
             </tbody>
           )}
         </table>
       </div>
-      <Box sx={{ 
-        marginTop: '1rem',
-        paddingX: '1rem'
-       }}>
+      <Box
+        sx={{
+          marginTop: "1rem",
+          paddingX: "1rem",
+        }}
+      >
         <TablePagination
           component={() => <TablePaginationComponent table={table} />}
           count={table.getFilteredRowModel().rows.length}
@@ -351,5 +341,6 @@ const KeuanganTable = () => {
     </Card>
   );
 };
+
 
 export default KeuanganTable;

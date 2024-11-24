@@ -1,16 +1,189 @@
-export type DataType = {
-  id: number;
-  avatar: string;
-  fullName: string;
-  post: string;
-  email: string;
-  city: string;
-  start_date: string;
-  salary: number;
-  age: number;
-  experience: string;
-  status: number;
-};
+import { KeuanganType, DataType } from "./type";
+
+
+export const KeuanganData: KeuanganType[] = [
+  {
+    id: 1,
+    nama: "Keuangan 1",
+    metodePembayaran: "Cicilan",
+    jumlahTagihan: 100000,
+    sisaTagihan: 100000,
+    tanggalPembayaran: new Date(),
+    status: "Belum Bayar"
+  },
+  {
+    id: 2,
+    nama: "Keuangan 2",
+    metodePembayaran: "Cicilan",
+    jumlahTagihan: 100000,
+    sisaTagihan: 50000,
+    tanggalPembayaran: new Date(),
+    status: "Sedang Menyicil"
+  },
+  {
+    id: 3,
+    nama: "Keuangan 3",
+    metodePembayaran: "Cicilan",
+    jumlahTagihan: 100000,
+    sisaTagihan: 0,
+    tanggalPembayaran: new Date(),
+    status: "Lunas"
+  },
+  {
+    id: 4,
+    nama: "Keuangan 4",
+    metodePembayaran: "Tunai",
+    jumlahTagihan: 200000,
+    sisaTagihan: 0,
+    tanggalPembayaran: new Date(),
+    status: "Lunas"
+  },
+  {
+    id: 5,
+    nama: "Keuangan 5",
+    metodePembayaran: "Tabungan",
+    jumlahTagihan: 200000,
+    sisaTagihan: 150000,
+    tanggalPembayaran: new Date(),
+    status: "Sedang Menabung"
+  },
+  {
+    id: 6,
+    nama: "Keuangan 6",
+    metodePembayaran: "Cicilan",
+    jumlahTagihan: 300000,
+    sisaTagihan: 300000,
+    tanggalPembayaran: new Date(),
+    status: "Belum Bayar"
+  },
+  {
+    id: 7,
+    nama: "Keuangan 7",
+    metodePembayaran: "Cicilan",
+    jumlahTagihan: 300000,
+    sisaTagihan: 100000,
+    tanggalPembayaran: new Date(),
+    status: "Sedang Menyicil"
+  },
+  {
+    id: 8,
+    nama: "Keuangan 8",
+    metodePembayaran: "Tunai",
+    jumlahTagihan: 500000,
+    sisaTagihan: 0,
+    tanggalPembayaran: new Date(),
+    status: "Lunas"
+  },
+  {
+    id: 9,
+    nama: "Keuangan 9",
+    metodePembayaran: "Tabungan",
+    jumlahTagihan: 200000,
+    sisaTagihan: 100000,
+    tanggalPembayaran: new Date(),
+    status: "Sedang Menabung"
+  },
+  {
+    id: 10,
+    nama: "Keuangan 10",
+    metodePembayaran: "Cicilan",
+    jumlahTagihan: 150000,
+    sisaTagihan: 0,
+    tanggalPembayaran: new Date(),
+    status: "Lunas"
+  },
+  {
+    id: 11,
+    nama: "Keuangan 11",
+    metodePembayaran: "Tunai",
+    jumlahTagihan: 400000,
+    sisaTagihan: 400000,
+    tanggalPembayaran: new Date(),
+    status: "Belum Bayar"
+  },
+  {
+    id: 12,
+    nama: "Keuangan 12",
+    metodePembayaran: "Cicilan",
+    jumlahTagihan: 250000,
+    sisaTagihan: 150000,
+    tanggalPembayaran: new Date(),
+    status: "Sedang Menyicil"
+  },
+  {
+    id: 13,
+    nama: "Keuangan 13",
+    metodePembayaran: "Tabungan",
+    jumlahTagihan: 350000,
+    sisaTagihan: 200000,
+    tanggalPembayaran: new Date(),
+    status: "Sedang Menabung"
+  },
+  {
+    id: 14,
+    nama: "Keuangan 14",
+    metodePembayaran: "Tunai",
+    jumlahTagihan: 250000,
+    sisaTagihan: 0,
+    tanggalPembayaran: new Date(),
+    status: "Lunas"
+  },
+  {
+    id: 15,
+    nama: "Keuangan 15",
+    metodePembayaran: "Cicilan",
+    jumlahTagihan: 100000,
+    sisaTagihan: 100000,
+    tanggalPembayaran: new Date(),
+    status: "Belum Bayar"
+  },
+  {
+    id: 16,
+    nama: "Keuangan 16",
+    metodePembayaran: "Cicilan",
+    jumlahTagihan: 200000,
+    sisaTagihan: 50000,
+    tanggalPembayaran: new Date(),
+    status: "Sedang Menyicil"
+  },
+  {
+    id: 17,
+    nama: "Keuangan 17",
+    metodePembayaran: "Tabungan",
+    jumlahTagihan: 300000,
+    sisaTagihan: 100000,
+    tanggalPembayaran: new Date(),
+    status: "Sedang Menabung"
+  },
+  {
+    id: 18,
+    nama: "Keuangan 18",
+    metodePembayaran: "Tunai",
+    jumlahTagihan: 150000,
+    sisaTagihan: 0,
+    tanggalPembayaran: new Date(),
+    status: "Lunas"
+  },
+  {
+    id: 19,
+    nama: "Keuangan 19",
+    metodePembayaran: "Cicilan",
+    jumlahTagihan: 200000,
+    sisaTagihan: 100000,
+    tanggalPembayaran: new Date(),
+    status: "Sedang Menyicil"
+  },
+  {
+    id: 20,
+    nama: "Keuangan 20",
+    metodePembayaran: "Tabungan",
+    jumlahTagihan: 400000,
+    sisaTagihan: 400000,
+    tanggalPembayaran: new Date(),
+    status: "Belum Bayar"
+  }
+];
+
 
 const data: DataType[] = [
   {
