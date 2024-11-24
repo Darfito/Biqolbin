@@ -9,7 +9,7 @@ import CardHeader from "@mui/material/CardHeader";
 import TablePagination from "@mui/material/TablePagination";
 import type { TextFieldProps } from "@mui/material/TextField";
 
-import {IconInfoCircle} from "@tabler/icons-react"
+import { IconInfoCircle } from "@tabler/icons-react";
 
 // Third-party Imports
 import classnames from "classnames";
@@ -35,7 +35,6 @@ import type {
 } from "@tanstack/react-table";
 import type { RankingInfo } from "@tanstack/match-sorter-utils";
 
-
 // Component Imports
 
 // Style Imports
@@ -46,8 +45,18 @@ import defaultData, { KeuanganData } from "./data";
 import TablePaginationComponent from "../pagination/TablePaginationComponent";
 import CustomTextField from "../textField/TextField";
 import { ChevronRight } from "@mui/icons-material";
-import { Autocomplete, Box, Button, FormControl, IconButton, InputLabel, MenuItem, Select } from "@mui/material";
+import {
+  Autocomplete,
+  Box,
+  Button,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+} from "@mui/material";
 import { KeuanganType } from "./type";
+import FormKeuangan from "@/app/(DashboardLayout)/keuangan/component/FormKeuangan";
 
 // Column Definitions
 const columnHelper = createColumnHelper<KeuanganType>();
@@ -127,22 +136,31 @@ const Filter = ({
 
   if (column.id === "status" || column.id === "metodePembayaran") {
     // Options for Status and Metode Pembayaran, including "Semua"
-    const options = column.id === "status"
-      ? ["Semua", "Belum Bayar", "Sedang Menyicil", "Sedang Menabung", "Lunas"]
-      : ["Semua", "Cicilan", "Tunai", "Tabungan"];
-  
+    const options =
+      column.id === "status"
+        ? [
+            "Semua",
+            "Belum Bayar",
+            "Sedang Menyicil",
+            "Sedang Menabung",
+            "Lunas",
+          ]
+        : ["Semua", "Cicilan", "Tunai", "Tabungan"];
+
     return (
-      <FormControl variant="outlined" fullWidth>
+      <FormControl
+        sx={{
+          paddingRight: "1rem",
+        }}
+        variant="outlined"
+        fullWidth
+      >
         <Autocomplete
-          value={columnFilterValue ?? "Semua"}  // Default to "Semua"
+          value={columnFilterValue ?? "Semua"} // Default to "Semua"
           onChange={(e, newValue) => column.setFilterValue(newValue)}
           options={options}
           renderInput={(params) => (
-            <CustomTextField
-              {...params}
-              variant="outlined"
-              fullWidth
-            />
+            <CustomTextField {...params} variant="outlined" fullWidth />
           )}
           isOptionEqualToValue={(option, value) => option === value} // Ensures correct matching
           disableClearable
@@ -150,12 +168,11 @@ const Filter = ({
       </FormControl>
     );
   }
-  
 
   return typeof firstValue === "number" ? (
     <div className="flex gap-x-2">
       <CustomTextField
-        variant='outlined'
+        variant="outlined"
         fullWidth
         type="number"
         sx={{ minInlineSize: 100, maxInlineSize: 125 }}
@@ -166,14 +183,10 @@ const Filter = ({
             old?.[1],
           ])
         }
-        placeholder={`Min ${
-          column.getFacetedMinMaxValues()?.[0]
-            ? `(${column.getFacetedMinMaxValues()?.[0]})`
-            : ""
-        }`}
+        placeholder={`Min`}
       />
       <CustomTextField
-        variant='outlined'
+        variant="outlined"
         fullWidth
         type="number"
         sx={{ minInlineSize: 100, maxInlineSize: 125 }}
@@ -184,16 +197,12 @@ const Filter = ({
             e.target.value,
           ])
         }
-        placeholder={`Max ${
-          column.getFacetedMinMaxValues()?.[1]
-            ? `(${column.getFacetedMinMaxValues()?.[1]})`
-            : ""
-        }`}
+        placeholder={`Max`}
       />
     </div>
   ) : (
     <CustomTextField
-      variant='outlined'
+      variant="outlined"
       fullWidth
       sx={{ minInlineSize: 100 }}
       value={(columnFilterValue ?? "") as string}
@@ -216,45 +225,51 @@ const KeuanganTable = () => {
   };
 
   // Hooks
-  const columns = useMemo<ColumnDef<KeuanganType, any>[]>(() => [
-    columnHelper.accessor("nama", {
-      cell: (info) => info.getValue(),
-      header: "Nama",
-    }),
-    columnHelper.accessor("metodePembayaran", {
-      cell: (info) => info.getValue(),
-      header: "Metode Pembayaran",
-    }),
-    columnHelper.accessor("jumlahTagihan", {
-      cell: (info) => `Rp ${info.getValue().toLocaleString()}`,
-      header: "Jumlah Tagihan",
-    }),
-    columnHelper.accessor("sisaTagihan", {
-      cell: (info) => `Rp ${info.getValue().toLocaleString()}`,
-      header: "Sisa Tagihan",
-    }),
-    columnHelper.accessor("tanggalPembayaran", {
-      cell: (info) => new Date(info.getValue()).toLocaleDateString("id-ID"),
-      header: "Tanggal Pembayaran",
-    }),
-    columnHelper.accessor("status", {
-      cell: (info) => info.getValue(),
-      header: "Status",
-    }),
-    // Add Action column at the end
-    columnHelper.accessor("action", {
-      cell: (info) => (
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
-          <IconButton color="primary" onClick={() => handleAction(info.row.original)} // Action when the button is clicked
-          >
-            <IconInfoCircle /> {/* Replace IconInfoCircle with your desired icon */}
-          </IconButton>
-        </Box>
-      ),
-      header: "Action",
-    }),
-  ], []);
-  
+  const columns = useMemo<ColumnDef<KeuanganType, any>[]>(
+    () => [
+      columnHelper.accessor("nama", {
+        cell: (info) => info.getValue(),
+        header: "Nama",
+      }),
+      columnHelper.accessor("metodePembayaran", {
+        cell: (info) => info.getValue(),
+        header: "Metode Pembayaran",
+      }),
+      columnHelper.accessor("jumlahTagihan", {
+        cell: (info) => `Rp ${info.getValue().toLocaleString()}`,
+        header: "Jumlah Tagihan",
+      }),
+      columnHelper.accessor("sisaTagihan", {
+        cell: (info) => `Rp ${info.getValue().toLocaleString()}`,
+        header: "Sisa Tagihan",
+      }),
+      columnHelper.accessor("tanggalPembayaran", {
+        cell: (info) => new Date(info.getValue()).toLocaleDateString("id-ID"),
+        header: "Tanggal Pembayaran",
+      }),
+      columnHelper.accessor("status", {
+        cell: (info) => info.getValue(),
+        header: "Status",
+      }),
+      // Add Action column at the end
+      columnHelper.accessor("action", {
+        cell: (info) => (
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            <IconButton
+              color="primary"
+              onClick={() => handleAction(info.row.original)} // Action when the button is clicked
+            >
+              <IconInfoCircle />{" "}
+              {/* Replace IconInfoCircle with your desired icon */}
+            </IconButton>
+          </Box>
+        ),
+        header: "Action",
+        enableColumnFilter: false,
+      }),
+    ],
+    []
+  );
 
   const table = useReactTable({
     data,
@@ -283,17 +298,25 @@ const KeuanganTable = () => {
       sx={{
         marginY: "1rem",
         paddingY: "2rem",
+        paddingX: "1rem",
       }}
     >
-      <CardHeader
-        action={
-          <DebouncedInput
-            value={globalFilter ?? ""}
-            onChange={(value) => setGlobalFilter(String(value))}
-            placeholder="Search all columns..."
-          />
-        }
-      />
+      <Box
+        sx={{
+          width: "100%",
+        }}
+      >
+        <FormKeuangan />
+        <CardHeader
+          action={
+            <DebouncedInput
+              value={globalFilter ?? ""}
+              onChange={(value) => setGlobalFilter(String(value))}
+              placeholder="Search all columns..."
+            />
+          }
+        />
+      </Box>
       <div className="overflow-x-auto">
         <table className={styles.table}>
           <thead>
@@ -304,35 +327,35 @@ const KeuanganTable = () => {
                     <th key={header.id} className={styles.tableTh}>
                       {header.isPlaceholder ? null : (
                         <>
-                        <div
-                          className={classnames({
-                            "flex items-center": header.column.getIsSorted(),
-                            "cursor-pointer select-none": header.column.getCanSort(),
-                          })}
-                          onClick={header.column.getToggleSortingHandler()}
-                        >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
+                          <div
+                            className={classnames({
+                              "flex items-center": header.column.getIsSorted(),
+                              "cursor-pointer select-none":
+                                header.column.getCanSort(),
+                            })}
+                            onClick={header.column.getToggleSortingHandler()}
+                          >
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                            {header.column.getIsSorted() &&
+                              {
+                                asc: (
+                                  <ChevronRight
+                                    className="-rotate-90"
+                                  />
+                                ),
+                                desc: (
+                                  <ChevronRight
+                                    className="rotate-90"
+                                  />
+                                ),
+                              }[header.column.getIsSorted() as "asc" | "desc"]}
+                          </div>
+                          {header.column.getCanFilter() && (
+                            <Filter column={header.column} table={table} />
                           )}
-                          {header.column.getIsSorted() && (
-                            {
-                              asc: (
-                                <ChevronRight
-                                  fontSize="1.25rem"
-                                  className="-rotate-90"
-                                />
-                              ),
-                              desc: (
-                                <ChevronRight
-                                  fontSize="1.25rem"
-                                  className="rotate-90"
-                                />
-                              ),
-                            }[header.column.getIsSorted() as "asc" | "desc"]
-                          )}
-                        </div>
-                        {header.column.getCanFilter() && <Filter column={header.column} table={table} />}
                         </>
                       )}
                     </th>
@@ -389,6 +412,5 @@ const KeuanganTable = () => {
     </Card>
   );
 };
-
 
 export default KeuanganTable;

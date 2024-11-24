@@ -80,7 +80,9 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => (
     </Stack>
     <Box>
       <Button
-        color="primary"
+        sx={{ 
+          color: "white",
+         }}
         variant="contained"
         size="large"
         fullWidth

@@ -49,7 +49,7 @@ const TextFieldStyled = styled(TextField)<TextFieldProps>(({ theme }) => ({
         transform: 'translateX(4px)'
       },
       '& :not(textarea).MuiFilledInput-input': {
-        padding: '6.25px 13px'
+        padding: '6.25px 13px 6.25px 1px'
       },
       '&:not(.Mui-error).MuiInputBase-colorPrimary': {
         borderColor: 'var(--mui-palette-primary-main)',
@@ -134,7 +134,7 @@ const TextFieldStyled = styled(TextField)<TextFieldProps>(({ theme }) => ({
 
   '& .MuiInputBase-input': {
     '&:not(textarea).MuiInputBase-inputSizeSmall': {
-      padding: '7.25px 14px'
+      padding: '7.25px 14px 7.25px 0'
     },
     '&:not(.MuiInputBase-readOnly):not([readonly])::placeholder': {
       transition: theme.transitions.create(['opacity', 'transform'], {
@@ -211,7 +211,7 @@ const TextFieldStyled = styled(TextField)<TextFieldProps>(({ theme }) => ({
   },
   '& .MuiAutocomplete-inputRoot.MuiInputBase-sizeSmall': {
     paddingBlock: '4.75px !important',
-    paddingInlineStart: '10px',
+    paddingInlineStart: '0px',
     '&.Mui-focused': {
       paddingBlock: '3.75px !important',
       paddingInlineStart: '9px',
