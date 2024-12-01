@@ -213,12 +213,10 @@ const Filter = ({
   );
 };
 
-interface KeuanganTableProps {
-  columns: ColumnDef<any, any>[];  // 'any' memungkinkan fleksibilitas tipe kolom
-}
 
 
-const KeuanganTable = ({ columns }: KeuanganTableProps) => {
+
+const KeuanganTable = () => {
   // States
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -234,7 +232,56 @@ const KeuanganTable = ({ columns }: KeuanganTableProps) => {
   };
 
   // Hooks
+  const columns = useMemo<ColumnDef<KeuanganType, any>[]>(
+    () => [
+      columnHelper.accessor("nama", {
+        cell: (info) => info.getValue(),
+        header: "Nama",
+      }),
+      columnHelper.accessor("jenisPaket.nama", {
+        cell: (info) => info.getValue(),
+        header: "Jenis Paket",
+        enableColumnFilter: true, // Explicitly enable filtering
+      }),
+      columnHelper.accessor("metodePembayaran", {
+        cell: (info) => info.getValue(),
+        header: "Metode Pembayaran",
+      }),
+      columnHelper.accessor("jumlahTagihan", {
+        cell: (info) => `Rp ${info.getValue().toLocaleString()}`,
+        header: "Jumlah Tagihan",
+      }),
+      columnHelper.accessor("sisaTagihan", {
+        cell: (info) => `Rp ${info.getValue().toLocaleString()}`,
+        header: "Sisa Tagihan",
+      }),
+      columnHelper.accessor("tanggalPembayaran", {
+        cell: (info) => new Date(info.getValue()).toLocaleDateString("id-ID"),
+        header: "Tanggal Pembayaran",
+      }),
+      columnHelper.accessor("status", {
+        cell: (info) => info.getValue(),
+        header: "Status",
+      }),
+      // Add Action column at the end
+      columnHelper.accessor("action", {
+        cell: (info) => (
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            <IconButton
+              color="primary"
+              onClick={() => handleAction(info.row.original)} // Action when the button is clicked
+            >
+              <IconInfoCircle />
 
+            </IconButton>
+          </Box>
+        ),
+        header: "Action",
+        enableColumnFilter: false,
+      }),
+    ],
+    []
+  );
 
   const table = useReactTable({
     data,
@@ -259,8 +306,10 @@ const KeuanganTable = ({ columns }: KeuanganTableProps) => {
   });
 
   return (
-    <Box
+    <Card
       sx={{
+        marginY: "1rem",
+        paddingY: "2rem",
         paddingX: "1rem",
       }}
     >
@@ -269,10 +318,8 @@ const KeuanganTable = ({ columns }: KeuanganTableProps) => {
           width: "100%",
         }}
       >
+        <FormKeuangan />
         <CardHeader
-        sx={{ 
-          paddingTop: 0
-         }}
           action={
             <DebouncedInput
               value={globalFilter ?? ""}
@@ -374,7 +421,7 @@ const KeuanganTable = ({ columns }: KeuanganTableProps) => {
           }}
         />
       </Box>
-    </Box>
+    </Card>
   );
 };
 

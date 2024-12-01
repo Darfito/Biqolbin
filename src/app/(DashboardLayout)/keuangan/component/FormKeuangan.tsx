@@ -1,12 +1,5 @@
 import * as React from "react";
-import {
-  object,
-  string,
-  minLength,
-  pipe,
-  nonEmpty,
-  optional,
-} from "valibot";
+import * as v from "valibot";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -15,65 +8,61 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import MenuItem from "@mui/material/MenuItem";
 import CustomTextField from "../../components/forms/theme-elements/CustomTextField";
+import { toast } from "react-toastify"; // Import toast
+import "react-toastify/dist/ReactToastify.css"; // Import toast styles
+
+interface FormErrors {
+  nama?: string;
+  jenisPaket?: string;
+  metodePembayaran?: string;
+  tenggatPembayaran?: string;
+  jumlahTagihan?: string;
+  uangMuka?: string;
+  banyaknyaAngsuran?: string;
+  jumlahBiayaPerAngsuran?: string;
+}
 
 // Valibot Schema
-const formSchema = object({
-  nama: pipe(
-    string(),
-    nonEmpty("Nama harus diisi") // Validator untuk memastikan nama tidak kosong
+const formSchema = v.object({
+  nama: v.pipe(v.string(), v.nonEmpty("Nama harus diisi")),
+  jenisPaket: v.pipe(v.string(), v.nonEmpty("Pilih jenis paket")),
+  metodePembayaran: v.pipe(v.string(), v.nonEmpty("Pilih metode pembayaran")),
+  tenggatPembayaran: v.pipe(
+    v.string(),
+    v.nonEmpty("Tenggat pembayaran harus diisi") // Validasi
   ),
-  metodePembayaran: pipe(
-    string(),
-    minLength(1, "Pilih metode pembayaran") // Validator untuk memastikan metode pembayaran dipilih
+  jumlahTagihan: v.pipe(
+    v.string(),
+    v.nonEmpty("Jumlah tagihan harus diisi"),
+    v.transform(Number),
+    v.minValue(1, "Jumlah tagihan harus lebih dari 0")
   ),
-  jumlahTagihan: pipe(
-    string(),
-    nonEmpty("Jumlah tagihan harus diisi"),
-    // Validator to check if the input is a valid number and greater than 0
-    (value) => {
-      if (isNaN(Number(value)) || Number(value) <= 0) {
-        return "Jumlah tagihan harus lebih dari 0";
-      }
-      return undefined;
-    }
+  uangMuka: v.pipe(
+    v.string(),
+    v.nonEmpty("Uang muka harus diisi"),
+    v.transform(Number),
+    v.minValue(0, "Uang muka harus lebih dari atau sama dengan 0")
   ),
-  uangMuka: pipe(
-    string(),
-    nonEmpty("Uang muka harus diisi"),
-    (value) => {
-      if (isNaN(Number(value)) || Number(value) < 0) {
-        return "Uang muka harus lebih dari 0";
-      }
-      return undefined;
-    }
-  ),
-  banyaknyaAngsuran: optional(
-    pipe(
-      string(),
-      (value) => {
-        if (value && (isNaN(Number(value)) || Number(value) <= 0)) {
-          return "Banyaknya angsuran harus lebih dari 0";
-        }
-        return undefined;
-      }
-    )
-  ),
-  jumlahBiayaPerAngsuran: optional(string()),
+  banyaknyaAngsuran: v.optional(v.string()),
+  jumlahBiayaPerAngsuran: v.optional(v.string()),
 });
 
 export default function FormKeuangan() {
   const [open, setOpen] = React.useState(false);
   const [metode, setMetode] = React.useState<string>("");
+  const [jenisPaket, setJenisPaket] = React.useState<string>("");
 
   const [formValues, setFormValues] = React.useState({
     nama: "",
+    jenisPaket: "",
     metodePembayaran: "",
+    tenggatPembayaran: "",
     jumlahTagihan: "",
     uangMuka: "",
     banyaknyaAngsuran: "",
     jumlahBiayaPerAngsuran: "",
   });
-  const [formErrors, setFormErrors] = React.useState<any>({});
+  const [formErrors, setFormErrors] = React.useState<FormErrors>({});
 
   // Handle metode pembayaran selection
   const handleMetodeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,41 +71,103 @@ export default function FormKeuangan() {
 
     // Reset installment values if method is not "Cicilan"
     if (event.target.value !== "Cicilan") {
-      setFormValues({
-        ...formValues,
+      setFormValues((prev) => ({
+        ...prev,
+        metodePembayaran: event.target.value,
         banyaknyaAngsuran: "",
         jumlahBiayaPerAngsuran: "",
-      });
+      }));
+    } else {
+      setFormValues((prev) => ({
+        ...prev,
+        metodePembayaran: event.target.value,
+      }));
     }
+  };
+
+  const handleJenisPaketChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setJenisPaket(event.target.value);
+    setFormValues({ ...formValues, jenisPaket: event.target.value });
   };
 
   // Handle form submission
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setFormErrors({}); // Clear previous errors
 
-    // Validate the form values manually
-    const result = formSchema.validate(formValues);
+    console.log("Form submitting with values:", formValues);
 
-    if (result.errors) {
-      setFormErrors(result.errors);
-      console.error("Validation errors:", result.errors);
+    // Special handling based on payment method
+    const methodErrors: FormErrors = {};
+
+    // Validate metodePembayaran
+    if (!formValues.metodePembayaran) {
+      methodErrors.metodePembayaran = "Pilih metode pembayaran";
+    }
+
+    // Specific validations for Cicilan method
+    if (formValues.metodePembayaran === "Cicilan") {
+      if (!formValues.banyaknyaAngsuran) {
+        methodErrors.banyaknyaAngsuran = "Banyaknya angsuran harus dipilih";
+      }
+    } else {
+      // Clear installment-related fields for non-Cicilan methods
+      setFormValues((prev) => ({
+        ...prev,
+        banyaknyaAngsuran: "",
+        jumlahBiayaPerAngsuran: "",
+      }));
+    }
+
+    // If method errors exist, set them and return
+    if (Object.keys(methodErrors).length > 0) {
+      setFormErrors(methodErrors);
+      return;
+    }
+
+    // Validate the form values
+    const result = v.safeParse(formSchema, formValues);
+
+    if (!result.success) {
+      const errorMap: FormErrors = {};
+      result.issues.forEach((issue) => {
+        const path = issue.path?.[0]?.key as keyof FormErrors | undefined;
+        if (path) {
+          errorMap[path] = issue.message;
+        }
+      });
+
+      setFormErrors(errorMap);
+      console.error("Validation errors:", errorMap);
       return;
     }
 
     console.log("Form submitted:", formValues);
+    toast.success("Form berhasil disubmit!"); // Show success toast
+
     handleClose();
   };
 
   // Calculate installment (angsuran) if "Cicilan" is selected
   const calculateAngsuran = () => {
-    if (metode === "Cicilan" && formValues.jumlahTagihan && formValues.uangMuka && formValues.banyaknyaAngsuran) {
+    if (
+      metode === "Cicilan" &&
+      formValues.jumlahTagihan &&
+      formValues.uangMuka &&
+      formValues.banyaknyaAngsuran
+    ) {
       const jumlahAngsuran =
         (Number(formValues.jumlahTagihan) - Number(formValues.uangMuka)) /
         Number(formValues.banyaknyaAngsuran);
-  
-      // Round the installment amount to 2 decimal places
-      const roundedAngsuran = Math.round(jumlahAngsuran); // You can adjust decimal places here if needed (e.g., .toFixed(2))
-      setFormValues({ ...formValues, jumlahBiayaPerAngsuran: roundedAngsuran.toString() });
+
+      // Round the installment amount to whole number
+      const roundedAngsuran = Math.round(jumlahAngsuran);
+      setFormValues({
+        ...formValues,
+        jumlahBiayaPerAngsuran: roundedAngsuran.toString(),
+      });
     }
   };
 
@@ -129,12 +180,33 @@ export default function FormKeuangan() {
   ]);
 
   const handleClickOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+
+    // Reset all form values
+    setFormValues({
+      nama: "",
+      jenisPaket: "",
+      metodePembayaran: "",
+      tenggatPembayaran: "",
+      jumlahTagihan: "",
+      uangMuka: "",
+      banyaknyaAngsuran: "",
+      jumlahBiayaPerAngsuran: "",
+    });
+
+    // Reset method selection
+    setMetode("");
+    setJenisPaket("");
+
+    // Clear any existing errors
+    setFormErrors({});
+  };
 
   return (
     <>
       <Button
-        sx={{ color: "#fff" }}
+        sx={{ color: "#fff", minWidth: "150px" }}
         variant="contained"
         onClick={handleClickOpen}
       >
@@ -159,7 +231,8 @@ export default function FormKeuangan() {
               label="Nama Lengkap"
               name="nama"
               value={formValues.nama}
-              error={formErrors.nama}
+              error={!!formErrors.nama}
+              helperText={formErrors.nama}
               onChange={(e: { target: { value: any } }) =>
                 setFormValues({ ...formValues, nama: e.target.value })
               }
@@ -168,10 +241,24 @@ export default function FormKeuangan() {
             <CustomTextField
               select
               fullWidth
+              label="Jenis Paket"
+              value={jenisPaket}
+              onChange={handleJenisPaketChange}
+              error={formErrors.jenisPaket}
+            >
+              <MenuItem value="Paket Regular 1">Paket Regular 1</MenuItem>
+              <MenuItem value="Paket Regular 2">Paket Regular 2</MenuItem>
+              <MenuItem value="Paket VIP 1">Paket VIP 1</MenuItem>
+            </CustomTextField>
+
+            <CustomTextField
+              select
+              fullWidth
               label="Metode Pembayaran"
               value={metode}
               onChange={handleMetodeChange}
-              error={formErrors.metodePembayaran}
+              error={!!formErrors.metodePembayaran}
+              helperText={formErrors.metodePembayaran}
             >
               <MenuItem value="Tunai">Tunai</MenuItem>
               <MenuItem value="Tabungan">Tabungan</MenuItem>
@@ -180,10 +267,31 @@ export default function FormKeuangan() {
 
             <CustomTextField
               fullWidth
-              label="Jumlah Tagihan (Rupiah)"
+              label="Tenggat Pembayaran"
+              type="date"
+              name="tenggatPembayaran"
+              InputLabelProps={{
+                shrink: true,
+              }}
+              value={formValues.tenggatPembayaran}
+              error={!!formErrors.tenggatPembayaran}
+              helperText={formErrors.tenggatPembayaran}
+              onChange={(e: { target: { value: any } }) =>
+                setFormValues({
+                  ...formValues,
+                  tenggatPembayaran: e.target.value,
+                })
+              }
+            />
+
+            <CustomTextField
+              fullWidth
+              label="Jumlah Tagihan"
+              name="jumlahTagihan"
               value={formValues.jumlahTagihan}
-              error={formErrors.jumlahTagihan}
-              onChange={(e: { target: { value: string } }) =>
+              error={!!formErrors.jumlahTagihan}
+              helperText={formErrors.jumlahTagihan}
+              onChange={(e: { target: { value: any } }) =>
                 setFormValues({
                   ...formValues,
                   jumlahTagihan: e.target.value,
@@ -193,10 +301,12 @@ export default function FormKeuangan() {
 
             <CustomTextField
               fullWidth
-              label="Uang Muka (Rupiah)"
+              label="Uang Muka"
+              name="uangMuka"
               value={formValues.uangMuka}
-              error={formErrors.uangMuka}
-              onChange={(e: { target: { value: string } }) =>
+              error={!!formErrors.uangMuka}
+              helperText={formErrors.uangMuka}
+              onChange={(e: { target: { value: any } }) =>
                 setFormValues({
                   ...formValues,
                   uangMuka: e.target.value,
@@ -208,40 +318,34 @@ export default function FormKeuangan() {
               <>
                 <CustomTextField
                   fullWidth
-                  select
                   label="Banyaknya Angsuran"
+                  name="banyaknyaAngsuran"
                   value={formValues.banyaknyaAngsuran}
-                  error={formErrors.banyaknyaAngsuran}
-                  onChange={(e: { target: { value: string } }) =>
+                  error={!!formErrors.banyaknyaAngsuran}
+                  helperText={formErrors.banyaknyaAngsuran}
+                  onChange={(e: { target: { value: any } }) =>
                     setFormValues({
                       ...formValues,
                       banyaknyaAngsuran: e.target.value,
                     })
                   }
-                >
-                  <MenuItem value="3">3</MenuItem>
-                  <MenuItem value="6">6</MenuItem>
-                </CustomTextField>
-
+                />
                 <CustomTextField
-                  label="Jumlah Biaya per Angsuran (Rupiah)"
-                  type="text"
-                  value={formValues.jumlahBiayaPerAngsuran}
+                  fullWidth
+                  label="Jumlah Biaya Per Angsuran"
+                  name="jumlahBiayaPerAngsuran"
+                  value={formValues.jumlahBiayaPerAngsuran || ""}
+                  error={!!formErrors.jumlahBiayaPerAngsuran}
+                  helperText={formErrors.jumlahBiayaPerAngsuran}
                   disabled
                 />
               </>
             )}
           </DialogContent>
           <DialogActions>
-            <Button
-              sx={{ color: "#fff" }}
-              variant="contained"
-              onClick={handleClose}
-            >
-              Batal
-            </Button>
-            <Button sx={{ color: "#fff" }} variant="contained" type="submit">
-              Tambah
+            <Button onClick={handleClose} variant="contained" color="error">Batal</Button>
+            <Button type="submit" variant="contained" sx={{ color: "white" }}>
+              Simpan
             </Button>
           </DialogActions>
         </form>

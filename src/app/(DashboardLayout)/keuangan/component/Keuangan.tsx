@@ -1,13 +1,16 @@
 "use client";
 
-import { Box, Grid, Typography } from "@mui/material";
+import { Box, Card, Grid, Typography } from "@mui/material";
 import PageContainer from "../../components/container/PageContainer";
 import ScoreCard from "../../utilities/component/card/ScoreCard";
 import { scoreCardKeuangan } from "../data";
 import KeuanganTable from "../../utilities/component/table/KeuanganTable";
-
+import Breadcrumb from "../../utilities/component/breadcrumb/Breadcrumb";
+import FormKeuangan from "./FormKeuangan";
+import { columnsKeuangan } from "../../utilities/component/table/columns";
 
 const Keuangan = () => {
+  const breadcrumbLinks = [{ label: "Keuangan", href: "/keuangan" }];
   return (
     <>
       <Box
@@ -41,9 +44,13 @@ const Keuangan = () => {
         ))}
       </Grid>
 
-
       <PageContainer title="Keuangan">
-        <KeuanganTable />
+        <Card sx={{ mt: 3 }}>
+          <Box sx={{ margin: "20px" }}>
+            <FormKeuangan />
+          </Box>
+          <KeuanganTable columns={columnsKeuangan} />
+        </Card>
       </PageContainer>
     </>
   );
