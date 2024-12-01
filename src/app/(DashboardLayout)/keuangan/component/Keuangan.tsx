@@ -8,6 +8,7 @@ import KeuanganTable from "../../utilities/component/table/KeuanganTable";
 import Breadcrumb from "../../utilities/component/breadcrumb/Breadcrumb";
 import FormKeuangan from "./FormKeuangan";
 import { columnsKeuangan } from "../../utilities/component/table/columns";
+import { KeuanganData } from "../../utilities/component/table/data";
 
 const Keuangan = () => {
   const breadcrumbLinks = [{ label: "Keuangan", href: "/keuangan" }];
@@ -45,11 +46,11 @@ const Keuangan = () => {
       </Grid>
 
       <PageContainer title="Keuangan">
-        <Card sx={{ mt: 3 }}>
+        <Card sx={{ mt: 3}}>
           <Box sx={{ margin: "20px" }}>
             <FormKeuangan />
           </Box>
-          <KeuanganTable columns={columnsKeuangan} />
+          <KeuanganTable columns={columnsKeuangan} data={KeuanganData} />
         </Card>
       </PageContainer>
     </>

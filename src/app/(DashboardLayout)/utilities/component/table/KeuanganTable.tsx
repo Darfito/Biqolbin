@@ -1,15 +1,12 @@
 "use client";
 
 // React Imports
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
-// MUI Imports
-import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
 import TablePagination from "@mui/material/TablePagination";
 import type { TextFieldProps } from "@mui/material/TextField";
 
-import { IconInfoCircle } from "@tabler/icons-react";
 
 // Third-party Imports
 import classnames from "classnames";
@@ -23,7 +20,6 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   flexRender,
-  createColumnHelper,
 } from "@tanstack/react-table";
 import { rankItem } from "@tanstack/match-sorter-utils";
 import type {
@@ -41,7 +37,6 @@ import type { RankingInfo } from "@tanstack/match-sorter-utils";
 import styles from "../../../../styles/table.module.css";
 
 // Data Imports
-import { KeuanganData } from "./data";
 import TablePaginationComponent from "../pagination/TablePaginationComponent";
 import CustomTextField from "../textField/TextField";
 import { ChevronRight } from "@mui/icons-material";
@@ -49,15 +44,11 @@ import {
   Autocomplete,
   Box,
   FormControl,
-  IconButton,
 } from "@mui/material";
 
-import FormKeuangan from "@/app/(DashboardLayout)/keuangan/component/FormKeuangan";
-import { useRouter } from "next/navigation";
 import { KeuanganType } from "../../type";
 
-// Column Definitions
-const columnHelper = createColumnHelper<KeuanganType>();
+
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -213,27 +204,19 @@ const Filter = ({
   );
 };
 
-interface KeuanganTableProps {
-  columns: ColumnDef<any, any>[];  // 'any' memungkinkan fleksibilitas tipe kolom
+// Mendeklarasikan interface dengan tipe generik T
+interface KeuanganTableProps<T> {
+  columns: ColumnDef<T, any>[];  // Kolom dinamis yang disesuaikan dengan tipe T
+  data: T[];  // Data dinamis sesuai tipe T
 }
 
 
-const KeuanganTable = ({ columns }: KeuanganTableProps) => {
+
+
+const KeuanganTable = <T,>({ columns, data }: KeuanganTableProps<T>) => {
   // States
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
-  const router = useRouter(); 
-  const [data, setData] = useState<KeuanganType[]>(() => KeuanganData); // Menggunakan KeuanganData sebagai default
-
-
-
-
-  const handleAction = (rowData: KeuanganType) => {
-    // Navigate to the dynamic route with the row's id
-    router.push(`/keuangan/${rowData.id}`);
-  };
-
-  // Hooks
 
 
   const table = useReactTable({

@@ -9,6 +9,8 @@ import React, { useState } from "react";
 import FormDetail from "./FormDetail";
 import { useRouter } from "next/navigation";
 import KeuanganTable from "@/app/(DashboardLayout)/utilities/component/table/KeuanganTable";
+import { columnsKeuangan } from "@/app/(DashboardLayout)/utilities/component/table/columns";
+import { KeuanganData } from "@/app/(DashboardLayout)/utilities/component/table/data";
 
 
 interface KeuanganDetailProps {
@@ -100,8 +102,11 @@ const handleSubmit = (data: React.SetStateAction<{}>) => {
           <FormDetail isEditing={isEditing} onSaveChanges={handleSubmit}/>
         </Box>
 
-        <Box>
-        {/* <KeuanganTable/> */}
+        <Box sx={{ marginTop: "2rem" , backgroundColor:"#fff" }}>
+        <Card sx={{ backgroundColor:"#fff" }}>
+
+        <KeuanganTable columns={columnsKeuangan} data={KeuanganData} />
+        </Card>
 
         </Box>
       </PageContainer>
@@ -125,6 +130,8 @@ const handleSubmit = (data: React.SetStateAction<{}>) => {
           </Button>
         </DialogActions>
       </Dialog>
+
+
     </>
   );
 };
