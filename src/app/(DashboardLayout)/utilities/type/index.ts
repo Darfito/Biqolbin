@@ -17,8 +17,19 @@ export type CardStatsHorizontalWithBorderProps = {
     tanggalPembayaran: Date
     status: StatusType
     action?: string; // Optional field for action
+    cicilan?: CicilanType[];
   }
   
+export type CicilanType = {
+  id: number;
+  cicilanKe: number;
+  jumlahCicilan: number;
+  nominalCicilan: number;
+  tanggalPembayaran: Date;
+  lampiran?: string;
+  action?: string;
+}
+
   export type MetodePembayaranType = 'Cicilan' | 'Tunai' | 'Tabungan'
 
   export type StatusType = 'Belum Bayar' | 'Sedang Menyicil' | 'Sedang Menabung' | 'Lunas';

@@ -49,17 +49,37 @@ export const KeuanganData: KeuanganType[] = [
     sisaTagihan: 100000,
     tanggalPembayaran: new Date(),
     status: "Belum Bayar",
-    jenisPaket: PaketData[0]
+    jenisPaket: PaketData[0],
+    cicilan: [
+      {
+        id: 1,
+        cicilanKe: 1,
+        jumlahCicilan: 100000,
+        nominalCicilan: 50000,
+        tanggalPembayaran: new Date("2024-04-01"),
+        lampiran: "https://example.com/lampiran1.pdf",
+      },
+    ],
   },
   {
     id: 2,
     nama: "Keuangan 2",
     metodePembayaran: "Cicilan",
-    jumlahTagihan: 100000,
-    sisaTagihan: 50000,
+    jumlahTagihan: 200000,
+    sisaTagihan: 100000,
     tanggalPembayaran: new Date(),
     status: "Sedang Menyicil",
-    jenisPaket: PaketData[1]
+    jenisPaket: PaketData[1],
+    cicilan: [
+      {
+        id: 2,
+        cicilanKe: 1,
+        jumlahCicilan: 200000,
+        nominalCicilan: 100000,
+        tanggalPembayaran: new Date("2024-03-15"),
+        lampiran: "https://example.com/lampiran2.pdf",
+      },
+    ],
   },
   {
     id: 3,

@@ -5,11 +5,11 @@ import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCa
 import Breadcrumb from "@/app/(DashboardLayout)/utilities/component/breadcrumb/Breadcrumb";
 import { Box, Button, Card, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
 import { IconArrowLeft } from "@tabler/icons-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import FormDetail from "./FormDetail";
 import { useRouter } from "next/navigation";
 import KeuanganTable from "@/app/(DashboardLayout)/utilities/component/table/KeuanganTable";
-import { columnsKeuangan } from "@/app/(DashboardLayout)/utilities/component/table/columns";
+import { columnsKeuanganDetail } from "@/app/(DashboardLayout)/utilities/component/table/columns";
 import { KeuanganData } from "@/app/(DashboardLayout)/utilities/component/table/data";
 
 
@@ -24,6 +24,15 @@ const KeuanganDetail = ({ id, breadcrumbLinks }: KeuanganDetailProps) => {
   const [openModal, setOpenModal] = React.useState<boolean>(false); // Modal state to confirm save
   const [isSaving, setIsSaving] = React.useState<boolean>(false); // State to check if saving is in progress
   const [formData, setFormData] = useState({});
+  const [currentData, setCurrentData] = useState<any>(null); // Data keuangan berdasarkan ID
+
+  // Ambil data berdasarkan ID
+  useEffect(() => {
+    const data = KeuanganData.find((item) => item.id.toString() === id); // Cari data sesuai ID
+    const cicilanData = data?.cicilan || [];
+    setCurrentData(cicilanData); // Set data atau null jika tidak ditemukan
+    console.log("currentData di detail:", cicilanData);
+  }, []);
 
 // Handle Submit data sebelum dialog
 const handleSubmit = (data: React.SetStateAction<{}>) => {
@@ -63,7 +72,10 @@ const handleSubmit = (data: React.SetStateAction<{}>) => {
         alert("Perubahan berhasil disimpan!"); // Menampilkan pesan sukses
       }, 1000); // Simulasi operasi async
     };
+
+
   
+  console.log("kolom data di detail:", columnsKeuanganDetail);
   return (
     <>
       <Breadcrumb links={breadcrumbLinks} />
@@ -105,7 +117,8 @@ const handleSubmit = (data: React.SetStateAction<{}>) => {
         <Box sx={{ marginTop: "2rem" , backgroundColor:"#fff" }}>
         <Card sx={{ backgroundColor:"#fff" }}>
 
-        <KeuanganTable columns={columnsKeuangan} data={KeuanganData} />
+
+        <KeuanganTable columns={columnsKeuanganDetail} data={currentData} />
         </Card>
 
         </Box>

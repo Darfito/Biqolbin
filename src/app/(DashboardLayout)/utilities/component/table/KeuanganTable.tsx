@@ -46,7 +46,6 @@ import {
   FormControl,
 } from "@mui/material";
 
-import { KeuanganType } from "../../type";
 
 
 
@@ -220,7 +219,7 @@ const KeuanganTable = <T,>({ columns, data }: KeuanganTableProps<T>) => {
 
 
   const table = useReactTable({
-    data,
+    data: data || [], // Pastikan data selalu berupa array.
     columns,
     filterFns: {
       fuzzy: fuzzyFilter,
@@ -312,7 +311,7 @@ const KeuanganTable = <T,>({ columns, data }: KeuanganTableProps<T>) => {
               </tr>
             ))}
           </thead>
-          {table.getFilteredRowModel().rows.length === 0 ? (
+          {table.getFilteredRowModel()?.rows?.length === 0 ? (
             <tbody>
               <tr>
                 <td
