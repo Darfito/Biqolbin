@@ -24,6 +24,7 @@
 
 /* Kelas lokal untuk th */
 .tableTh {
+  padding-right: 1rem;
   font-weight: 500;
   font-size: 0.8125rem;
   letter-spacing: 0.2px;
@@ -34,12 +35,13 @@
 
 .tableTh:not(:first-of-type):not(:last-of-type) {
   padding-block: 0.5rem;
-  padding-inline: 1rem;
+  padding-inline: 0 1rem 0 0;
 }
 
 .tableTh:first-of-type {
   padding-block: 0.5rem;
-  padding-inline: 1.5rem 1rem;
+  /* padding-inline: 1.5rem 1rem; */
+  padding-inline: 0 1rem 0 0;
 }
 
 .tableTh:last-of-type {
@@ -61,7 +63,8 @@
 
 .tableTbody td:first-of-type {
   padding-block: 0.5rem;
-  padding-inline: 1.5rem 1rem;
+  /* padding-inline: 1.5rem 1rem; */
+  padding-inline: 0 1rem 0 0;
 }
 
 .tableTbody td:last-of-type {

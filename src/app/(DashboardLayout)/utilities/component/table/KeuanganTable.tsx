@@ -1,13 +1,12 @@
 "use client";
 
 // React Imports
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
-// MUI Imports
-import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
 import TablePagination from "@mui/material/TablePagination";
 import type { TextFieldProps } from "@mui/material/TextField";
+
 
 // Third-party Imports
 import classnames from "classnames";
@@ -21,7 +20,6 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   flexRender,
-  createColumnHelper,
 } from "@tanstack/react-table";
 import { rankItem } from "@tanstack/match-sorter-utils";
 import type {
@@ -33,23 +31,23 @@ import type {
 } from "@tanstack/react-table";
 import type { RankingInfo } from "@tanstack/match-sorter-utils";
 
-// Type Imports
-import type { DataType } from "./data";
-
 // Component Imports
 
 // Style Imports
 import styles from "../../../../styles/table.module.css";
 
 // Data Imports
-import defaultData from "./data";
 import TablePaginationComponent from "../pagination/TablePaginationComponent";
 import CustomTextField from "../textField/TextField";
 import { ChevronRight } from "@mui/icons-material";
-import { Box } from "@mui/material";
+import {
+  Autocomplete,
+  Box,
+  FormControl,
+} from "@mui/material";
 
-// Column Definitions
-const columnHelper = createColumnHelper<DataType>();
+
+
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -102,6 +100,7 @@ const DebouncedInput = ({
 
   return (
     <CustomTextField
+      variant="outlined"
       {...props}
       value={value}
       onChange={(e) => setValue(e.target.value)}
@@ -116,52 +115,85 @@ const Filter = ({
   column: Column<any, unknown>;
   table: Table<any>;
 }) => {
-  // Vars
   const firstValue = table
     .getPreFilteredRowModel()
     .flatRows[0]?.getValue(column.id);
 
   const columnFilterValue = column.getFilterValue();
 
-  return typeof firstValue === "number" ? (
-    <div className="flex gap-x-2">
-      <CustomTextField
-        fullWidth
-        type="number"
-        sx={{ minInlineSize: 100, maxInlineSize: 125 }}
-        value={(columnFilterValue as [number, number])?.[0] ?? ""}
-        onChange={(e) =>
-          column.setFilterValue((old: [number, number]) => [
-            e.target.value,
-            old?.[1],
-          ])
-        }
-        placeholder={`Min ${
-          column.getFacetedMinMaxValues()?.[0]
-            ? `(${column.getFacetedMinMaxValues()?.[0]})`
-            : ""
-        }`}
-      />
-      <CustomTextField
-        fullWidth
-        type="number"
-        sx={{ minInlineSize: 100, maxInlineSize: 125 }}
-        value={(columnFilterValue as [number, number])?.[1] ?? ""}
-        onChange={(e) =>
-          column.setFilterValue((old: [number, number]) => [
-            old?.[0],
-            e.target.value,
-          ])
-        }
-        placeholder={`Max ${
-          column.getFacetedMinMaxValues()?.[1]
-            ? `(${column.getFacetedMinMaxValues()?.[1]})`
-            : ""
-        }`}
-      />
-    </div>
-  ) : (
+  // Options for filtering based on column id
+  const getColumnOptions = (columnId: string) => {
+    switch (columnId) {
+      case "status":
+        return ["Semua", "Belum Bayar", "Sedang Menyicil", "Sedang Menabung", "Lunas"];
+      case "metodePembayaran":
+        return ["Semua", "Cicilan", "Tunai", "Tabungan"];
+      case "jenisPaket.nama": // Ensure this matches exactly with the column id in the table
+        return ["Semua", "Paket Regular 1", "Paket Regular 2", "Paket VIP 1"];
+      default:
+        return [];
+    }
+  };
+
+  const options = getColumnOptions(column.id);
+
+  if (options.length > 0) {
+    return (
+      <FormControl sx={{ paddingRight: "1rem" }} variant="outlined" fullWidth>
+        <Autocomplete
+          value={columnFilterValue ?? "Semua"} // Default to "Semua"
+          onChange={(e, newValue) =>
+            column.setFilterValue(newValue === "Semua" ? undefined : newValue)
+          }
+          options={options}
+          renderInput={(params) => (
+            <CustomTextField {...params} variant="outlined" fullWidth />
+          )}
+          isOptionEqualToValue={(option, value) => option === value}
+          disableClearable
+        />
+      </FormControl>
+    );
+  }
+
+  if (typeof firstValue === "number") {
+    return (
+      <div className="flex gap-x-2">
+        <CustomTextField
+          variant="outlined"
+          fullWidth
+          type="number"
+          sx={{ minInlineSize: 100, maxInlineSize: 125 }}
+          value={(columnFilterValue as [number, number])?.[0] ?? ""}
+          onChange={(e) =>
+            column.setFilterValue((old: [number, number]) => [
+              e.target.value,
+              old?.[1],
+            ])
+          }
+          placeholder={`Min`}
+        />
+        <CustomTextField
+          variant="outlined"
+          fullWidth
+          type="number"
+          sx={{ minInlineSize: 100, maxInlineSize: 125 }}
+          value={(columnFilterValue as [number, number])?.[1] ?? ""}
+          onChange={(e) =>
+            column.setFilterValue((old: [number, number]) => [
+              old?.[0],
+              e.target.value,
+            ])
+          }
+          placeholder={`Max`}
+        />
+      </div>
+    );
+  }
+
+  return (
     <CustomTextField
+      variant="outlined"
       fullWidth
       sx={{ minInlineSize: 100 }}
       value={(columnFilterValue ?? "") as string}
@@ -171,43 +203,23 @@ const Filter = ({
   );
 };
 
-const KeuanganTable = () => {
+// Mendeklarasikan interface dengan tipe generik T
+interface KeuanganTableProps<T> {
+  columns: ColumnDef<T, any>[];  // Kolom dinamis yang disesuaikan dengan tipe T
+  data: T[];  // Data dinamis sesuai tipe T
+}
+
+
+
+
+const KeuanganTable = <T,>({ columns, data }: KeuanganTableProps<T>) => {
   // States
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
 
-  const [data, setData] = useState<DataType[]>(() => defaultData);
-
-  // Hooks
-  const columns = useMemo<ColumnDef<DataType, any>[]>(
-    () => [
-      columnHelper.accessor("fullName", {
-        cell: (info) => info.getValue(),
-        header: "Name",
-      }),
-      columnHelper.accessor("email", {
-        cell: (info) => info.getValue(),
-        header: "Email",
-      }),
-      columnHelper.accessor("start_date", {
-        cell: (info) => info.getValue(),
-        header: "Date",
-      }),
-      columnHelper.accessor("experience", {
-        cell: (info) => info.getValue(),
-        header: "Experience",
-      }),
-      columnHelper.accessor("age", {
-        cell: (info) => info.getValue(),
-        header: "Age",
-      }),
-    ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
 
   const table = useReactTable({
-    data,
+    data: data || [], // Pastikan data selalu berupa array.
     columns,
     filterFns: {
       fuzzy: fuzzyFilter,
@@ -228,30 +240,30 @@ const KeuanganTable = () => {
     getFacetedMinMaxValues: getFacetedMinMaxValues(),
   });
 
-  useEffect(() => {
-    if (table.getState().columnFilters[0]?.id === "fullName") {
-      if (table.getState().sorting[0]?.id !== "fullName") {
-        table.setSorting([{ id: "fullName", desc: false }]);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [table.getState().columnFilters[0]?.id]);
-
   return (
-    <Card
+    <Box
       sx={{
-        paddingY: "2rem",
+        paddingX: "1rem",
       }}
     >
-      <CardHeader
-        action={
-          <DebouncedInput
-            value={globalFilter ?? ""}
-            onChange={(value) => setGlobalFilter(String(value))}
-            placeholder="Search all columns..."
-          />
-        }
-      />
+      <Box
+        sx={{
+          width: "100%",
+        }}
+      >
+        <CardHeader
+        sx={{ 
+          paddingTop: 0
+         }}
+          action={
+            <DebouncedInput
+              value={globalFilter ?? ""}
+              onChange={(value) => setGlobalFilter(String(value))}
+              placeholder="Search all columns..."
+            />
+          }
+        />
+      </Box>
       <div className="overflow-x-auto">
         <table className={styles.table}>
           <thead>
@@ -274,21 +286,19 @@ const KeuanganTable = () => {
                               header.column.columnDef.header,
                               header.getContext()
                             )}
-                            {{
-                              asc: (
-                                <ChevronRight
-                                  fontSize="1.25rem"
-                                  className="-rotate-90"
-                                />
-                              ),
-                              desc: (
-                                <ChevronRight
-                                  fontSize="1.25rem"
-                                  className="rotate-90"
-                                />
-                              ),
-                            }[header.column.getIsSorted() as "asc" | "desc"] ??
-                              null}
+                            {header.column.getIsSorted() &&
+                              {
+                                asc: (
+                                  <ChevronRight
+                                    className="-rotate-90"
+                                  />
+                                ),
+                                desc: (
+                                  <ChevronRight
+                                    className="rotate-90"
+                                  />
+                                ),
+                              }[header.column.getIsSorted() as "asc" | "desc"]}
                           </div>
                           {header.column.getCanFilter() && (
                             <Filter column={header.column} table={table} />
@@ -301,12 +311,12 @@ const KeuanganTable = () => {
               </tr>
             ))}
           </thead>
-          {table.getFilteredRowModel().rows.length === 0 ? (
+          {table.getFilteredRowModel()?.rows?.length === 0 ? (
             <tbody>
               <tr>
                 <td
                   colSpan={table.getVisibleFlatColumns().length}
-                  className="text-center "
+                  className="text-center"
                 >
                   No data available
                 </td>
@@ -314,30 +324,28 @@ const KeuanganTable = () => {
             </tbody>
           ) : (
             <tbody className={styles.tableTbody}>
-              {table.getRowModel().rows.map((row) => {
-                return (
-                  <tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => {
-                      return (
-                        <td key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
+              {table.getRowModel().rows.map((row) => (
+                <tr key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
             </tbody>
           )}
         </table>
       </div>
-      <Box sx={{ 
-        marginTop: '1rem',
-        paddingX: '1rem'
-       }}>
+      <Box
+        sx={{
+          marginTop: "1rem",
+          paddingX: "1rem",
+        }}
+      >
         <TablePagination
           component={() => <TablePaginationComponent table={table} />}
           count={table.getFilteredRowModel().rows.length}
@@ -348,7 +356,7 @@ const KeuanganTable = () => {
           }}
         />
       </Box>
-    </Card>
+    </Box>
   );
 };
 

@@ -47,45 +47,7 @@ const Login2 = () => {
               <Box display="flex" alignItems="center" justifyContent="center">
                 <Logo />
               </Box>
-              <AuthLogin
-                subtext={
-                  <Typography
-                    variant="subtitle1"
-                    textAlign="center"
-                    color="textSecondary"
-                    mb={1}
-                  >
-                    Your Social Campaigns
-                  </Typography>
-                }
-                subtitle={
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    justifyContent="center"
-                    mt={3}
-                  >
-                    <Typography
-                      color="textSecondary"
-                      variant="h6"
-                      fontWeight="500"
-                    >
-                      New to Modernize?
-                    </Typography>
-                    <Typography
-                      component={Link}
-                      href="/authentication/register"
-                      fontWeight="500"
-                      sx={{
-                        textDecoration: "none",
-                        color: "primary.main",
-                      }}
-                    >
-                      Create an account
-                    </Typography>
-                  </Stack>
-                }
-              />
+              <AuthLogin/>
             </Card>
           </Grid>
         </Grid>
