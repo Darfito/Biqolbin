@@ -1,16 +1,16 @@
 "use client";
 
 import PageContainer from "@/app/(DashboardLayout)/components/container/PageContainer";
-import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCard";
 import Breadcrumb from "@/app/(DashboardLayout)/utilities/component/breadcrumb/Breadcrumb";
 import { Box, Button, Card, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
 import { IconArrowLeft } from "@tabler/icons-react";
 import React, { useEffect, useState } from "react";
 import FormDetail from "./FormDetail";
 import { useRouter } from "next/navigation";
-import KeuanganTable from "@/app/(DashboardLayout)/utilities/component/table/KeuanganTable";
-import { columnsKeuanganDetail } from "@/app/(DashboardLayout)/utilities/component/table/columns";
+
 import { KeuanganData } from "@/app/(DashboardLayout)/utilities/component/table/data";
+import KeuanganDetailTable from "@/app/(DashboardLayout)/utilities/component/table/KeuanganDetailTable";
+
 
 
 interface KeuanganDetailProps {
@@ -75,7 +75,7 @@ const handleSubmit = (data: React.SetStateAction<{}>) => {
 
 
   
-  console.log("kolom data di detail:", columnsKeuanganDetail);
+  // console.log("kolom data di detail:", ColumnsKeuanganDetail);
   return (
     <>
       <Breadcrumb links={breadcrumbLinks} />
@@ -117,8 +117,9 @@ const handleSubmit = (data: React.SetStateAction<{}>) => {
         <Box sx={{ marginTop: "2rem" , backgroundColor:"#fff" }}>
         <Card sx={{ backgroundColor:"#fff" }}>
 
+        <KeuanganDetailTable data={currentData}/>
 
-        <KeuanganTable columns={columnsKeuanganDetail} data={currentData} />
+
         </Card>
 
         </Box>

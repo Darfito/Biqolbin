@@ -7,8 +7,9 @@ import { scoreCardKeuangan } from "../data";
 import KeuanganTable from "../../utilities/component/table/KeuanganTable";
 import Breadcrumb from "../../utilities/component/breadcrumb/Breadcrumb";
 import FormKeuangan from "./FormKeuangan";
-import { columnsKeuangan } from "../../utilities/component/table/columns";
+
 import { KeuanganData } from "../../utilities/component/table/data";
+import { columnsKeuangan } from "./columns/columnsKeuangan";
 
 const Keuangan = () => {
   const breadcrumbLinks = [{ label: "Keuangan", href: "/keuangan" }];
