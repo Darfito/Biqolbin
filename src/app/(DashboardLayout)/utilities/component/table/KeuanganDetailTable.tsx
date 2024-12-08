@@ -13,9 +13,8 @@ import {
   ColumnFiltersState,
 } from "@tanstack/react-table";
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, CardHeader, TablePagination } from "@mui/material";
-import { Delete, Edit, Folder, UploadFile, ChevronRight } from "@mui/icons-material";
+import { Delete, Edit, Folder, UploadFile } from "@mui/icons-material";
 import { RankingInfo, rankItem } from "@tanstack/match-sorter-utils";
-import classnames from "classnames";
 
 // Component Imports
 import CustomTextField from "../textField/TextField";
@@ -88,6 +87,11 @@ const KeuanganDetailTable =<T,>({ data }: KeuanganDetailProps<T>) => {
 
   const handleOpenFormCicilan = (data: CicilanType) => {
     setEditData(data); // Set data cicilan yang akan diedit
+    setOpenFormCicilan(true); // Buka dialog
+  };
+
+  const handleAddCicilan = () => {
+    setEditData(null); // Reset data cicilan
     setOpenFormCicilan(true); // Buka dialog
   };
 
@@ -197,6 +201,19 @@ const KeuanganDetailTable =<T,>({ data }: KeuanganDetailProps<T>) => {
 
   return (
     <Box sx={{ paddingX: "1rem" }}>
+      <Box sx={{ 
+        width: "100%", 
+        display: "flex",
+        margin: "20px"
+       }}>
+      <Button
+        sx={{ color: "#fff", minWidth: "150px" }}
+        variant="contained"
+        onClick={handleAddCicilan}
+      >
+        Tambah
+      </Button>
+      </Box>
       <CardHeader
         sx={{ paddingTop: 0 }}
         action={

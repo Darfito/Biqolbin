@@ -91,6 +91,12 @@ const FormCicilan: React.FC<FormCicilanProps> = ({ open, handleClose, initialDat
 
     // If validation passes, log form values
     console.log("Form submitted successfully:", parsedValues);
+       // If validation passes
+       if (initialData) {
+        console.log("Update Cicilan:", parsedValues); // Log update for now
+      } else {
+        console.log("Add New Cicilan:", parsedValues); // Log addition for now
+      }
 
     // Close the dialog
     handleClose();
@@ -100,7 +106,9 @@ const FormCicilan: React.FC<FormCicilanProps> = ({ open, handleClose, initialDat
     <>
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <form onSubmit={handleSubmit}>
-          <DialogTitle>Tambah Item Pembayaran</DialogTitle>
+        <DialogTitle>
+          {initialData ? "Edit Cicilan" : "Tambah Cicilan"}
+        </DialogTitle>
           <DialogContent
             sx={{
               display: "flex",
@@ -110,7 +118,11 @@ const FormCicilan: React.FC<FormCicilanProps> = ({ open, handleClose, initialDat
               gap: "1rem",
             }}
           >
-            <DialogContentText>Masukkan detail pembayaran.</DialogContentText>
+             <DialogContentText>
+            {initialData
+              ? "Perbarui detail cicilan yang dipilih."
+              : "Masukkan detail cicilan baru."}
+          </DialogContentText>
 
             <CustomTextField
               fullWidth
