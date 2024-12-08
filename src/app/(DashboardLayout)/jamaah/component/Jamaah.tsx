@@ -1,10 +1,13 @@
 "use client";
 
-import { Box, Grid, Typography } from "@mui/material";
+import { Box, Card, Grid, Typography } from "@mui/material";
 import DashboardCard from "../../components/shared/DashboardCard";
 import PageContainer from "../../components/container/PageContainer";
-import { scoreCardKeuangan } from "../../keuangan/data";
+import { KeuanganData, scoreCardKeuangan } from "../../keuangan/data";
 import ScoreCard from "../../utilities/component/card/ScoreCard";
+import { columnsKeuangan } from "../../keuangan/component/columns/columnsKeuangan";
+import FormKeuangan from "../../keuangan/component/FormKeuangan";
+import KeuanganTable from "../../utilities/component/table/KeuanganTable";
 
 const Jamaah = () => {
   const breadcrumbLinks = [{ label: "Jamaah", href: "/jamaah" }];
@@ -41,9 +44,12 @@ const Jamaah = () => {
         ))}
       </Grid>
       <PageContainer title="Jamaah">
-        <DashboardCard title="Jamaah">
-          <Typography>This is Jamaah Page</Typography>
-        </DashboardCard>
+        <Card sx={{ mt: 3 }}>
+          <Box sx={{ margin: "20px" }}>
+            <FormKeuangan />
+          </Box>
+          <KeuanganTable columns={columnsKeuangan} data={KeuanganData} />
+        </Card>
       </PageContainer>
     </>
   );

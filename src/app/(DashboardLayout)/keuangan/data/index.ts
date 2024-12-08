@@ -1,4 +1,4 @@
-import { CardStatsHorizontalWithBorderProps, KeuanganType, PaketInterface } from "../../utilities/type";
+import { CardStatsHorizontalWithBorderProps, KeuanganProps, PaketInterface } from "../../utilities/type";
 import { IconUser, IconProgress,IconReceipt } from "@tabler/icons-react";
 
 
@@ -64,7 +64,7 @@ const PaketData: PaketInterface[] = [
   },
 ];
 
-export const KeuanganData: KeuanganType[] = [
+export const KeuanganData: KeuanganProps[] = [
   {
     id: 1,
     nama: "Keuangan 1",

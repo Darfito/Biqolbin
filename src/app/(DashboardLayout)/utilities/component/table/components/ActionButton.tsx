@@ -1,12 +1,12 @@
 // components/ActionButton.tsx
 import React from "react";
 import { useRouter } from "next/navigation";
-import { KeuanganType } from "../../../type";
+import { KeuanganProps } from "../../../type";
 import { Box, IconButton } from "@mui/material";
 import { IconInfoCircle } from "@tabler/icons-react";
 
 interface ActionButtonProps {
-  rowData: KeuanganType;
+  rowData: KeuanganProps;
 }
 
 const ActionButton: React.FC<ActionButtonProps> = ({ rowData }) => {
