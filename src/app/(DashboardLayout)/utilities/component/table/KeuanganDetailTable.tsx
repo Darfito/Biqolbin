@@ -27,6 +27,7 @@ import styles from "../../../../styles/table.module.css";
 // Type Imports
 import { CicilanType } from "../../type";
 import FileUploaderSingle from "../uploader/FileUploaderSingle";
+import FormCicilan from "@/app/(DashboardLayout)/keuangan/[id]/component/FormCicilan";
 
 const fuzzyFilter = (row: { getValue: (arg0: any) => any; }, columnId: any, value: string, addMeta: (arg0: { itemRank: RankingInfo; }) => void) => {
   const itemRank = rankItem(row.getValue(columnId), value);
@@ -69,34 +70,56 @@ interface KeuanganDetailProps<T> {
   data: T[];
 }
 
+interface EditCicilanFormProps {
+  onClose: () => void;
+}
+
+
+
 const KeuanganDetailTable =<T,>({ data }: KeuanganDetailProps<T>) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
+  const [openFormCicilan, setOpenFormCicilan] = useState(false);
+  const [editData, setEditData] = useState<CicilanType | null>(null); // Data cicilan yang sedang diedit
 
   const handleDialogOpen = () => setOpenDialog(true);
   const handleDialogClose = () => setOpenDialog(false);
+
+  const handleOpenFormCicilan = (data: CicilanType) => {
+    setEditData(data); // Set data cicilan yang akan diedit
+    setOpenFormCicilan(true); // Buka dialog
+  };
+
+  const handleCloseFormCicilan = () => {
+    setOpenFormCicilan(false); // Tutup dialog
+    setEditData(null); // Reset data cicilan
+  };
 
   const columnHelper = createColumnHelper<CicilanType>();
 
   const columns = [
     columnHelper.accessor("cicilanKe", {
+      id: "cicilanKe",
       cell: (info) => info.getValue(),
       header: "Cicilan Ke",
       enableColumnFilter: false,
     }),
     columnHelper.accessor("tanggalPembayaran", {
+      id: "tanggalPembayaran",
       cell: (info) => new Date(info.getValue()).toLocaleDateString("id-ID"),
       header: "Tanggal Bayar",
       enableColumnFilter: false,
     }),
     columnHelper.accessor("nominalCicilan", {
+      id: "nominalCicilan",
       cell: (info) => `Rp ${info.getValue().toLocaleString()}`,
-      header: "Nominal Cicilan",
+      header: "Cicilan Yang Dibayar",
       enableColumnFilter: false,
     }),
     columnHelper.accessor("jumlahCicilan", {
-      cell: (info) => info.getValue(),
+      id: "jumlahCicilan",
+      cell: (info) => `Rp ${info.getValue().toLocaleString()}`,
       header: "Jumlah Cicilan",
       enableColumnFilter: false,
     }),
@@ -120,12 +143,12 @@ const KeuanganDetailTable =<T,>({ data }: KeuanganDetailProps<T>) => {
       enableColumnFilter: false,
     }),
     columnHelper.accessor("action", {
-      cell: () => (
+      cell: (info) => (
         <Box sx={{ display: "flex", justifyContent: "start" }}>
           <IconButton onClick={handleDialogOpen}>
             <UploadFile />
           </IconButton>
-          <IconButton>
+          <IconButton onClick={() => handleOpenFormCicilan(info.row.original)}>
             <Edit />
           </IconButton>
           <IconButton>
@@ -221,6 +244,15 @@ const KeuanganDetailTable =<T,>({ data }: KeuanganDetailProps<T>) => {
           table.setPageIndex(page);
         }}
       />
+
+      {/* Form Cicilan Dialog */}
+      {openFormCicilan && (
+        <FormCicilan
+          open={openFormCicilan}
+          handleClose={handleCloseFormCicilan}
+          initialData={editData}
+        />
+      )}
     </Box>
   );
 };
