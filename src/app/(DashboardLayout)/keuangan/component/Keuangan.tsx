@@ -3,12 +3,12 @@
 import { Box, Card, Grid, Typography } from "@mui/material";
 import PageContainer from "../../components/container/PageContainer";
 import ScoreCard from "../../utilities/component/card/ScoreCard";
-import { scoreCardKeuangan } from "../data";
+import { KeuanganData, scoreCardKeuangan } from "../data";
 import KeuanganTable from "../../utilities/component/table/KeuanganTable";
 import Breadcrumb from "../../utilities/component/breadcrumb/Breadcrumb";
 import FormKeuangan from "./FormKeuangan";
 
-import { KeuanganData } from "../../utilities/component/table/data";
+
 import { columnsKeuangan } from "./columns/columnsKeuangan";
 
 const Keuangan = () => {

@@ -8,8 +8,8 @@ import React, { useEffect, useState } from "react";
 import FormDetail from "./FormDetail";
 import { useRouter } from "next/navigation";
 
-import { KeuanganData } from "@/app/(DashboardLayout)/utilities/component/table/data";
 import KeuanganDetailTable from "@/app/(DashboardLayout)/utilities/component/table/KeuanganDetailTable";
+import { KeuanganData } from "../../data";
 
 
 
