@@ -111,7 +111,7 @@ const handleSubmit = (data: React.SetStateAction<{}>) => {
         </Box>
 
         <Box sx={{ marginTop: "2rem" }}>
-          <FormDetail isEditing={isEditing} onSaveChanges={handleSubmit}/>
+          <FormDetail isEditing={isEditing} onSaveChanges={handleSubmit} keuanganData={currentData}/>
         </Box>
 
         <Box sx={{ marginTop: "2rem" , backgroundColor:"#fff" }}>

@@ -27,9 +27,9 @@ export const columnsKeuangan: ColumnDef<KeuanganProps, any>[] = [
     cell: (info) => `Rp ${info.getValue().toLocaleString()}`,
     header: "Sisa Tagihan",
   }),
-  columnHelper.accessor("tanggalPembayaran", {
+  columnHelper.accessor("tenggatPembayaran", {
     cell: (info) => new Date(info.getValue()).toLocaleDateString("id-ID"),
-    header: "Tanggal Pembayaran",
+    header: "Tenggat Pembayaran",
   }),
   columnHelper.accessor("status", {
     cell: (info) => info.getValue(),

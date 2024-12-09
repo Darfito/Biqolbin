@@ -16,9 +16,13 @@ export type CardStatsHorizontalWithBorderProps = {
     nama: string;
     jenisPaket : PaketInterface
     metodePembayaran: MetodePembayaranType
+    uangMuka?: number
     jumlahTagihan: number
     sisaTagihan: number
-    tanggalPembayaran: Date
+    jumlahBiayaPerAngsuran?: number
+    tenggatPembayaran: Date
+    banyaknyaCicilan?: number
+    catatanPembayaran?: string
     status: StatusType
     action?: string; // Optional field for action
     cicilan?: CicilanType[];
