@@ -26,14 +26,13 @@ const JamaahDetail = ({ id, breadcrumbLinks }: JamaahDetailProps) => {
   const [openModal, setOpenModal] = useState<boolean>(false); // Modal state to confirm save
   const [isSaving, setIsSaving] = useState<boolean>(false); // State to check if saving is in progress
   const [formData, setFormData] = useState({});
-  const [currentData, setCurrentData] = useState<any>(null); // Data keuangan berdasarkan ID
-  const [jamaah, setJamaah] = useState<JamaahProps | null>(null); // State untuk menyimpan data jamaah
+  const [currentData, setCurrentData] = useState<JamaahProps | null>(null); // State untuk menyimpan data jamaah
 
   useEffect(() => {
     if (id) {
       // Cari data jamaah berdasarkan ID
       const foundJamaah = jamaahData.find((item) => item.id === Number(id));
-      setJamaah(foundJamaah || null); // Set data ke state
+      setCurrentData(foundJamaah || null); // Set data ke state
     }
   }, [id]);
 
@@ -117,7 +116,7 @@ const handleSubmit = (data: React.SetStateAction<{}>) => {
         </Box>
 
         <Box sx={{ marginTop: "2rem" }}>
-          <FormDetail isEditing={isEditing} onSaveChanges={handleSubmit} jamaahData={jamaah}/>
+          <FormDetail isEditing={isEditing} onSaveChanges={handleSubmit} jamaahData={currentData}/>
         </Box>
 
         <Box sx={{ marginTop: "2rem" , backgroundColor:"#fff" }}>
