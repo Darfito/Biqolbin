@@ -36,6 +36,12 @@ const jamaahData: JamaahProps[] = [
         noTelp: "081987654321",
         hubungan: KontakDaruratRelation.Istri,
       },
+      {
+        id: 2,
+        nama: "John Yoesop",
+        noTelp: "081987654321",
+        hubungan: KontakDaruratRelation.Ayah,
+      },
     ],
     email: "ahmad.fauzi@example.com",
     jenisKelamin: JenisKelamin.LakiLaki,
