@@ -8,31 +8,37 @@ import React, { useEffect, useState } from "react";
 import FormDetail from "./FormDetail";
 import { useRouter } from "next/navigation";
 
-import KeuanganDetailTable from "@/app/(DashboardLayout)/utilities/component/table/KeuanganDetailTable";
-import { KeuanganData } from "../../data";
+import jamaahData from "../../data";
+import JamaahTable from "@/app/(DashboardLayout)/utilities/component/table/JamaahTable";
+import { columnsJamaah } from "../../component/columns/columnsJamaah";
+import { JamaahProps } from "@/app/(DashboardLayout)/utilities/type";
 
 
 
-interface KeuanganDetailProps {
+interface JamaahDetailProps {
   id: string;
   breadcrumbLinks: { label: string; href?: string }[];
 }
 
-const KeuanganDetail = ({ id, breadcrumbLinks }: KeuanganDetailProps) => {
+const JamaahDetail = ({ id, breadcrumbLinks }: JamaahDetailProps) => {
   const router = useRouter(); // Initialize useRouter
   const [isEditing, setIsEditing] = useState<boolean>(false); // State to toggle edit mode
   const [openModal, setOpenModal] = useState<boolean>(false); // Modal state to confirm save
   const [isSaving, setIsSaving] = useState<boolean>(false); // State to check if saving is in progress
   const [formData, setFormData] = useState({});
   const [currentData, setCurrentData] = useState<any>(null); // Data keuangan berdasarkan ID
+  const [jamaah, setJamaah] = useState<JamaahProps | null>(null); // State untuk menyimpan data jamaah
 
-  // Ambil data berdasarkan ID
   useEffect(() => {
-    const data = KeuanganData.find((item) => item.id.toString() === id); // Cari data sesuai ID
-    const cicilanData = data?.cicilan || [];
-    setCurrentData(cicilanData); // Set data atau null jika tidak ditemukan
-    console.log("currentData di detail:", cicilanData);
-  }, []);
+    if (id) {
+      // Cari data jamaah berdasarkan ID
+      const foundJamaah = jamaahData.find((item) => item.id === Number(id));
+      setJamaah(foundJamaah || null); // Set data ke state
+    }
+  }, [id]);
+
+
+
 
 // Handle Submit data sebelum dialog
 const handleSubmit = (data: React.SetStateAction<{}>) => {
@@ -75,7 +81,7 @@ const handleSubmit = (data: React.SetStateAction<{}>) => {
 
 
   
-  // console.log("kolom data di detail:", ColumnsKeuanganDetail);
+
   return (
     <>
       <Breadcrumb links={breadcrumbLinks} />
@@ -111,12 +117,12 @@ const handleSubmit = (data: React.SetStateAction<{}>) => {
         </Box>
 
         <Box sx={{ marginTop: "2rem" }}>
-          <FormDetail isEditing={isEditing} onSaveChanges={handleSubmit}/>
+          <FormDetail isEditing={isEditing} onSaveChanges={handleSubmit} jamaahData={jamaah}/>
         </Box>
 
         <Box sx={{ marginTop: "2rem" , backgroundColor:"#fff" }}>
         <Card sx={{ backgroundColor:"#fff" }}>
-        <KeuanganDetailTable data={currentData}/>
+        <JamaahTable columns={columnsJamaah} data={jamaahData} />
         </Card>
 
         </Box>
@@ -147,4 +153,4 @@ const handleSubmit = (data: React.SetStateAction<{}>) => {
   );
 };
 
-export default KeuanganDetail;
+export default JamaahDetail;

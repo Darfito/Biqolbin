@@ -116,7 +116,6 @@ export enum JenisKelamin {
 
 
 // ! TYPE HOTEL
-
 export type HotelType = {
   id: number;
   namaHotel: string;

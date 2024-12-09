@@ -36,7 +36,12 @@ export const columnsKeuangan: ColumnDef<KeuanganProps, any>[] = [
     header: "Status",
   }),
   columnHelper.accessor("action", {
-    cell: (info) => <ActionButton rowData={info.row.original} />,
+    cell: (info) => (
+      <ActionButton
+        rowData={info.row.original}
+        actionPath={(rowData) => `/keuangan/${rowData.id}`} // Path dinamis berdasarkan ID Jamaah
+      />
+    ),
     header: "Action",
     enableColumnFilter: false,
   }),

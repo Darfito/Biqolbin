@@ -8,6 +8,9 @@ import ScoreCard from "../../utilities/component/card/ScoreCard";
 import { columnsKeuangan } from "../../keuangan/component/columns/columnsKeuangan";
 import FormKeuangan from "../../keuangan/component/FormKeuangan";
 import KeuanganTable from "../../utilities/component/table/KeuanganTable";
+import { columnsJamaah } from "./columns/columnsJamaah";
+import JamaahTable from "../../utilities/component/table/JamaahTable";
+import jamaahData from "../data";
 
 const Jamaah = () => {
   const breadcrumbLinks = [{ label: "Jamaah", href: "/jamaah" }];
@@ -48,7 +51,7 @@ const Jamaah = () => {
           <Box sx={{ margin: "20px" }}>
             <FormKeuangan />
           </Box>
-          <KeuanganTable columns={columnsKeuangan} data={KeuanganData} />
+          <JamaahTable columns={columnsJamaah} data={jamaahData} />
         </Card>
       </PageContainer>
     </>

@@ -1,32 +1,30 @@
 // components/ActionButton.tsx
 import React from "react";
 import { useRouter } from "next/navigation";
-import { KeuanganProps } from "../../../type";
 import { Box, IconButton } from "@mui/material";
 import { IconInfoCircle } from "@tabler/icons-react";
 
-interface ActionButtonProps {
-  rowData: KeuanganProps;
+interface ActionButtonProps<T> {
+  rowData: T;
+  actionPath: (rowData: T) => string; // Fungsi untuk menentukan path dinamis
 }
 
-const ActionButton: React.FC<ActionButtonProps> = ({ rowData }) => {
+const ActionButton = <T,>({ rowData, actionPath }: ActionButtonProps<T>) => {
   const router = useRouter();
 
   const handleAction = () => {
-    router.push(`/keuangan/${rowData.id}`);
+    router.push(actionPath(rowData)); // Navigasi ke path berdasarkan fungsi
   };
 
   return (
-    <>
-      <Box sx={{ display: "flex", justifyContent: "center" }}>
-        <IconButton
-          color="primary"
-          onClick={handleAction} // Action when the button is clicked
-        >
-          <IconInfoCircle />
-        </IconButton>
-      </Box>
-    </>
+    <Box sx={{ display: "flex", justifyContent: "center" }}>
+      <IconButton
+        color="primary"
+        onClick={handleAction} // Action ketika tombol diklik
+      >
+        <IconInfoCircle />
+      </IconButton>
+    </Box>
   );
 };
 
