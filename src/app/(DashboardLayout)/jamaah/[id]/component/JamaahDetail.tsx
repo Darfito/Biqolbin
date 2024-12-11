@@ -9,9 +9,9 @@ import FormDetail from "./FormDetail";
 import { useRouter } from "next/navigation";
 
 import jamaahData from "../../data";
-import JamaahTable from "@/app/(DashboardLayout)/utilities/component/table/JamaahTable";
 import { columnsJamaah } from "../../component/columns/columnsJamaah";
 import { JamaahProps } from "@/app/(DashboardLayout)/utilities/type";
+import JamaahDetailTable from "@/app/(DashboardLayout)/utilities/component/table/JamaahDetailTable";
 
 
 
@@ -53,7 +53,7 @@ const handleSubmit = (data: React.SetStateAction<{}>) => {
 
   // Function to handle the "Kembali ke Daftar" button click
   const handleBackClick = () => {
-    router.push("/keuangan"); // Navigate to /keuangan page
+    router.push("/jamaah"); // Navigate to /keuangan page
   };
 
     // Open the confirmation modal
@@ -121,7 +121,7 @@ const handleSubmit = (data: React.SetStateAction<{}>) => {
 
         <Box sx={{ marginTop: "2rem" , backgroundColor:"#fff" }}>
         <Card sx={{ backgroundColor:"#fff" }}>
-        <JamaahTable columns={columnsJamaah} data={jamaahData} />
+        {/* <JamaahDetailTable columns={columnsJamaah} data={jamaahData} /> */}
         </Card>
 
         </Box>

@@ -67,7 +67,6 @@ const DebouncedInput = ({
 
 interface KeuanganDetailProps<T> {
   data: T[];
-  cicilanKe: number
 }
 
 interface EditCicilanFormProps {
@@ -76,7 +75,7 @@ interface EditCicilanFormProps {
 
 
 
-const KeuanganDetailTable =<T,>({ data, cicilanKe }: KeuanganDetailProps<T>) => {
+const KeuanganDetailTable =<T,>({ data }: KeuanganDetailProps<T>) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
@@ -85,9 +84,6 @@ const KeuanganDetailTable =<T,>({ data, cicilanKe }: KeuanganDetailProps<T>) => 
 
   const handleDialogOpen = () => setOpenDialog(true);
   const handleDialogClose = () => setOpenDialog(false);
-
-  console.log("data keuangan detail table:", data);
-  console.log("data cicilan ke:", cicilanKe);
 
   const handleOpenFormCicilan = (data: CicilanType) => {
     setEditData(data); // Set data cicilan yang akan diedit
@@ -272,8 +268,7 @@ const KeuanganDetailTable =<T,>({ data, cicilanKe }: KeuanganDetailProps<T>) => 
           open={openFormCicilan}
           handleClose={handleCloseFormCicilan}
           initialData={editData}
-          currentCicilanKe={cicilanKe}
-          />
+        />
       )}
     </Box>
   );

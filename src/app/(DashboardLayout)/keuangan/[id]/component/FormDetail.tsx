@@ -3,6 +3,7 @@ import CustomTextField from "@/app/(DashboardLayout)/components/forms/theme-elem
 import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCard";
 import { Box, Grid, MenuItem, Button } from "@mui/material";
 import { KeuanganProps } from "@/app/(DashboardLayout)/utilities/type";
+import { showToast } from "@/app/(DashboardLayout)/utilities/component/toast/Toast";
 
 interface FormDetailProps {
   isEditing: boolean; // Receive isEditing from the parent component
@@ -11,6 +12,8 @@ interface FormDetailProps {
 }
 
 const FormDetail = ({ isEditing, onSaveChanges, keuanganData }: FormDetailProps) => {
+
+  console.log("keuanganData di detail:", keuanganData);
   const [metode, setMetode] = React.useState<string>("");
   const [jenisPaket, setJenisPaket] = React.useState<string>("");
 
@@ -67,6 +70,7 @@ const FormDetail = ({ isEditing, onSaveChanges, keuanganData }: FormDetailProps)
   const handleSubmit = () => {
     // Kirim data ke parent
     onSaveChanges(formValues);
+    showToast('Form berhasil disimpan', 'minor-success');
   };
 
   const [formErrors, setFormErrors] = React.useState<any>({});

@@ -1,4 +1,5 @@
 import CustomTextField from "@/app/(DashboardLayout)/components/forms/theme-elements/CustomTextField";
+import { showToast } from "@/app/(DashboardLayout)/utilities/component/toast/Toast";
 import { CicilanType } from "@/app/(DashboardLayout)/utilities/type";
 import {
   Button,
@@ -19,33 +20,41 @@ interface FormErrors {
 
 const formSchema = v.object({
   cicilanKe: v.pipe(
-  v.string(),
-  v.nonEmpty("Isi Cicilan keberapa"),
-  v.transform(Number),
-  v.minValue(1, "Cicilan keberapa harus lebih dari 0")
-),
+    v.number(),
+    v.transform(Number),
+    v.minValue(1, "Cicilan keberapa harus lebih dari 0")
+  ),
   tanggalBayar: v.pipe(
     v.string(),
     v.nonEmpty("Tenggat pembayaran harus diisi") // Validasi
   ),
   nominalCicilan: v.pipe(
-  v.string(),
-  v.nonEmpty("Jumlah cicilan harus diisi"),
-  v.transform(Number),
-  v.minValue(1, "Jumlah cicilan harus lebih dari 0")),
+    v.number(),
+    v.transform(Number),
+    v.minValue(10000, "Jumlah cicilan harus lebih dari 0")
+  ),
 });
 
 interface FormCicilanProps {
   open: boolean;
   handleClose: () => void;
   initialData?: CicilanType | null;
+  currentCicilanKe?: number;
 }
 
-const FormCicilan: React.FC<FormCicilanProps> = ({ open, handleClose, initialData }) => {
+const FormCicilan: React.FC<FormCicilanProps> = ({
+  open,
+  handleClose,
+  initialData,
+  currentCicilanKe,
+}) => {
+  console.log("initialData cicilan:", initialData);
+  console.log("cicilan ke:", currentCicilanKe);
+
   const [formValues, setFormValues] = React.useState({
-    cicilanKe: "",
+    cicilanKe: 0,
     tanggalBayar: "",
-    nominalCicilan: "",
+    nominalCicilan: 0,
   });
   const [formErrors, setFormErrors] = React.useState<FormErrors>({});
 
@@ -53,11 +62,17 @@ const FormCicilan: React.FC<FormCicilanProps> = ({ open, handleClose, initialDat
   React.useEffect(() => {
     if (initialData) {
       setFormValues({
-        cicilanKe: String(initialData.cicilanKe || ""),
+        cicilanKe: initialData.cicilanKe || 0,
         tanggalBayar: initialData.tanggalPembayaran
           ? new Date(initialData.tanggalPembayaran).toISOString().split("T")[0]
           : "",
-        nominalCicilan: String(initialData.nominalCicilan || ""),
+        nominalCicilan: initialData.nominalCicilan || 0,
+      });
+    } else {
+      setFormValues({
+        cicilanKe: currentCicilanKe || 0,
+        tanggalBayar: "",
+        nominalCicilan: 0,
       });
     }
   }, [initialData]);
@@ -91,24 +106,25 @@ const FormCicilan: React.FC<FormCicilanProps> = ({ open, handleClose, initialDat
 
     // If validation passes, log form values
     console.log("Form submitted successfully:", parsedValues);
-       // If validation passes
-       if (initialData) {
-        console.log("Update Cicilan:", parsedValues); // Log update for now
-      } else {
-        console.log("Add New Cicilan:", parsedValues); // Log addition for now
-      }
+    // If validation passes
+    if (initialData) {
+      console.log("Update Cicilan:", parsedValues); // Log update for now
+    } else {
+      console.log("Add New Cicilan:", parsedValues); // Log addition for now
+    }
 
     // Close the dialog
     handleClose();
+    showToast("Form berhasil disimpan", "success");
   };
 
   return (
     <>
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <form onSubmit={handleSubmit}>
-        <DialogTitle>
-          {initialData ? "Edit Cicilan" : "Tambah Cicilan"}
-        </DialogTitle>
+          <DialogTitle>
+            {initialData ? "Edit Cicilan" : "Tambah Cicilan"}
+          </DialogTitle>
           <DialogContent
             sx={{
               display: "flex",
@@ -118,22 +134,26 @@ const FormCicilan: React.FC<FormCicilanProps> = ({ open, handleClose, initialDat
               gap: "1rem",
             }}
           >
-             <DialogContentText>
-            {initialData
-              ? "Perbarui detail cicilan yang dipilih."
-              : "Masukkan detail cicilan baru."}
-          </DialogContentText>
+            <DialogContentText>
+              {initialData
+                ? "Perbarui detail cicilan yang dipilih."
+                : "Masukkan detail cicilan baru."}
+            </DialogContentText>
 
             <CustomTextField
               fullWidth
+              disabled
               label="Cicilan Ke"
               name="cicilanKe"
               value={formValues.cicilanKe}
               error={!!formErrors.cicilanKe}
               helperText={formErrors.cicilanKe}
-              onChange={(e: { target: { value: string } }) =>
-                setFormValues({ ...formValues, cicilanKe: e.target.value })
-              }
+              onChange={(e: { target: { value: number } }) => {
+                setFormValues({
+                  ...formValues,
+                  cicilanKe: Number(e.target.value),
+                });
+              }}
             />
 
             <CustomTextField
@@ -159,9 +179,12 @@ const FormCicilan: React.FC<FormCicilanProps> = ({ open, handleClose, initialDat
               value={formValues.nominalCicilan}
               error={!!formErrors.nominalCicilan}
               helperText={formErrors.nominalCicilan}
-              onChange={(e: { target: { value: string } }) =>
-                setFormValues({ ...formValues, nominalCicilan: e.target.value })
-              }
+              onChange={(e: { target: { value: number } }) => {
+                setFormValues({
+                  ...formValues,
+                  nominalCicilan: Number(e.target.value),
+                });
+              }}
             />
           </DialogContent>
           <DialogActions>
