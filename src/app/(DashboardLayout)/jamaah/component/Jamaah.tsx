@@ -1,13 +1,10 @@
 "use client";
 
 import { Box, Card, Grid, Typography } from "@mui/material";
-import DashboardCard from "../../components/shared/DashboardCard";
 import PageContainer from "../../components/container/PageContainer";
-import { KeuanganData, scoreCardKeuangan } from "../../keuangan/data";
+import { scoreCardKeuangan } from "../../keuangan/data";
 import ScoreCard from "../../utilities/component/card/ScoreCard";
-import { columnsKeuangan } from "../../keuangan/component/columns/columnsKeuangan";
 import FormKeuangan from "../../keuangan/component/FormKeuangan";
-import KeuanganTable from "../../utilities/component/table/KeuanganTable";
 import { columnsJamaah } from "./columns/columnsJamaah";
 import JamaahTable from "../../utilities/component/table/JamaahTable";
 import jamaahData from "../data";

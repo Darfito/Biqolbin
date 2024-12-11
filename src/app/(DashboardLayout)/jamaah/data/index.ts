@@ -77,6 +77,44 @@ const jamaahData: JamaahProps[] = [
       status: "Dijadwalkan",
       deskripsi: "Persiapan keberangkatan",
     },
+    jenisDokumen: [
+      {
+        id: 1,
+        namaDokumen: "KTP",
+        lampiran: false,
+        file: "",
+      },
+      {
+        id: 2,
+        namaDokumen: "Paspor",
+        lampiran: false,
+        file: "",
+      },
+      {
+        id: 3,
+        namaDokumen: "Buku Nikah",
+        lampiran: false,
+        file: "",
+      },
+      {
+        id: 4,
+        namaDokumen: "Kartu Keluarga",
+        lampiran: false,
+        file: "",
+      },
+      {
+        id: 5,
+        namaDokumen: "Visa",
+        lampiran: false,
+        file: "",
+      },
+      {
+        id: 6,
+        namaDokumen: "Pas Foto",
+        lampiran: false,
+        file: "",
+      },
+    ]
   },
   {
     id: 2,
@@ -125,6 +163,44 @@ const jamaahData: JamaahProps[] = [
       status: "Berangkat",
       deskripsi: "Dalam perjalanan menuju Saudi Arabia",
     },
+    jenisDokumen: [
+      {
+        id: 1,
+        namaDokumen: "KTP",
+        lampiran: false,
+        file: "",
+      },
+      {
+        id: 2,
+        namaDokumen: "Paspor",
+        lampiran: false,
+        file: "",
+      },
+      {
+        id: 3,
+        namaDokumen: "Buku Nikah",
+        lampiran: false,
+        file: "",
+      },
+      {
+        id: 4,
+        namaDokumen: "Kartu Keluarga",
+        lampiran: false,
+        file: "",
+      },
+      {
+        id: 5,
+        namaDokumen: "Visa",
+        lampiran: false,
+        file: "",
+      },
+      {
+        id: 6,
+        namaDokumen: "Pas Foto",
+        lampiran: false,
+        file: "",
+      },
+    ]
   },
   {
     id: 3,
@@ -173,6 +249,44 @@ const jamaahData: JamaahProps[] = [
       status: "Dijadwalkan",
       deskripsi: "Menunggu dokumen selesai",
     },
+    jenisDokumen: [
+      {
+        id: 1,
+        namaDokumen: "KTP",
+        lampiran: false,
+        file: "",
+      },
+      {
+        id: 2,
+        namaDokumen: "Paspor",
+        lampiran: false,
+        file: "",
+      },
+      {
+        id: 3,
+        namaDokumen: "Buku Nikah",
+        lampiran: false,
+        file: "",
+      },
+      {
+        id: 4,
+        namaDokumen: "Kartu Keluarga",
+        lampiran: false,
+        file: "",
+      },
+      {
+        id: 5,
+        namaDokumen: "Visa",
+        lampiran: false,
+        file: "",
+      },
+      {
+        id: 6,
+        namaDokumen: "Pas Foto",
+        lampiran: false,
+        file: "",
+      },
+    ]
   },
   // Tambahkan data ke-4 dan ke-5 dengan pola serupa jika diperlukan
 ];

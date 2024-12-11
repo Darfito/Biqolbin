@@ -24,9 +24,8 @@ import TablePaginationComponent from "../pagination/TablePaginationComponent";
 import styles from "../../../../styles/table.module.css";
 
 // Type Imports
-import { CicilanType } from "../../type";
+import { CicilanType, JenisDokumen } from "../../type";
 import FileUploaderSingle from "../uploader/FileUploaderSingle";
-import FormCicilan from "@/app/(DashboardLayout)/keuangan/[id]/component/FormCicilan";
 
 const fuzzyFilter = (row: { getValue: (arg0: any) => any; }, columnId: any, value: string, addMeta: (arg0: { itemRank: RankingInfo; }) => void) => {
   const itemRank = rankItem(row.getValue(columnId), value);
@@ -65,83 +64,51 @@ const DebouncedInput = ({
   );
 };
 
-interface KeuanganDetailProps<T> {
+interface JamaahDetailProps<T> {
   data: T[];
-}
-
-interface EditCicilanFormProps {
-  onClose: () => void;
+  perkawinan?: boolean;
 }
 
 
-
-const KeuanganDetailTable =<T,>({ data }: KeuanganDetailProps<T>) => {
+const JamaahDetailTable = ({ data, perkawinan }: JamaahDetailProps<JenisDokumen>) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
-  const [openFormCicilan, setOpenFormCicilan] = useState(false);
-  const [editData, setEditData] = useState<CicilanType | null>(null); // Data cicilan yang sedang diedit
 
   const handleDialogOpen = () => setOpenDialog(true);
   const handleDialogClose = () => setOpenDialog(false);
 
-  const handleOpenFormCicilan = (data: CicilanType) => {
-    setEditData(data); // Set data cicilan yang akan diedit
-    setOpenFormCicilan(true); // Buka dialog
-  };
 
   const handleAddCicilan = () => {
     setEditData(null); // Reset data cicilan
     setOpenFormCicilan(true); // Buka dialog
   };
 
-  const handleCloseFormCicilan = () => {
-    setOpenFormCicilan(false); // Tutup dialog
-    setEditData(null); // Reset data cicilan
-  };
 
-  const columnHelper = createColumnHelper<CicilanType>();
+  // Filter data "Buku Nikah" hanya jika perkawinan bernilai true
+  const filteredData = data.filter(
+    (dokumen) =>
+      dokumen.namaDokumen !== "Buku Nikah" || perkawinan
+  );
+  
+
+  const columnHelper = createColumnHelper<JenisDokumen>();
+
 
   const columns = [
-    columnHelper.accessor("cicilanKe", {
-      id: "cicilanKe",
+    columnHelper.accessor("namaDokumen", {
+      id: "namaDokumen",
       cell: (info) => info.getValue(),
-      header: "Cicilan Ke",
-      enableColumnFilter: false,
-    }),
-    columnHelper.accessor("tanggalPembayaran", {
-      id: "tanggalPembayaran",
-      cell: (info) => new Date(info.getValue()).toLocaleDateString("id-ID"),
-      header: "Tanggal Bayar",
-      enableColumnFilter: false,
-    }),
-    columnHelper.accessor("nominalCicilan", {
-      id: "nominalCicilan",
-      cell: (info) => `Rp ${info.getValue().toLocaleString()}`,
-      header: "Cicilan Yang Dibayar",
-      enableColumnFilter: false,
-    }),
-    columnHelper.accessor("jumlahCicilan", {
-      id: "jumlahCicilan",
-      cell: (info) => `Rp ${info.getValue().toLocaleString()}`,
-      header: "Jumlah Cicilan",
+      header: "Jenis Dokumen",
       enableColumnFilter: false,
     }),
     columnHelper.accessor("lampiran", {
       cell: (info) => (
-        <IconButton
-          onClick={() => {
-            const fileUrl = info.getValue();
-            if (fileUrl) {
-              window.open(fileUrl, "_blank");
-            } else {
-              alert("Lampiran tidak tersedia");
-            }
-          }}
-          aria-label="view attachment"
-        >
-          <Folder />
-        </IconButton>
+        <Box sx={{ display: "flex", justifyContent: "start" }}>
+          <IconButton>
+            <Folder />
+          </IconButton>
+        </Box> 
       ),
       header: "Lampiran",
       enableColumnFilter: false,
@@ -152,7 +119,7 @@ const KeuanganDetailTable =<T,>({ data }: KeuanganDetailProps<T>) => {
           <IconButton onClick={handleDialogOpen}>
             <UploadFile />
           </IconButton>
-          <IconButton onClick={() => handleOpenFormCicilan(info.row.original)}>
+          <IconButton>
             <Edit />
           </IconButton>
           <IconButton>
@@ -181,7 +148,7 @@ const KeuanganDetailTable =<T,>({ data }: KeuanganDetailProps<T>) => {
   ];
 
   const table = useReactTable({
-    data: data || [],
+    data: filteredData,
     columns,
     filterFns: {
       fuzzy: fuzzyFilter,
@@ -205,7 +172,7 @@ const KeuanganDetailTable =<T,>({ data }: KeuanganDetailProps<T>) => {
         width: "100%", 
         display: "flex",
         margin: "20px"
-       }}>
+      }}>
       <Button
         sx={{ color: "#fff", minWidth: "150px" }}
         variant="contained"
@@ -262,16 +229,8 @@ const KeuanganDetailTable =<T,>({ data }: KeuanganDetailProps<T>) => {
         }}
       />
 
-      {/* Form Cicilan Dialog */}
-      {openFormCicilan && (
-        <FormCicilan
-          open={openFormCicilan}
-          handleClose={handleCloseFormCicilan}
-          initialData={editData}
-        />
-      )}
     </Box>
   );
 };
 
-export default KeuanganDetailTable;
+export default JamaahDetailTable;

@@ -79,10 +79,19 @@ export interface JamaahProps {
   pekerjaan: string;
   kursiRoda: boolean;
   riwayatPenyakit: string;
+  jenisDokumen: JenisDokumen[];
   jenisPaket : PaketInterface;
   berangkat: Date; // tanggal berangkat dari paket
   selesai: Date; // tanggal pulang dari paket
   status: StatusKepergian;
+}
+
+export type JenisDokumen ={
+  id: number;
+  namaDokumen: string;
+  file?: string
+  lampiran: boolean
+  action?: string
 }
 
 export type KontakDaruratType = {
