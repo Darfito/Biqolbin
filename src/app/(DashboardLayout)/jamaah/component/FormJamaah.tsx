@@ -28,6 +28,7 @@ import {
   Box,
 } from "@mui/material";
 import { KontakDaruratSection } from "./KontakDaruratHandler";
+import { PaketData } from "../data";
 
 interface FormErrors {
   id?: string;
@@ -178,6 +179,18 @@ export default function FormJamaah() {
       setFormValues(prev => ({
         ...prev,
         kontakDarurat: prev.kontakDarurat.filter((_, index) => index !== indexToRemove)
+      }));
+    }
+  };
+
+  const handleJenisPaketChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const selectedPaket = PaketData.find(paket => paket.id === event.target.value);
+    if (selectedPaket) {
+      setFormValues(prevValues => ({
+        ...prevValues,
+        jenisPaket: selectedPaket,
+        berangkat: selectedPaket.tglKeberangkatan,
+        selesai: selectedPaket.tglKepulangan,
       }));
     }
   };
@@ -472,7 +485,55 @@ export default function FormJamaah() {
                   }
                   sx={{ marginBottom: 2 }}
                 />
+
+                      {/* Jenis Paket */}
+      <CustomTextField
+        select
+        fullWidth
+        label="Jenis Paket"
+        value={formValues.jenisPaket.id}
+        onChange={handleJenisPaketChange}
+        sx={{ marginBottom: 2 }}
+      >
+        {PaketData.map((paket) => (
+          <MenuItem key={paket.id} value={paket.id}>
+            {paket.nama}
+          </MenuItem>
+        ))}
+      </CustomTextField>
+
+      {/* Tanggal Berangkat */}
+      <CustomTextField
+        fullWidth
+        label="Tanggal Berangkat"
+        type="date"
+        value={formValues.berangkat.toISOString().split('T')[0]} // Format date untuk input type="date"
+        onChange={(e: { target: { value: string } }) =>
+          setFormValues({
+            ...formValues,
+            berangkat: new Date(e.target.value),
+          })
+        }
+        sx={{ marginBottom: 2 }}
+      />
+
+      {/* Tanggal Selesai */}
+      <CustomTextField
+        fullWidth
+        label="Tanggal Selesai"
+        type="date"
+        value={formValues.selesai.toISOString().split('T')[0]} // Format date untuk input type="date"
+        onChange={(e: { target: { value: string } }) =>
+          setFormValues({
+            ...formValues,
+            selesai: new Date(e.target.value),
+          })
+        }
+        sx={{ marginBottom: 2 }}
+      />
               </Grid>
+
+
 
               {/* Kontak Darurat */}
               <KontakDaruratSection 
@@ -481,6 +542,8 @@ export default function FormJamaah() {
                 handleAddContact={handleAddContact}
                 handleRemoveContact={handleRemoveContact}
               />
+
+              
             </Grid>
           </DialogContent>
           <DialogActions>

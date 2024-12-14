@@ -1,4 +1,4 @@
-import { CardStatsHorizontalWithBorderProps, JamaahProps, JenisKelamin, KontakDaruratRelation, TipeKamar } from "../../utilities/type";
+import { CardStatsHorizontalWithBorderProps, JamaahProps, JenisKelamin, KontakDaruratRelation, PaketInterface, TipeKamar } from "../../utilities/type";
 import { IconUser, IconCreditCard,IconReceipt } from "@tabler/icons-react";
 
 
@@ -22,6 +22,45 @@ export const scoreCardKeuangan: CardStatsHorizontalWithBorderProps[] = [
     icon: IconReceipt,
   },
 ]
+
+export const PaketData: PaketInterface[] = [
+  {
+    id: "PKT001",
+    nama: "Paket Regular 1",
+    jenis: "REGULAR",
+    maskapai: "Garuda Indonesia",
+    jenisPenerbangan: "DIRECT",
+    keretaCepat: false,
+    harga: 1000000,
+    tglKeberangkatan: new Date("2024-12-01"),
+    tglKepulangan: new Date("2024-12-10"),
+    fasilitas: "Hotel bintang 3, Transportasi lokal",
+  },
+  {
+    id: "PKT002",
+    nama: "Paket Regular 2",
+    jenis: "REGULAR",
+    maskapai: "Lion Air",
+    jenisPenerbangan: "TRANSIT",
+    keretaCepat: false,
+    harga: 800000,
+    tglKeberangkatan: new Date("2024-12-05"),
+    tglKepulangan: new Date("2024-12-15"),
+    fasilitas: "Hotel bintang 2, Transportasi lokal",
+  },
+  {
+    id: "PKT003",
+    nama: "Paket VIP 1",
+    jenis: "VIP",
+    maskapai: "Singapore Airlines",
+    jenisPenerbangan: "DIRECT",
+    keretaCepat: true,
+    harga: 2000000,
+    tglKeberangkatan: new Date("2024-12-10"),
+    tglKepulangan: new Date("2024-12-20"),
+    fasilitas: "Hotel bintang 5, Transportasi premium",
+  },
+];
 
 const jamaahData: JamaahProps[] = [
   {
@@ -58,18 +97,7 @@ const jamaahData: JamaahProps[] = [
     pekerjaan: "Pengusaha",
     kursiRoda: false,
     riwayatPenyakit: "Tidak ada",
-    jenisPaket: {
-      id: "1",
-      nama: "Umroh Reguler",
-      jenis: "REGULAR",
-      maskapai: "Garuda Indonesia",
-      jenisPenerbangan: "DIRECT",
-      keretaCepat: false,
-      harga: 25000000,
-      tglKeberangkatan: new Date("2024-01-15"),
-      tglKepulangan: new Date("2024-01-30"),
-      fasilitas: "Hotel bintang 4, Makan 3x sehari",
-    },
+    jenisPaket: PaketData[0],
     berangkat: new Date("2024-01-15"),
     selesai: new Date("2024-01-30"),
     status: {
@@ -144,18 +172,7 @@ const jamaahData: JamaahProps[] = [
     pekerjaan: "Guru",
     kursiRoda: false,
     riwayatPenyakit: "Asma",
-    jenisPaket: {
-      id: "2",
-      nama: "Umroh VIP",
-      jenis: "VIP",
-      maskapai: "Saudi Airlines",
-      jenisPenerbangan: "TRANSIT",
-      keretaCepat: true,
-      harga: 35000000,
-      tglKeberangkatan: new Date("2024-02-10"),
-      tglKepulangan: new Date("2024-02-25"),
-      fasilitas: "Hotel bintang 5, Transportasi VIP",
-    },
+    jenisPaket: PaketData[1],
     berangkat: new Date("2024-02-10"),
     selesai: new Date("2024-02-25"),
     status: {
@@ -230,18 +247,7 @@ const jamaahData: JamaahProps[] = [
     pekerjaan: "Mahasiswa",
     kursiRoda: false,
     riwayatPenyakit: "Tidak ada",
-    jenisPaket: {
-      id: "3",
-      nama: "Umroh Reguler",
-      jenis: "REGULAR",
-      maskapai: "Garuda Indonesia",
-      jenisPenerbangan: "DIRECT",
-      keretaCepat: false,
-      harga: 22000000,
-      tglKeberangkatan: new Date("2024-03-15"),
-      tglKepulangan: new Date("2024-03-30"),
-      fasilitas: "Hotel bintang 3, Transportasi lokal",
-    },
+    jenisPaket: PaketData[2],
     berangkat: new Date("2024-03-15"),
     selesai: new Date("2024-03-30"),
     status: {
