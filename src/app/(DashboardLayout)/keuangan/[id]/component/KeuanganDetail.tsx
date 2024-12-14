@@ -8,8 +8,8 @@ import React, { useEffect, useState } from "react";
 import FormDetail from "./FormDetail";
 import { useRouter } from "next/navigation";
 
-import { KeuanganData } from "@/app/(DashboardLayout)/utilities/component/table/data";
 import KeuanganDetailTable from "@/app/(DashboardLayout)/utilities/component/table/KeuanganDetailTable";
+import { KeuanganData } from "../../data";
 
 
 
@@ -20,17 +20,20 @@ interface KeuanganDetailProps {
 
 const KeuanganDetail = ({ id, breadcrumbLinks }: KeuanganDetailProps) => {
   const router = useRouter(); // Initialize useRouter
-  const [isEditing, setIsEditing] = React.useState<boolean>(false); // State to toggle edit mode
-  const [openModal, setOpenModal] = React.useState<boolean>(false); // Modal state to confirm save
-  const [isSaving, setIsSaving] = React.useState<boolean>(false); // State to check if saving is in progress
+  const [isEditing, setIsEditing] = useState<boolean>(false); // State to toggle edit mode
+  const [openModal, setOpenModal] = useState<boolean>(false); // Modal state to confirm save
+  const [isSaving, setIsSaving] = useState<boolean>(false); // State to check if saving is in progress
   const [formData, setFormData] = useState({});
   const [currentData, setCurrentData] = useState<any>(null); // Data keuangan berdasarkan ID
-
+  const [currentDataKeuangan, setCurrentDataKeuangan] = useState<any>(null); // Data keuangan berdasarkan ID
   // Ambil data berdasarkan ID
   useEffect(() => {
     const data = KeuanganData.find((item) => item.id.toString() === id); // Cari data sesuai ID
     const cicilanData = data?.cicilan || [];
+    const keuanganData = data || null;
+    setCurrentDataKeuangan(keuanganData);
     setCurrentData(cicilanData); // Set data atau null jika tidak ditemukan
+    console.log("currentDataKeuangan di detail:", keuanganData);
     console.log("currentData di detail:", cicilanData);
   }, []);
 
@@ -61,6 +64,11 @@ const handleSubmit = (data: React.SetStateAction<{}>) => {
       setOpenModal(false);
     };
 
+    // Hitung nilai cicilan berikutnya
+    const nextCicilanKe = currentData ? currentData.length + 1 : 1;
+    console.log("nextCicilanKe:", nextCicilanKe);
+
+
     const handleSaveChanges = () => {
       setIsSaving(true);
       console.log("Menyimpan data...", formData); // Menampilkan data yang sedang disimpan
@@ -73,9 +81,6 @@ const handleSubmit = (data: React.SetStateAction<{}>) => {
       }, 1000); // Simulasi operasi async
     };
 
-
-  
-  // console.log("kolom data di detail:", ColumnsKeuanganDetail);
   return (
     <>
       <Breadcrumb links={breadcrumbLinks} />
@@ -111,12 +116,12 @@ const handleSubmit = (data: React.SetStateAction<{}>) => {
         </Box>
 
         <Box sx={{ marginTop: "2rem" }}>
-          <FormDetail isEditing={isEditing} onSaveChanges={handleSubmit}/>
+          <FormDetail isEditing={isEditing} onSaveChanges={handleSubmit} keuanganData={currentDataKeuangan}/>
         </Box>
 
         <Box sx={{ marginTop: "2rem" , backgroundColor:"#fff" }}>
         <Card sx={{ backgroundColor:"#fff" }}>
-        <KeuanganDetailTable data={currentData}/>
+        <KeuanganDetailTable data={currentData} cicilanKe={nextCicilanKe}/>
         </Card>
 
         </Box>

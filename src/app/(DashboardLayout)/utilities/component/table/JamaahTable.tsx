@@ -121,41 +121,6 @@ const Filter = ({
 
   const columnFilterValue = column.getFilterValue();
 
-  // Options for filtering based on column id
-  const getColumnOptions = (columnId: string) => {
-    switch (columnId) {
-      case "status":
-        return ["Semua", "Belum Bayar", "Sedang Menyicil", "Sedang Menabung", "Lunas"];
-      case "metodePembayaran":
-        return ["Semua", "Cicilan", "Tunai", "Tabungan"];
-      case "jenisPaket.nama": // Ensure this matches exactly with the column id in the table
-        return ["Semua", "Paket Regular 1", "Paket Regular 2", "Paket VIP 1"];
-      default:
-        return [];
-    }
-  };
-
-  const options = getColumnOptions(column.id);
-
-  if (options.length > 0) {
-    return (
-      <FormControl sx={{ paddingRight: "1rem" }} variant="outlined" fullWidth>
-        <Autocomplete
-          value={columnFilterValue ?? "Semua"} // Default to "Semua"
-          onChange={(e, newValue) =>
-            column.setFilterValue(newValue === "Semua" ? undefined : newValue)
-          }
-          options={options}
-          renderInput={(params) => (
-            <CustomTextField {...params} variant="outlined" fullWidth />
-          )}
-          isOptionEqualToValue={(option, value) => option === value}
-          disableClearable
-        />
-      </FormControl>
-    );
-  }
-
   if (typeof firstValue === "number") {
     return (
       <div className="flex gap-x-2">
@@ -204,7 +169,7 @@ const Filter = ({
 };
 
 // Mendeklarasikan interface dengan tipe generik T
-interface KeuanganTableProps<T> {
+interface JamaahTableProps<T> {
   columns: ColumnDef<T, any>[];  // Kolom dinamis yang disesuaikan dengan tipe T
   data: T[];  // Data dinamis sesuai tipe T
 }
@@ -212,7 +177,7 @@ interface KeuanganTableProps<T> {
 
 
 
-const KeuanganTable = <T,>({ columns, data }: KeuanganTableProps<T>) => {
+const JamaahTable = <T,>({ columns, data }: JamaahTableProps<T>) => {
   // States
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -254,7 +219,7 @@ const KeuanganTable = <T,>({ columns, data }: KeuanganTableProps<T>) => {
         <CardHeader
         sx={{ 
           paddingTop: 0
-        }}
+         }}
           action={
             <DebouncedInput
               value={globalFilter ?? ""}
@@ -360,4 +325,4 @@ const KeuanganTable = <T,>({ columns, data }: KeuanganTableProps<T>) => {
   );
 };
 
-export default KeuanganTable;
+export default JamaahTable;
