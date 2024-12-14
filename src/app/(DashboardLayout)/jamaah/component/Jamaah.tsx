@@ -8,6 +8,7 @@ import FormKeuangan from "../../keuangan/component/FormKeuangan";
 import { columnsJamaah } from "./columns/columnsJamaah";
 import JamaahTable from "../../utilities/component/table/JamaahTable";
 import jamaahData from "../data";
+import FormJamaah from "./FormJamaah";
 
 const Jamaah = () => {
   return (
@@ -45,7 +46,7 @@ const Jamaah = () => {
       <PageContainer title="Jamaah">
         <Card sx={{ mt: 3 }}>
           <Box sx={{ margin: "20px", display: "flex", justifyContent: "end" }}>
-            <FormKeuangan />
+            <FormJamaah />
           </Box>
           <JamaahTable columns={columnsJamaah} data={jamaahData} />
         </Card>
