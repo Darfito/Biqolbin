@@ -36,12 +36,11 @@ const JamaahDetail = ({ id, breadcrumbLinks }: JamaahDetailProps) => {
   const [currentData, setCurrentData] = useState<JamaahProps | null>(null); // State untuk menyimpan data jamaah
 
   useEffect(() => {
-    if (id) {
-      // Cari data jamaah berdasarkan ID
+    if (id && !currentData) {
       const foundJamaah = jamaahData.find((item) => item.id === Number(id));
-      setCurrentData(foundJamaah || null); // Set data ke state
+      setCurrentData(foundJamaah || null);
     }
-  }, [id]);
+  }, [id, currentData]); // Tambahkan dependency array yang tepat
 
   // Handle Submit data sebelum dialog
   const handleSubmit = (data: React.SetStateAction<{}>) => {
@@ -51,7 +50,9 @@ const JamaahDetail = ({ id, breadcrumbLinks }: JamaahDetailProps) => {
 
   // Toggle the isEditing state
   const handleEditClick = () => {
-    setIsEditing(!isEditing); // Toggle edit mode
+    if (!isEditing) {
+      setIsEditing(true); // Set isEditing hanya jika belum dalam mode edit
+    }
   };
 
   // Function to handle the "Kembali ke Daftar" button click
@@ -61,14 +62,16 @@ const JamaahDetail = ({ id, breadcrumbLinks }: JamaahDetailProps) => {
 
   // Open the confirmation modal
   const handleOpenModal = () => {
-    setOpenModal(true);
+    if (!openModal) {
+      setOpenModal(true); // Hanya buka modal jika belum terbuka
+    }
   };
-
   // Close the confirmation modal
   const handleCloseModal = () => {
-    setOpenModal(false);
+    if (openModal) {
+      setOpenModal(false); // Hanya tutup modal jika terbuka
+    }
   };
-
   const handleSaveChanges = () => {
     setIsSaving(true);
     console.log("Menyimpan data...", formData); // Menampilkan data yang sedang disimpan
@@ -116,9 +119,6 @@ const JamaahDetail = ({ id, breadcrumbLinks }: JamaahDetailProps) => {
               onClick={isEditing ? handleOpenModal : handleEditClick}
             >
               {isEditing ? "Simpan Perubahan" : "Sunting Rincian"}
-            </Button>
-            <Button variant="contained" disabled sx={{ color: "white" }}>
-              Telah Lunas
             </Button>
           </Box>
         </Box>

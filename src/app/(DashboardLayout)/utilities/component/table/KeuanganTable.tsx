@@ -254,7 +254,7 @@ const KeuanganTable = <T,>({ columns, data }: KeuanganTableProps<T>) => {
         <CardHeader
         sx={{ 
           paddingTop: 0
-         }}
+        }}
           action={
             <DebouncedInput
               value={globalFilter ?? ""}

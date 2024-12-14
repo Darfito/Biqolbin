@@ -13,7 +13,7 @@ import {
   ColumnFiltersState,
 } from "@tanstack/react-table";
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, CardHeader, TablePagination } from "@mui/material";
-import { Delete, Edit, Folder, UploadFile } from "@mui/icons-material";
+import { Delete, Folder, UploadFile } from "@mui/icons-material";
 import { RankingInfo, rankItem } from "@tanstack/match-sorter-utils";
 
 // Component Imports
@@ -24,8 +24,9 @@ import TablePaginationComponent from "../pagination/TablePaginationComponent";
 import styles from "../../../../styles/table.module.css";
 
 // Type Imports
-import { CicilanType, JenisDokumen } from "../../type";
+import { JenisDokumen } from "../../type";
 import FileUploaderSingle from "../uploader/FileUploaderSingle";
+import { IconEye } from "@tabler/icons-react";
 
 const fuzzyFilter = (row: { getValue: (arg0: any) => any; }, columnId: any, value: string, addMeta: (arg0: { itemRank: RankingInfo; }) => void) => {
   const itemRank = rankItem(row.getValue(columnId), value);
@@ -33,8 +34,15 @@ const fuzzyFilter = (row: { getValue: (arg0: any) => any; }, columnId: any, valu
   return itemRank.passed;
 };
 
+interface DebouncedInputProps {
+  value: string
+  onChange: (value: string) => void;
+  debounce?: number;
+  placeholder?: string; // Tambahkan properti placeholder
+}
+
 // A debounced input react component
-const DebouncedInput = ({
+const DebouncedInput: React.FC<DebouncedInputProps> = ({
   value: initialValue,
   onChange,
   debounce = 500,
@@ -120,7 +128,7 @@ const JamaahDetailTable = ({ data, perkawinan }: JamaahDetailProps<JenisDokumen>
             <UploadFile />
           </IconButton>
           <IconButton>
-            <Edit />
+            <IconEye />
           </IconButton>
           <IconButton>
             <Delete />

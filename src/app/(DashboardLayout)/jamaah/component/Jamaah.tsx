@@ -10,7 +10,6 @@ import JamaahTable from "../../utilities/component/table/JamaahTable";
 import jamaahData from "../data";
 
 const Jamaah = () => {
-  const breadcrumbLinks = [{ label: "Jamaah", href: "/jamaah" }];
   return (
     <>
       <Box
@@ -45,7 +44,7 @@ const Jamaah = () => {
       </Grid>
       <PageContainer title="Jamaah">
         <Card sx={{ mt: 3 }}>
-          <Box sx={{ margin: "20px" }}>
+          <Box sx={{ margin: "20px", display: "flex", justifyContent: "end" }}>
             <FormKeuangan />
           </Box>
           <JamaahTable columns={columnsJamaah} data={jamaahData} />

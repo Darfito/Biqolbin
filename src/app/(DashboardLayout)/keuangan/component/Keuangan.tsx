@@ -8,10 +8,9 @@ import FormKeuangan from "./FormKeuangan";
 
 
 import { columnsKeuangan } from "./columns/columnsKeuangan";
-import JamaahTable from "../../utilities/component/table/JamaahTable";
+import KeuanganTable from "../../utilities/component/table/KeuanganTable";
 
 const Keuangan = () => {
-  const breadcrumbLinks = [{ label: "Keuangan", href: "/keuangan" }];
   return (
     <>
       <Box
@@ -47,10 +46,10 @@ const Keuangan = () => {
 
       <PageContainer title="Keuangan">
         <Card sx={{ mt: 3}}>
-          <Box sx={{ margin: "20px" }}>
+          <Box sx={{ margin: "20px", display: "flex", justifyContent: "end"}}>
             <FormKeuangan />
           </Box>
-          <JamaahTable columns={columnsKeuangan} data={KeuanganData} />
+          <KeuanganTable columns={columnsKeuangan} data={KeuanganData} />
         </Card>
       </PageContainer>
     </>

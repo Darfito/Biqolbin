@@ -52,6 +52,7 @@ const FormDetail = ({
       pekerjaan: "",
       kursiRoda: false,
       riwayatPenyakit: "",
+      jenisDokumen: [],
       jenisPaket: {
         id: "0",
         nama: "",
@@ -80,7 +81,7 @@ const FormDetail = ({
 
   const handleContactChange = (
     index: number,
-    field: keyof KontakDaruratRelation,
+    field: "nama" | "noTelp" | "hubungan",  // Memperbaiki tipe field
     value: string
   ) => {
     const updatedContacts = [...formValues.kontakDarurat];

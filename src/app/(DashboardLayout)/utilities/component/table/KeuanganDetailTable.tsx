@@ -11,6 +11,7 @@ import {
   flexRender,
   createColumnHelper,
   ColumnFiltersState,
+  Table,
 } from "@tanstack/react-table";
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, CardHeader, TablePagination } from "@mui/material";
 import { Delete, Edit, Folder, UploadFile } from "@mui/icons-material";
@@ -28,14 +29,23 @@ import { CicilanType } from "../../type";
 import FileUploaderSingle from "../uploader/FileUploaderSingle";
 import FormCicilan from "@/app/(DashboardLayout)/keuangan/[id]/component/FormCicilan";
 
+
+
+
+interface DebouncedInputProps {
+  value: string 
+  onChange: (value: string) => void;
+  debounce?: number;
+  placeholder?: string; // Tambahkan properti placeholder
+}
+
 const fuzzyFilter = (row: { getValue: (arg0: any) => any; }, columnId: any, value: string, addMeta: (arg0: { itemRank: RankingInfo; }) => void) => {
   const itemRank = rankItem(row.getValue(columnId), value);
   addMeta({ itemRank });
   return itemRank.passed;
 };
-
 // A debounced input react component
-const DebouncedInput = ({
+const DebouncedInput: React.FC<DebouncedInputProps> = ({
   value: initialValue,
   onChange,
   debounce = 500,
@@ -76,7 +86,7 @@ interface EditCicilanFormProps {
 
 
 
-const KeuanganDetailTable =<T,>({ data, cicilanKe }: KeuanganDetailProps<T>) => {
+const KeuanganDetailTable = ({ data, cicilanKe }: KeuanganDetailProps<CicilanType>) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
@@ -209,7 +219,7 @@ const KeuanganDetailTable =<T,>({ data, cicilanKe }: KeuanganDetailProps<T>) => 
         width: "100%", 
         display: "flex",
         margin: "20px"
-       }}>
+      }}>
       <Button
         sx={{ color: "#fff", minWidth: "150px" }}
         variant="contained"
