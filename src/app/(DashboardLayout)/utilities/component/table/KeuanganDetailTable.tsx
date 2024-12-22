@@ -92,9 +92,16 @@ const KeuanganDetailTable = ({ data, cicilanKe }: KeuanganDetailProps<CicilanTyp
   const [openDialog, setOpenDialog] = useState(false);
   const [openFormCicilan, setOpenFormCicilan] = useState(false);
   const [editData, setEditData] = useState<CicilanType | null>(null); // Data cicilan yang sedang diedit
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null); // State untuk menyimpan file yang diunggah
 
   const handleDialogOpen = () => setOpenDialog(true);
   const handleDialogClose = () => setOpenDialog(false);
+
+  
+  const handleFileUpload = (file: File) => {
+    setUploadedFile(file); // Simpan file yang diunggah ke state
+    console.log("File uploaded:", file);
+  };
 
   console.log("data keuangan detail table:", data);
   console.log("data cicilan ke:", cicilanKe);
@@ -176,7 +183,7 @@ const KeuanganDetailTable = ({ data, cicilanKe }: KeuanganDetailProps<CicilanTyp
           <Dialog open={openDialog} onClose={handleDialogClose}>
             <DialogTitle>Upload File</DialogTitle>
             <DialogContent>
-            <FileUploaderSingle />
+            <FileUploaderSingle onFileUpload={handleFileUpload}/>
             </DialogContent>
             <DialogActions>
               <Button onClick={handleDialogClose} color="primary">

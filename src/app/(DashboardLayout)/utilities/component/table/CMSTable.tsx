@@ -7,7 +7,6 @@ import CardHeader from "@mui/material/CardHeader";
 import TablePagination from "@mui/material/TablePagination";
 import type { TextFieldProps } from "@mui/material/TextField";
 
-
 // Third-party Imports
 import classnames from "classnames";
 import {
@@ -28,7 +27,6 @@ import type {
   Table,
   ColumnFiltersState,
   FilterFn,
-  ColumnDef,
 } from "@tanstack/react-table";
 import type { RankingInfo } from "@tanstack/match-sorter-utils";
 
@@ -42,21 +40,11 @@ import TablePaginationComponent from "../pagination/TablePaginationComponent";
 import CustomTextField from "../textField/TextField";
 import { ChevronRight } from "@mui/icons-material";
 import {
-  Autocomplete,
   Box,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
 } from "@mui/material";
 import { PaketInterface } from "../../type";
-import FileUploaderSingle from "../uploader/FileUploaderSingle";
-import JamaahTable from "./JamaahTable";
-
-
-
+import { useRouter } from "next/navigation";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -182,9 +170,6 @@ interface CMSProps<T> {
   data: T[];
 }
 
-
-
-
 const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
   // States
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -193,8 +178,17 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
 
   const handleDialogOpen = () => setOpenDialog(true);
   const handleDialogClose = () => setOpenDialog(false);
-  
+
+  const router = useRouter();
+
   const columnHelper = createColumnHelper<PaketInterface>();
+
+  const handleNavigateToCMS = (rowData: any) => {
+    const actionPath = `/cms/${rowData.id}`;
+    console.log(`Navigating to: ${actionPath}`);
+    // Jika menggunakan Next.js, gunakan router.push
+    router.push(actionPath);
+  };
 
   const columns = [
     columnHelper.accessor("nama", {
@@ -231,33 +225,16 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
           >
             Publish
           </Button>
-          <Button variant="contained" className="text-white">
+          <Button
+            onClick={() => handleNavigateToCMS(info.row.original)}
+            variant="contained"
+            className="text-white"
+          >
             Detail
-          </Button>
-          <Button variant="contained" className="text-white">
-            Edit
           </Button>
           <Button variant="contained" color="error" className="text-white">
             Delete
           </Button>
-
-          <Dialog open={openDialog} onClose={handleDialogClose}>
-            <DialogTitle>Upload File</DialogTitle>
-            <DialogContent>
-              <FileUploaderSingle />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleDialogClose} color="primary">
-                Cancel
-              </Button>
-              <Button
-                onClick={() => console.log("Upload file")}
-                color="primary"
-              >
-                Upload
-              </Button>
-            </DialogActions>
-          </Dialog>
         </Box>
       ),
       header: "Action",
@@ -299,9 +276,9 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
         }}
       >
         <CardHeader
-        sx={{ 
-          paddingTop: 0
-         }}
+          sx={{
+            paddingTop: 0,
+          }}
           action={
             <DebouncedInput
               value={globalFilter ?? ""}
@@ -335,16 +312,8 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
                             )}
                             {header.column.getIsSorted() &&
                               {
-                                asc: (
-                                  <ChevronRight
-                                    className="-rotate-90"
-                                  />
-                                ),
-                                desc: (
-                                  <ChevronRight
-                                    className="rotate-90"
-                                  />
-                                ),
+                                asc: <ChevronRight className="-rotate-90" />,
+                                desc: <ChevronRight className="rotate-90" />,
                               }[header.column.getIsSorted() as "asc" | "desc"]}
                           </div>
                           {header.column.getCanFilter() && (

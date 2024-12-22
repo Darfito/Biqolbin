@@ -18,7 +18,6 @@ import FormDetail from "./FormDetail";
 import { useRouter } from "next/navigation";
 
 import jamaahData from "../../data";
-import { columnsJamaah } from "../../component/columns/columnsJamaah";
 import { JamaahProps } from "@/app/(DashboardLayout)/utilities/type";
 import JamaahDetailTable from "@/app/(DashboardLayout)/utilities/component/table/JamaahDetailTable";
 
@@ -88,13 +87,14 @@ const JamaahDetail = ({ id, breadcrumbLinks }: JamaahDetailProps) => {
 
   return (
     <>
-      <Breadcrumb links={breadcrumbLinks} />
-      <Typography variant="h2" component="h1" mb={3}>
+      <Typography variant="h2" component="h1" >
         Detail
       </Typography>
+      <Breadcrumb links={breadcrumbLinks} />
       <PageContainer title="Jamaah Detail">
         <Box
           sx={{
+            marginTop: 3,
             width: "100%",
             display: "flex",
             justifyContent: "space-between",
