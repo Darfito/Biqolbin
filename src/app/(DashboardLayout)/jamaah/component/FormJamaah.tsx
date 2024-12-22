@@ -11,22 +11,12 @@ import CustomTextField from "../../components/forms/theme-elements/CustomTextFie
 import { toast } from "react-toastify"; // Import toast
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 import {
-  JenisDokumen,
   JenisKelamin,
-  KamarType,
   KontakDaruratRelation,
   KontakDaruratType,
-  PaketInterface,
-  StatusKepergian,
   TipeKamar,
 } from "../../utilities/type";
-import {
-  Grid,
-  FormControlLabel,
-  Checkbox,
-  Typography,
-  Box,
-} from "@mui/material";
+import { Grid, FormControlLabel, Checkbox } from "@mui/material";
 import { KontakDaruratSection } from "./KontakDaruratHandler";
 import { PaketData } from "../data";
 
@@ -52,7 +42,6 @@ interface FormErrors {
   selesai?: string;
   status?: string;
 }
-
 
 // Valibot Schema
 const formSchema = v.object({
@@ -130,12 +119,12 @@ export default function FormJamaah() {
       jenisPenerbangan: "DIRECT",
       keretaCepat: false,
       harga: 0,
-      tglKeberangkatan: new Date(),
-      tglKepulangan: new Date(),
-      fasilitas: "",
+      tglKeberangkatan: "",
+      tglKepulangan: "",
+      fasilitas: [],
     },
-    berangkat: new Date(),
-    selesai: new Date(),
+    berangkat: "",
+    selesai: "",
     status: { id: 0, status: "Dijadwalkan" },
   });
   const [formErrors, setFormErrors] = React.useState<FormErrors>({});
@@ -144,9 +133,11 @@ export default function FormJamaah() {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setJenisKelamin(event.target.value as JenisKelamin);
-    setFormValues({ ...formValues, jenisKelamin: event.target.value as JenisKelamin });
+    setFormValues({
+      ...formValues,
+      jenisKelamin: event.target.value as JenisKelamin,
+    });
   };
-  
 
   const handleContactChange = (
     index: number,
@@ -159,34 +150,40 @@ export default function FormJamaah() {
   };
 
   const handleAddContact = () => {
-    setFormValues(prev => ({
+    setFormValues((prev) => ({
       ...prev,
       kontakDarurat: [
-        ...prev.kontakDarurat, 
-        { 
-          id: prev.kontakDarurat.length, 
-          nama: "", 
-          noTelp: "", 
-          hubungan: KontakDaruratRelation.Lainnya 
-        }
-      ]
+        ...prev.kontakDarurat,
+        {
+          id: prev.kontakDarurat.length,
+          nama: "",
+          noTelp: "",
+          hubungan: KontakDaruratRelation.Lainnya,
+        },
+      ],
     }));
   };
 
   const handleRemoveContact = (indexToRemove: number) => {
     // Prevent removing the last contact
     if (formValues.kontakDarurat.length > 1) {
-      setFormValues(prev => ({
+      setFormValues((prev) => ({
         ...prev,
-        kontakDarurat: prev.kontakDarurat.filter((_, index) => index !== indexToRemove)
+        kontakDarurat: prev.kontakDarurat.filter(
+          (_, index) => index !== indexToRemove
+        ),
       }));
     }
   };
 
-  const handleJenisPaketChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    const selectedPaket = PaketData.find(paket => paket.id === event.target.value);
+  const handleJenisPaketChange = (
+    event: React.ChangeEvent<{ value: unknown }>
+  ) => {
+    const selectedPaket = PaketData.find(
+      (paket) => paket.id === event.target.value
+    );
     if (selectedPaket) {
-      setFormValues(prevValues => ({
+      setFormValues((prevValues) => ({
         ...prevValues,
         jenisPaket: selectedPaket,
         berangkat: selectedPaket.tglKeberangkatan,
@@ -199,15 +196,15 @@ export default function FormJamaah() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFormErrors({}); // Clear previous errors
-  
+
     console.log("Form submitting with values:", formValues);
-  
+
     // Validate the form values
     const result = v.safeParse(formSchema, formValues);
-  
+
     if (!result.success) {
       const errorMap: FormErrors = {};
-  
+
       result.issues.forEach((issue) => {
         const path = issue.path?.[0]?.key as keyof FormErrors | undefined;
         if (path) {
@@ -223,20 +220,17 @@ export default function FormJamaah() {
           }
         }
       });
-  
+
       setFormErrors(errorMap);
       console.error("Validation errors:", errorMap);
       return;
     }
-  
+
     console.log("Form submitted:", formValues);
     toast.success("Form berhasil disubmit!"); // Show success toast
-  
+
     handleClose();
   };
-  
-  
-  
 
   // Calculate installment (angsuran) if "Cicilan" is selected
 
@@ -281,12 +275,12 @@ export default function FormJamaah() {
         jenisPenerbangan: "DIRECT",
         keretaCepat: false,
         harga: 0,
-        tglKeberangkatan: new Date(),
-        tglKepulangan: new Date(),
-        fasilitas: "",
+        tglKeberangkatan: "",
+        tglKepulangan: "",
+        fasilitas: [],
       },
-      berangkat: new Date(),
-      selesai: new Date(),
+      berangkat: "",
+      selesai: "",
       status: { id: 0, status: "Dijadwalkan" },
     });
   };
@@ -486,64 +480,66 @@ export default function FormJamaah() {
                   sx={{ marginBottom: 2 }}
                 />
 
-                      {/* Jenis Paket */}
-      <CustomTextField
-        select
-        fullWidth
-        label="Jenis Paket"
-        value={formValues.jenisPaket.id}
-        onChange={handleJenisPaketChange}
-        sx={{ marginBottom: 2 }}
-      >
-        {PaketData.map((paket) => (
-          <MenuItem key={paket.id} value={paket.id}>
-            {paket.nama}
-          </MenuItem>
-        ))}
-      </CustomTextField>
+                {/* Jenis Paket */}
+                <CustomTextField
+                  select
+                  fullWidth
+                  label="Jenis Paket"
+                  value={formValues.jenisPaket.id}
+                  onChange={handleJenisPaketChange}
+                  sx={{ marginBottom: 2 }}
+                >
+                  {PaketData.map((paket) => (
+                    <MenuItem key={paket.id} value={paket.id}>
+                      {paket.nama}
+                    </MenuItem>
+                  ))}
+                </CustomTextField>
 
-      {/* Tanggal Berangkat */}
-      <CustomTextField
-        fullWidth
-        label="Tanggal Berangkat"
-        type="date"
-        value={formValues.berangkat.toISOString().split('T')[0]} // Format date untuk input type="date"
-        onChange={(e: { target: { value: string } }) =>
-          setFormValues({
-            ...formValues,
-            berangkat: new Date(e.target.value),
-          })
-        }
-        sx={{ marginBottom: 2 }}
-      />
+                {/* Tanggal Berangkat */}
+                <CustomTextField
+                  fullWidth
+                  label="Tanggal Berangkat"
+                  type="date"
+                  value={formValues.berangkat} // Format date untuk input type="date"
+                  onChange={(e: { target: { value: string } }) =>
+                    setFormValues({
+                      ...formValues,
+                      berangkat: e.target.value,
+                    })
+                  }
+                  InputLabelProps={{
+                    shrink: true, // Memastikan label selalu berada di atas
+                  }}
+                  sx={{ marginBottom: 2 }}
+                />
 
-      {/* Tanggal Selesai */}
-      <CustomTextField
-        fullWidth
-        label="Tanggal Selesai"
-        type="date"
-        value={formValues.selesai.toISOString().split('T')[0]} // Format date untuk input type="date"
-        onChange={(e: { target: { value: string } }) =>
-          setFormValues({
-            ...formValues,
-            selesai: new Date(e.target.value),
-          })
-        }
-        sx={{ marginBottom: 2 }}
-      />
+                {/* Tanggal Selesai */}
+                <CustomTextField
+                  fullWidth
+                  label="Tanggal Selesai"
+                  type="date"
+                  value={formValues.selesai} // Format date untuk input type="date"
+                  onChange={(e: { target: { value: string } }) =>
+                    setFormValues({
+                      ...formValues,
+                      selesai: e.target.value,
+                    })
+                  }
+                  InputLabelProps={{
+                    shrink: true, // Memastikan label selalu berada di atas
+                  }}
+                  sx={{ marginBottom: 2 }}
+                />
               </Grid>
 
-
-
               {/* Kontak Darurat */}
-              <KontakDaruratSection 
+              <KontakDaruratSection
                 kontakDarurat={formValues.kontakDarurat}
                 handleContactChange={handleContactChange}
                 handleAddContact={handleAddContact}
                 handleRemoveContact={handleRemoveContact}
               />
-
-              
             </Grid>
           </DialogContent>
           <DialogActions>

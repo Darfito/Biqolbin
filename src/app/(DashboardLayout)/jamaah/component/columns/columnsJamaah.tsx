@@ -6,12 +6,12 @@ const columnHelper = createColumnHelper<JamaahProps>();
 
 export const columnsJamaah: ColumnDef<JamaahProps, any>[] = [
   // Kolom Nomor (No)
-  columnHelper.display({
-    id: "no",
-    header: "NO",
-    cell: (info) => info.row.index + 1, // Index otomatis sesuai urutan data
-    enableSorting: false,
-  }),
+  // columnHelper.display({
+  //   id: "no",
+  //   header: "NO",
+  //   cell: (info) => info.row.index + 1, // Index otomatis sesuai urutan data
+  //   enableSorting: false,
+  // }),
 
   // Kolom Nama
   columnHelper.accessor("nama", {

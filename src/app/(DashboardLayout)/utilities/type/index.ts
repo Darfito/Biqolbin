@@ -46,23 +46,38 @@ export type CicilanType = {
     id: string;
     nama: string;
     jenis: JenisPaket;
-    maskapai : string;
-    jenisPenerbangan:JenisPenerbangan;
-    keretaCepat: boolean
-    harga: number
-    tglKeberangkatan: Date
-    tglKepulangan: Date
-    fasilitas: string
+    maskapai: string;
+    jenisPenerbangan: JenisPenerbangan;
+    keretaCepat: boolean;
+    harga: number;
+    tglKeberangkatan: string;
+    tglKepulangan: string;
+    fasilitas: string[];
+    action?: string;
+    publish: boolean;
+    gambar?: {
+      url: string; // URL gambar (untuk akses langsung)
+      bucket: string; // Nama bucket di Supabase
+      path: string; // Path file dalam bucket
+    }; // Menyimpan URL gambar dari Supabase Bucket
   }
 
-export type JenisPaket = 'REGULAR' | 'VIP'
 
-export type JenisPenerbangan = 'DIRECT' | 'TRANSIT'
+  
+
+export enum JenisPaket{
+  REGULAR = "REGULAR",
+  VIP = "VIP",
+}
+
+export enum JenisPenerbangan {
+  DIRECT = "DIRECT",
+  TRANSIT = "TRANSIT",
+}
 
 
 
 // ! JAMAAH TYPE
-
 export interface JamaahProps {
   id: number;
   nama: string;

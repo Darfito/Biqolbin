@@ -1,4 +1,4 @@
-import { CardStatsHorizontalWithBorderProps, JamaahProps, JenisKelamin, KontakDaruratRelation, PaketInterface, TipeKamar } from "../../utilities/type";
+import { CardStatsHorizontalWithBorderProps, JamaahProps, JenisKelamin, JenisPaket, JenisPenerbangan, KontakDaruratRelation, PaketInterface, TipeKamar } from "../../utilities/type";
 import { IconUser, IconCreditCard,IconReceipt } from "@tabler/icons-react";
 
 
@@ -27,40 +27,44 @@ export const PaketData: PaketInterface[] = [
   {
     id: "PKT001",
     nama: "Paket Regular 1",
-    jenis: "REGULAR",
+    jenis: JenisPaket.REGULAR,
     maskapai: "Garuda Indonesia",
-    jenisPenerbangan: "DIRECT",
+    jenisPenerbangan: JenisPenerbangan.DIRECT,
     keretaCepat: false,
     harga: 1000000,
-    tglKeberangkatan: new Date("2024-12-01"),
-    tglKepulangan: new Date("2024-12-10"),
-    fasilitas: "Hotel bintang 3, Transportasi lokal",
+    tglKeberangkatan: "2024-12-01",
+    tglKepulangan: "2024-12-10",
+    fasilitas: ["Hotel bintang 3", "Transportasi lokal"],
+    publish: false
   },
   {
     id: "PKT002",
     nama: "Paket Regular 2",
-    jenis: "REGULAR",
+    jenis: JenisPaket.REGULAR,
     maskapai: "Lion Air",
-    jenisPenerbangan: "TRANSIT",
+    jenisPenerbangan: JenisPenerbangan.TRANSIT,
     keretaCepat: false,
     harga: 800000,
-    tglKeberangkatan: new Date("2024-12-05"),
-    tglKepulangan: new Date("2024-12-15"),
-    fasilitas: "Hotel bintang 2, Transportasi lokal",
+    tglKeberangkatan: "2024-12-05",
+    tglKepulangan: "2024-12-15",
+    fasilitas: ["Hotel bintang 3", "Transportasi lokal"],
+    publish: false
   },
   {
     id: "PKT003",
     nama: "Paket VIP 1",
-    jenis: "VIP",
+    jenis: JenisPaket.VIP,
     maskapai: "Singapore Airlines",
-    jenisPenerbangan: "DIRECT",
+    jenisPenerbangan: JenisPenerbangan.DIRECT,
     keretaCepat: true,
     harga: 2000000,
-    tglKeberangkatan: new Date("2024-12-10"),
-    tglKepulangan: new Date("2024-12-20"),
-    fasilitas: "Hotel bintang 5, Transportasi premium",
+    tglKeberangkatan: "2024-12-10",
+    tglKepulangan: "2024-12-20",
+    fasilitas: ["Hotel bintang 3", "Transportasi lokal"],
+    publish: false
   },
 ];
+
 
 const jamaahData: JamaahProps[] = [
   {

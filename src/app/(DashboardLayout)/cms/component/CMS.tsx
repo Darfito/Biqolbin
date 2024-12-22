@@ -1,12 +1,13 @@
 "use client";
 
 import { Box, Card, Typography } from "@mui/material";
-import DashboardCard from "../../components/shared/DashboardCard";
 import PageContainer from "../../components/container/PageContainer";
-import KeuanganTable from "../../utilities/component/table/KeuanganTable";
-import { columnsKeuangan } from "../../keuangan/component/columns/columnsKeuangan";
-import { KeuanganData } from "../../keuangan/data";
-import FormKeuangan from "../../keuangan/component/FormKeuangan";
+
+
+import { PaketData } from "../../jamaah/data";
+import FormKeuangan from "./FormCMS";
+import FormCMS from "./FormCMS";
+import CMSTable from "../../utilities/component/table/CMSTable";
 
 const CMS = () => {
   return (
@@ -22,10 +23,10 @@ const CMS = () => {
     </Box>
     <PageContainer title="CMS">
       <Card sx={{ mt: 3}}>
-        <Box sx={{ margin: "20px" }}>
-          <FormKeuangan />
+        <Box sx={{ margin: "20px", display: "flex", justifyContent: "end" }}>
+          <FormCMS />
         </Box>
-        <KeuanganTable columns={columnsKeuangan} data={KeuanganData} />
+        <CMSTable data={PaketData} />
       </Card>
     </PageContainer>
   </>
