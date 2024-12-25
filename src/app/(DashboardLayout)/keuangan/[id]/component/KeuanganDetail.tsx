@@ -120,9 +120,8 @@ const handleSubmit = (data: React.SetStateAction<{}>) => {
         </Box>
 
         <Box sx={{ marginTop: "2rem" , backgroundColor:"#fff" }}>
-        <Card sx={{ backgroundColor:"#fff" }}>
+
         <KeuanganDetailTable data={currentData} cicilanKe={nextCicilanKe}/>
-        </Card>
 
         </Box>
       </PageContainer>

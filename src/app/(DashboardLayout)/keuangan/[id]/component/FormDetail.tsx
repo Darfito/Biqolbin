@@ -224,13 +224,13 @@ const FormDetail = ({ isEditing, onSaveChanges, keuanganData }: FormDetailProps)
           </Grid>
           </Grid>
 
-          {isEditing && (
+          {/* {isEditing && (
             <Box sx={{ marginTop: 3 }}>
               <Button variant="contained" color="primary" sx={{ color: "white" }} onClick={handleSubmit}>
                 Simpan Perubahan
               </Button>
             </Box>
-          )}
+          )} */}
         </Box>
       </form>
     </DashboardCard>

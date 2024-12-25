@@ -112,17 +112,17 @@ const JamaahDetailTable = ({ data, perkawinan }: JamaahDetailProps<JenisDokumen>
       header: "Jenis Dokumen",
       enableColumnFilter: false,
     }),
-    columnHelper.accessor("lampiran", {
-      cell: (info) => (
-        <Box sx={{ display: "flex", justifyContent: "start" }}>
-          <IconButton>
-            <Folder />
-          </IconButton>
-        </Box> 
-      ),
-      header: "Lampiran",
-      enableColumnFilter: false,
-    }),
+    // columnHelper.accessor("lampiran", {
+    //   cell: (info) => (
+    //     <Box sx={{ display: "flex", justifyContent: "start" }}>
+    //       <IconButton>
+    //         <Folder />
+    //       </IconButton>
+    //     </Box> 
+    //   ),
+    //   header: "Lampiran",
+    //   enableColumnFilter: false,
+    // }),
     columnHelper.accessor("action", {
       cell: (info) => (
         <Box sx={{ display: "flex", justifyContent: "start" }}>
@@ -130,7 +130,7 @@ const JamaahDetailTable = ({ data, perkawinan }: JamaahDetailProps<JenisDokumen>
             <UploadFile />
           </IconButton>
           <IconButton>
-            <IconEye />
+            <Folder />
           </IconButton>
           <IconButton>
             <Delete />
@@ -184,7 +184,7 @@ const JamaahDetailTable = ({ data, perkawinan }: JamaahDetailProps<JenisDokumen>
         margin: "20px"
       }}>
       </Box>
-      <CardHeader
+      {/* <CardHeader
         sx={{ paddingTop: 0 }}
         action={
           <DebouncedInput
@@ -193,7 +193,7 @@ const JamaahDetailTable = ({ data, perkawinan }: JamaahDetailProps<JenisDokumen>
             placeholder="Search all columns..."
           />
         }
-      />
+      /> */}
       <div className="overflow-x-auto">
         <table className={styles.table}>
           <thead>

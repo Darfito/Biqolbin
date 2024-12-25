@@ -16,7 +16,15 @@ import {
   KontakDaruratType,
   TipeKamar,
 } from "../../utilities/type";
-import { Grid, FormControlLabel, Checkbox } from "@mui/material";
+import {
+  Grid,
+  FormControlLabel,
+  Checkbox,
+  Radio,
+  RadioGroup,
+  FormControl,
+  FormLabel,
+} from "@mui/material";
 import { KontakDaruratSection } from "./KontakDaruratHandler";
 import { PaketData } from "../data";
 
@@ -294,7 +302,7 @@ export default function FormJamaah() {
       >
         Tambah
       </Button>
-      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
         <form onSubmit={handleSubmit}>
           <DialogTitle>Tambah Item Jamaah</DialogTitle>
           <DialogContent
@@ -341,17 +349,31 @@ export default function FormJamaah() {
                   }
                   sx={{ marginBottom: 2 }}
                 />
-                <CustomTextField
-                  select
-                  fullWidth
-                  label="Jenis Kelamin"
-                  value={formValues.jenisKelamin}
-                  onChange={handleJenisKelaminChange}
-                  sx={{ marginBottom: 2 }}
-                >
-                  <MenuItem value={JenisKelamin.LakiLaki}>Laki-Laki</MenuItem>
-                  <MenuItem value={JenisKelamin.Perempuan}>Perempuan</MenuItem>
-                </CustomTextField>
+                <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
+                  <FormLabel component="legend">Jenis Kelamin</FormLabel>
+                  <RadioGroup
+                    value={formValues.jenisKelamin}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setFormValues({
+                        ...formValues,
+                        jenisKelamin: e.target.value as JenisKelamin, // Cast ke JenisKelamin
+                      })
+                    }
+                    row
+                  >
+                    <FormControlLabel
+                      value={JenisKelamin.LakiLaki}
+                      control={<Radio />}
+                      label="Laki-Laki"
+                    />
+                    <FormControlLabel
+                      value={JenisKelamin.Perempuan}
+                      control={<Radio />}
+                      label="Perempuan"
+                    />
+                  </RadioGroup>
+                </FormControl>
+
                 <CustomTextField
                   fullWidth
                   label="Tempat Lahir"
@@ -373,25 +395,10 @@ export default function FormJamaah() {
                   }
                   sx={{ marginBottom: 2 }}
                 />
+
                 <CustomTextField
-                  select
-                  fullWidth
-                  label="Status Perkawinan"
-                  value={
-                    formValues.perkawinan ? "Sudah Menikah" : "Belum Menikah"
-                  }
-                  onChange={(e: { target: { value: string } }) =>
-                    setFormValues({
-                      ...formValues,
-                      perkawinan: e.target.value === "Sudah Menikah",
-                    })
-                  }
-                  sx={{ marginBottom: 2 }}
-                >
-                  <MenuItem value="Sudah Menikah">Sudah Menikah</MenuItem>
-                  <MenuItem value="Belum Menikah">Belum Menikah</MenuItem>
-                </CustomTextField>
-                <CustomTextField
+                  multiline
+                  rows={4}
                   fullWidth
                   label="Alamat"
                   value={formValues.alamat}
@@ -400,26 +407,60 @@ export default function FormJamaah() {
                   }
                   sx={{ marginBottom: 2 }}
                 />
-                <CustomTextField
-                  select
-                  fullWidth
-                  label="Kewarganegaraan"
-                  value={formValues.kewarganegaraan ? "WNI" : "WNA"}
-                  onChange={(e: { target: { value: string } }) =>
-                    setFormValues({
-                      ...formValues,
-                      kewarganegaraan: e.target.value === "WNI",
-                    })
-                  }
-                  sx={{ marginBottom: 2 }}
-                >
-                  <MenuItem value="WNI">WNI</MenuItem>
-                  <MenuItem value="WNA">WNA</MenuItem>
-                </CustomTextField>
+                                <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
+                  <FormLabel component="legend">Status Menikah</FormLabel>
+                  <RadioGroup
+                    value={
+                      formValues.perkawinan ? "Sudah Menikah" : "Belum Menikah"
+                    }
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setFormValues({
+                        ...formValues,
+                        perkawinan: e.target.value === "Sudah Menikah",
+                      })
+                    }
+                    row
+                  >
+                    <FormControlLabel
+                      value="Belum Menikah"
+                      control={<Radio />}
+                      label="Belum Menikah"
+                    />
+                    <FormControlLabel
+                      value="Sudah Menikah"
+                      control={<Radio />}
+                      label="Sudah Menikah"
+                    />
+                  </RadioGroup>
+                </FormControl>
               </Grid>
 
               {/* Kolom Kanan */}
               <Grid item xs={12} sm={6}>
+                <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
+                  <FormLabel component="legend">Status Bernegara</FormLabel>
+                  <RadioGroup
+                    value={formValues.kewarganegaraan ? "WNI" : "WNA"}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setFormValues({
+                        ...formValues,
+                        kewarganegaraan: e.target.value === "WNI",
+                      })
+                    }
+                    row
+                  >
+                    <FormControlLabel
+                      value="WNI"
+                      control={<Radio />}
+                      label="WNI"
+                    />
+                    <FormControlLabel
+                      value="WNA"
+                      control={<Radio />}
+                      label="WNA"
+                    />
+                  </RadioGroup>
+                </FormControl>
                 <CustomTextField
                   select
                   fullWidth

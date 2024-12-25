@@ -5,6 +5,7 @@ import {
   Button,
   Card,
   Divider,
+  Grid,
   List,
   ListItem,
   ListItemText,
@@ -93,65 +94,124 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
                 </Box>
               )}
               <List>
-                <ListItem>
-                  <ListItemText
-                    primary="Jenis Paket"
-                    secondary={paketDetail.jenis}
-                  />
-                </ListItem>
-                <ListItem>
-                  <ListItemText
-                    primary="Maskapai"
-                    secondary={paketDetail.maskapai}
-                  />
-                </ListItem>
-                <ListItem>
-                  <ListItemText
-                    primary="Jenis Penerbangan"
-                    secondary={paketDetail.jenisPenerbangan}
-                  />
-                </ListItem>
-                <ListItem>
-                  <ListItemText
-                    primary="Kereta Cepat"
-                    secondary={paketDetail.keretaCepat ? "Ya" : "Tidak"}
-                  />
-                </ListItem>
-                <ListItem>
-                  <ListItemText
-                    primary="Harga"
-                    secondary={`Rp ${paketDetail.harga.toLocaleString(
-                      "id-ID"
-                    )}`}
-                  />
-                </ListItem>
-                <ListItem>
-                  <ListItemText
-                    primary="Tanggal Keberangkatan"
-                    secondary={paketDetail.tglKeberangkatan}
-                  />
-                </ListItem>
-                <ListItem>
-                  <ListItemText
-                    primary="Tanggal Kepulangan"
-                    secondary={paketDetail.tglKepulangan}
-                  />
-                </ListItem>
-                <ListItem>
-                  <ListItemText
-                    primary="Fasilitas"
-                    secondary={
-                      <ul style={{ margin: 0, paddingLeft: "20px" }}>
-                        {paketDetail.fasilitas.map((fasilitas : string, index: number) => (
-                          <li key={index} style={{ marginBottom: "4px" }}>
-                           {index + 1}. {fasilitas}
-                          </li>
-                        ))}
-                      </ul>
-                    }
-                  />
-                </ListItem>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <ListItem>
+                      <ListItemText
+                        primary="Jenis Paket"
+                        secondary={paketDetail.jenis}
+                        sx={{
+                          "& .MuiListItemText-primary": { fontSize: "1.1rem" },
+                          "& .MuiListItemText-secondary": { fontSize: "1rem" },
+                        }}
+                      />
+                    </ListItem>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <ListItem>
+                      <ListItemText
+                        primary="Maskapai"
+                        secondary={paketDetail.maskapai}
+                        sx={{
+                          "& .MuiListItemText-primary": { fontSize: "1.1rem" },
+                          "& .MuiListItemText-secondary": { fontSize: "1rem" },
+                        }}
+                      />
+                    </ListItem>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <ListItem>
+                      <ListItemText
+                        primary="Jenis Penerbangan"
+                        secondary={paketDetail.jenisPenerbangan}
+                        sx={{
+                          "& .MuiListItemText-primary": { fontSize: "1.1rem" },
+                          "& .MuiListItemText-secondary": { fontSize: "1rem" },
+                        }}
+                      />
+                    </ListItem>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <ListItem>
+                      <ListItemText
+                        primary="Kereta Cepat"
+                        secondary={paketDetail.keretaCepat ? "Ya" : "Tidak"}
+                        sx={{
+                          "& .MuiListItemText-primary": { fontSize: "1.1rem" },
+                          "& .MuiListItemText-secondary": { fontSize: "1rem" },
+                        }}
+                      />
+                    </ListItem>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <ListItem>
+                      <ListItemText
+                        primary="Harga"
+                        secondary={`Rp ${paketDetail.harga.toLocaleString(
+                          "id-ID"
+                        )}`}
+                        sx={{
+                          "& .MuiListItemText-primary": { fontSize: "1.1rem" },
+                          "& .MuiListItemText-secondary": { fontSize: "1rem" },
+                        }}
+                      />
+                    </ListItem>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <ListItem>
+                      <ListItemText
+                        primary="Tanggal Keberangkatan"
+                        secondary={paketDetail.tglKeberangkatan}
+                        sx={{
+                          "& .MuiListItemText-primary": { fontSize: "1.1rem" },
+                          "& .MuiListItemText-secondary": { fontSize: "1rem" },
+                        }}
+                      />
+                    </ListItem>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <ListItem>
+                      <ListItemText
+                        primary="Tanggal Kepulangan"
+                        secondary={paketDetail.tglKepulangan}
+                        sx={{
+                          "& .MuiListItemText-primary": { fontSize: "1.1rem" },
+                          "& .MuiListItemText-secondary": { fontSize: "1rem" },
+                        }}
+                      />
+                    </ListItem>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <ListItem>
+                      <ListItemText
+                        primary="Fasilitas"
+                        secondary={
+                          <ul
+                            style={{
+                              margin: 0,
+                              paddingLeft: "20px",
+                              fontSize: "1rem",
+                            }}
+                          >
+                            {paketDetail.fasilitas.map(
+                              (fasilitas: string, index: number) => (
+                                <li key={index} style={{ marginBottom: "4px" }}>
+                                  {index + 1}. {fasilitas}
+                                </li>
+                              )
+                            )}
+                          </ul>
+                        }
+                        sx={{
+                          "& .MuiListItemText-primary": { fontSize: "1.1rem" },
+                          "& .MuiListItemText-secondary": { fontSize: "1rem" },
+                        }}
+                      />
+                    </ListItem>
+                  </Grid>
+                </Grid>
               </List>
+              ; ;
             </>
           ) : (
             <Typography variant="h6" color="error">

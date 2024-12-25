@@ -4,7 +4,6 @@ import { Box, Card, Grid, Typography } from "@mui/material";
 import PageContainer from "../../components/container/PageContainer";
 import { scoreCardKeuangan } from "../../keuangan/data";
 import ScoreCard from "../../utilities/component/card/ScoreCard";
-import FormKeuangan from "../../keuangan/component/FormKeuangan";
 import { columnsJamaah } from "./columns/columnsJamaah";
 import JamaahTable from "../../utilities/component/table/JamaahTable";
 import jamaahData from "../data";
@@ -44,10 +43,10 @@ const Jamaah = () => {
         ))}
       </Grid>
       <PageContainer title="Jamaah">
-        <Card sx={{ mt: 3 }}>
-          <Box sx={{ margin: "20px", display: "flex", justifyContent: "end" }}>
-            <FormJamaah />
-          </Box>
+      <Box sx={{ margin: "20px", display: "flex", justifyContent: "end" }}>
+          <FormJamaah />
+      </Box>
+        <Card sx={{ mt: 2 }}>
           <JamaahTable columns={columnsJamaah} data={jamaahData} />
         </Card>
       </PageContainer>

@@ -19,7 +19,7 @@
 .table thead {
   text-transform: uppercase;
   color: var(--mui-palette-text-primary);
-  border-block-start: 1px solid var(--border-color);
+  /* border-block-start: 1px solid rgb(47 43 61 / 0.12); */
 }
 
 /* Kelas lokal untuk th */
@@ -41,7 +41,7 @@
 .tableTh:first-of-type {
   padding-block: 0.5rem;
   /* padding-inline: 1.5rem 1rem; */
-  padding-inline: 0 1rem 0 0;
+  /* padding-inline: 0 1rem 0 0; */
 }
 
 .tableTh:last-of-type {
@@ -73,9 +73,14 @@
 }
 
 .tableTbody tr:not(:last-child) {
-  border-block-end: 1px solid var(--border-color);
+  border-block-end: 1px solid rgb(47 43 61 / 0.12);
 }
 
 .tableTbody tr {
-  border-block-start: 1px solid var(--border-color);
+  border-block-start: 1px solid rgb(47 43 61 / 0.12);
 }
+
+.tableTbody tr:first-child {
+  border-block-start: none;
+}
+

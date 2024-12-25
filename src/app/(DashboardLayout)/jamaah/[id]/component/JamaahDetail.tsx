@@ -88,7 +88,7 @@ const JamaahDetail = ({ id, breadcrumbLinks }: JamaahDetailProps) => {
   return (
     <>
       <Typography variant="h2" component="h1" >
-        Detail
+       Jamaah Detail
       </Typography>
       <Breadcrumb links={breadcrumbLinks} />
       <PageContainer title="Jamaah Detail">

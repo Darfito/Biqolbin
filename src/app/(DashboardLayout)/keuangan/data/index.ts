@@ -1,4 +1,4 @@
-import { CardStatsHorizontalWithBorderProps, KeuanganProps, PaketInterface } from "../../utilities/type";
+import { CardStatsHorizontalWithBorderProps, JenisPaket, JenisPenerbangan, KeuanganProps, PaketInterface } from "../../utilities/type";
 import { IconUser, IconProgress,IconReceipt } from "@tabler/icons-react";
 
 
@@ -29,40 +29,50 @@ const PaketData: PaketInterface[] = [
   {
     id: "PKT001",
     nama: "Paket Regular 1",
-    jenis: "REGULAR",
+    jenis: JenisPaket.REGULAR, // Enum digunakan di sini
     maskapai: "Garuda Indonesia",
-    jenisPenerbangan: "DIRECT",
+    jenisPenerbangan: JenisPenerbangan.DIRECT, // Enum digunakan di sini
     keretaCepat: false,
     harga: 1000000,
-    tglKeberangkatan: new Date("2024-12-01"),
-    tglKepulangan: new Date("2024-12-10"),
-    fasilitas: "Hotel bintang 3, Transportasi lokal",
+    tglKeberangkatan: "2024-12-01", // Diubah menjadi string
+    tglKepulangan: "2024-12-10", // Diubah menjadi string
+    fasilitas: ["Hotel bintang 3", "Transportasi lokal"], // Diubah menjadi array string
+    publish: true, // Properti baru sesuai tipe
   },
   {
     id: "PKT002",
     nama: "Paket Regular 2",
-    jenis: "REGULAR",
+    jenis: JenisPaket.REGULAR,
     maskapai: "Lion Air",
-    jenisPenerbangan: "TRANSIT",
+    jenisPenerbangan: JenisPenerbangan.TRANSIT,
     keretaCepat: false,
     harga: 800000,
-    tglKeberangkatan: new Date("2024-12-05"),
-    tglKepulangan: new Date("2024-12-15"),
-    fasilitas: "Hotel bintang 2, Transportasi lokal",
+    tglKeberangkatan: "2024-12-05",
+    tglKepulangan: "2024-12-15",
+    fasilitas: ["Hotel bintang 2", "Transportasi lokal"],
+    publish: false, // Properti baru sesuai tipe
   },
   {
     id: "PKT003",
     nama: "Paket VIP 1",
-    jenis: "VIP",
+    jenis: JenisPaket.VIP,
     maskapai: "Singapore Airlines",
-    jenisPenerbangan: "DIRECT",
+    jenisPenerbangan: JenisPenerbangan.DIRECT,
     keretaCepat: true,
     harga: 2000000,
-    tglKeberangkatan: new Date("2024-12-10"),
-    tglKepulangan: new Date("2024-12-20"),
-    fasilitas: "Hotel bintang 5, Transportasi premium",
+    tglKeberangkatan: "2024-12-10",
+    tglKepulangan: "2024-12-20",
+    fasilitas: ["Hotel bintang 5", "Transportasi premium"],
+    publish: true,
+    gambar: {
+      id: 1,
+      url: "https://example.com/images/paket-vip-1.jpg",
+      bucket: "travel-packages",
+      path: "images/paket-vip-1.jpg",
+    }, // Menambahkan properti gambar sesuai tipe
   },
 ];
+
 
 export const KeuanganData: KeuanganProps[] = [
   {

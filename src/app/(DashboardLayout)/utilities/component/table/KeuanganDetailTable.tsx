@@ -13,7 +13,18 @@ import {
   ColumnFiltersState,
   Table,
 } from "@tanstack/react-table";
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, CardHeader, TablePagination } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  CardHeader,
+  TablePagination,
+  Card,
+} from "@mui/material";
 import { Delete, Edit, Folder, UploadFile } from "@mui/icons-material";
 import { RankingInfo, rankItem } from "@tanstack/match-sorter-utils";
 
@@ -29,17 +40,19 @@ import { CicilanType } from "../../type";
 import FileUploaderSingle from "../uploader/FileUploaderSingle";
 import FormCicilan from "@/app/(DashboardLayout)/keuangan/[id]/component/FormCicilan";
 
-
-
-
 interface DebouncedInputProps {
-  value: string 
+  value: string;
   onChange: (value: string) => void;
   debounce?: number;
   placeholder?: string; // Tambahkan properti placeholder
 }
 
-const fuzzyFilter = (row: { getValue: (arg0: any) => any; }, columnId: any, value: string, addMeta: (arg0: { itemRank: RankingInfo; }) => void) => {
+const fuzzyFilter = (
+  row: { getValue: (arg0: any) => any },
+  columnId: any,
+  value: string,
+  addMeta: (arg0: { itemRank: RankingInfo }) => void
+) => {
   const itemRank = rankItem(row.getValue(columnId), value);
   addMeta({ itemRank });
   return itemRank.passed;
@@ -77,16 +90,17 @@ const DebouncedInput: React.FC<DebouncedInputProps> = ({
 
 interface KeuanganDetailProps<T> {
   data: T[];
-  cicilanKe: number
+  cicilanKe: number;
 }
 
 interface EditCicilanFormProps {
   onClose: () => void;
 }
 
-
-
-const KeuanganDetailTable = ({ data, cicilanKe }: KeuanganDetailProps<CicilanType>) => {
+const KeuanganDetailTable = ({
+  data,
+  cicilanKe,
+}: KeuanganDetailProps<CicilanType>) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
@@ -97,7 +111,6 @@ const KeuanganDetailTable = ({ data, cicilanKe }: KeuanganDetailProps<CicilanTyp
   const handleDialogOpen = () => setOpenDialog(true);
   const handleDialogClose = () => setOpenDialog(false);
 
-  
   const handleFileUpload = (file: File) => {
     setUploadedFile(file); // Simpan file yang diunggah ke state
     console.log("File uploaded:", file);
@@ -183,13 +196,16 @@ const KeuanganDetailTable = ({ data, cicilanKe }: KeuanganDetailProps<CicilanTyp
           <Dialog open={openDialog} onClose={handleDialogClose}>
             <DialogTitle>Upload File</DialogTitle>
             <DialogContent>
-            <FileUploaderSingle onFileUpload={handleFileUpload}/>
+              <FileUploaderSingle onFileUpload={handleFileUpload} />
             </DialogContent>
             <DialogActions>
               <Button onClick={handleDialogClose} color="primary">
                 Cancel
               </Button>
-              <Button onClick={() => console.log("Upload file")} color="primary">
+              <Button
+                onClick={() => console.log("Upload file")}
+                color="primary"
+              >
                 Upload
               </Button>
             </DialogActions>
@@ -221,21 +237,26 @@ const KeuanganDetailTable = ({ data, cicilanKe }: KeuanganDetailProps<CicilanTyp
   });
 
   return (
-    <Box sx={{ paddingX: "1rem" }}>
-      <Box sx={{ 
-        width: "100%", 
-        display: "flex",
-        margin: "20px"
-      }}>
-      <Button
-        sx={{ color: "#fff", minWidth: "150px" }}
-        variant="contained"
-        onClick={handleAddCicilan}
-      >
-        Tambah
-      </Button>
+    <>
+      <Box sx={{ margin: "20px", display: "flex", justifyContent: "end" }}>
+        <Button
+          sx={{ color: "#fff", minWidth: "150px" }}
+          variant="contained"
+          onClick={handleAddCicilan}
+        >
+          Tambah
+        </Button>
       </Box>
-      <CardHeader
+      <Card sx={{ backgroundColor: "#fff", paddingX: "1rem" }}>
+        
+          <Box
+            sx={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "end",
+            }}
+          ></Box>
+          {/* <CardHeader
         sx={{ paddingTop: 0 }}
         action={
           <DebouncedInput
@@ -244,55 +265,62 @@ const KeuanganDetailTable = ({ data, cicilanKe }: KeuanganDetailProps<CicilanTyp
             placeholder="Search all columns..."
           />
         }
-      />
-      <div className="overflow-x-auto">
-        <table className={styles.table}>
-          <thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th key={header.id} className={styles.tableTh}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
-                  </th>
+      /> */}
+          <div className="overflow-x-auto">
+            <table className={styles.table}>
+              <thead>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <th key={header.id} className={styles.tableTh}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </th>
+                    ))}
+                  </tr>
                 ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.map((row) => (
-              <tr key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.map((row) => (
+                  <tr key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </td>
+                    ))}
+                  </tr>
                 ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <TablePagination
-        component={() => <TablePaginationComponent table={table} />}
-        count={table.getFilteredRowModel().rows.length}
-        rowsPerPage={table.getState().pagination.pageSize}
-        page={table.getState().pagination.pageIndex}
-        onPageChange={(_, page) => {
-          table.setPageIndex(page);
-        }}
-      />
-
-      {/* Form Cicilan Dialog */}
-      {openFormCicilan && (
-        <FormCicilan
-          open={openFormCicilan}
-          handleClose={handleCloseFormCicilan}
-          initialData={editData}
-          currentCicilanKe={cicilanKe}
+              </tbody>
+            </table>
+          </div>
+          <TablePagination
+            component={() => <TablePaginationComponent table={table} />}
+            count={table.getFilteredRowModel().rows.length}
+            rowsPerPage={table.getState().pagination.pageSize}
+            page={table.getState().pagination.pageIndex}
+            onPageChange={(_, page) => {
+              table.setPageIndex(page);
+            }}
           />
-      )}
-    </Box>
+
+          {/* Form Cicilan Dialog */}
+          {openFormCicilan && (
+            <FormCicilan
+              open={openFormCicilan}
+              handleClose={handleCloseFormCicilan}
+              initialData={editData}
+              currentCicilanKe={cicilanKe}
+            />
+          )}
+      </Card>
+    </>
   );
 };
 

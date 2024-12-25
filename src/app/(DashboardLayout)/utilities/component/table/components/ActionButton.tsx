@@ -2,7 +2,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { Box, IconButton } from "@mui/material";
-import { IconInfoCircle } from "@tabler/icons-react";
+import { IconEditCircle, IconInfoCircle } from "@tabler/icons-react";
 
 interface ActionButtonProps<T> {
   rowData: T;
@@ -22,7 +22,7 @@ const ActionButton = <T,>({ rowData, actionPath }: ActionButtonProps<T>) => {
         color="primary"
         onClick={handleAction} // Action ketika tombol diklik
       >
-        <IconInfoCircle />
+        <IconEditCircle />
       </IconButton>
     </Box>
   );

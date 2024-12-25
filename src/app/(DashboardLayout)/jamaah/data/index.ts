@@ -37,6 +37,7 @@ export const PaketData: PaketInterface[] = [
     fasilitas: ["Hotel bintang 3", "Transportasi lokal"],
     publish: false,
     gambar: {
+      id: 1,
       url: "https://picsum.photos/seed/picsum/200/300",
       bucket: "images",
       path: "paket/paket-1.jpg",

@@ -216,7 +216,7 @@ const JamaahTable = <T,>({ columns, data }: JamaahTableProps<T>) => {
           width: "100%",
         }}
       >
-        <CardHeader
+        {/* <CardHeader
         sx={{ 
           paddingTop: 0
          }}
@@ -227,7 +227,7 @@ const JamaahTable = <T,>({ columns, data }: JamaahTableProps<T>) => {
               placeholder="Search all columns..."
             />
           }
-        />
+        /> */}
       </Box>
       <div className="overflow-x-auto">
         <table className={styles.table}>

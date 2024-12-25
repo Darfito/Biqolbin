@@ -212,7 +212,7 @@ export default function FormKeuangan() {
       >
         Tambah
       </Button>
-      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
         <form onSubmit={handleSubmit}>
           <DialogTitle>Tambah Item Pembayaran</DialogTitle>
           <DialogContent

@@ -1,4 +1,5 @@
 // MUI Imports
+import { Box } from "@mui/material";
 import Pagination from "@mui/material/Pagination";
 import Typography from "@mui/material/Typography";
 
@@ -13,8 +14,10 @@ const TablePaginationComponent = <T,>({
   table,
 }: TablePaginationComponentProps<T>) => {
   return (
-    <div className="flex justify-between items-center flex-wrap pli-6 border-bs bs-auto plb-[12.5px] gap-2">
-      <Typography color="text.disabled" sx={{ color: "white" }}>
+    <Box sx={{ 
+      marginY: "2rem",
+     }} className="flex justify-between items-center flex-wrap pli-6 border-bs bs-auto plb-[12.5px] gap-2">
+      <Typography color="text.disabled">
         {`Showing ${
           table.getFilteredRowModel().rows.length === 0
             ? 0
@@ -40,12 +43,17 @@ const TablePaginationComponent = <T,>({
           table.setPageIndex(page - 1);
         }}
         sx={{
-          color: "white",
+          '& .MuiPaginationItem-root': {
+            color: 'black', // Default color
+          },
+          '& .MuiPaginationItem-root.Mui-selected': {
+            color: 'white',       // Text color for the selected item
+          },
         }}
         showFirstButton
         showLastButton
       />
-    </div>
+    </Box>
   );
 };
 

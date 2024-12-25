@@ -42,7 +42,7 @@ export const columnsKeuangan: ColumnDef<KeuanganProps, any>[] = [
         actionPath={(rowData) => `/keuangan/${rowData.id}`} // Path dinamis berdasarkan ID Jamaah
       />
     ),
-    header: "Action",
+    header: "Detail",
     enableColumnFilter: false,
   }),
 ];

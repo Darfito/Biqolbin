@@ -22,10 +22,10 @@ const CMS = () => {
       </Typography>
     </Box>
     <PageContainer title="CMS">
-      <Card sx={{ mt: 3}}>
         <Box sx={{ margin: "20px", display: "flex", justifyContent: "end" }}>
           <FormCMS />
         </Box>
+      <Card sx={{ mt: 3}}>
         <CMSTable data={PaketData} />
       </Card>
     </PageContainer>

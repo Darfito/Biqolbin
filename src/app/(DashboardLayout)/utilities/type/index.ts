@@ -56,6 +56,7 @@ export type CicilanType = {
     action?: string;
     publish: boolean;
     gambar?: {
+      id: number
       url: string; // URL gambar (untuk akses langsung)
       bucket: string; // Nama bucket di Supabase
       path: string; // Path file dalam bucket
@@ -100,6 +101,9 @@ export interface JamaahProps {
   selesai: Date; // tanggal pulang dari paket
   status: StatusKepergian;
 }
+
+
+
 
 export type JenisDokumen ={
   id: number;

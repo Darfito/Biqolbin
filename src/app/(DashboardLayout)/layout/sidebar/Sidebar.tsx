@@ -65,8 +65,8 @@ const MSidebar = ({
               width={'270px'}
               collapsewidth="80px"
               open={isSidebarOpen}
-              themeColor="#5d87ff"
-              themeSecondaryColor="#49beff"
+              themeColor="#f18b04"
+              themeSecondaryColor="#f18b04"
               showProfile={false}
             >
               {/* ------------------------------------------- */}
@@ -78,7 +78,7 @@ const MSidebar = ({
                 {/* Sidebar Items */}
                 {/* ------------------------------------------- */}
                 <SidebarItems />
-                {/* <Upgrade /> */}
+                <Upgrade />
               </Box>
             </Sidebar >
           </Box>
@@ -110,8 +110,8 @@ const MSidebar = ({
           isCollapse={false}
           mode="light"
           direction="ltr"
-          themeColor="#5d87ff"
-          themeSecondaryColor="#49beff"
+          themeColor="#f18b04"
+          themeSecondaryColor="#f18b04"
           showProfile={false}
         >
           {/* ------------------------------------------- */}

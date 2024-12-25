@@ -42,6 +42,11 @@ import { ChevronRight } from "@mui/icons-material";
 import {
   Box,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Typography,
 } from "@mui/material";
 import { PaketInterface } from "../../type";
 import { useRouter } from "next/navigation";
@@ -175,11 +180,36 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [actionType, setActionType] = useState<"publish" | "unpublish">("publish");
+  const [tableData, setTableData] = useState<PaketInterface[]>(data); // Local state to manage table data
 
-  const handleDialogOpen = () => setOpenDialog(true);
-  const handleDialogClose = () => setOpenDialog(false);
 
   const router = useRouter();
+
+  const handleDialogOpen = (id: string, type: "publish" | "unpublish") => {
+    setSelectedId(id);
+    setActionType(type);
+    setOpenDialog(true);
+  };
+
+  const handleDialogClose = () => {
+    setSelectedId(null);
+    setActionType("publish");
+    setOpenDialog(false);
+  };
+
+  const handleSaveChanges = () => {
+    if (selectedId) {
+      const updatedData = tableData.map((paket) =>
+        paket.id === selectedId
+          ? { ...paket, publish: actionType === "publish" }
+          : paket
+      );
+      setTableData(updatedData);
+    }
+    handleDialogClose();
+  };
 
   const columnHelper = createColumnHelper<PaketInterface>();
 
@@ -220,10 +250,17 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
         <Box sx={{ display: "flex", gap: "0.5rem" }}>
           <Button
             variant="contained"
-            className="text-white"
-            onClick={handleDialogOpen}
+            onClick={() =>
+              handleDialogOpen(
+                info.row.original.id,
+                info.row.original.publish ? "unpublish" : "publish"
+              )
+            }
+            sx={{
+              color: "#fff",backgroundColor: info.row.original.publish ? "red" : "green",
+            }}
           >
-            Publish
+            {info.row.original.publish ? "Unpublish" : "Publish"}
           </Button>
           <Button
             onClick={() => handleNavigateToCMS(info.row.original)}
@@ -243,7 +280,7 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
   ];
 
   const table = useReactTable({
-    data: data || [], // Pastikan data selalu berupa array.
+    data: tableData || [], // Pastikan data selalu berupa array.
     columns,
     filterFns: {
       fuzzy: fuzzyFilter,
@@ -275,7 +312,7 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
           width: "100%",
         }}
       >
-        <CardHeader
+        {/* <CardHeader
           sx={{
             paddingTop: 0,
           }}
@@ -286,7 +323,7 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
               placeholder="Search all columns..."
             />
           }
-        />
+        /> */}
       </Box>
       <div className="overflow-x-auto">
         <table className={styles.table}>
@@ -372,6 +409,24 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
           }}
         />
       </Box>
+      <Dialog open={openDialog} onClose={handleDialogClose}>
+        <DialogTitle>Konfirmasi Aksi</DialogTitle>
+        <DialogContent>
+          <Typography>
+            {actionType === "publish"
+              ? "Apakah Anda yakin ingin mempublikasikan konten ini?"
+              : "Apakah Anda yakin ingin menutup konten ini?"}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} variant="contained" color="error">
+            Batal
+          </Button>
+          <Button onClick={handleSaveChanges} variant="contained" color="primary" sx={{ color: "#fff" }}>
+            Konfirmasi
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
