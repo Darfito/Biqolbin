@@ -16,7 +16,7 @@ interface FormErrors {
   jenisPaket?: string;
   metodePembayaran?: string;
   tenggatPembayaran?: string;
-  jumlahTagihan?: string;
+  totalTagihan?: string;
   uangMuka?: string;
   banyaknyaAngsuran?: string;
   jumlahBiayaPerAngsuran?: string;
@@ -31,11 +31,11 @@ const formSchema = v.object({
     v.string(),
     v.nonEmpty("Tenggat pembayaran harus diisi") // Validasi
   ),
-  jumlahTagihan: v.pipe(
+  totalTagihan: v.pipe(
     v.string(),
-    v.nonEmpty("Jumlah tagihan harus diisi"),
+    v.nonEmpty("Total Tagihan harus diisi"),
     v.transform(Number),
-    v.minValue(1, "Jumlah tagihan harus lebih dari 0")
+    v.minValue(1, "Total Tagihan harus lebih dari 0")
   ),
   uangMuka: v.pipe(
     v.string(),
@@ -57,7 +57,7 @@ export default function FormKeuangan() {
     jenisPaket: "",
     metodePembayaran: "",
     tenggatPembayaran: "",
-    jumlahTagihan: "",
+    totalTagihan: "",
     uangMuka: "",
     banyaknyaAngsuran: "",
     jumlahBiayaPerAngsuran: "",
@@ -154,12 +154,12 @@ export default function FormKeuangan() {
   const calculateAngsuran = () => {
     if (
       metode === "Cicilan" &&
-      formValues.jumlahTagihan &&
+      formValues.totalTagihan &&
       formValues.uangMuka &&
       formValues.banyaknyaAngsuran
     ) {
       const jumlahAngsuran =
-        (Number(formValues.jumlahTagihan) - Number(formValues.uangMuka)) /
+        (Number(formValues.totalTagihan) - Number(formValues.uangMuka)) /
         Number(formValues.banyaknyaAngsuran);
 
       // Round the installment amount to whole number
@@ -174,7 +174,7 @@ export default function FormKeuangan() {
   React.useEffect(() => {
     calculateAngsuran();
   }, [
-    formValues.jumlahTagihan,
+    formValues.totalTagihan,
     formValues.uangMuka,
     formValues.banyaknyaAngsuran,
   ]);
@@ -189,7 +189,7 @@ export default function FormKeuangan() {
       jenisPaket: "",
       metodePembayaran: "",
       tenggatPembayaran: "",
-      jumlahTagihan: "",
+      totalTagihan: "",
       uangMuka: "",
       banyaknyaAngsuran: "",
       jumlahBiayaPerAngsuran: "",
@@ -286,15 +286,15 @@ export default function FormKeuangan() {
 
             <CustomTextField
               fullWidth
-              label="Jumlah Tagihan"
-              name="jumlahTagihan"
-              value={formValues.jumlahTagihan}
-              error={!!formErrors.jumlahTagihan}
-              helperText={formErrors.jumlahTagihan}
+              label="Total Tagihan"
+              name="totalTagihan"
+              value={formValues.totalTagihan}
+              error={!!formErrors.totalTagihan}
+              helperText={formErrors.totalTagihan}
               onChange={(e: { target: { value: any } }) =>
                 setFormValues({
                   ...formValues,
-                  jumlahTagihan: e.target.value,
+                  totalTagihan: e.target.value,
                 })
               }
             />

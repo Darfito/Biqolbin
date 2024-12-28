@@ -227,6 +227,12 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
       header: "Nama Paket",
       enableColumnFilter: false,
     }),
+    columnHelper.accessor("namaMuthawif", {
+      id: "namaMuthawif",
+      cell: (info) => info.getValue(),
+      header: "Nama Muthawif",
+      enableColumnFilter: false,
+    }),
     columnHelper.accessor("jenis", {
       id: "jenis",
       cell: (info) => info.getValue(),

@@ -2,14 +2,17 @@
 
 import { Box, Card, Typography } from "@mui/material";
 import PageContainer from "../../components/container/PageContainer";
-
+import * as v from "valibot";
 
 import { PaketData } from "../../jamaah/data";
-import FormKeuangan from "./FormCMS";
-import FormCMS from "./FormCMS";
+import FormCMS, { formSchema } from "./FormCMS";
 import CMSTable from "../../utilities/component/table/CMSTable";
+import { useState } from "react";
+import { toast } from "react-toastify";
 
 const CMS = () => {
+
+
   return (
     <>
     <Box
@@ -23,7 +26,7 @@ const CMS = () => {
     </Box>
     <PageContainer title="CMS">
         <Box sx={{ margin: "20px", display: "flex", justifyContent: "end" }}>
-          <FormCMS />
+          <FormCMS mode={"create"}  />
         </Box>
       <Card sx={{ mt: 3}}>
         <CMSTable data={PaketData} />

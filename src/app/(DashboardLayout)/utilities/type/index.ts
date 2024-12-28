@@ -17,7 +17,7 @@ export type CardStatsHorizontalWithBorderProps = {
     jenisPaket : PaketInterface
     metodePembayaran: MetodePembayaranType
     uangMuka?: number
-    jumlahTagihan: number
+    totalTagihan: number
     sisaTagihan: number
     jumlahBiayaPerAngsuran?: number
     tenggatPembayaran: Date
@@ -46,8 +46,10 @@ export type CicilanType = {
     id: string;
     nama: string;
     jenis: JenisPaket;
-    maskapai: string;
+    maskapai: Maskapai; // Menggunakan enum Maskapai
+    customMaskapai?: string; // Untuk maskapai lainnya jika memilih "Lainnya"
     jenisPenerbangan: JenisPenerbangan;
+    noPenerbangan?: string;
     keretaCepat: boolean;
     harga: number;
     tglKeberangkatan: string;
@@ -55,6 +57,13 @@ export type CicilanType = {
     fasilitas: string[];
     action?: string;
     publish: boolean;
+    namaMuthawif: string;
+    noTelpMuthawif: string;
+    namaHotel: string;
+    alamatHotel: string;
+    ratingHotel: number;
+    tanggalCheckIn: string;
+    tanggalCheckOut: string;
     gambar?: {
       id: number
       url: string; // URL gambar (untuk akses langsung)
@@ -64,7 +73,16 @@ export type CicilanType = {
   }
 
 
-  
+
+  export enum Maskapai {
+    SAUDIA_ARABIA = "Saudia Arabia",
+    GARUDA_INDONESIA = "Garuda Indonesia",
+    QATAR_AIRWAYS = "Qatar Airways",
+    ETIHAD_AIRWAYS = "Etihad Airways",
+    LION_AIRWAYS = "Lion Airways",
+    LAINNYA = "Lainnya", // Opsi untuk memilih maskapai lainnya
+  }
+
 
 export enum JenisPaket{
   REGULAR = "REGULAR",
@@ -169,7 +187,5 @@ export enum TipeKamar {
   QUAD = "QUAD",
   TRIPLE = "TRIPLE",
   DOUBLE = "DOUBLE",
-  CHILD = "CHILD",
-  INFANT = "INFANT",
 }
 

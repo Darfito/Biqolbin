@@ -1,34 +1,43 @@
-import { CardStatsHorizontalWithBorderProps, JamaahProps, JenisKelamin, JenisPaket, JenisPenerbangan, KontakDaruratRelation, PaketInterface, TipeKamar } from "../../utilities/type";
-import { IconUser, IconCreditCard,IconReceipt } from "@tabler/icons-react";
-
+import {
+  CardStatsHorizontalWithBorderProps,
+  JamaahProps,
+  JenisKelamin,
+  JenisPaket,
+  JenisPenerbangan,
+  KontakDaruratRelation,
+  Maskapai,
+  PaketInterface,
+  TipeKamar,
+} from "../../utilities/type";
+import { IconUser, IconCreditCard, IconReceipt } from "@tabler/icons-react";
 
 export const scoreCardKeuangan: CardStatsHorizontalWithBorderProps[] = [
   {
-    title: 'Total Jamaah',
+    title: "Total Jamaah",
     total: 1280,
-    color: '#3E74FF',
+    color: "#3E74FF",
     icon: IconUser,
   },
   {
-    title: 'Belum Proses',
+    title: "Belum Proses",
     total: 1280,
-    color: '#F54F63',
+    color: "#F54F63",
     icon: IconCreditCard,
   },
   {
-    title: 'Sedang Proses',
+    title: "Sedang Proses",
     total: 1280,
-    color: '#F5BD4F',
+    color: "#F5BD4F",
     icon: IconReceipt,
   },
-]
+];
 
 export const PaketData: PaketInterface[] = [
   {
     id: "PKT001",
     nama: "Paket Regular 1",
     jenis: JenisPaket.REGULAR,
-    maskapai: "Garuda Indonesia",
+    maskapai: Maskapai.GARUDA_INDONESIA,
     jenisPenerbangan: JenisPenerbangan.DIRECT,
     keretaCepat: false,
     harga: 1000000,
@@ -41,36 +50,56 @@ export const PaketData: PaketInterface[] = [
       url: "https://picsum.photos/seed/picsum/200/300",
       bucket: "images",
       path: "paket/paket-1.jpg",
-    }
+    },
+    namaMuthawif: "Ahmad Yusuf",
+    namaHotel: "Hotel Bintang Jakarta",
+    alamatHotel: "Jl. Gatot Subroto No.10, Jakarta",
+    ratingHotel: 3,
+    tanggalCheckIn: "2024-12-01",
+    tanggalCheckOut: "2024-12-10",
+    noTelpMuthawif: "+62 812 3456 7890",
   },
   {
     id: "PKT002",
     nama: "Paket Regular 2",
     jenis: JenisPaket.REGULAR,
-    maskapai: "Lion Air",
+    maskapai: Maskapai.LION_AIRWAYS,
     jenisPenerbangan: JenisPenerbangan.TRANSIT,
     keretaCepat: false,
     harga: 800000,
     tglKeberangkatan: "2024-12-05",
     tglKepulangan: "2024-12-15",
     fasilitas: ["Hotel bintang 3", "Transportasi lokal"],
-    publish: false
+    publish: false,
+    namaMuthawif: "Fatimah Anisa",
+    namaHotel: "Hotel Bintang Surabaya",
+    alamatHotel: "Jl. Raya Darmo No.45, Surabaya",
+    ratingHotel: 3,
+    tanggalCheckIn: "2024-12-05",
+    tanggalCheckOut: "2024-12-15",
+    noTelpMuthawif: "+62 813 6543 2100",
   },
   {
     id: "PKT003",
     nama: "Paket VIP 1",
     jenis: JenisPaket.VIP,
-    maskapai: "Singapore Airlines",
+    maskapai: Maskapai.ETIHAD_AIRWAYS,
     jenisPenerbangan: JenisPenerbangan.DIRECT,
     keretaCepat: true,
     harga: 2000000,
     tglKeberangkatan: "2024-12-10",
     tglKepulangan: "2024-12-20",
     fasilitas: ["Hotel bintang 3", "Transportasi lokal"],
-    publish: false
+    publish: false,
+    namaMuthawif: "Zainal Abidin",
+    namaHotel: "Hotel Premium Bali",
+    alamatHotel: "Jl. Sunset Road No.12, Bali",
+    ratingHotel: 5,
+    tanggalCheckIn: "2024-12-10",
+    tanggalCheckOut: "2024-12-20",
+    noTelpMuthawif: "+62 811 9876 5432",
   },
 ];
-
 
 const jamaahData: JamaahProps[] = [
   {
@@ -152,7 +181,7 @@ const jamaahData: JamaahProps[] = [
         lampiran: false,
         file: "",
       },
-    ]
+    ],
   },
   {
     id: 2,
@@ -227,7 +256,7 @@ const jamaahData: JamaahProps[] = [
         lampiran: false,
         file: "",
       },
-    ]
+    ],
   },
   {
     id: 3,
@@ -302,11 +331,9 @@ const jamaahData: JamaahProps[] = [
         lampiran: false,
         file: "",
       },
-    ]
+    ],
   },
   // Tambahkan data ke-4 dan ke-5 dengan pola serupa jika diperlukan
 ];
 
 export default jamaahData;
-
-

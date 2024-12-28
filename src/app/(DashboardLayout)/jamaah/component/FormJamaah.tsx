@@ -407,7 +407,7 @@ export default function FormJamaah() {
                   }
                   sx={{ marginBottom: 2 }}
                 />
-                                <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
+                <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
                   <FormLabel component="legend">Status Menikah</FormLabel>
                   <RadioGroup
                     value={
@@ -480,10 +480,7 @@ export default function FormJamaah() {
                   <MenuItem value={TipeKamar.QUAD}>QUAD</MenuItem>
                   <MenuItem value={TipeKamar.TRIPLE}>TRIPLE</MenuItem>
                   <MenuItem value={TipeKamar.DOUBLE}>DOUBLE</MenuItem>
-                  <MenuItem value={TipeKamar.CHILD}>CHILD</MenuItem>
-                  <MenuItem value={TipeKamar.INFANT}>INFANT</MenuItem>
                 </CustomTextField>
-
                 <CustomTextField
                   fullWidth
                   label="Pekerjaan"

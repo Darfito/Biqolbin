@@ -21,7 +21,7 @@ const FormDetail = ({ isEditing, onSaveChanges, keuanganData }: FormDetailProps)
     nama: "",
     jenisPaket: "",
     metodePembayaran: "",
-    jumlahTagihan: "",
+    totalTagihan: "",
     uangMuka: "",
     sisaPembayaran: "",
     totalPembayaran: "",
@@ -39,10 +39,10 @@ const FormDetail = ({ isEditing, onSaveChanges, keuanganData }: FormDetailProps)
         nama: keuanganData.nama || "",
         jenisPaket: keuanganData.jenisPaket?.nama || "",
         metodePembayaran: keuanganData.metodePembayaran || "",
-        jumlahTagihan: keuanganData.jumlahTagihan?.toString() || "",
+        totalTagihan: keuanganData.totalTagihan?.toString() || "",
         uangMuka: keuanganData.uangMuka?.toString() || "",
         sisaPembayaran: keuanganData.sisaTagihan?.toString() || "",
-        totalPembayaran: keuanganData.jumlahTagihan?.toString() || "",
+        totalPembayaran: keuanganData.totalTagihan?.toString() || "",
         tenggatPembayaran: keuanganData?.tenggatPembayaran
         ? new Date(keuanganData.tenggatPembayaran).toISOString().split("T")[0]
         : "",
@@ -126,13 +126,13 @@ const FormDetail = ({ isEditing, onSaveChanges, keuanganData }: FormDetailProps)
 
               <CustomTextField
                 fullWidth
-                label="Jumlah Tagihan (Rupiah)"
-                value={formValues.jumlahTagihan}
-                error={formErrors.jumlahTagihan}
+                label="Total Tagihan (Rupiah)"
+                value={formValues.totalTagihan}
+                error={formErrors.totalTagihan}
                 onChange={(e: { target: { value: string } }) =>
                   setFormValues({
                     ...formValues,
-                    jumlahTagihan: e.target.value,
+                    totalTagihan: e.target.value,
                   })
                 }
                 disabled={!isEditing} // Disable if not editing
