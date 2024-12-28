@@ -11,23 +11,22 @@ import CustomTextField from "../../components/forms/theme-elements/CustomTextFie
 import { toast } from "react-toastify"; // Import toast
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 import {
-  JenisDokumen,
   JenisKelamin,
-  KamarType,
   KontakDaruratRelation,
   KontakDaruratType,
-  PaketInterface,
-  StatusKepergian,
   TipeKamar,
 } from "../../utilities/type";
 import {
   Grid,
   FormControlLabel,
   Checkbox,
-  Typography,
-  Box,
+  Radio,
+  RadioGroup,
+  FormControl,
+  FormLabel,
 } from "@mui/material";
 import { KontakDaruratSection } from "./KontakDaruratHandler";
+import { PaketData } from "../data";
 
 interface FormErrors {
   id?: string;
@@ -51,7 +50,6 @@ interface FormErrors {
   selesai?: string;
   status?: string;
 }
-
 
 // Valibot Schema
 const formSchema = v.object({
@@ -129,12 +127,12 @@ export default function FormJamaah() {
       jenisPenerbangan: "DIRECT",
       keretaCepat: false,
       harga: 0,
-      tglKeberangkatan: new Date(),
-      tglKepulangan: new Date(),
-      fasilitas: "",
+      tglKeberangkatan: "",
+      tglKepulangan: "",
+      fasilitas: [],
     },
-    berangkat: new Date(),
-    selesai: new Date(),
+    berangkat: "",
+    selesai: "",
     status: { id: 0, status: "Dijadwalkan" },
   });
   const [formErrors, setFormErrors] = React.useState<FormErrors>({});
@@ -143,9 +141,11 @@ export default function FormJamaah() {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setJenisKelamin(event.target.value as JenisKelamin);
-    setFormValues({ ...formValues, jenisKelamin: event.target.value as JenisKelamin });
+    setFormValues({
+      ...formValues,
+      jenisKelamin: event.target.value as JenisKelamin,
+    });
   };
-  
 
   const handleContactChange = (
     index: number,
@@ -158,26 +158,44 @@ export default function FormJamaah() {
   };
 
   const handleAddContact = () => {
-    setFormValues(prev => ({
+    setFormValues((prev) => ({
       ...prev,
       kontakDarurat: [
-        ...prev.kontakDarurat, 
-        { 
-          id: prev.kontakDarurat.length, 
-          nama: "", 
-          noTelp: "", 
-          hubungan: KontakDaruratRelation.Lainnya 
-        }
-      ]
+        ...prev.kontakDarurat,
+        {
+          id: prev.kontakDarurat.length,
+          nama: "",
+          noTelp: "",
+          hubungan: KontakDaruratRelation.Lainnya,
+        },
+      ],
     }));
   };
 
   const handleRemoveContact = (indexToRemove: number) => {
     // Prevent removing the last contact
     if (formValues.kontakDarurat.length > 1) {
-      setFormValues(prev => ({
+      setFormValues((prev) => ({
         ...prev,
-        kontakDarurat: prev.kontakDarurat.filter((_, index) => index !== indexToRemove)
+        kontakDarurat: prev.kontakDarurat.filter(
+          (_, index) => index !== indexToRemove
+        ),
+      }));
+    }
+  };
+
+  const handleJenisPaketChange = (
+    event: React.ChangeEvent<{ value: unknown }>
+  ) => {
+    const selectedPaket = PaketData.find(
+      (paket) => paket.id === event.target.value
+    );
+    if (selectedPaket) {
+      setFormValues((prevValues) => ({
+        ...prevValues,
+        jenisPaket: selectedPaket,
+        berangkat: selectedPaket.tglKeberangkatan,
+        selesai: selectedPaket.tglKepulangan,
       }));
     }
   };
@@ -186,15 +204,15 @@ export default function FormJamaah() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFormErrors({}); // Clear previous errors
-  
+
     console.log("Form submitting with values:", formValues);
-  
+
     // Validate the form values
     const result = v.safeParse(formSchema, formValues);
-  
+
     if (!result.success) {
       const errorMap: FormErrors = {};
-  
+
       result.issues.forEach((issue) => {
         const path = issue.path?.[0]?.key as keyof FormErrors | undefined;
         if (path) {
@@ -210,20 +228,17 @@ export default function FormJamaah() {
           }
         }
       });
-  
+
       setFormErrors(errorMap);
       console.error("Validation errors:", errorMap);
       return;
     }
-  
+
     console.log("Form submitted:", formValues);
     toast.success("Form berhasil disubmit!"); // Show success toast
-  
+
     handleClose();
   };
-  
-  
-  
 
   // Calculate installment (angsuran) if "Cicilan" is selected
 
@@ -268,12 +283,12 @@ export default function FormJamaah() {
         jenisPenerbangan: "DIRECT",
         keretaCepat: false,
         harga: 0,
-        tglKeberangkatan: new Date(),
-        tglKepulangan: new Date(),
-        fasilitas: "",
+        tglKeberangkatan: "",
+        tglKepulangan: "",
+        fasilitas: [],
       },
-      berangkat: new Date(),
-      selesai: new Date(),
+      berangkat: "",
+      selesai: "",
       status: { id: 0, status: "Dijadwalkan" },
     });
   };
@@ -287,7 +302,7 @@ export default function FormJamaah() {
       >
         Tambah
       </Button>
-      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
         <form onSubmit={handleSubmit}>
           <DialogTitle>Tambah Item Jamaah</DialogTitle>
           <DialogContent
@@ -334,17 +349,31 @@ export default function FormJamaah() {
                   }
                   sx={{ marginBottom: 2 }}
                 />
-                <CustomTextField
-                  select
-                  fullWidth
-                  label="Jenis Kelamin"
-                  value={formValues.jenisKelamin}
-                  onChange={handleJenisKelaminChange}
-                  sx={{ marginBottom: 2 }}
-                >
-                  <MenuItem value={JenisKelamin.LakiLaki}>Laki-Laki</MenuItem>
-                  <MenuItem value={JenisKelamin.Perempuan}>Perempuan</MenuItem>
-                </CustomTextField>
+                <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
+                  <FormLabel component="legend">Jenis Kelamin</FormLabel>
+                  <RadioGroup
+                    value={formValues.jenisKelamin}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setFormValues({
+                        ...formValues,
+                        jenisKelamin: e.target.value as JenisKelamin, // Cast ke JenisKelamin
+                      })
+                    }
+                    row
+                  >
+                    <FormControlLabel
+                      value={JenisKelamin.LakiLaki}
+                      control={<Radio />}
+                      label="Laki-Laki"
+                    />
+                    <FormControlLabel
+                      value={JenisKelamin.Perempuan}
+                      control={<Radio />}
+                      label="Perempuan"
+                    />
+                  </RadioGroup>
+                </FormControl>
+
                 <CustomTextField
                   fullWidth
                   label="Tempat Lahir"
@@ -366,25 +395,10 @@ export default function FormJamaah() {
                   }
                   sx={{ marginBottom: 2 }}
                 />
+
                 <CustomTextField
-                  select
-                  fullWidth
-                  label="Status Perkawinan"
-                  value={
-                    formValues.perkawinan ? "Sudah Menikah" : "Belum Menikah"
-                  }
-                  onChange={(e: { target: { value: string } }) =>
-                    setFormValues({
-                      ...formValues,
-                      perkawinan: e.target.value === "Sudah Menikah",
-                    })
-                  }
-                  sx={{ marginBottom: 2 }}
-                >
-                  <MenuItem value="Sudah Menikah">Sudah Menikah</MenuItem>
-                  <MenuItem value="Belum Menikah">Belum Menikah</MenuItem>
-                </CustomTextField>
-                <CustomTextField
+                  multiline
+                  rows={4}
                   fullWidth
                   label="Alamat"
                   value={formValues.alamat}
@@ -393,26 +407,60 @@ export default function FormJamaah() {
                   }
                   sx={{ marginBottom: 2 }}
                 />
-                <CustomTextField
-                  select
-                  fullWidth
-                  label="Kewarganegaraan"
-                  value={formValues.kewarganegaraan ? "WNI" : "WNA"}
-                  onChange={(e: { target: { value: string } }) =>
-                    setFormValues({
-                      ...formValues,
-                      kewarganegaraan: e.target.value === "WNI",
-                    })
-                  }
-                  sx={{ marginBottom: 2 }}
-                >
-                  <MenuItem value="WNI">WNI</MenuItem>
-                  <MenuItem value="WNA">WNA</MenuItem>
-                </CustomTextField>
+                <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
+                  <FormLabel component="legend">Status Menikah</FormLabel>
+                  <RadioGroup
+                    value={
+                      formValues.perkawinan ? "Sudah Menikah" : "Belum Menikah"
+                    }
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setFormValues({
+                        ...formValues,
+                        perkawinan: e.target.value === "Sudah Menikah",
+                      })
+                    }
+                    row
+                  >
+                    <FormControlLabel
+                      value="Belum Menikah"
+                      control={<Radio />}
+                      label="Belum Menikah"
+                    />
+                    <FormControlLabel
+                      value="Sudah Menikah"
+                      control={<Radio />}
+                      label="Sudah Menikah"
+                    />
+                  </RadioGroup>
+                </FormControl>
               </Grid>
 
               {/* Kolom Kanan */}
               <Grid item xs={12} sm={6}>
+                <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
+                  <FormLabel component="legend">Status Bernegara</FormLabel>
+                  <RadioGroup
+                    value={formValues.kewarganegaraan ? "WNI" : "WNA"}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setFormValues({
+                        ...formValues,
+                        kewarganegaraan: e.target.value === "WNI",
+                      })
+                    }
+                    row
+                  >
+                    <FormControlLabel
+                      value="WNI"
+                      control={<Radio />}
+                      label="WNI"
+                    />
+                    <FormControlLabel
+                      value="WNA"
+                      control={<Radio />}
+                      label="WNA"
+                    />
+                  </RadioGroup>
+                </FormControl>
                 <CustomTextField
                   select
                   fullWidth
@@ -432,10 +480,7 @@ export default function FormJamaah() {
                   <MenuItem value={TipeKamar.QUAD}>QUAD</MenuItem>
                   <MenuItem value={TipeKamar.TRIPLE}>TRIPLE</MenuItem>
                   <MenuItem value={TipeKamar.DOUBLE}>DOUBLE</MenuItem>
-                  <MenuItem value={TipeKamar.CHILD}>CHILD</MenuItem>
-                  <MenuItem value={TipeKamar.INFANT}>INFANT</MenuItem>
                 </CustomTextField>
-
                 <CustomTextField
                   fullWidth
                   label="Pekerjaan"
@@ -472,10 +517,62 @@ export default function FormJamaah() {
                   }
                   sx={{ marginBottom: 2 }}
                 />
+
+                {/* Jenis Paket */}
+                <CustomTextField
+                  select
+                  fullWidth
+                  label="Jenis Paket"
+                  value={formValues.jenisPaket.id}
+                  onChange={handleJenisPaketChange}
+                  sx={{ marginBottom: 2 }}
+                >
+                  {PaketData.map((paket) => (
+                    <MenuItem key={paket.id} value={paket.id}>
+                      {paket.nama}
+                    </MenuItem>
+                  ))}
+                </CustomTextField>
+
+                {/* Tanggal Berangkat */}
+                <CustomTextField
+                  fullWidth
+                  label="Tanggal Berangkat"
+                  type="date"
+                  value={formValues.berangkat} // Format date untuk input type="date"
+                  onChange={(e: { target: { value: string } }) =>
+                    setFormValues({
+                      ...formValues,
+                      berangkat: e.target.value,
+                    })
+                  }
+                  InputLabelProps={{
+                    shrink: true, // Memastikan label selalu berada di atas
+                  }}
+                  sx={{ marginBottom: 2 }}
+                />
+
+                {/* Tanggal Selesai */}
+                <CustomTextField
+                  fullWidth
+                  label="Tanggal Selesai"
+                  type="date"
+                  value={formValues.selesai} // Format date untuk input type="date"
+                  onChange={(e: { target: { value: string } }) =>
+                    setFormValues({
+                      ...formValues,
+                      selesai: e.target.value,
+                    })
+                  }
+                  InputLabelProps={{
+                    shrink: true, // Memastikan label selalu berada di atas
+                  }}
+                  sx={{ marginBottom: 2 }}
+                />
               </Grid>
 
               {/* Kontak Darurat */}
-              <KontakDaruratSection 
+              <KontakDaruratSection
                 kontakDarurat={formValues.kontakDarurat}
                 handleContactChange={handleContactChange}
                 handleAddContact={handleAddContact}

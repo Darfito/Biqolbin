@@ -19,9 +19,9 @@ export const columnsKeuangan: ColumnDef<KeuanganProps, any>[] = [
     cell: (info) => info.getValue(),
     header: "Metode Pembayaran",
   }),
-  columnHelper.accessor("jumlahTagihan", {
+  columnHelper.accessor("totalTagihan", {
     cell: (info) => `Rp ${info.getValue().toLocaleString()}`,
-    header: "Jumlah Tagihan",
+    header: "Total Tagihan",
   }),
   columnHelper.accessor("sisaTagihan", {
     cell: (info) => `Rp ${info.getValue().toLocaleString()}`,
@@ -42,7 +42,7 @@ export const columnsKeuangan: ColumnDef<KeuanganProps, any>[] = [
         actionPath={(rowData) => `/keuangan/${rowData.id}`} // Path dinamis berdasarkan ID Jamaah
       />
     ),
-    header: "Action",
+    header: "Detail",
     enableColumnFilter: false,
   }),
 ];

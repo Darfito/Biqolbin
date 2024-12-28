@@ -6,7 +6,6 @@ import ScoreCard from "../../utilities/component/card/ScoreCard";
 import { KeuanganData, scoreCardKeuangan } from "../data";
 import FormKeuangan from "./FormKeuangan";
 
-
 import { columnsKeuangan } from "./columns/columnsKeuangan";
 import KeuanganTable from "../../utilities/component/table/KeuanganTable";
 
@@ -45,10 +44,10 @@ const Keuangan = () => {
       </Grid>
 
       <PageContainer title="Keuangan">
-        <Card sx={{ mt: 3}}>
-          <Box sx={{ margin: "20px", display: "flex", justifyContent: "end"}}>
-            <FormKeuangan />
-          </Box>
+        <Box sx={{ margin: "20px", display: "flex", justifyContent: "end" }}>
+          <FormKeuangan />
+        </Box>
+        <Card sx={{ mt: 2 }}>
           <KeuanganTable columns={columnsKeuangan} data={KeuanganData} />
         </Card>
       </PageContainer>

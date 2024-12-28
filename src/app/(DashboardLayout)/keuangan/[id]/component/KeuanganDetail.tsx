@@ -83,12 +83,12 @@ const handleSubmit = (data: React.SetStateAction<{}>) => {
 
   return (
     <>
-      <Breadcrumb links={breadcrumbLinks} />
-      <Typography variant="h2" component="h1" mb={3}>
+      <Typography variant="h2" component="h1">
         Detail
       </Typography>
+      <Breadcrumb links={breadcrumbLinks} />
       <PageContainer title="Keuangan Detail">
-        <Box sx={{ width: "100%", display: "flex", justifyContent: "space-between" }}>
+        <Box sx={{marginTop: 3, width: "100%", display: "flex", justifyContent: "space-between" }}>
           <Box>
             <Button
               variant="contained"
@@ -120,9 +120,8 @@ const handleSubmit = (data: React.SetStateAction<{}>) => {
         </Box>
 
         <Box sx={{ marginTop: "2rem" , backgroundColor:"#fff" }}>
-        <Card sx={{ backgroundColor:"#fff" }}>
+
         <KeuanganDetailTable data={currentData} cicilanKe={nextCicilanKe}/>
-        </Card>
 
         </Box>
       </PageContainer>

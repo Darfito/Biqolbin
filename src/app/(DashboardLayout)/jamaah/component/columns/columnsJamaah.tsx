@@ -1,17 +1,11 @@
 import ActionButton from "@/app/(DashboardLayout)/utilities/component/table/components/ActionButton";
 import { JamaahProps } from "@/app/(DashboardLayout)/utilities/type";
+import { Chip } from "@mui/material";
 import { createColumnHelper, ColumnDef } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<JamaahProps>();
 
 export const columnsJamaah: ColumnDef<JamaahProps, any>[] = [
-  // Kolom Nomor (No)
-  columnHelper.display({
-    id: "no",
-    header: "NO",
-    cell: (info) => info.row.index + 1, // Index otomatis sesuai urutan data
-    enableSorting: false,
-  }),
 
   // Kolom Nama
   columnHelper.accessor("nama", {
@@ -53,15 +47,39 @@ export const columnsJamaah: ColumnDef<JamaahProps, any>[] = [
     id: "status",
     cell: (info) => {
       const status = info.getValue();
-      return status === "Berangkat" || status === "Selesai" ? status : "Dijadwalkan";
+      let chipColor = "";
+  
+      switch (status) {
+        case "Berangkat":
+          chipColor = "lightblue"; // Biru muda
+          break;
+        case "Selesai":
+          chipColor = "green"; // Hijau
+          break;
+        default:
+          chipColor = "#F18B04"; // Warna khusus untuk Dijadwalkan
+          break;
+      }
+  
+      return (
+        <Chip
+          label={status === "Berangkat" || status === "Selesai" ? status : "Dijadwalkan"}
+          sx={{
+            backgroundColor: chipColor,
+            color: "white", // Warna teks putih agar kontras
+            fontWeight: "bold",
+          }}
+        />
+      );
     },
     header: "Status",
   }),
+  
 
   // Kolom Aksi
   columnHelper.display({
     id: "action",
-    header: "ACTION",
+    header: "Detail",
     cell: (info) => (
       <ActionButton
         rowData={info.row.original}

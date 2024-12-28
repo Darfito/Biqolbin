@@ -1,15 +1,8 @@
 import {
-  IconAperture,
   IconBook,
-  IconCopy,
   IconLayoutDashboard,
-  IconLogin,
   IconMoneybag,
-  IconMoodHappy,
-  IconPaperclip,
   IconPencil,
-  IconTypography,
-  IconUserPlus,
 } from "@tabler/icons-react";
 
 import { uniqueId } from "lodash";

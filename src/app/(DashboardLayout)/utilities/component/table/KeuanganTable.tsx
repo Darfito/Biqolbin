@@ -251,7 +251,7 @@ const KeuanganTable = <T,>({ columns, data }: KeuanganTableProps<T>) => {
           width: "100%",
         }}
       >
-        <CardHeader
+        {/* <CardHeader
         sx={{ 
           paddingTop: 0
         }}
@@ -262,7 +262,7 @@ const KeuanganTable = <T,>({ columns, data }: KeuanganTableProps<T>) => {
               placeholder="Search all columns..."
             />
           }
-        />
+        /> */}
       </Box>
       <div className="overflow-x-auto">
         <table className={styles.table}>

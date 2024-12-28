@@ -1,4 +1,4 @@
-import { CardStatsHorizontalWithBorderProps, KeuanganProps, PaketInterface } from "../../utilities/type";
+import { CardStatsHorizontalWithBorderProps, JenisPaket, JenisPenerbangan, KeuanganProps, PaketInterface } from "../../utilities/type";
 import { IconUser, IconProgress,IconReceipt } from "@tabler/icons-react";
 
 
@@ -29,47 +29,57 @@ const PaketData: PaketInterface[] = [
   {
     id: "PKT001",
     nama: "Paket Regular 1",
-    jenis: "REGULAR",
+    jenis: JenisPaket.REGULAR, // Enum digunakan di sini
     maskapai: "Garuda Indonesia",
-    jenisPenerbangan: "DIRECT",
+    jenisPenerbangan: JenisPenerbangan.DIRECT, // Enum digunakan di sini
     keretaCepat: false,
     harga: 1000000,
-    tglKeberangkatan: new Date("2024-12-01"),
-    tglKepulangan: new Date("2024-12-10"),
-    fasilitas: "Hotel bintang 3, Transportasi lokal",
+    tglKeberangkatan: "2024-12-01", // Diubah menjadi string
+    tglKepulangan: "2024-12-10", // Diubah menjadi string
+    fasilitas: ["Hotel bintang 3", "Transportasi lokal"], // Diubah menjadi array string
+    publish: true, // Properti baru sesuai tipe
   },
   {
     id: "PKT002",
     nama: "Paket Regular 2",
-    jenis: "REGULAR",
+    jenis: JenisPaket.REGULAR,
     maskapai: "Lion Air",
-    jenisPenerbangan: "TRANSIT",
+    jenisPenerbangan: JenisPenerbangan.TRANSIT,
     keretaCepat: false,
     harga: 800000,
-    tglKeberangkatan: new Date("2024-12-05"),
-    tglKepulangan: new Date("2024-12-15"),
-    fasilitas: "Hotel bintang 2, Transportasi lokal",
+    tglKeberangkatan: "2024-12-05",
+    tglKepulangan: "2024-12-15",
+    fasilitas: ["Hotel bintang 2", "Transportasi lokal"],
+    publish: false, // Properti baru sesuai tipe
   },
   {
     id: "PKT003",
     nama: "Paket VIP 1",
-    jenis: "VIP",
+    jenis: JenisPaket.VIP,
     maskapai: "Singapore Airlines",
-    jenisPenerbangan: "DIRECT",
+    jenisPenerbangan: JenisPenerbangan.DIRECT,
     keretaCepat: true,
     harga: 2000000,
-    tglKeberangkatan: new Date("2024-12-10"),
-    tglKepulangan: new Date("2024-12-20"),
-    fasilitas: "Hotel bintang 5, Transportasi premium",
+    tglKeberangkatan: "2024-12-10",
+    tglKepulangan: "2024-12-20",
+    fasilitas: ["Hotel bintang 5", "Transportasi premium"],
+    publish: true,
+    gambar: {
+      id: 1,
+      url: "https://example.com/images/paket-vip-1.jpg",
+      bucket: "travel-packages",
+      path: "images/paket-vip-1.jpg",
+    }, // Menambahkan properti gambar sesuai tipe
   },
 ];
+
 
 export const KeuanganData: KeuanganProps[] = [
   {
     id: 1,
     nama: "Keuangan 1",
     metodePembayaran: "Cicilan",
-    jumlahTagihan: 100000,
+    totalTagihan: 100000,
     banyaknyaCicilan: 6,
     jumlahBiayaPerAngsuran: 5000,
     uangMuka: 50000,
@@ -102,7 +112,7 @@ export const KeuanganData: KeuanganProps[] = [
     nama: "Keuangan 2",
     metodePembayaran: "Cicilan",
     banyaknyaCicilan: 5,
-    jumlahTagihan: 200000,
+    totalTagihan: 200000,
     jumlahBiayaPerAngsuran: 5000,
     sisaTagihan: 100000,
     uangMuka: 50000,
@@ -128,7 +138,7 @@ export const KeuanganData: KeuanganProps[] = [
     uangMuka: 50000,
     jumlahBiayaPerAngsuran: 5000,
     banyaknyaCicilan: 7,
-    jumlahTagihan: 100000,
+    totalTagihan: 100000,
     sisaTagihan: 0,
     tenggatPembayaran: new Date(),
     status: "Lunas",
@@ -140,7 +150,7 @@ export const KeuanganData: KeuanganProps[] = [
     nama: "Keuangan 4",
     metodePembayaran: "Tunai",
     uangMuka: 50000,
-    jumlahTagihan: 200000,
+    totalTagihan: 200000,
     jumlahBiayaPerAngsuran: 5000,
     sisaTagihan: 0,
     tenggatPembayaran: new Date(),
@@ -153,7 +163,7 @@ export const KeuanganData: KeuanganProps[] = [
     nama: "Keuangan 5",
     metodePembayaran: "Tabungan",
     uangMuka: 50000,
-    jumlahTagihan: 200000,
+    totalTagihan: 200000,
     sisaTagihan: 150000,
     tenggatPembayaran: new Date(),
     status: "Sedang Menabung",
@@ -167,7 +177,7 @@ export const KeuanganData: KeuanganProps[] = [
     banyaknyaCicilan: 8,
     jumlahBiayaPerAngsuran: 5000,
     uangMuka: 50000,
-    jumlahTagihan: 300000,
+    totalTagihan: 300000,
     sisaTagihan: 300000,
     tenggatPembayaran: new Date(),
     status: "Belum Bayar",
@@ -181,7 +191,7 @@ export const KeuanganData: KeuanganProps[] = [
     jumlahBiayaPerAngsuran: 5000,
     banyaknyaCicilan: 9,
     uangMuka: 50000,
-    jumlahTagihan: 300000,
+    totalTagihan: 300000,
     sisaTagihan: 100000,
     tenggatPembayaran: new Date(),
     status: "Sedang Menyicil",
@@ -193,7 +203,7 @@ export const KeuanganData: KeuanganProps[] = [
     nama: "Keuangan 8",
     metodePembayaran: "Tunai",
     uangMuka: 50000,
-    jumlahTagihan: 500000,
+    totalTagihan: 500000,
     sisaTagihan: 0,
     tenggatPembayaran: new Date(),
     status: "Lunas",
@@ -204,7 +214,7 @@ export const KeuanganData: KeuanganProps[] = [
     id: 9,
     nama: "Keuangan 9",
     metodePembayaran: "Tabungan",
-    jumlahTagihan: 200000,
+    totalTagihan: 200000,
     sisaTagihan: 100000,
     tenggatPembayaran: new Date(),
     status: "Sedang Menabung",
@@ -218,7 +228,7 @@ export const KeuanganData: KeuanganProps[] = [
     banyaknyaCicilan: 10,
     jumlahBiayaPerAngsuran: 5000,
     uangMuka: 50000,
-    jumlahTagihan: 150000,
+    totalTagihan: 150000,
     sisaTagihan: 0,
     tenggatPembayaran: new Date(),
     status: "Lunas",
@@ -230,7 +240,7 @@ export const KeuanganData: KeuanganProps[] = [
     nama: "Keuangan 11",
     metodePembayaran: "Tunai",
     uangMuka: 50000,
-    jumlahTagihan: 400000,
+    totalTagihan: 400000,
     sisaTagihan: 400000,
     tenggatPembayaran: new Date(),
     status: "Belum Bayar",
@@ -244,7 +254,7 @@ export const KeuanganData: KeuanganProps[] = [
     metodePembayaran: "Cicilan",
     uangMuka: 50000,
     jumlahBiayaPerAngsuran: 5000,
-    jumlahTagihan: 250000,
+    totalTagihan: 250000,
     sisaTagihan: 150000,
     tenggatPembayaran: new Date(),
     status: "Sedang Menyicil",

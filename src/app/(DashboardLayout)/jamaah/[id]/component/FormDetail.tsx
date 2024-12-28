@@ -9,6 +9,10 @@ import {
   FormControlLabel,
   Checkbox,
   Typography,
+  FormControl,
+  FormLabel,
+  Radio,
+  RadioGroup,
 } from "@mui/material";
 import {
   JamaahProps,
@@ -29,13 +33,18 @@ const FormDetail = ({
   jamaahData,
 }: FormDetailProps) => {
   const [formValues, setFormValues] = useState<JamaahProps>(
-    jamaahData ||{
+    jamaahData || {
       id: 0,
       nama: "",
       ayahKandung: "",
       noTelp: "",
       kontakDarurat: [
-        { id: 0, nama: "", noTelp: "", hubungan: KontakDaruratRelation.Lainnya },
+        {
+          id: 0,
+          nama: "",
+          noTelp: "",
+          hubungan: KontakDaruratRelation.Lainnya,
+        },
       ],
       email: "",
       jenisKelamin: JenisKelamin.LakiLaki,
@@ -81,7 +90,7 @@ const FormDetail = ({
 
   const handleContactChange = (
     index: number,
-    field: "nama" | "noTelp" | "hubungan",  // Memperbaiki tipe field
+    field: "nama" | "noTelp" | "hubungan", // Memperbaiki tipe field
     value: string
   ) => {
     const updatedContacts = [...formValues.kontakDarurat];
@@ -131,20 +140,30 @@ const FormDetail = ({
                 disabled={!isEditing}
                 sx={{ marginBottom: 2 }}
               />
-              <CustomTextField
-                select
-                fullWidth
-                label="Jenis Kelamin"
-                value={formValues.jenisKelamin}
-                onChange={(e: { target: { value: string } }) =>
-                  handleInputChange("jenisKelamin", e.target.value)
-                }
-                disabled={!isEditing}
-                sx={{ marginBottom: 2 }}
-              >
-                <MenuItem value={JenisKelamin.LakiLaki}>Laki-Laki</MenuItem>
-                <MenuItem value={JenisKelamin.Perempuan}>Perempuan</MenuItem>
-              </CustomTextField>
+              <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
+                <FormLabel component="legend">Jenis Kelamin</FormLabel>
+                <RadioGroup
+                  value={formValues.jenisKelamin}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleInputChange("jenisKelamin", e.target.value)
+                  }
+                  row
+                >
+                  <FormControlLabel
+                    value={JenisKelamin.LakiLaki}
+                    control={<Radio />}
+                    label="Laki-Laki"
+                    disabled={!isEditing}
+                  />
+                  <FormControlLabel
+                    value={JenisKelamin.Perempuan}
+                    control={<Radio />}
+                    label="Perempuan"
+                    disabled={!isEditing}
+                  />
+                </RadioGroup>
+              </FormControl>
+
               <CustomTextField
                 fullWidth
                 label="Tempat Lahir"
@@ -165,27 +184,11 @@ const FormDetail = ({
                 disabled={!isEditing}
                 sx={{ marginBottom: 2 }}
               />
-              <CustomTextField
-                select
-                fullWidth
-                label="Status Perkawinan"
-                value={
-                  formValues.perkawinan ? "Sudah Menikah" : "Belum Menikah"
-                }
-                onChange={(e: { target: { value: string } }) =>
-                  handleInputChange(
-                    "perkawinan",
-                    e.target.value === "Sudah Menikah"
-                  )
-                }
-                disabled={!isEditing}
-                sx={{ marginBottom: 2 }}
-              >
-                <MenuItem value="Sudah Menikah">Sudah Menikah</MenuItem>
-                <MenuItem value="Belum Menikah">Belum Menikah</MenuItem>
-              </CustomTextField>
+
               <CustomTextField
                 fullWidth
+                multiline
+                rows={4}
                 label="Alamat"
                 value={formValues.alamat}
                 onChange={(e: { target: { value: string } }) =>
@@ -194,24 +197,68 @@ const FormDetail = ({
                 disabled={!isEditing}
                 sx={{ marginBottom: 2 }}
               />
-              <CustomTextField
-                select
-                fullWidth
-                label="Kewarganegaraan"
-                value={formValues.kewarganegaraan ? "WNI" : "WNA"}
-                onChange={(e: { target: { value: string } }) =>
-                  handleInputChange("kewarganegaraan", e.target.value === "WNI")
-                }
-                disabled={!isEditing}
-                sx={{ marginBottom: 2 }}
-              >
-                <MenuItem value="WNI">WNI</MenuItem>
-                <MenuItem value="WNA">WNA</MenuItem>
-              </CustomTextField>
             </Grid>
 
             {/* Kolom Kanan */}
             <Grid item xs={12} sm={6}>
+              <Box>
+              <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
+                <FormLabel component="legend">Status Perkawinan</FormLabel>
+                <RadioGroup
+                  value={
+                    formValues.perkawinan ? "Sudah Menikah" : "Belum Menikah"
+                  }
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleInputChange(
+                      "perkawinan",
+                      e.target.value === "Sudah Menikah"
+                    )
+                  }
+                  row
+                >
+                  <FormControlLabel
+                    value="Sudah Menikah"
+                    control={<Radio />}
+                    label="Sudah Menikah"
+                    disabled={!isEditing}
+                  />
+                  <FormControlLabel
+                    value="Belum Menikah"
+                    control={<Radio />}
+                    label="Belum Menikah"
+                    disabled={!isEditing}
+                  />
+                </RadioGroup>
+              </FormControl>
+              </Box>
+              <Box>
+              <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
+                <FormLabel component="legend">Kewarganegaraan</FormLabel>
+                <RadioGroup
+                  value={formValues.kewarganegaraan ? "WNI" : "WNA"}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleInputChange(
+                      "kewarganegaraan",
+                      e.target.value === "WNI"
+                    )
+                  }
+                  row
+                >
+                  <FormControlLabel
+                    value="WNI"
+                    control={<Radio />}
+                    label="WNI"
+                    disabled={!isEditing}
+                  />
+                  <FormControlLabel
+                    value="WNA"
+                    control={<Radio />}
+                    label="WNA"
+                    disabled={!isEditing}
+                  />
+                </RadioGroup>
+              </FormControl>
+              </Box>
               <CustomTextField
                 select
                 fullWidth
@@ -269,7 +316,9 @@ const FormDetail = ({
 
             {/* Kontak Darurat */}
             <Grid item xs={12}>
-              <Typography sx={{ marginBottom: 2 }} variant="h5">Kontak Darurat</Typography>
+              <Typography sx={{ marginBottom: 2 }} variant="h5">
+                Kontak Darurat
+              </Typography>
               {formValues.kontakDarurat.map((contact, index) => (
                 <Box key={index}>
                   <CustomTextField

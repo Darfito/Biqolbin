@@ -120,7 +120,7 @@ const FormCicilan: React.FC<FormCicilanProps> = ({
 
   return (
     <>
-      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
         <form onSubmit={handleSubmit}>
           <DialogTitle>
             {initialData ? "Edit Cicilan" : "Tambah Cicilan"}

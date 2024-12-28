@@ -7,7 +7,6 @@ import CardHeader from "@mui/material/CardHeader";
 import TablePagination from "@mui/material/TablePagination";
 import type { TextFieldProps } from "@mui/material/TextField";
 
-
 // Third-party Imports
 import classnames from "classnames";
 import {
@@ -40,14 +39,7 @@ import styles from "../../../../styles/table.module.css";
 import TablePaginationComponent from "../pagination/TablePaginationComponent";
 import CustomTextField from "../textField/TextField";
 import { ChevronRight } from "@mui/icons-material";
-import {
-  Autocomplete,
-  Box,
-  FormControl,
-} from "@mui/material";
-
-
-
+import { Autocomplete, Box, FormControl } from "@mui/material";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -170,18 +162,14 @@ const Filter = ({
 
 // Mendeklarasikan interface dengan tipe generik T
 interface JamaahTableProps<T> {
-  columns: ColumnDef<T, any>[];  // Kolom dinamis yang disesuaikan dengan tipe T
-  data: T[];  // Data dinamis sesuai tipe T
+  columns: ColumnDef<T, any>[]; // Kolom dinamis yang disesuaikan dengan tipe T
+  data: T[]; // Data dinamis sesuai tipe T
 }
-
-
-
 
 const JamaahTable = <T,>({ columns, data }: JamaahTableProps<T>) => {
   // States
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
-
 
   const table = useReactTable({
     data: data || [], // Pastikan data selalu berupa array.
@@ -216,10 +204,10 @@ const JamaahTable = <T,>({ columns, data }: JamaahTableProps<T>) => {
           width: "100%",
         }}
       >
-        <CardHeader
+        {/* <CardHeader
         sx={{ 
           paddingTop: 0
-         }}
+        }}
           action={
             <DebouncedInput
               value={globalFilter ?? ""}
@@ -227,7 +215,7 @@ const JamaahTable = <T,>({ columns, data }: JamaahTableProps<T>) => {
               placeholder="Search all columns..."
             />
           }
-        />
+        /> */}
       </Box>
       <div className="overflow-x-auto">
         <table className={styles.table}>
@@ -253,16 +241,8 @@ const JamaahTable = <T,>({ columns, data }: JamaahTableProps<T>) => {
                             )}
                             {header.column.getIsSorted() &&
                               {
-                                asc: (
-                                  <ChevronRight
-                                    className="-rotate-90"
-                                  />
-                                ),
-                                desc: (
-                                  <ChevronRight
-                                    className="rotate-90"
-                                  />
-                                ),
+                                asc: <ChevronRight className="-rotate-90" />,
+                                desc: <ChevronRight className="rotate-90" />,
                               }[header.column.getIsSorted() as "asc" | "desc"]}
                           </div>
                           {header.column.getCanFilter() && (

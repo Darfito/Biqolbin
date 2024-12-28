@@ -17,7 +17,11 @@ interface FileProp {
   size: number
 }
 
-const FileUploaderSingle = () => {
+interface FileUploaderSingleProps {
+  onFileUpload: (file: File) => void;
+}
+
+const FileUploaderSingle = ({onFileUpload}: FileUploaderSingleProps) => {
   // ** State
   const [files, setFiles] = useState<File[]>([])
 
@@ -29,7 +33,9 @@ const FileUploaderSingle = () => {
       'application/pdf': ['.pdf'] 
     },
     onDrop: (acceptedFiles: File[]) => {
-      setFiles(acceptedFiles.map((file: File) => Object.assign(file)))
+      const file = acceptedFiles[0];
+      setFiles([file]); // Save file locally for preview
+      onFileUpload(file); // Trigger callback
     }
   })
 

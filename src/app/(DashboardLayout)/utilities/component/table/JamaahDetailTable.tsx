@@ -82,15 +82,17 @@ const JamaahDetailTable = ({ data, perkawinan }: JamaahDetailProps<JenisDokumen>
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null); // State untuk menyimpan file yang diunggah
+
 
   const handleDialogOpen = () => setOpenDialog(true);
   const handleDialogClose = () => setOpenDialog(false);
 
-
-  const handleAddCicilan = () => {
-    setEditData(null); // Reset data cicilan
-    setOpenFormCicilan(true); // Buka dialog
+  const handleFileUpload = (file: File) => {
+    setUploadedFile(file); // Simpan file yang diunggah ke state
+    console.log("File uploaded:", file);
   };
+
 
 
   // Filter data "Buku Nikah" hanya jika perkawinan bernilai true
@@ -110,17 +112,17 @@ const JamaahDetailTable = ({ data, perkawinan }: JamaahDetailProps<JenisDokumen>
       header: "Jenis Dokumen",
       enableColumnFilter: false,
     }),
-    columnHelper.accessor("lampiran", {
-      cell: (info) => (
-        <Box sx={{ display: "flex", justifyContent: "start" }}>
-          <IconButton>
-            <Folder />
-          </IconButton>
-        </Box> 
-      ),
-      header: "Lampiran",
-      enableColumnFilter: false,
-    }),
+    // columnHelper.accessor("lampiran", {
+    //   cell: (info) => (
+    //     <Box sx={{ display: "flex", justifyContent: "start" }}>
+    //       <IconButton>
+    //         <Folder />
+    //       </IconButton>
+    //     </Box> 
+    //   ),
+    //   header: "Lampiran",
+    //   enableColumnFilter: false,
+    // }),
     columnHelper.accessor("action", {
       cell: (info) => (
         <Box sx={{ display: "flex", justifyContent: "start" }}>
@@ -128,7 +130,7 @@ const JamaahDetailTable = ({ data, perkawinan }: JamaahDetailProps<JenisDokumen>
             <UploadFile />
           </IconButton>
           <IconButton>
-            <IconEye />
+            <Folder />
           </IconButton>
           <IconButton>
             <Delete />
@@ -137,7 +139,7 @@ const JamaahDetailTable = ({ data, perkawinan }: JamaahDetailProps<JenisDokumen>
           <Dialog open={openDialog} onClose={handleDialogClose}>
             <DialogTitle>Upload File</DialogTitle>
             <DialogContent>
-            <FileUploaderSingle />
+            <FileUploaderSingle onFileUpload={handleFileUpload} /> {/* Oper onFileUpload */}
             </DialogContent>
             <DialogActions>
               <Button onClick={handleDialogClose} color="primary">
@@ -181,15 +183,8 @@ const JamaahDetailTable = ({ data, perkawinan }: JamaahDetailProps<JenisDokumen>
         display: "flex",
         margin: "20px"
       }}>
-      <Button
-        sx={{ color: "#fff", minWidth: "150px" }}
-        variant="contained"
-        onClick={handleAddCicilan}
-      >
-        Tambah
-      </Button>
       </Box>
-      <CardHeader
+      {/* <CardHeader
         sx={{ paddingTop: 0 }}
         action={
           <DebouncedInput
@@ -198,7 +193,7 @@ const JamaahDetailTable = ({ data, perkawinan }: JamaahDetailProps<JenisDokumen>
             placeholder="Search all columns..."
           />
         }
-      />
+      /> */}
       <div className="overflow-x-auto">
         <table className={styles.table}>
           <thead>

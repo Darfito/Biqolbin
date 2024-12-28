@@ -1,14 +1,18 @@
 "use client";
 
 import { Box, Card, Typography } from "@mui/material";
-import DashboardCard from "../../components/shared/DashboardCard";
 import PageContainer from "../../components/container/PageContainer";
-import KeuanganTable from "../../utilities/component/table/KeuanganTable";
-import { columnsKeuangan } from "../../keuangan/component/columns/columnsKeuangan";
-import { KeuanganData } from "../../keuangan/data";
-import FormKeuangan from "../../keuangan/component/FormKeuangan";
+import * as v from "valibot";
+
+import { PaketData } from "../../jamaah/data";
+import FormCMS, { formSchema } from "./FormCMS";
+import CMSTable from "../../utilities/component/table/CMSTable";
+import { useState } from "react";
+import { toast } from "react-toastify";
 
 const CMS = () => {
+
+
   return (
     <>
     <Box
@@ -21,11 +25,11 @@ const CMS = () => {
       </Typography>
     </Box>
     <PageContainer title="CMS">
-      <Card sx={{ mt: 3}}>
-        <Box sx={{ margin: "20px" }}>
-          <FormKeuangan />
+        <Box sx={{ margin: "20px", display: "flex", justifyContent: "end" }}>
+          <FormCMS mode={"create"}  />
         </Box>
-        <KeuanganTable columns={columnsKeuangan} data={KeuanganData} />
+      <Card sx={{ mt: 3}}>
+        <CMSTable data={PaketData} />
       </Card>
     </PageContainer>
   </>
