@@ -3,6 +3,7 @@ import {
   IconLayoutDashboard,
   IconMoneybag,
   IconPencil,
+  IconUser,
 } from "@tabler/icons-react";
 
 import { uniqueId } from "lodash";
@@ -33,6 +34,12 @@ const Menuitems = [
     title: "CMS",
     icon: IconPencil,
     href: "/cms",
+  },
+  {
+    id: uniqueId(),
+    title: "User",
+    icon: IconUser,
+    href: "/user",
   },
 ];
 

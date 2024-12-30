@@ -1,4 +1,4 @@
-import { CardStatsHorizontalWithBorderProps, JenisPaket, JenisPenerbangan, KeuanganProps, PaketInterface } from "../../utilities/type";
+import { CardStatsHorizontalWithBorderProps, Jabatan, JenisKelamin, JenisPaket, JenisPenerbangan, KeuanganProps, Maskapai, PaketInterface, UserProps } from "../type";
 import { IconUser, IconProgress,IconReceipt } from "@tabler/icons-react";
 
 
@@ -29,34 +29,60 @@ const PaketData: PaketInterface[] = [
   {
     id: "PKT001",
     nama: "Paket Regular 1",
-    jenis: JenisPaket.REGULAR, // Enum digunakan di sini
-    maskapai: "Garuda Indonesia",
-    jenisPenerbangan: JenisPenerbangan.DIRECT, // Enum digunakan di sini
+    jenis: JenisPaket.REGULAR,
+    maskapai: Maskapai.GARUDA_INDONESIA,
+    jenisPenerbangan: JenisPenerbangan.DIRECT,
     keretaCepat: false,
     harga: 1000000,
-    tglKeberangkatan: "2024-12-01", // Diubah menjadi string
-    tglKepulangan: "2024-12-10", // Diubah menjadi string
-    fasilitas: ["Hotel bintang 3", "Transportasi lokal"], // Diubah menjadi array string
-    publish: true, // Properti baru sesuai tipe
+    tglKeberangkatan: "2024-12-01",
+    tglKepulangan: "2024-12-10",
+    fasilitas: ["Hotel bintang 3", "Transportasi lokal"],
+    publish: true,
+    namaMuthawif: "Yusuf Aldi",
+    noTelpMuthawif: "0812 3456 7890",
+    namaHotel: "Al Madinah",
+    alamatHotel: "Jl. Utama No. 123, Mekah",
+    ratingHotel: 4.5,
+    tanggalCheckIn: "2024-12-02",
+    tanggalCheckOut: "2024-12-09",
+    gambar: {
+      id: 1,
+      url: "https://example.com/images/paket-regular-1.jpg",
+      bucket: "travel-packages",
+      path: "images/paket-regular-1.jpg",
+    },
   },
   {
     id: "PKT002",
     nama: "Paket Regular 2",
     jenis: JenisPaket.REGULAR,
-    maskapai: "Lion Air",
+    maskapai: Maskapai.QATAR_AIRWAYS,
     jenisPenerbangan: JenisPenerbangan.TRANSIT,
     keretaCepat: false,
     harga: 800000,
     tglKeberangkatan: "2024-12-05",
     tglKepulangan: "2024-12-15",
     fasilitas: ["Hotel bintang 2", "Transportasi lokal"],
-    publish: false, // Properti baru sesuai tipe
+    publish: false,
+    namaMuthawif: "Ahmad Fauzi",
+    noTelpMuthawif: "0812 5678 1234",
+    namaHotel: "Al Safwa",
+    alamatHotel: "Jl. Selatan No. 45, Madinah",
+    ratingHotel: 3.8,
+    tanggalCheckIn: "2024-12-06",
+    tanggalCheckOut: "2024-12-14",
+    gambar: {
+      id: 2,
+      url: "https://example.com/images/paket-regular-2.jpg",
+      bucket: "travel-packages",
+      path: "images/paket-regular-2.jpg",
+    },
   },
   {
     id: "PKT003",
     nama: "Paket VIP 1",
     jenis: JenisPaket.VIP,
-    maskapai: "Singapore Airlines",
+    maskapai: Maskapai.LION_AIRWAYS,
     jenisPenerbangan: JenisPenerbangan.DIRECT,
     keretaCepat: true,
     harga: 2000000,
@@ -64,14 +90,74 @@ const PaketData: PaketInterface[] = [
     tglKepulangan: "2024-12-20",
     fasilitas: ["Hotel bintang 5", "Transportasi premium"],
     publish: true,
+    namaMuthawif: "Hana Ramadani",
+    noTelpMuthawif: "0812 3456 7891",
+    namaHotel: "Hilton Mekah",
+    alamatHotel: "Jl. Ka'bah No. 1, Mekah",
+    ratingHotel: 5.0,
+    tanggalCheckIn: "2024-12-11",
+    tanggalCheckOut: "2024-12-19",
     gambar: {
-      id: 1,
+      id: 3,
       url: "https://example.com/images/paket-vip-1.jpg",
       bucket: "travel-packages",
       path: "images/paket-vip-1.jpg",
-    }, // Menambahkan properti gambar sesuai tipe
+    },
+  },
+  {
+    id: "PKT004",
+    nama: "Paket Regular 4",
+    jenis: JenisPaket.REGULAR,
+    maskapai: Maskapai.ETIHAD_AIRWAYS,
+    jenisPenerbangan: JenisPenerbangan.TRANSIT,
+    keretaCepat: false,
+    harga: 500000,
+    tglKeberangkatan: "2024-12-15",
+    tglKepulangan: "2024-12-25",
+    fasilitas: ["Hotel bintang 1", "Transportasi umum"],
+    publish: true,
+    namaMuthawif: "Rizki Hidayat",
+    noTelpMuthawif: "0812 7890 4567",
+    namaHotel: "Al Firdous",
+    alamatHotel: "Jl. Timur No. 34, Madinah",
+    ratingHotel: 3.0,
+    tanggalCheckIn: "2024-12-16",
+    tanggalCheckOut: "2024-12-24",
+    gambar: {
+      id: 4,
+      url: "https://example.com/images/paket-ekonomi-1.jpg",
+      bucket: "travel-packages",
+      path: "images/paket-ekonomi-1.jpg",
+    },
+  },
+  {
+    id: "PKT005",
+    nama: "Paket VIP 4",
+    jenis: JenisPaket.VIP,
+    maskapai: Maskapai.SAUDIA_ARABIA,
+    jenisPenerbangan: JenisPenerbangan.DIRECT,
+    keretaCepat: true,
+    harga: 3000000,
+    tglKeberangkatan: "2024-12-20",
+    tglKepulangan: "2024-12-30",
+    fasilitas: ["Hotel bintang 5", "Transportasi VIP", "Makanan premium"],
+    publish: true,
+    namaMuthawif: "Nur Aisyah",
+    noTelpMuthawif: "0812 5678 9101",
+    namaHotel: "Raffles Mekah",
+    alamatHotel: "Jl. Zamzam No. 12, Mekah",
+    ratingHotel: 4.9,
+    tanggalCheckIn: "2024-12-21",
+    tanggalCheckOut: "2024-12-29",
+    gambar: {
+      id: 5,
+      url: "https://example.com/images/paket-premium-1.jpg",
+      bucket: "travel-packages",
+      path: "images/paket-premium-1.jpg",
+    },
   },
 ];
+
 
 
 export const KeuanganData: KeuanganProps[] = [
@@ -263,3 +349,53 @@ export const KeuanganData: KeuanganProps[] = [
   },
 ];
 
+export const userData: UserProps[] = [
+  {
+    id: 1,
+    nama: "Budi Santoso",
+    jenisKelamin: JenisKelamin.LakiLaki,
+    noTelp: "081234567890",
+    role: Jabatan.Marketing,
+    penempatan: "Jakarta",
+    alamatCabang: "Jl. Sudirman No. 12, Jakarta",
+    action: "Edit",
+  },
+  {
+    id: 2,
+    nama: "Siti Nurhaliza",
+    jenisKelamin: JenisKelamin.Perempuan,
+    noTelp: "081234567891",
+    role: Jabatan.Admin,
+    penempatan: "Bandung",
+    alamatCabang: "Jl. Braga No. 45, Bandung",
+    action: "Delete",
+  },
+  {
+    id: 3,
+    nama: "Andi Pratama",
+    jenisKelamin: JenisKelamin.LakiLaki,
+    noTelp: "081234567892",
+    role: Jabatan.FinanceAccounting,
+    penempatan: "Surabaya",
+    alamatCabang: "Jl. Tunjungan No. 23, Surabaya",
+  },
+  {
+    id: 4,
+    nama: "Rina Amelia",
+    jenisKelamin: JenisKelamin.Perempuan,
+    noTelp: "081234567893",
+    role: Jabatan.DivisiGeneralAffair,
+    penempatan: "Yogyakarta",
+    alamatCabang: "Jl. Malioboro No. 10, Yogyakarta",
+    action: "View",
+  },
+  {
+    id: 5,
+    nama: "Joko Widodo",
+    jenisKelamin: JenisKelamin.LakiLaki,
+    noTelp: "081234567894",
+    role: Jabatan.Marketing,
+    penempatan: "Medan",
+    alamatCabang: "Jl. Sisingamangaraja No. 8, Medan",
+  },
+];

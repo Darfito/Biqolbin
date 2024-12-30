@@ -17,7 +17,10 @@ import {
 import {
   JamaahProps,
   JenisKelamin,
+  JenisPaket,
+  JenisPenerbangan,
   KontakDaruratRelation,
+  Maskapai,
   TipeKamar,
 } from "@/app/(DashboardLayout)/utilities/type";
 
@@ -65,14 +68,28 @@ const FormDetail = ({
       jenisPaket: {
         id: "0",
         nama: "",
-        jenis: "REGULAR",
-        maskapai: "",
-        jenisPenerbangan: "DIRECT",
+        jenis: JenisPaket.REGULAR,
+        maskapai: Maskapai.GARUDA_INDONESIA,
+        jenisPenerbangan: JenisPenerbangan.DIRECT,
         keretaCepat: false,
         harga: 0,
-        tglKeberangkatan: new Date(),
-        tglKepulangan: new Date(),
-        fasilitas: "",
+        tglKeberangkatan: "",
+        tglKepulangan: "",
+        fasilitas: [],
+        publish: false,
+        namaMuthawif: "",
+        noTelpMuthawif: "",
+        namaHotel: "",
+        alamatHotel: "",
+        ratingHotel: 0,
+        tanggalCheckIn: "",
+        tanggalCheckOut: "",
+        gambar: {
+          id: 0,
+          url: "",
+          bucket: "",
+          path: "",
+        },
       },
       berangkat: new Date(),
       selesai: new Date(),
@@ -202,62 +219,62 @@ const FormDetail = ({
             {/* Kolom Kanan */}
             <Grid item xs={12} sm={6}>
               <Box>
-              <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
-                <FormLabel component="legend">Status Perkawinan</FormLabel>
-                <RadioGroup
-                  value={
-                    formValues.perkawinan ? "Sudah Menikah" : "Belum Menikah"
-                  }
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    handleInputChange(
-                      "perkawinan",
-                      e.target.value === "Sudah Menikah"
-                    )
-                  }
-                  row
-                >
-                  <FormControlLabel
-                    value="Sudah Menikah"
-                    control={<Radio />}
-                    label="Sudah Menikah"
-                    disabled={!isEditing}
-                  />
-                  <FormControlLabel
-                    value="Belum Menikah"
-                    control={<Radio />}
-                    label="Belum Menikah"
-                    disabled={!isEditing}
-                  />
-                </RadioGroup>
-              </FormControl>
+                <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
+                  <FormLabel component="legend">Status Perkawinan</FormLabel>
+                  <RadioGroup
+                    value={
+                      formValues.perkawinan ? "Sudah Menikah" : "Belum Menikah"
+                    }
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      handleInputChange(
+                        "perkawinan",
+                        e.target.value === "Sudah Menikah"
+                      )
+                    }
+                    row
+                  >
+                    <FormControlLabel
+                      value="Sudah Menikah"
+                      control={<Radio />}
+                      label="Sudah Menikah"
+                      disabled={!isEditing}
+                    />
+                    <FormControlLabel
+                      value="Belum Menikah"
+                      control={<Radio />}
+                      label="Belum Menikah"
+                      disabled={!isEditing}
+                    />
+                  </RadioGroup>
+                </FormControl>
               </Box>
               <Box>
-              <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
-                <FormLabel component="legend">Kewarganegaraan</FormLabel>
-                <RadioGroup
-                  value={formValues.kewarganegaraan ? "WNI" : "WNA"}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    handleInputChange(
-                      "kewarganegaraan",
-                      e.target.value === "WNI"
-                    )
-                  }
-                  row
-                >
-                  <FormControlLabel
-                    value="WNI"
-                    control={<Radio />}
-                    label="WNI"
-                    disabled={!isEditing}
-                  />
-                  <FormControlLabel
-                    value="WNA"
-                    control={<Radio />}
-                    label="WNA"
-                    disabled={!isEditing}
-                  />
-                </RadioGroup>
-              </FormControl>
+                <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
+                  <FormLabel component="legend">Kewarganegaraan</FormLabel>
+                  <RadioGroup
+                    value={formValues.kewarganegaraan ? "WNI" : "WNA"}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      handleInputChange(
+                        "kewarganegaraan",
+                        e.target.value === "WNI"
+                      )
+                    }
+                    row
+                  >
+                    <FormControlLabel
+                      value="WNI"
+                      control={<Radio />}
+                      label="WNI"
+                      disabled={!isEditing}
+                    />
+                    <FormControlLabel
+                      value="WNA"
+                      control={<Radio />}
+                      label="WNA"
+                      disabled={!isEditing}
+                    />
+                  </RadioGroup>
+                </FormControl>
               </Box>
               <CustomTextField
                 select
@@ -276,8 +293,6 @@ const FormDetail = ({
                 <MenuItem value={TipeKamar.QUAD}>QUAD</MenuItem>
                 <MenuItem value={TipeKamar.TRIPLE}>TRIPLE</MenuItem>
                 <MenuItem value={TipeKamar.DOUBLE}>DOUBLE</MenuItem>
-                <MenuItem value={TipeKamar.CHILD}>CHILD</MenuItem>
-                <MenuItem value={TipeKamar.INFANT}>INFANT</MenuItem>
               </CustomTextField>
               <CustomTextField
                 fullWidth
@@ -380,15 +395,6 @@ const FormDetail = ({
                 </Box>
               ))}
             </Grid>
-
-            {/* Tombol Simpan */}
-            {isEditing && (
-              <Grid item xs={12}>
-                <Button type="submit" variant="contained" color="primary">
-                  Simpan
-                </Button>
-              </Grid>
-            )}
           </Grid>
         </Box>
       </form>

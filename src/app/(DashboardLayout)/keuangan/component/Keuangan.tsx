@@ -3,7 +3,7 @@
 import { Box, Card, Grid, Typography } from "@mui/material";
 import PageContainer from "../../components/container/PageContainer";
 import ScoreCard from "../../utilities/component/card/ScoreCard";
-import { KeuanganData, scoreCardKeuangan } from "../data";
+import { KeuanganData, scoreCardKeuangan } from "../../utilities/data";
 import FormKeuangan from "./FormKeuangan";
 
 import { columnsKeuangan } from "./columns/columnsKeuangan";

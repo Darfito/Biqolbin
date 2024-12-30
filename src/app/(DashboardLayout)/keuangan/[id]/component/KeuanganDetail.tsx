@@ -9,7 +9,7 @@ import FormDetail from "./FormDetail";
 import { useRouter } from "next/navigation";
 
 import KeuanganDetailTable from "@/app/(DashboardLayout)/utilities/component/table/KeuanganDetailTable";
-import { KeuanganData } from "../../data";
+import { KeuanganData } from "../../../utilities/data";
 
 
 

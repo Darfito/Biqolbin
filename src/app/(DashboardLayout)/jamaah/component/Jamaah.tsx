@@ -2,7 +2,7 @@
 
 import { Box, Card, Grid, Typography } from "@mui/material";
 import PageContainer from "../../components/container/PageContainer";
-import { scoreCardKeuangan } from "../../keuangan/data";
+import { scoreCardKeuangan } from "../../utilities/data";
 import ScoreCard from "../../utilities/component/card/ScoreCard";
 import { columnsJamaah } from "./columns/columnsJamaah";
 import JamaahTable from "../../utilities/component/table/JamaahTable";
