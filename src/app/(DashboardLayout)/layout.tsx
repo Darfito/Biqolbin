@@ -3,6 +3,7 @@ import { styled, Container, Box } from "@mui/material";
 import React, { useState } from "react";
 import Header from "@/app/(DashboardLayout)/layout/header/Header";
 import Sidebar from "@/app/(DashboardLayout)/layout/sidebar/Sidebar";
+import { ToastContainer } from "react-toastify";
 
 
 const MainWrapper = styled("div")(() => ({
@@ -35,6 +36,7 @@ export default function RootLayout({
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   return (
     <MainWrapper className="mainwrapper">
+      <ToastContainer />
       {/* ------------------------------------------- */}
       {/* Sidebar */}
       {/* ------------------------------------------- */}

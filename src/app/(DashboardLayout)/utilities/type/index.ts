@@ -137,6 +137,7 @@ export enum Jabatan {
   Marketing = "Marketing",
   FinanceAccounting = "Finance & Accounting",
   Admin = "Admin",
+  Superadmin = "Superadmin",
 }
 
 export type JenisDokumen ={

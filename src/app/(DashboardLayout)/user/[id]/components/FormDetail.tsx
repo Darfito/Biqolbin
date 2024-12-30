@@ -118,6 +118,7 @@ const FormDetail = ({
                 sx={{ marginBottom: 2 }}
               >
                 <MenuItem value={Jabatan.Admin}>Admin</MenuItem>
+                <MenuItem value={Jabatan.Superadmin}>Superadmin</MenuItem>
                 <MenuItem value={Jabatan.DivisiGeneralAffair}>
                   Divisi General Affair
                 </MenuItem>
@@ -125,6 +126,7 @@ const FormDetail = ({
                   Finance & Accounting
                 </MenuItem>
                 <MenuItem value={Jabatan.Marketing}>Marketing</MenuItem>
+                
               </CustomTextField>
               <CustomTextField
                 fullWidth
@@ -145,6 +147,7 @@ const FormDetail = ({
                 onChange={(e: { target: { value: string } }) =>
                   setFormValues({ ...formValues, alamatCabang: e.target.value })
                 }
+                disabled={!isEditing}
                 multiline
                 rows={4}
               />

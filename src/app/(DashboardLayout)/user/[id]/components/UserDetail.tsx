@@ -16,7 +16,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { UserProps } from "@/app/(DashboardLayout)/utilities/type";
-import { userData } from "@/app/(DashboardLayout)/utilities/data";
+import { createClient } from "@/libs/supabase/client";
 import FormDetail from "./FormDetail";
 
 interface UserDetailProps {
@@ -25,60 +25,82 @@ interface UserDetailProps {
 }
 
 const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
-  const router = useRouter(); // Initialize useRouter
-  const [isEditing, setIsEditing] = useState<boolean>(false); // State to toggle edit mode
-  const [openModal, setOpenModal] = useState<boolean>(false); // Modal state to confirm save
-  const [isSaving, setIsSaving] = useState<boolean>(false); // State to check if saving is in progress
+  const router = useRouter();
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
   const [formData, setFormData] = useState({});
-  const [currentData, setCurrentData] = useState<UserProps | null>(null); // State untuk menyimpan data jamaah
+  const [currentData, setCurrentData] = useState<UserProps | null>(null);
+  
+  const supabase = createClient();
 
+  // Fetch user data
   useEffect(() => {
-    if (id && !currentData) {
-      const foundUser = userData.find((item) => item.id === Number(id));
-      setCurrentData(foundUser || null);
-    }
-  }, [id]); // Tambahkan dependency array yang tepat
+    const fetchUserData = async () => {
+      if (id && !currentData) {
+        try {
+          const { data, error } = await supabase
+            .from("User")
+            .select("*") // Get all necessary fields, not just 'id'
+            .eq("id", id)
+            .single(); // To get only one user based on the id
 
-  // Handle Submit data sebelum dialog
+          if (error) {
+            console.error("Error fetching user:", error);
+          } else {
+            setCurrentData(data); // Set fetched user data
+          }
+        } catch (err) {
+          console.error("Error fetching data:", err);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, [id, currentData, supabase]);
+
+  // Handle Submit data before dialog
   const handleSubmit = (data: React.SetStateAction<{}>) => {
-    setFormData(data); // Simpan data form ke state
-    setOpenModal(true);
+    setFormData(data); // Save form data to state
+    setOpenModal(true); // Open the modal for confirmation
   };
 
   // Toggle the isEditing state
   const handleEditClick = () => {
     if (!isEditing) {
-      setIsEditing(true); // Set isEditing hanya jika belum dalam mode edit
+      setIsEditing(true); // Enter edit mode
     }
   };
 
-  // Function to handle the "Kembali ke Daftar" button click
+  // Function to handle the "Back to List" button click
   const handleBackClick = () => {
-    router.push("/user"); // Navigate to /keuangan page
+    router.push("/user"); // Navigate to the user list
   };
 
   // Open the confirmation modal
   const handleOpenModal = () => {
     if (!openModal) {
-      setOpenModal(true); // Hanya buka modal jika belum terbuka
+      setOpenModal(true); // Only open the modal if it's not already open
     }
   };
+
   // Close the confirmation modal
   const handleCloseModal = () => {
     if (openModal) {
-      setOpenModal(false); // Hanya tutup modal jika terbuka
+      setOpenModal(false); // Close the modal if it's open
     }
   };
+
   const handleSaveChanges = () => {
     setIsSaving(true);
-    console.log("Menyimpan data...", formData); // Menampilkan data yang sedang disimpan
+    console.log("Saving data...", formData); // Log the form data being saved
     setTimeout(() => {
       setIsSaving(false);
-      setIsEditing(false); // Disable edit mode setelah menyimpan
-      setOpenModal(false); // Tutup modal setelah data disimpan
-      console.log("Data berhasil disimpan:", formData); // Menampilkan data setelah disimpan
-      alert("Perubahan berhasil disimpan!"); // Menampilkan pesan sukses
-    }, 1000); // Simulasi operasi async
+      setIsEditing(false); // Exit edit mode after saving
+      setOpenModal(false); // Close the modal after saving
+      console.log("Data successfully saved:", formData); // Log the saved data
+      alert("Changes saved successfully!"); // Show success message
+    }, 1000); // Simulate async operation
   };
 
   return (
@@ -87,7 +109,7 @@ const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
         User Detail
       </Typography>
       <Breadcrumb links={breadcrumbLinks} />
-      <PageContainer title="Jamaah Detail">
+      <PageContainer title="User Detail">
         <Box
           sx={{
             marginTop: 3,
@@ -104,7 +126,7 @@ const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
               startIcon={<IconArrowLeft />}
               onClick={handleBackClick}
             >
-              Kembali ke Daftar
+              Back to List
             </Button>
           </Box>
 
@@ -114,7 +136,7 @@ const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
               sx={{ color: "white", marginRight: "1rem" }}
               onClick={isEditing ? handleOpenModal : handleEditClick}
             >
-              {isEditing ? "Simpan Perubahan" : "Sunting Rincian"}
+              {isEditing ? "Save Changes" : "Edit Details"}
             </Button>
           </Box>
         </Box>
@@ -123,23 +145,22 @@ const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
           <FormDetail
             isEditing={isEditing}
             onSaveChanges={handleSubmit}
-            userData={currentData}
+            userData={currentData} // Pass the fetched user data
           />
         </Box>
-
       </PageContainer>
 
       {/* Confirmation Modal */}
       <Dialog open={openModal} onClose={handleCloseModal}>
-        <DialogTitle>Konfirmasi Simpan Perubahan</DialogTitle>
+        <DialogTitle>Confirm Save Changes</DialogTitle>
         <DialogContent>
           <Typography>
-            Apakah Anda yakin ingin menyimpan perubahan ini?
+            Are you sure you want to save these changes?
           </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseModal} variant="contained" color="error">
-            Batal
+            Cancel
           </Button>
           <Button
             onClick={handleSaveChanges}
@@ -147,7 +168,7 @@ const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
             sx={{ color: "white" }}
             disabled={isSaving} // Disable the button while saving
           >
-            {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
+            {isSaving ? "Saving..." : "Save Changes"}
           </Button>
         </DialogActions>
       </Dialog>
