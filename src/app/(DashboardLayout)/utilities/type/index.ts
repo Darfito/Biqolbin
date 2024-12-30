@@ -120,8 +120,24 @@ export interface JamaahProps {
   status: StatusKepergian;
 }
 
+// ! INTERFACE USER
+export interface UserProps {
+  id: number;
+  nama: string;
+  jenisKelamin: JenisKelamin;
+  noTelp: string;
+  role: Jabatan;
+  penempatan: string;
+  alamatCabang: string;
+  action?: string
+}
 
-
+export enum Jabatan {
+  DivisiGeneralAffair = "Divisi General Affair",
+  Marketing = "Marketing",
+  FinanceAccounting = "Finance & Accounting",
+  Admin = "Admin",
+}
 
 export type JenisDokumen ={
   id: number;

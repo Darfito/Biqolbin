@@ -5,7 +5,6 @@ import Breadcrumb from "@/app/(DashboardLayout)/utilities/component/breadcrumb/B
 import {
   Box,
   Button,
-  Card,
   Dialog,
   DialogActions,
   DialogContent,
@@ -14,30 +13,29 @@ import {
 } from "@mui/material";
 import { IconArrowLeft } from "@tabler/icons-react";
 import React, { useEffect, useState } from "react";
-import FormDetail from "./FormDetail";
 import { useRouter } from "next/navigation";
 
-import jamaahData from "../../data";
-import { JamaahProps } from "@/app/(DashboardLayout)/utilities/type";
-import JamaahDetailTable from "@/app/(DashboardLayout)/utilities/component/table/JamaahDetailTable";
+import { UserProps } from "@/app/(DashboardLayout)/utilities/type";
+import { userData } from "@/app/(DashboardLayout)/utilities/data";
+import FormDetail from "./FormDetail";
 
-interface JamaahDetailProps {
+interface UserDetailProps {
   id: string;
   breadcrumbLinks: { label: string; href?: string }[];
 }
 
-const JamaahDetail = ({ id, breadcrumbLinks }: JamaahDetailProps) => {
+const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
   const router = useRouter(); // Initialize useRouter
   const [isEditing, setIsEditing] = useState<boolean>(false); // State to toggle edit mode
   const [openModal, setOpenModal] = useState<boolean>(false); // Modal state to confirm save
   const [isSaving, setIsSaving] = useState<boolean>(false); // State to check if saving is in progress
   const [formData, setFormData] = useState({});
-  const [currentData, setCurrentData] = useState<JamaahProps | null>(null); // State untuk menyimpan data jamaah
+  const [currentData, setCurrentData] = useState<UserProps | null>(null); // State untuk menyimpan data jamaah
 
   useEffect(() => {
     if (id && !currentData) {
-      const foundJamaah = jamaahData.find((item) => item.id === Number(id));
-      setCurrentData(foundJamaah || null);
+      const foundUser = userData.find((item) => item.id === Number(id));
+      setCurrentData(foundUser || null);
     }
   }, [id]); // Tambahkan dependency array yang tepat
 
@@ -56,7 +54,7 @@ const JamaahDetail = ({ id, breadcrumbLinks }: JamaahDetailProps) => {
 
   // Function to handle the "Kembali ke Daftar" button click
   const handleBackClick = () => {
-    router.push("/jamaah"); // Navigate to /keuangan page
+    router.push("/user"); // Navigate to /keuangan page
   };
 
   // Open the confirmation modal
@@ -83,12 +81,10 @@ const JamaahDetail = ({ id, breadcrumbLinks }: JamaahDetailProps) => {
     }, 1000); // Simulasi operasi async
   };
 
-  console.log("currentData untuk dioper ke table detail:", currentData?.jenisDokumen);
-
   return (
     <>
-      <Typography variant="h2" component="h1" >
-      Jamaah Detail
+      <Typography variant="h2" component="h1">
+        User Detail
       </Typography>
       <Breadcrumb links={breadcrumbLinks} />
       <PageContainer title="Jamaah Detail">
@@ -127,18 +123,10 @@ const JamaahDetail = ({ id, breadcrumbLinks }: JamaahDetailProps) => {
           <FormDetail
             isEditing={isEditing}
             onSaveChanges={handleSubmit}
-            jamaahData={currentData}
+            userData={currentData}
           />
         </Box>
 
-        <Box sx={{ marginTop: "2rem", backgroundColor: "#fff" }}>
-          <Card sx={{ backgroundColor: "#fff" }}>
-            <JamaahDetailTable
-              data={currentData?.jenisDokumen || []}
-              perkawinan={currentData?.perkawinan}
-            />
-          </Card>
-        </Box>
       </PageContainer>
 
       {/* Confirmation Modal */}
@@ -167,4 +155,4 @@ const JamaahDetail = ({ id, breadcrumbLinks }: JamaahDetailProps) => {
   );
 };
 
-export default JamaahDetail;
+export default UserDetail;
