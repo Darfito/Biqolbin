@@ -50,6 +50,7 @@ import {
 } from "@mui/material";
 import { PaketInterface } from "../../type";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/libs/supabase/client";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -199,6 +200,27 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
     setOpenDialog(false);
   };
 
+  const handlePublishToggle = async (id: string, currentStatus: boolean) => {
+      const supabase = createClient();
+    try {
+      const { data, error } = await supabase
+        .from("Paket")
+        .update({ publish: !currentStatus }) // Toggle the publish status
+        .eq("id", id); // Match the row by its id
+  
+      if (error) {
+        console.error("Error updating publish status:", error);
+        alert("Failed to update publish status.");
+      } else {
+        console.log("Publish status updated successfully:", data);
+        alert("Publish status updated successfully.");
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      alert("An unexpected error occurred.");
+    }
+  };
+
   const handleSaveChanges = () => {
     if (selectedId) {
       const updatedData = tableData.map((paket) =>
@@ -248,7 +270,7 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
     columnHelper.accessor("tglKepulangan", {
       id: "tglKepulangan",
       cell: (info) => info.getValue(),
-      header: "Tanggal Keberangkatan",
+      header: "Tanggal Kepulangan",
       enableColumnFilter: false,
     }),
     columnHelper.accessor("action", {
@@ -257,13 +279,11 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
           <Button
             variant="contained"
             onClick={() =>
-              handleDialogOpen(
-                info.row.original.id,
-                info.row.original.publish ? "unpublish" : "publish"
-              )
+              handlePublishToggle(info.row.original.id, info.row.original.publish)
             }
             sx={{
-              color: "#fff",backgroundColor: info.row.original.publish ? "red" : "green",
+              color: "#fff",
+              backgroundColor: info.row.original.publish ? "red" : "green",
             }}
           >
             {info.row.original.publish ? "Unpublish" : "Publish"}

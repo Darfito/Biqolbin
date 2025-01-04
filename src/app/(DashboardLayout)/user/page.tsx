@@ -1,7 +1,6 @@
 'use server';
 
 
-import { getUserData } from "@/app/api/routes/user";
 import User from "./components/User";
 import { getUserAction } from "./action";
 

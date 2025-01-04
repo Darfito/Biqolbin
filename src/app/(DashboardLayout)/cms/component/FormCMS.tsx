@@ -42,6 +42,7 @@ interface FormValues {
   nama: string;
   jenis: string;
   maskapai: string;
+  noPenerbangan?: string;
   customMaskapai: string;
   jenisPenerbangan: string;
   keretaCepat: boolean;
@@ -64,6 +65,7 @@ interface FormErrors {
   nama?: string;
   jenis?: string;
   maskapai?: string;
+  noPenerbangan?: string;
   customMaskapai?: string;
   jenisPenerbangan?: string;
   keretaCepat?: boolean;
@@ -132,6 +134,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
       nama: "",
       jenis: "",
       maskapai: "",
+      noPenerbangan: "",
       customMaskapai: "",
       jenisPenerbangan: "",
       keretaCepat: false,
@@ -443,6 +446,18 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
                 </MenuItem>
               ))}
             </CustomTextField>
+
+            <CustomTextField
+              fullWidth
+              label="Nomor Penerbangan (opsional)"
+              name="Nomor Penerbangan"
+              value={formValues.nama}
+              error={!!formErrors.nama}
+              helperText={formErrors.nama}
+              onChange={(e: { target: { value: string } }) =>
+                setFormValues({ ...formValues, nama: e.target.value })
+              }
+            />
 
             {/* Input tambahan jika memilih "Lainnya" */}
             {isCustomMaskapai && (
