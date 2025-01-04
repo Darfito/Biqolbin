@@ -107,7 +107,7 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
                 Detail Paket: {paketDetail.nama}
               </Typography>
               <Divider sx={{ my: 2 }} />
-              {paketDetail.gambar?.url && (
+              {paketDetail.gambar_url && (
                 <Box
                   sx={{
                     width: "100%",

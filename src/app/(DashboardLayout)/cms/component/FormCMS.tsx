@@ -26,10 +26,38 @@ import {
 import { Delete } from "@mui/icons-material";
 import FileUploaderSingle from "../../utilities/component/uploader/FileUploaderSingle";
 import { useEffect, useState } from "react";
+import {
+  createCmsAction,
+  sanitizeFolderName,
+  updateCmsAction,
+} from "../action";
+import { createClient } from "@/libs/supabase/client";
 
 interface FormCMSProps {
-  initialValues?: Record<string, any>; // Nilai default untuk mengedit
-  mode: 'create' | 'edit'; // Mode: create atau edit
+  initialValues?: FormValues; // Nilai default untuk mengedit
+  mode: "create" | "edit"; // Mode: create atau edit
+}
+
+interface FormValues {
+  nama: string;
+  jenis: string;
+  maskapai: string;
+  customMaskapai: string;
+  jenisPenerbangan: string;
+  keretaCepat: boolean;
+  harga: string;
+  tglKeberangkatan: string;
+  tglKepulangan: string;
+  namaMuthawif: string;
+  noTelpMuthawif: string;
+  namaHotel: string;
+  alamatHotel: string;
+  ratingHotel: number;
+  tanggalCheckIn: string;
+  tanggalCheckOut: string;
+  fasilitas: string[];
+  publish?: boolean;
+  gambar_url: string;
 }
 
 interface FormErrors {
@@ -50,11 +78,7 @@ interface FormErrors {
   tanggalCheckIn?: string;
   tanggalCheckOut?: string;
   fasilitas?: string[];
-  gambar?: {
-    url?: string;
-    bucket?: string;
-    path?: string;
-  };
+  gambar_url?: string;
 }
 
 // Valibot Schema
@@ -62,12 +86,12 @@ export const formSchema = v.object({
   nama: v.pipe(v.string(), v.nonEmpty("Nama harus diisi")),
   jenis: v.pipe(v.string(), v.nonEmpty("Pilih jenis paket")),
   maskapai: v.pipe(v.string(), v.nonEmpty("Maskapai harus diisi")),
-  customMaskapai: v.optional(
-    v.pipe(
-      v.string(),
-      v.nonEmpty("Nama maskapai harus diisi jika memilih 'Lainnya'")
-    )
-  ),
+  // customMaskapai: v.optional(
+  //   v.pipe(
+  //     v.string(),
+  //     v.nonEmpty("Nama maskapai harus diisi jika memilih 'Lainnya'")
+  //   )
+  // ),
   jenisPenerbangan: v.pipe(v.string(), v.nonEmpty("Pilih Jenis Penerbangan")),
   keretaCepat: v.boolean(),
   harga: v.pipe(v.string(), v.nonEmpty("Harga harus diisi")),
@@ -80,29 +104,30 @@ export const formSchema = v.object({
     v.nonEmpty("Tanggal Kepulangan harus diisi")
   ),
   namaMuthawif: v.pipe(v.string(), v.nonEmpty("Nama Muthawif harus diisi")),
-  noTelpMuthawif: v.pipe(v.string(), v.nonEmpty("No Telp Muthawif harus diisi")),
+  noTelpMuthawif: v.pipe(
+    v.string(),
+    v.nonEmpty("No Telp Muthawif harus diisi")
+  ),
   namaHotel: v.pipe(v.string(), v.nonEmpty("Nama Hotel harus diisi")),
   alamatHotel: v.pipe(v.string(), v.nonEmpty("Alamat Hotel harus diisi")),
   ratingHotel: v.number(),
-  tanggalCheckIn: v.pipe(v.string(), v.nonEmpty("Tanggal Check In harus diisi")),
+  tanggalCheckIn: v.pipe(
+    v.string(),
+    v.nonEmpty("Tanggal Check In harus diisi")
+  ),
   tanggalCheckOut: v.pipe(
     v.string(),
     v.nonEmpty("Tanggal Check Out harus diisi")
   ),
   fasilitas: v.array(v.string()),
-  gambar: v.object({
-    url: v.pipe(v.string(), v.nonEmpty("Gambar harus memiliki URL")),
-    bucket: v.string(),
-    path: v.string(),
-  }),
+  gambar_url: v.string(),
 });
 
-const FormCMS  = ({ initialValues, mode } : FormCMSProps) => {
+const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
   const [open, setOpen] = useState(false);
-  const [jenisPaket, setJenisPaket] = useState<string>("");
   const [isCustomMaskapai, setIsCustomMaskapai] = useState(false); // Untuk melacak apakah pengguna memilih "Lainnya"
 
-  const [formValues, setFormValues] = useState(
+  const [formValues, setFormValues] = useState<FormValues>(
     initialValues || {
       nama: "",
       jenis: "",
@@ -121,23 +146,21 @@ const FormCMS  = ({ initialValues, mode } : FormCMSProps) => {
       tanggalCheckIn: "",
       tanggalCheckOut: "",
       fasilitas: [] as string[],
-      gambar: {
-        url: "",
-        bucket: "",
-        path: "",
-      },
+      publish: false,
+      gambar_url: "",
     }
   );
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [newFasilitas, setNewFasilitas] = useState<string>("");
 
+  
 
   useEffect(() => {
     if (initialValues) {
       setFormValues(initialValues);
     }
   }, [initialValues]);
-  
+
   const handleAddFasilitas = () => {
     if (newFasilitas.trim() === "") {
       toast.error("Fasilitas tidak boleh kosong");
@@ -157,15 +180,91 @@ const FormCMS  = ({ initialValues, mode } : FormCMSProps) => {
     }));
   };
 
-  // Handle form submission
-  const handleSubmit = (values: Record<string, any>) => {
-    setFormErrors({}); // Clear previous errors
+  const uploadImageToSupabase = async (folderName: string, file: File) => {
+    if (typeof folderName !== "string") {
+      throw new Error(`Invalid folderName: ${folderName}`);
+    }
 
-    // Validasi menggunakan Valibot
-    const result = v.safeParse(formSchema, values);
+    const supabase = createClient();
+    const { data, error } = await supabase.storage
+      .from("Paket") // Ganti dengan nama bucket Anda
+      .upload(`${folderName}/${file.name}`, file);
+  
+    if (error) {
+      throw new Error(error.message);
+    }
+    return data;
+  };
 
+  const handleUpload = async (file: File) => {
+    try {
+      // Log untuk memeriksa nilai formValues.nama
+      console.log("formValues.nama:", formValues.nama);
+  
+      // Pastikan formValues.nama adalah string
+      const namaPaket = await formValues.nama; // Jika formValues.nama adalah Promise, tunggu hasilnya
+  
+      // Cek apakah nilai sudah valid
+      if (typeof namaPaket !== "string") {
+        throw new Error("Nama paket harus berupa string");
+      }
+  
+      // Sanitize folder name
+      // const folderName = sanitizeFolderName(namaPaket);
+      const folderName = namaPaket;
+      console.log("Folder Name:", folderName);
+  
+      // Upload file
+      const result = await uploadImageToSupabase(folderName, file);
+  
+      // Buat URL publik
+      const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Paket/${result.path}`;
+  
+      // Simpan URL ke state
+      setFormValues((prevValues) => ({
+        ...prevValues,
+        gambar_url: publicUrl,
+      }));
+  
+      console.log("File uploaded successfully:", result);
+    } catch (error) {
+      console.error("Upload failed:", error);
+      toast.error("Gagal mengunggah gambar!");
+    }
+  };
+  
+
+
+  const serializeFormData = (values: FormValues): FormValues => {
+    return {
+      nama: values.nama,
+      jenis: values.jenis,
+      maskapai: values.maskapai,
+      customMaskapai: values.customMaskapai,
+      jenisPenerbangan: values.jenisPenerbangan,
+      keretaCepat: Boolean(values.keretaCepat),
+      harga: values.harga,
+      tglKeberangkatan: values.tglKeberangkatan,
+      tglKepulangan: values.tglKepulangan,
+      namaMuthawif: values.namaMuthawif,
+      noTelpMuthawif: values.noTelpMuthawif,
+      namaHotel: values.namaHotel,
+      alamatHotel: values.alamatHotel,
+      ratingHotel: Number(values.ratingHotel),
+      tanggalCheckIn: values.tanggalCheckIn,
+      tanggalCheckOut: values.tanggalCheckOut,
+      fasilitas: Array.isArray(values.fasilitas) ? values.fasilitas : [],
+      gambar_url: values.gambar_url,
+    };
+  };
+  
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+  
+    // Validate form data
+    const result = v.safeParse(formSchema, formValues);
+  
     if (!result.success) {
-      // Jika ada error, perbarui state `formErrors`
       const errorMap: Record<string, string> = {};
       result.issues.forEach((issue) => {
         const path = issue.path?.[0]?.key as string | undefined;
@@ -173,55 +272,78 @@ const FormCMS  = ({ initialValues, mode } : FormCMSProps) => {
           errorMap[path] = issue.message;
         }
       });
-
-      setFormErrors(errorMap); // Kirim error ke komponen bawah
+  
+      setFormErrors(errorMap);
       console.error("Validation errors:", errorMap);
       return;
     }
-
-    // Jika validasi berhasil
-    if (mode === "create") {
-
-      console.log("Form submitted:", values);
-      toast.success("Form berhasil disubmit!");
-    } else if (mode === "edit") {
-
-      console.log("Form berhasil di Update!:", values);
-      toast.success("Form berhasil di Update!");
+  
+    if (!formValues.gambar_url) {
+      toast.error("Harap unggah gambar sebelum mengirimkan form!");
+      return;
     }
-
+  
+    // Serialize form data before sending to server action
+    const serializedData = serializeFormData(formValues);
+  
+    try {
+      if (mode === "create") {
+        const { success, data, error } = await createCmsAction(serializedData);
+        
+        if (success) {
+          toast.success("Form berhasil disubmit!");
+          console.log("Paket created:", data);
+          handleClose();
+        } else {
+          toast.error(`Error: ${error}`);
+          console.error("Error creating Paket:", error);
+        }
+      } else if (mode === "edit") {
+        const { success, data, error } = await updateCmsAction(serializedData);
+        
+        if (success) {
+          toast.success("Form berhasil di Update!");
+          console.log("Paket updated:", data);
+          handleClose();
+        } else {
+          toast.error(`Error: ${error}`);
+          console.error("Error updating Paket:", error);
+        }
+      }
+    } catch (error) {
+      console.error("Action error:", error);
+      toast.error("Terjadi kesalahan saat memproses form");
+    }
   };
-
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
 
     // Reset all form values
-    setFormValues(initialValues || {
-      nama: "",
-      jenis: "",
-      maskapai: "",
-      customMaskapai: "",
-      jenisPenerbangan: "",
-      keretaCepat: false,
-      harga: "",
-      tglKeberangkatan: "",
-      tglKepulangan: "",
-      namaMuthawif: "",
-      noTelpMuthawif: '',
-      namaHotel: "",
-      alamatHotel: "",
-      ratingHotel: 0,
-      tanggalCheckIn: "",
-      tanggalCheckOut: "",
-      fasilitas: [],
-      gambar: {
-        url: "",
-        bucket: "",
-        path: "",
-      },
-    });
+    setFormValues(
+      initialValues || {
+        nama: "",
+        jenis: "",
+        maskapai: "",
+        customMaskapai: "",
+        jenisPenerbangan: "",
+        keretaCepat: false,
+        harga: "",
+        tglKeberangkatan: "",
+        tglKepulangan: "",
+        namaMuthawif: "",
+        noTelpMuthawif: "",
+        namaHotel: "",
+        alamatHotel: "",
+        ratingHotel: 0,
+        tanggalCheckIn: "",
+        tanggalCheckOut: "",
+        fasilitas: [],
+        publish: false,
+        gambar_url: "",
+      }
+    );
 
     // Clear any existing errors
     setFormErrors({});
@@ -237,11 +359,13 @@ const FormCMS  = ({ initialValues, mode } : FormCMSProps) => {
         variant="contained"
         onClick={handleClickOpen}
       >
-        {mode === 'create' ? "Tambah" : "Sunting"}
+        {mode === "create" ? "Tambah" : "Sunting"}
       </Button>
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <form onSubmit={handleSubmit}>
-        <DialogTitle>{mode === 'create' ? "Tambah Paket" : "Edit Paket"}</DialogTitle>
+          <DialogTitle>
+            {mode === "create" ? "Tambah Paket" : "Edit Paket"}
+          </DialogTitle>
           <DialogContent
             sx={{
               display: "flex",
@@ -390,7 +514,7 @@ const FormCMS  = ({ initialValues, mode } : FormCMSProps) => {
                 setFormValues({ ...formValues, harga: e.target.value })
               }
             />
-            <Divider/>
+            <Divider />
             {/* Akomodasi */}
             <Typography variant="h5">Akomodasi</Typography>
             <CustomTextField
@@ -415,7 +539,7 @@ const FormCMS  = ({ initialValues, mode } : FormCMSProps) => {
                 setFormValues({ ...formValues, noTelpMuthawif: e.target.value })
               }
             />
-                        <CustomTextField
+            <CustomTextField
               fullWidth
               label="Nama Hotel"
               name="namaHotel"
@@ -443,13 +567,18 @@ const FormCMS  = ({ initialValues, mode } : FormCMSProps) => {
               fullWidth
               label="Rating Hotel"
               name="ratingHotel"
+              type="number"
               value={formValues.ratingHotel}
               error={!!formErrors.ratingHotel}
               helperText={formErrors.ratingHotel}
-              onChange={(e: { target: { value: number } }) =>
-                setFormValues({ ...formValues, ratingHotel: e.target.value })
+              onChange={(e: { target: { value: string } }) =>
+                setFormValues({
+                  ...formValues,
+                  ratingHotel: e.target.value === "" ? 0 : Number(e.target.value),
+                })
               }
             />
+
             <CustomTextField
               fullWidth
               label="Tanggal Check In Hotel"
@@ -474,7 +603,10 @@ const FormCMS  = ({ initialValues, mode } : FormCMSProps) => {
               error={!!formErrors.tanggalCheckOut}
               helperText={formErrors.tanggalCheckOut}
               onChange={(e: { target: { value: string } }) =>
-                setFormValues({ ...formValues, tanggalCheckOut: e.target.value })
+                setFormValues({
+                  ...formValues,
+                  tanggalCheckOut: e.target.value,
+                })
               }
               InputLabelProps={{
                 shrink: true,
@@ -513,25 +645,27 @@ const FormCMS  = ({ initialValues, mode } : FormCMSProps) => {
                 shrink: true, // Memastikan label selalu berada di atas
               }}
             />
-            <Divider/>
+            <Divider />
             {/* Fasilitas */}
             <Box sx={{ width: "100%" }}>
-              <Typography variant="h5">Fasilitas</Typography>
-              {formValues.fasilitas.map((fasilitas: string[], index: number) => (
-                <Box
-                  key={index}
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
-                  <Typography>
-                    {index + 1}. {fasilitas}
-                  </Typography>
-                  <IconButton onClick={() => handleRemoveFasilitas(index)}>
-                    <Delete />
-                  </IconButton>
-                </Box>
-              ))}
+              <Typography variant="h5" sx={{ mb: 2 }}>Fasilitas</Typography>
+              {formValues.fasilitas.map(
+                (fasilitas: string, index: number) => (
+                  <Box
+                    key={index}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                  >
+                    <Typography>
+                      {index + 1}. {fasilitas}
+                    </Typography>
+                    <IconButton onClick={() => handleRemoveFasilitas(index)}>
+                      <Delete />
+                    </IconButton>
+                  </Box>
+                )
+              )}
               <Box display="flex" gap="0.5rem" alignItems="center">
                 <CustomTextField
                   label="Tambah Fasilitas"
@@ -558,38 +692,10 @@ const FormCMS  = ({ initialValues, mode } : FormCMSProps) => {
                 Upload Gambar Poster Penawaran
               </Typography>
               <FileUploaderSingle
-                onFileUpload={(file) => {
-                  // Simulasi menyimpan data file ke Supabase
-                  const bucket = "your-bucket-name"; // Ganti dengan nama bucket Supabase Anda
-                  const path = `uploads/${file.name}`; // Path file dalam bucket
-                  const url = URL.createObjectURL(file); // Simulasi URL file untuk preview
-
-                  // Update state formValues untuk gambar
-                  setFormValues((prevValues) => ({
-                    ...prevValues,
-                    gambar: {
-                      url,
-                      bucket,
-                      path,
-                    },
-                  }));
+                onFileUpload={async (file) => {
+                  await handleUpload(file); // Memanggil handleUpload yang sudah Anda buat
                 }}
               />
-              {/* {formValues.gambar && (
-                <Box sx={{ mt: 2 }}>
-                  <Box
-                    component="img"
-                    src={formValues.gambar.url}
-                    alt="Preview"
-                    sx={{
-                      mt: 1,
-                      maxWidth: "100%",
-                      maxHeight: 200,
-                      borderRadius: 2,
-                    }}
-                  />
-                </Box>
-              )} */}
             </Box>
           </DialogContent>
           <DialogActions>
@@ -604,6 +710,6 @@ const FormCMS  = ({ initialValues, mode } : FormCMSProps) => {
       </Dialog>
     </>
   );
-}
+};
 
 export default FormCMS;
