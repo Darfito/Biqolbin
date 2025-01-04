@@ -20,6 +20,7 @@ import { PaketData } from "@/app/(DashboardLayout)/jamaah/data";
 import FormCMS, { formSchema } from "../../component/FormCMS";
 import * as v from "valibot";
 import { toast } from "react-toastify";
+import { createClient } from "@/libs/supabase/client";
 
 interface CMSDetailProps {
   id: string;
@@ -35,9 +36,18 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
   console.log("id di detail:", id);
 
   useEffect(() => {
-    const detail = PaketData.find((paket) => paket.id === id);
-    if (detail) {
-      setPaketDetail(detail);
+    if (id) {
+      const fetchData = async () => {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from("Paket")
+          .select("*")
+          .eq("id", id)
+          .single();
+        if (data) setPaketDetail(data);
+        if (error) console.error("Error fetching Paket data:", error);
+      };
+      fetchData();
     }
   }, [id]);
 
@@ -117,7 +127,7 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
                 >
                   <Box
                     component="img"
-                    src={paketDetail.gambar.url}
+                    src={paketDetail.gambar_url}
                     alt="Gambar Paket"
                     sx={{
                       mt: 3,
