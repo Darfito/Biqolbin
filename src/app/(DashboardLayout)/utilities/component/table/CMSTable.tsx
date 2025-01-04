@@ -30,8 +30,6 @@ import type {
 } from "@tanstack/react-table";
 import type { RankingInfo } from "@tanstack/match-sorter-utils";
 
-// Component Imports
-
 // Style Imports
 import styles from "../../../../styles/table.module.css";
 
@@ -185,9 +183,10 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
   const [globalFilter, setGlobalFilter] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [actionType, setActionType] = useState<"publish" | "unpublish">("publish");
+  const [actionType, setActionType] = useState<"publish" | "unpublish">(
+    "publish"
+  );
   const [tableData, setTableData] = useState<PaketInterface[]>(data); // Local state to manage table data
-
 
   const router = useRouter();
 
@@ -205,42 +204,41 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
 
   const handlePublishToggle = async (id: string, currentStatus: boolean) => {
     const supabase = createClient();
-  
+
     try {
       const { data, error } = await supabase
         .from("Paket")
         .update({ publish: !currentStatus }) // Toggle the publish status
         .eq("id", id); // Match the row by its id
-  
+
       if (error) {
         console.error("Error updating publish status:", error);
         toast.error("Failed to update publish status.");
         return; // Hentikan eksekusi jika ada error
       }
-  
+
       console.log("Publish status updated successfully:", data);
       toast.success("Publish status updated successfully.");
-  
+
       // Refresh halaman atau data
       // Solusi alternatif untuk client-side:
       // Fetch ulang data dari Supabase dan update state lokal
       const { data: updatedData, error: fetchError } = await supabase
         .from("Paket")
         .select("*");
-  
+
       if (fetchError) {
         console.error("Error fetching updated data:", fetchError);
         toast.error("Failed to fetch updated data.");
         return;
       }
-  
+
       setTableData(updatedData); // Update state dengan data terbaru
     } catch (err) {
       console.error("Unexpected error:", err);
       toast.error("An unexpected error occurred.");
     }
   };
-  
 
   const handleSaveChanges = () => {
     if (selectedId) {
@@ -252,6 +250,36 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
       setTableData(updatedData);
     }
     handleDialogClose();
+  };
+
+  const handleDelete = async (id: string) => {
+    const supabase = createClient();
+    try {
+      // Konfirmasi sebelum menghapus
+      const confirmed = window.confirm(
+        "Are you sure you want to delete this item?"
+      );
+      if (!confirmed) return;
+
+      // Hapus data dari tabel 'Paket'
+      const { error } = await supabase.from("Paket").delete().eq("id", id);
+
+      // Cek jika ada error
+      if (error) {
+        console.error("Error deleting data:", error);
+        toast.error("Failed to delete item.");
+        return;
+      }
+
+      // Berhasil dihapus
+      toast.success("Item deleted successfully.");
+
+      // Revalidate atau refresh data
+      revalidatePath("/cms"); // Sesuaikan dengan path yang digunakan
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      toast.error("An unexpected error occurred.");
+    }
   };
 
   const columnHelper = createColumnHelper<PaketInterface>();
@@ -300,7 +328,10 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
           <Button
             variant="contained"
             onClick={() =>
-              handlePublishToggle(info.row.original.id, info.row.original.publish)
+              handlePublishToggle(
+                info.row.original.id,
+                info.row.original.publish
+              )
             }
             sx={{
               color: "#fff",
@@ -316,7 +347,12 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
           >
             Detail
           </Button>
-          <Button variant="contained" color="error" className="text-white">
+          <Button
+            variant="contained"
+            color="error"
+            className="text-white"
+            onClick={() => handleDelete(info.row.original.id)} // Tambahkan onClick untuk delete
+          >
             Delete
           </Button>
         </Box>
@@ -469,7 +505,12 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
           <Button onClick={handleDialogClose} variant="contained" color="error">
             Batal
           </Button>
-          <Button onClick={handleSaveChanges} variant="contained" color="primary" sx={{ color: "#fff" }}>
+          <Button
+            onClick={handleSaveChanges}
+            variant="contained"
+            color="primary"
+            sx={{ color: "#fff" }}
+          >
             Konfirmasi
           </Button>
         </DialogActions>
