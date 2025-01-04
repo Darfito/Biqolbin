@@ -3,7 +3,6 @@
 // React Imports
 import { useEffect, useState } from "react";
 
-import CardHeader from "@mui/material/CardHeader";
 import TablePagination from "@mui/material/TablePagination";
 import type { TextFieldProps } from "@mui/material/TextField";
 
@@ -182,8 +181,9 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false); // Untuk delete
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [actionType, setActionType] = useState<"publish" | "unpublish">(
+  const [actionType, setActionType] = useState<"publish" | "unpublish" | "delete">(
     "publish"
   );
   const [tableData, setTableData] = useState<PaketInterface[]>(data); // Local state to manage table data
@@ -240,6 +240,24 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    const supabase = createClient();
+    try {
+      const { error } = await supabase.from("Paket").delete().eq("id", id);
+      if (error) {
+        console.error("Error deleting data:", error);
+        toast.error("Failed to delete item.");
+        return;
+      }
+      toast.success("Item deleted successfully.");
+      const updatedData = tableData.filter((item) => item.id !== id);
+      setTableData(updatedData);
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      toast.error("An unexpected error occurred.");
+    }
+  };
+
   const handleSaveChanges = () => {
     if (selectedId) {
       const updatedData = tableData.map((paket) =>
@@ -252,35 +270,6 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
     handleDialogClose();
   };
 
-  const handleDelete = async (id: string) => {
-    const supabase = createClient();
-    try {
-      // Konfirmasi sebelum menghapus
-      const confirmed = window.confirm(
-        "Are you sure you want to delete this item?"
-      );
-      if (!confirmed) return;
-
-      // Hapus data dari tabel 'Paket'
-      const { error } = await supabase.from("Paket").delete().eq("id", id);
-
-      // Cek jika ada error
-      if (error) {
-        console.error("Error deleting data:", error);
-        toast.error("Failed to delete item.");
-        return;
-      }
-
-      // Berhasil dihapus
-      toast.success("Item deleted successfully.");
-
-      // Revalidate atau refresh data
-      revalidatePath("/cms"); // Sesuaikan dengan path yang digunakan
-    } catch (err) {
-      console.error("Unexpected error:", err);
-      toast.error("An unexpected error occurred.");
-    }
-  };
 
   const columnHelper = createColumnHelper<PaketInterface>();
 
@@ -512,6 +501,57 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
             sx={{ color: "#fff" }}
           >
             Konfirmasi
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Dialog for Publish/Unpublish */}
+      <Dialog open={openDialog} onClose={handleDialogClose}>
+        <DialogTitle>Konfirmasi Aksi</DialogTitle>
+        <DialogContent>
+          <Typography>
+            {actionType === "publish"
+              ? "Apakah Anda yakin ingin mempublikasikan konten ini?"
+              : "Apakah Anda yakin ingin menutup konten ini?"}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} variant="contained" color="error">
+            Batal
+          </Button>
+          <Button
+            onClick={handleSaveChanges}
+            variant="contained"
+            color="primary"
+            sx={{ color: "#fff" }}
+          >
+            Konfirmasi
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog for Delete */}
+      <Dialog open={openDeleteDialog} onClose={handleDialogClose}>
+        <DialogTitle>Konfirmasi Hapus</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Apakah Anda yakin ingin menghapus item ini? Tindakan ini tidak bisa
+            dibatalkan.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} variant="contained" color="error">
+            Batal
+          </Button>
+          <Button
+            onClick={() => {
+              handleDelete(selectedId!);
+              handleDialogClose();
+            }}
+            variant="contained"
+            color="primary"
+            sx={{ color: "#fff" }}
+          >
+            Hapus
           </Button>
         </DialogActions>
       </Dialog>
