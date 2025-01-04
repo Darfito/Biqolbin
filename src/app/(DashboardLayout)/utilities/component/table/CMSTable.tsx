@@ -51,6 +51,9 @@ import {
 import { PaketInterface } from "../../type";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/libs/supabase/client";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Import toast styles
+import { revalidatePath } from "next/cache";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -201,7 +204,8 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
   };
 
   const handlePublishToggle = async (id: string, currentStatus: boolean) => {
-      const supabase = createClient();
+    const supabase = createClient();
+  
     try {
       const { data, error } = await supabase
         .from("Paket")
@@ -210,16 +214,33 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
   
       if (error) {
         console.error("Error updating publish status:", error);
-        alert("Failed to update publish status.");
-      } else {
-        console.log("Publish status updated successfully:", data);
-        alert("Publish status updated successfully.");
+        toast.error("Failed to update publish status.");
+        return; // Hentikan eksekusi jika ada error
       }
+  
+      console.log("Publish status updated successfully:", data);
+      toast.success("Publish status updated successfully.");
+  
+      // Refresh halaman atau data
+      // Solusi alternatif untuk client-side:
+      // Fetch ulang data dari Supabase dan update state lokal
+      const { data: updatedData, error: fetchError } = await supabase
+        .from("Paket")
+        .select("*");
+  
+      if (fetchError) {
+        console.error("Error fetching updated data:", fetchError);
+        toast.error("Failed to fetch updated data.");
+        return;
+      }
+  
+      setTableData(updatedData); // Update state dengan data terbaru
     } catch (err) {
       console.error("Unexpected error:", err);
-      alert("An unexpected error occurred.");
+      toast.error("An unexpected error occurred.");
     }
   };
+  
 
   const handleSaveChanges = () => {
     if (selectedId) {
