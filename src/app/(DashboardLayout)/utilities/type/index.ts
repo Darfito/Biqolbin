@@ -104,7 +104,7 @@ export interface JamaahProps {
   email:string;
   jenisKelamin: JenisKelamin;
   tempatLahir: string;
-  perkawinan: boolean;
+  pernikahan: boolean;
   alamat: string;
   varianKamar: KamarType;
   kewarganegaraan: boolean;
@@ -113,8 +113,8 @@ export interface JamaahProps {
   riwayatPenyakit: string;
   jenisDokumen: JenisDokumen[];
   jenisPaket : PaketInterface;
-  berangkat: Date; // tanggal berangkat dari paket
-  selesai: Date; // tanggal pulang dari paket
+  berangkat: string; // tanggal berangkat dari paket
+  selesai: string; // tanggal pulang dari paket
   status: StatusKepergian;
 }
 

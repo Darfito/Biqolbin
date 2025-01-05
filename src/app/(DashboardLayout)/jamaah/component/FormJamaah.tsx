@@ -36,6 +36,7 @@ import {
 import { KontakDaruratSection } from "./KontakDaruratHandler";
 
 import { ChangeEvent, FormEvent, useState } from "react";
+import { createJamaahAction } from "../action";
 
 interface FormErrors {
   id?: string;
@@ -46,7 +47,7 @@ interface FormErrors {
   email?: string;
   jenisKelamin?: string;
   tempatLahir?: string;
-  perkawinan?: string;
+  pernikahan?: string;
   alamat?: string;
   varianKamar?: string;
   kewarganegaraan?: string;
@@ -77,7 +78,7 @@ const formSchema = v.object({
   email: v.pipe(v.string(), v.nonEmpty("Email harus diisi")),
   jenisKelamin: v.pipe(v.string(), v.nonEmpty("Jenis Kelamin harus diisi")),
   tempatLahir: v.pipe(v.string(), v.nonEmpty("Tempat Lahir harus diisi")),
-  perkawinan: v.boolean(),
+  pernikahan: v.boolean(),
   alamat: v.pipe(v.string(), v.nonEmpty("Alamat harus diisi")),
   varianKamar: v.pipe(v.string(), v.nonEmpty("Varian Kamar harus diisi")),
   kewarganegaraan: v.boolean(),
@@ -102,6 +103,7 @@ const formSchema = v.object({
 });
 
 type FormType = {
+  id: number;
   nama: string;
   ayahKandung: string;
   noTelp: string;
@@ -109,7 +111,7 @@ type FormType = {
   email: string;
   jenisKelamin: JenisKelamin;
   tempatLahir: string;
-  perkawinan: boolean;
+  pernikahan: boolean;
   alamat: string;
   varianKamar: KamarType;
   kewarganegaraan: boolean;
@@ -132,6 +134,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
   const [jenisKelamin, setJenisKelamin] = useState<string>("");
 
   const [formValues, setFormValues] = useState<FormType>({
+    id: 0,
     nama: "",
     ayahKandung: "",
     noTelp: "",
@@ -141,7 +144,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
     email: "",
     jenisKelamin: JenisKelamin.LakiLaki,
     tempatLahir: "",
-    perkawinan: false,
+    pernikahan: false,
     alamat: "",
     varianKamar: {
       id: 0,
@@ -243,7 +246,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
   };
 
   // Handle form submission
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFormErrors({}); // Clear previous errors
 
@@ -253,36 +256,21 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
     const result = v.safeParse(formSchema, formValues);
 
     if (!result.success) {
-      const errorMap: FormErrors = {};
-
+      const errorMap: Record<string, string> = {};
       result.issues.forEach((issue) => {
-        const path = issue.path?.[0]?.key as keyof FormErrors | undefined;
+        const path = issue.path?.[0]?.key as string | undefined;
         if (path) {
-          if (path === "jenisDokumen") {
-            // Jika error untuk jenisDokumen, simpan dalam array
-            if (!errorMap.jenisDokumen) {
-              errorMap.jenisDokumen = [];
-            }
-            errorMap.jenisDokumen.push(issue.message);
-          } else {
-            // Jika field lain, langsung simpan pesan kesalahan
-            errorMap[path] = issue.message;
-          }
+          errorMap[path] = issue.message;
         }
       });
-
-      setFormErrors(errorMap);
-      console.error("Validation errors:", errorMap);
-      return;
     }
 
     console.log("Form submitted:", formValues);
-    toast.success("Form berhasil disubmit!"); // Show success toast
 
-    handleClose();
+    const response = await createJamaahAction(formValues);
+    toast.success("Form berhasil disubmit!"); // Show success toast
   };
 
-  // Calculate installment (angsuran) if "Cicilan" is selected
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => {
@@ -290,6 +278,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
 
     // Reset all form values
     setFormValues({
+      id: 0,
       nama: "",
       ayahKandung: "",
       noTelp: "",
@@ -304,7 +293,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
       email: "",
       jenisKelamin: JenisKelamin.LakiLaki,
       tempatLahir: "",
-      perkawinan: false,
+      pernikahan: false,
       alamat: "",
       varianKamar: {
         id: 0,
@@ -464,12 +453,12 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                   <FormLabel component="legend">Status Menikah</FormLabel>
                   <RadioGroup
                     value={
-                      formValues.perkawinan ? "Sudah Menikah" : "Belum Menikah"
+                      formValues.pernikahan ? "Sudah Menikah" : "Belum Menikah"
                     }
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
                       setFormValues({
                         ...formValues,
-                        perkawinan: e.target.value === "Sudah Menikah",
+                        pernikahan: e.target.value === "Sudah Menikah",
                       })
                     }
                     row
@@ -606,9 +595,10 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                {/* Tanggal Berangkat */}
                 <CustomTextField
                   fullWidth
+                  disabled
                   label="Tanggal Berangkat"
                   type="date"
-                  value={formValues.berangkat} // Format date untuk input type="date"
+                  value={formValues.jenisPaket.tglKeberangkatan} // Format date untuk input type="date"
                   onChange={(e: { target: { value: string } }) =>
                     setFormValues({
                       ...formValues,
@@ -623,9 +613,10 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                 {/* Tanggal Selesai */}
                 <CustomTextField
                   fullWidth
+                  disabled
                   label="Tanggal Selesai"
                   type="date"
-                  value={formValues.selesai} // Format date untuk input type="date"
+                  value={formValues.jenisPaket.tglKepulangan} // Format date untuk input type="date"
                   onChange={(e: { target: { value: string } }) =>
                     setFormValues({
                       ...formValues,

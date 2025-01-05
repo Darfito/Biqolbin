@@ -9,6 +9,7 @@ import JamaahTable from "../../utilities/component/table/JamaahTable";
 import jamaahData from "../data";
 import FormJamaah from "./FormJamaah";
 import { PaketInterface } from "../../utilities/type";
+import { useMemo } from "react";
 
 
 export type JamaahProps = {
@@ -16,6 +17,8 @@ export type JamaahProps = {
 }
 
 const Jamaah = ({paketData}: JamaahProps) => {
+  const stablePaketData = useMemo(() => paketData || [], [paketData]);
+  const stableJamaahData = useMemo(() => jamaahData, []);
   return (
     <>
       <Box
@@ -50,10 +53,10 @@ const Jamaah = ({paketData}: JamaahProps) => {
       </Grid>
       <PageContainer title="Jamaah">
       <Box sx={{ margin: "20px", display: "flex", justifyContent: "end" }}>
-          <FormJamaah paketData={ paketData||[]} />
+          <FormJamaah paketData={ stablePaketData|| []} />
       </Box>
         <Card sx={{ mt: 2 }}>
-          <JamaahTable columns={columnsJamaah} data={jamaahData} />
+          <JamaahTable columns={columnsJamaah} data={stableJamaahData} />
         </Card>
       </PageContainer>
     </>

@@ -39,7 +39,7 @@ const JamaahDetail = ({ id, breadcrumbLinks }: JamaahDetailProps) => {
       const foundJamaah = jamaahData.find((item) => item.id === Number(id));
       setCurrentData(foundJamaah || null);
     }
-  }, [id]); // Tambahkan dependency array yang tepat
+  }, [currentData, id]); 
 
   // Handle Submit data sebelum dialog
   const handleSubmit = (data: SetStateAction<{}>) => {
@@ -135,7 +135,7 @@ const JamaahDetail = ({ id, breadcrumbLinks }: JamaahDetailProps) => {
           <Card sx={{ backgroundColor: "#fff" }}>
             <JamaahDetailTable
               data={currentData?.jenisDokumen || []}
-              perkawinan={currentData?.perkawinan}
+              perkawinan={currentData?.pernikahan}
             />
           </Card>
         </Box>

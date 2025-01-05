@@ -20,7 +20,6 @@ import {
 import { Jabatan, JenisKelamin, UserProps } from "../../utilities/type";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { createUserAction } from "../action";
-import { revalidatePath } from "next/cache";
 
 interface FormErrors {
   nama?: string;

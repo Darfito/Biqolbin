@@ -52,7 +52,7 @@ const FormDetail = ({
       email: "",
       jenisKelamin: JenisKelamin.LakiLaki,
       tempatLahir: "",
-      perkawinan: false,
+      pernikahan: false,
       alamat: "",
       varianKamar: {
         id: 0,
@@ -218,11 +218,11 @@ const FormDetail = ({
                   <FormLabel component="legend">Status Perkawinan</FormLabel>
                   <RadioGroup
                     value={
-                      formValues.perkawinan ? "Sudah Menikah" : "Belum Menikah"
+                      formValues.pernikahan ? "Sudah Menikah" : "Belum Menikah"
                     }
                     onChange={(e: ChangeEvent<HTMLInputElement>) =>
                       handleInputChange(
-                        "perkawinan",
+                        "pernikahan",
                         e.target.value === "Sudah Menikah"
                       )
                     }

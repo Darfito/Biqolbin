@@ -60,17 +60,6 @@ export const updateCmsAction = async (paketData: Record<string, any>) => {
   return { success: true, data };
 };
 
-// export const uploadImageToSupabase = async (folderName: string, file: File) => {
-//   const supabase = createClient();
-//   const { data, error } = await supabase.storage
-//     .from("Paket") // Ganti dengan nama bucket Anda
-//     .upload(`${folderName}/${file.name}`, file);
-
-//   if (error) {
-//     throw new Error(error.message);
-//   }
-//   return data;
-// };
 
 
 export const sanitizeFolderName = (name: string): string => {
