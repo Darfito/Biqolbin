@@ -18,7 +18,7 @@ import {
   Radio,
 } from "@mui/material";
 import { Jabatan, JenisKelamin, UserProps } from "../../utilities/type";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { createUserAction } from "../action";
 import { revalidatePath } from "next/cache";
 
@@ -59,7 +59,7 @@ export default function FormUser() {
   };
 
   // Handle form submission
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // setFormErrors({}); // Clear previous errors
 

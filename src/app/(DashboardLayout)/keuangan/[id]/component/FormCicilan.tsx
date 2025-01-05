@@ -9,7 +9,7 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
-import React from "react";
+import React, { FormEvent, useEffect, useState } from "react";
 import * as v from "valibot";
 
 interface FormErrors {
@@ -42,24 +42,24 @@ interface FormCicilanProps {
   currentCicilanKe?: number;
 }
 
-const FormCicilan: React.FC<FormCicilanProps> = ({
+const FormCicilan= ({
   open,
   handleClose,
   initialData,
   currentCicilanKe,
-}) => {
+}:FormCicilanProps) => {
   console.log("initialData cicilan:", initialData);
   console.log("cicilan ke:", currentCicilanKe);
 
-  const [formValues, setFormValues] = React.useState({
+  const [formValues, setFormValues] = useState({
     cicilanKe: 0,
     tanggalBayar: "",
     nominalCicilan: 0,
   });
-  const [formErrors, setFormErrors] = React.useState<FormErrors>({});
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
 
   // Reset form values when initialData changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (initialData) {
       setFormValues({
         cicilanKe: initialData.cicilanKe || 0,
@@ -78,7 +78,7 @@ const FormCicilan: React.FC<FormCicilanProps> = ({
   }, [initialData]);
 
   // Handle form submission
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     // Parse and validate form values

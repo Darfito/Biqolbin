@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import CustomTextField from "@/app/(DashboardLayout)/components/forms/theme-elements/CustomTextField";
 import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCard";
 import {
@@ -84,16 +84,11 @@ const FormDetail = ({
         ratingHotel: 0,
         tanggalCheckIn: "",
         tanggalCheckOut: "",
-        gambar: {
-          id: 0,
-          url: "",
-          bucket: "",
-          path: "",
-        },
+        gambar_url: "",
       },
       berangkat: new Date(),
       selesai: new Date(),
-      status: { id: 0, status: "Dijadwalkan" },
+      status: "Dijadwalkan",
     }
   );
 
@@ -115,7 +110,7 @@ const FormDetail = ({
     setFormValues({ ...formValues, kontakDarurat: updatedContacts });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     onSaveChanges(formValues);
   };
@@ -161,7 +156,7 @@ const FormDetail = ({
                 <FormLabel component="legend">Jenis Kelamin</FormLabel>
                 <RadioGroup
                   value={formValues.jenisKelamin}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     handleInputChange("jenisKelamin", e.target.value)
                   }
                   row
@@ -225,7 +220,7 @@ const FormDetail = ({
                     value={
                       formValues.perkawinan ? "Sudah Menikah" : "Belum Menikah"
                     }
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
                       handleInputChange(
                         "perkawinan",
                         e.target.value === "Sudah Menikah"
@@ -253,7 +248,7 @@ const FormDetail = ({
                   <FormLabel component="legend">Kewarganegaraan</FormLabel>
                   <RadioGroup
                     value={formValues.kewarganegaraan ? "WNI" : "WNA"}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
                       handleInputChange(
                         "kewarganegaraan",
                         e.target.value === "WNI"

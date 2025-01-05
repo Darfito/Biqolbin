@@ -8,8 +8,14 @@ import { columnsJamaah } from "./columns/columnsJamaah";
 import JamaahTable from "../../utilities/component/table/JamaahTable";
 import jamaahData from "../data";
 import FormJamaah from "./FormJamaah";
+import { PaketInterface } from "../../utilities/type";
 
-const Jamaah = () => {
+
+export type JamaahProps = {
+  paketData: PaketInterface[]
+}
+
+const Jamaah = ({paketData}: JamaahProps) => {
   return (
     <>
       <Box
@@ -44,7 +50,7 @@ const Jamaah = () => {
       </Grid>
       <PageContainer title="Jamaah">
       <Box sx={{ margin: "20px", display: "flex", justifyContent: "end" }}>
-          <FormJamaah />
+          <FormJamaah paketData={ paketData||[]} />
       </Box>
         <Card sx={{ mt: 2 }}>
           <JamaahTable columns={columnsJamaah} data={jamaahData} />

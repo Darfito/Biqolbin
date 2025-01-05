@@ -42,6 +42,9 @@ export type CicilanType = {
 
   export type StatusType = 'Belum Bayar' | 'Sedang Menyicil' | 'Sedang Menabung' | 'Lunas';
 
+
+
+  // ! PAKET TYPE
   export interface PaketInterface {
     id: string;
     nama: string;
@@ -151,12 +154,12 @@ export type KontakDaruratType = {
   relasiLain?: string;
 }
 
-export type StatusKepergian = {
-  id: number;
-  status: 'Berangkat' | 'Dijadwalkan' | 'Selesai';
-  deskripsi?: string;
-}
-// export type StatusKepergian = 'Berangkat' | 'Dijadwalkan' | 'Selesai'
+// export type StatusKepergian = {
+//   id: number;
+//   status: 'Berangkat' | 'Dijadwalkan' | 'Selesai';
+//   deskripsi?: string;
+// }
+export type StatusKepergian = 'Berangkat' | 'Dijadwalkan' | 'Selesai'
 
 export enum KontakDaruratRelation {
   Ayah = "Ayah",

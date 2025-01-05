@@ -14,12 +14,12 @@ interface KontakDaruratSectionProps {
   handleRemoveContact: (index: number) => void;
 }
 
-export const KontakDaruratSection: React.FC<KontakDaruratSectionProps> = ({
+export const KontakDaruratSection = ({
   kontakDarurat,
   handleContactChange,
   handleAddContact,
   handleRemoveContact,
-}) => {
+}: KontakDaruratSectionProps) => {
   return (
     <Grid item xs={12}>
       <Typography sx={{ marginBottom: 2 }} variant="h5">

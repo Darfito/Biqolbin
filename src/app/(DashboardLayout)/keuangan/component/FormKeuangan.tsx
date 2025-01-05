@@ -10,6 +10,7 @@ import MenuItem from "@mui/material/MenuItem";
 import CustomTextField from "../../components/forms/theme-elements/CustomTextField";
 import { toast } from "react-toastify"; // Import toast
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 
 interface FormErrors {
   nama?: string;
@@ -48,11 +49,11 @@ const formSchema = v.object({
 });
 
 export default function FormKeuangan() {
-  const [open, setOpen] = React.useState(false);
-  const [metode, setMetode] = React.useState<string>("");
-  const [jenisPaket, setJenisPaket] = React.useState<string>("");
+  const [open, setOpen] = useState(false);
+  const [metode, setMetode] = useState<string>("");
+  const [jenisPaket, setJenisPaket] = useState<string>("");
 
-  const [formValues, setFormValues] = React.useState({
+  const [formValues, setFormValues] = useState({
     nama: "",
     jenisPaket: "",
     metodePembayaran: "",
@@ -62,10 +63,10 @@ export default function FormKeuangan() {
     banyaknyaAngsuran: "",
     jumlahBiayaPerAngsuran: "",
   });
-  const [formErrors, setFormErrors] = React.useState<FormErrors>({});
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
 
   // Handle metode pembayaran selection
-  const handleMetodeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMetodeChange = (event: ChangeEvent<HTMLInputElement>) => {
     setMetode(event.target.value);
     setFormValues({ ...formValues, metodePembayaran: event.target.value });
 
@@ -86,14 +87,14 @@ export default function FormKeuangan() {
   };
 
   const handleJenisPaketChange = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: ChangeEvent<HTMLInputElement>
   ) => {
     setJenisPaket(event.target.value);
     setFormValues({ ...formValues, jenisPaket: event.target.value });
   };
 
   // Handle form submission
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFormErrors({}); // Clear previous errors
 
@@ -171,7 +172,7 @@ export default function FormKeuangan() {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     calculateAngsuran();
   }, [
     formValues.totalTagihan,

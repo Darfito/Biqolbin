@@ -12,7 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import { IconArrowLeft } from "@tabler/icons-react";
-import React, { useEffect, useState } from "react";
+import React, { SetStateAction, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { UserProps } from "@/app/(DashboardLayout)/utilities/type";
@@ -60,7 +60,7 @@ const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
   }, [id, currentData, supabase]);
 
   // Handle Submit data before dialog
-  const handleSubmit = (data: React.SetStateAction<{}>) => {
+  const handleSubmit = (data: SetStateAction<{}>) => {
     setFormData(data); // Save form data to state
     setOpenModal(true); // Open the modal for confirmation
   };

@@ -43,7 +43,7 @@ export const columnsJamaah: ColumnDef<JamaahProps, any>[] = [
   }),
 
   // Kolom Status (Berangkat dan Selesai)
-  columnHelper.accessor("status.status", {
+  columnHelper.accessor("status", {
     id: "status",
     cell: (info) => {
       const status = info.getValue();

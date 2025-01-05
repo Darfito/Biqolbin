@@ -13,7 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import { IconArrowLeft } from "@tabler/icons-react";
-import React, { useEffect, useState } from "react";
+import React, { SetStateAction, useEffect, useState } from "react";
 import FormDetail from "./FormDetail";
 import { useRouter } from "next/navigation";
 
@@ -42,7 +42,7 @@ const JamaahDetail = ({ id, breadcrumbLinks }: JamaahDetailProps) => {
   }, [id]); // Tambahkan dependency array yang tepat
 
   // Handle Submit data sebelum dialog
-  const handleSubmit = (data: React.SetStateAction<{}>) => {
+  const handleSubmit = (data: SetStateAction<{}>) => {
     setFormData(data); // Simpan data form ke state
     setOpenModal(true);
   };

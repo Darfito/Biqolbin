@@ -134,11 +134,7 @@ const jamaahData: JamaahProps[] = [
     jenisPaket: PaketData[0],
     berangkat: new Date("2024-01-15"),
     selesai: new Date("2024-01-30"),
-    status: {
-      id: 1,
-      status: "Dijadwalkan",
-      deskripsi: "Persiapan keberangkatan",
-    },
+    status: "Dijadwalkan",
     jenisDokumen: [
       {
         id: 1,
@@ -209,11 +205,7 @@ const jamaahData: JamaahProps[] = [
     jenisPaket: PaketData[1],
     berangkat: new Date("2024-02-10"),
     selesai: new Date("2024-02-25"),
-    status: {
-      id: 2,
-      status: "Berangkat",
-      deskripsi: "Dalam perjalanan menuju Saudi Arabia",
-    },
+    status: "Berangkat",
     jenisDokumen: [
       {
         id: 1,
@@ -284,11 +276,7 @@ const jamaahData: JamaahProps[] = [
     jenisPaket: PaketData[2],
     berangkat: new Date("2024-03-15"),
     selesai: new Date("2024-03-30"),
-    status: {
-      id: 3,
-      status: "Dijadwalkan",
-      deskripsi: "Menunggu dokumen selesai",
-    },
+    status: "Dijadwalkan",
     jenisDokumen: [
       {
         id: 1,
