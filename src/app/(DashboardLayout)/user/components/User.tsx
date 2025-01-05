@@ -2,19 +2,19 @@
 
 import { Box, Card, Typography } from "@mui/material";
 import PageContainer from "../../components/container/PageContainer";
-import * as v from "valibot";
 
-import { PaketData } from "../../jamaah/data";
-
-import CMSTable from "../../utilities/component/table/CMSTable";
-import { useState } from "react";
-import { toast } from "react-toastify";
 import UserTable from "../../utilities/component/table/UserTable";
-import { userData } from "../../utilities/data";
 import FormUser from "./FormUser";
 import { columnsUser } from "./columnsUser";
+import { UserProps } from "../../utilities/type";
 
-const User = () => {
+export type UserPageProps = {
+  data: UserProps[];
+};
+
+const User = ({ data }: UserPageProps) => {
+
+
   return (
     <>
       <Box
@@ -26,12 +26,12 @@ const User = () => {
           User
         </Typography>
       </Box>
-      <PageContainer title="CMS">
+      <PageContainer title="User">
         <Box sx={{ margin: "20px", display: "flex", justifyContent: "end" }}>
-          <FormUser/>
+          <FormUser />
         </Box>
         <Card sx={{ mt: 3 }}>
-          <UserTable data={userData} columns={columnsUser} />
+          <UserTable data={data} columns={columnsUser} />
         </Card>
       </PageContainer>
     </>

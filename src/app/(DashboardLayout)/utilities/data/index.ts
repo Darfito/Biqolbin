@@ -358,7 +358,6 @@ export const userData: UserProps[] = [
     role: Jabatan.Marketing,
     penempatan: "Jakarta",
     alamatCabang: "Jl. Sudirman No. 12, Jakarta",
-    action: "Edit",
   },
   {
     id: 2,

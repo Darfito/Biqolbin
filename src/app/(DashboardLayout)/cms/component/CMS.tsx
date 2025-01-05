@@ -2,15 +2,18 @@
 
 import { Box, Card, Typography } from "@mui/material";
 import PageContainer from "../../components/container/PageContainer";
-import * as v from "valibot";
 
-import { PaketData } from "../../jamaah/data";
-import FormCMS, { formSchema } from "./FormCMS";
+import FormCMS from "./FormCMS";
 import CMSTable from "../../utilities/component/table/CMSTable";
-import { useState } from "react";
-import { toast } from "react-toastify";
+import { PaketInterface } from "../../utilities/type";
 
-const CMS = () => {
+export type CMSPageProps = {
+  data: PaketInterface[]
+};
+
+const CMS = ({data}: CMSPageProps) => {
+
+  console.log("Paket data:", data);
 
 
   return (
@@ -29,7 +32,7 @@ const CMS = () => {
           <FormCMS mode={"create"}  />
         </Box>
       <Card sx={{ mt: 3}}>
-        <CMSTable data={PaketData} />
+        <CMSTable data={data} />
       </Card>
     </PageContainer>
   </>

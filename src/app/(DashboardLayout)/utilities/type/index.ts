@@ -64,12 +64,7 @@ export type CicilanType = {
     ratingHotel: number;
     tanggalCheckIn: string;
     tanggalCheckOut: string;
-    gambar?: {
-      id: number
-      url: string; // URL gambar (untuk akses langsung)
-      bucket: string; // Nama bucket di Supabase
-      path: string; // Path file dalam bucket
-    }; // Menyimpan URL gambar dari Supabase Bucket
+    gambar_url?: string;
   }
 
 
@@ -137,6 +132,7 @@ export enum Jabatan {
   Marketing = "Marketing",
   FinanceAccounting = "Finance & Accounting",
   Admin = "Admin",
+  Superadmin = "Superadmin",
 }
 
 export type JenisDokumen ={

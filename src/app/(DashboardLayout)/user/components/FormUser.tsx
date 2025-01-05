@@ -18,6 +18,9 @@ import {
   Radio,
 } from "@mui/material";
 import { Jabatan, JenisKelamin, UserProps } from "../../utilities/type";
+import { useState } from "react";
+import { createUserAction } from "../action";
+import { revalidatePath } from "next/cache";
 
 interface FormErrors {
   nama?: string;
@@ -39,11 +42,9 @@ const formSchema = v.object({
 });
 
 export default function FormUser() {
-  const [open, setOpen] = React.useState(false);
-  const [metode, setMetode] = React.useState<string>("");
-  const [jenisPaket, setJenisPaket] = React.useState<string>("");
+  const [open, setOpen] = useState(false);
 
-  const [formValues, setFormValues] = React.useState({
+  const [formValues, setFormValues] = useState({
     nama: "",
     jenisKelamin: "",
     noTelp: "",
@@ -51,21 +52,21 @@ export default function FormUser() {
     penempatan: "",
     alamatCabang: "",
   });
-  const [formErrors, setFormErrors] = React.useState<FormErrors>({});
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
 
   const handleInputChange = (field: keyof UserProps, value: any) => {
     setFormValues({ ...formValues, [field]: value });
   };
 
   // Handle form submission
-  const handleSubmit = (values: Record<string, any>) => {
-    setFormErrors({}); // Clear previous errors
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    // setFormErrors({}); // Clear previous errors
 
     // Validasi menggunakan Valibot
-    const result = v.safeParse(formSchema, values);
+    const result = v.safeParse(formSchema, formValues);
 
     if (!result.success) {
-      // Jika ada error, perbarui state `formErrors`
       const errorMap: Record<string, string> = {};
       result.issues.forEach((issue) => {
         const path = issue.path?.[0]?.key as string | undefined;
@@ -74,18 +75,25 @@ export default function FormUser() {
         }
       });
 
-      setFormErrors(errorMap); // Kirim error ke komponen bawah
+      setFormErrors(errorMap);
       console.error("Validation errors:", errorMap);
       return;
     }
 
-    // Jika validasi berhasil
+    console.log("Form User submitted:", formValues);
 
-    console.log("Form submitted:", values);
-    toast.success("Form berhasil disubmit!");
+    // Jika validasi berhasil, panggil createUserAction
+    const response = await createUserAction(formValues);
+
+    if (response.success) {
+      toast.success("User berhasil ditambahkan!");
+      handleClose(); // Tutup dialog setelah berhasil
+
+    } else {
+      toast.error(`Gagal menambahkan user: ${response.error}`);
+    }
   };
 
-  // Calculate installment (angsuran) if "Cicilan" is selected
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => {
@@ -101,9 +109,6 @@ export default function FormUser() {
       alamatCabang: "",
     });
 
-    // Reset method selection
-    setMetode("");
-    setJenisPaket("");
 
     // Clear any existing errors
     setFormErrors({});
@@ -187,8 +192,13 @@ export default function FormUser() {
               sx={{ marginBottom: 2 }}
             >
               <MenuItem value={Jabatan.Admin}>Admin</MenuItem>
-              <MenuItem value={Jabatan.DivisiGeneralAffair}>Divisi General Affair</MenuItem>
-              <MenuItem value={Jabatan.FinanceAccounting}>Finance & Accounting</MenuItem>
+              <MenuItem value={Jabatan.Superadmin}>Superadmin</MenuItem>
+              <MenuItem value={Jabatan.DivisiGeneralAffair}>
+                Divisi General Affair
+              </MenuItem>
+              <MenuItem value={Jabatan.FinanceAccounting}>
+                Finance & Accounting
+              </MenuItem>
               <MenuItem value={Jabatan.Marketing}>Marketing</MenuItem>
             </CustomTextField>
             <CustomTextField

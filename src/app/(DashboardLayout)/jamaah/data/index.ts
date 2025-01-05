@@ -45,12 +45,7 @@ export const PaketData: PaketInterface[] = [
     tglKepulangan: "2024-12-10",
     fasilitas: ["Hotel bintang 3", "Transportasi lokal"],
     publish: false,
-    gambar: {
-      id: 1,
-      url: "https://picsum.photos/seed/picsum/200/300",
-      bucket: "images",
-      path: "paket/paket-1.jpg",
-    },
+    gambar_url: "https://picsum.photos/seed/picsum/200/300",
     namaMuthawif: "Ahmad Yusuf",
     namaHotel: "Hotel Bintang Jakarta",
     alamatHotel: "Jl. Gatot Subroto No.10, Jakarta",
