@@ -39,6 +39,7 @@ interface FormCMSProps {
 }
 
 interface FormValues {
+  id?: number;
   nama: string;
   jenis: string;
   maskapai: string;
@@ -46,7 +47,7 @@ interface FormValues {
   customMaskapai: string;
   jenisPenerbangan: string;
   keretaCepat: boolean;
-  harga: string;
+  harga: number;
   tglKeberangkatan: string;
   tglKepulangan: string;
   namaMuthawif: string;
@@ -96,7 +97,7 @@ export const formSchema = v.object({
   // ),
   jenisPenerbangan: v.pipe(v.string(), v.nonEmpty("Pilih Jenis Penerbangan")),
   keretaCepat: v.boolean(),
-  harga: v.pipe(v.string(), v.nonEmpty("Harga harus diisi")),
+  harga: v.pipe(v.number(), v.minValue(1, "Harga harus lebih dari 0")),
   tglKeberangkatan: v.pipe(
     v.string(),
     v.nonEmpty("Tanggal Keberangkatan harus diisi")
@@ -138,7 +139,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
       customMaskapai: "",
       jenisPenerbangan: "",
       keretaCepat: false,
-      harga: "",
+      harga: 0,
       tglKeberangkatan: "",
       tglKepulangan: "",
       namaMuthawif: "",
@@ -287,7 +288,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
     }
   
     // Serialize form data before sending to server action
-    const serializedData = serializeFormData(formValues);
+    let serializedData = serializeFormData(formValues);
   
     try {
       if (mode === "create") {
@@ -302,6 +303,11 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
           console.error("Error creating Paket:", error);
         }
       } else if (mode === "edit") {
+        serializedData = {
+          ...serializedData,
+          id: initialValues?.id, // Add id from initialValues only for 'edit' mode
+        };
+        console.log("Data to be sent for update:", serializedData); // Log data before update
         const { success, data, error } = await updateCmsAction(serializedData);
         
         if (success) {
@@ -332,7 +338,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
         customMaskapai: "",
         jenisPenerbangan: "",
         keretaCepat: false,
-        harga: "",
+        harga: 0,
         tglKeberangkatan: "",
         tglKepulangan: "",
         namaMuthawif: "",
@@ -451,11 +457,11 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
               fullWidth
               label="Nomor Penerbangan (opsional)"
               name="Nomor Penerbangan"
-              value={formValues.nama}
-              error={!!formErrors.nama}
-              helperText={formErrors.nama}
+              value={formValues.noPenerbangan}
+              error={!!formErrors.noPenerbangan}
+              helperText={formErrors.noPenerbangan}
               onChange={(e: { target: { value: string } }) =>
-                setFormValues({ ...formValues, nama: e.target.value })
+                setFormValues({ ...formValues, noPenerbangan: e.target.value })
               }
             />
 
@@ -526,7 +532,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
               error={!!formErrors.harga}
               helperText={formErrors.harga}
               onChange={(e: { target: { value: string } }) =>
-                setFormValues({ ...formValues, harga: e.target.value })
+                setFormValues({ ...formValues, harga: e.target.value === "" ? 0 : Number(e.target.value) })
               }
             />
             <Divider />
