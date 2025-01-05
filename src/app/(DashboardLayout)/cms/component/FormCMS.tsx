@@ -25,7 +25,7 @@ import {
 } from "@mui/material";
 import { Delete } from "@mui/icons-material";
 import FileUploaderSingle from "../../utilities/component/uploader/FileUploaderSingle";
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import {
   createCmsAction,
   sanitizeFolderName,
@@ -262,7 +262,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
     };
   };
   
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
   
     // Validate form data

@@ -18,7 +18,7 @@ import {
   Radio,
 } from "@mui/material";
 import { Jabatan, JenisKelamin, UserProps } from "../../utilities/type";
-import { FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import { createUserAction } from "../action";
 import { revalidatePath } from "next/cache";
 
@@ -153,7 +153,7 @@ export default function FormUser() {
               <FormLabel component="legend">Jenis Kelamin</FormLabel>
               <RadioGroup
                 value={formValues.jenisKelamin}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   handleInputChange("jenisKelamin", e.target.value)
                 }
                 row
