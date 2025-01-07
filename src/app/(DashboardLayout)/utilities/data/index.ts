@@ -1,5 +1,5 @@
 import { CardStatsHorizontalWithBorderProps, Jabatan, JenisKelamin, JenisPaket, JenisPenerbangan, KeuanganProps, Maskapai, PaketInterface, UserProps } from "../type";
-import { IconUser, IconProgress,IconReceipt } from "@tabler/icons-react";
+import { IconUser, IconProgress,IconReceipt, IconPlaneDeparture, IconPlaneArrival, IconLoader } from "@tabler/icons-react";
 
 
 export const scoreCardKeuangan: CardStatsHorizontalWithBorderProps[] = [
@@ -22,139 +22,158 @@ export const scoreCardKeuangan: CardStatsHorizontalWithBorderProps[] = [
     icon: IconReceipt,
   },
 ]
-
-
-
-const PaketData: PaketInterface[] = [
+export const scoreCardJamaah: CardStatsHorizontalWithBorderProps[] = [
   {
-    id: "PKT001",
+    title: 'Total Jamaah',
+    total: 1280,
+    color: '#3E74FF',
+    icon: IconUser,
+  },
+  {
+    title: 'Belum Berangkat',
+    total: 1280,
+    color: '#F54F63',
+    icon: IconLoader,
+  },
+  {
+    title: 'Selesai',
+    total: 1280,
+    color: '#F5BD4F',
+    icon: IconPlaneArrival,
+  },
+]
+
+
+
+export const PaketData: PaketInterface[] = [
+  {
+    id: 1,
     nama: "Paket Regular 1",
     jenis: JenisPaket.REGULAR,
     maskapai: Maskapai.GARUDA_INDONESIA,
     jenisPenerbangan: JenisPenerbangan.DIRECT,
     keretaCepat: false,
-    harga: 1000000,
+
     tglKeberangkatan: "2024-12-01",
     tglKepulangan: "2024-12-10",
     fasilitas: ["Hotel bintang 3", "Transportasi lokal"],
     publish: true,
     namaMuthawif: "Yusuf Aldi",
     noTelpMuthawif: "0812 3456 7890",
-    namaHotel: "Al Madinah",
+    hotel: [
+      {
+        id:1,
+        namaHotel: "Al Madinah",
     alamatHotel: "Jl. Utama No. 123, Mekah",
     ratingHotel: 4.5,
     tanggalCheckIn: "2024-12-02",
     tanggalCheckOut: "2024-12-09",
-    gambar: {
-      id: 1,
-      url: "https://example.com/images/paket-regular-1.jpg",
-      bucket: "travel-packages",
-      path: "images/paket-regular-1.jpg",
-    },
+      }
+    ],
+    gambar_url: "https://example.com/images/paket-regular-1.jpg",
   },
   {
-    id: "PKT002",
+    id: 2,
     nama: "Paket Regular 2",
     jenis: JenisPaket.REGULAR,
     maskapai: Maskapai.QATAR_AIRWAYS,
     jenisPenerbangan: JenisPenerbangan.TRANSIT,
     keretaCepat: false,
-    harga: 800000,
     tglKeberangkatan: "2024-12-05",
     tglKepulangan: "2024-12-15",
     fasilitas: ["Hotel bintang 2", "Transportasi lokal"],
     publish: false,
     namaMuthawif: "Ahmad Fauzi",
     noTelpMuthawif: "0812 5678 1234",
-    namaHotel: "Al Safwa",
-    alamatHotel: "Jl. Selatan No. 45, Madinah",
-    ratingHotel: 3.8,
-    tanggalCheckIn: "2024-12-06",
-    tanggalCheckOut: "2024-12-14",
-    gambar: {
-      id: 2,
-      url: "https://example.com/images/paket-regular-2.jpg",
-      bucket: "travel-packages",
-      path: "images/paket-regular-2.jpg",
-    },
+   hotel: [
+     {
+      id: 1,
+      namaHotel: "Al Safwa",
+      alamatHotel: "Jl. Selatan No. 45, Madinah",
+      ratingHotel: 3.8,
+      tanggalCheckIn: "2024-12-06",
+      tanggalCheckOut: "2024-12-14",
+     }
+   ],
+    gambar_url: "https://example.com/images/paket-regular-2.jpg",
   },
   {
-    id: "PKT003",
+    id: 3,
     nama: "Paket VIP 1",
     jenis: JenisPaket.VIP,
     maskapai: Maskapai.LION_AIRWAYS,
     jenisPenerbangan: JenisPenerbangan.DIRECT,
     keretaCepat: true,
-    harga: 2000000,
     tglKeberangkatan: "2024-12-10",
     tglKepulangan: "2024-12-20",
     fasilitas: ["Hotel bintang 5", "Transportasi premium"],
     publish: true,
     namaMuthawif: "Hana Ramadani",
     noTelpMuthawif: "0812 3456 7891",
-    namaHotel: "Hilton Mekah",
+    hotel: [
+      {
+        id: 1,
+        namaHotel: "Hilton Mekah",
     alamatHotel: "Jl. Ka'bah No. 1, Mekah",
     ratingHotel: 5.0,
     tanggalCheckIn: "2024-12-11",
     tanggalCheckOut: "2024-12-19",
-    gambar: {
-      id: 3,
-      url: "https://example.com/images/paket-vip-1.jpg",
-      bucket: "travel-packages",
-      path: "images/paket-vip-1.jpg",
-    },
+      }
+    ],
+    gambar_url: "https://example.com/images/paket-vip-1.jpg",
   },
   {
-    id: "PKT004",
+    id: 4,
     nama: "Paket Regular 4",
     jenis: JenisPaket.REGULAR,
     maskapai: Maskapai.ETIHAD_AIRWAYS,
     jenisPenerbangan: JenisPenerbangan.TRANSIT,
     keretaCepat: false,
-    harga: 500000,
     tglKeberangkatan: "2024-12-15",
     tglKepulangan: "2024-12-25",
     fasilitas: ["Hotel bintang 1", "Transportasi umum"],
     publish: true,
     namaMuthawif: "Rizki Hidayat",
     noTelpMuthawif: "0812 7890 4567",
-    namaHotel: "Al Firdous",
-    alamatHotel: "Jl. Timur No. 34, Madinah",
-    ratingHotel: 3.0,
-    tanggalCheckIn: "2024-12-16",
-    tanggalCheckOut: "2024-12-24",
-    gambar: {
-      id: 4,
-      url: "https://example.com/images/paket-ekonomi-1.jpg",
-      bucket: "travel-packages",
-      path: "images/paket-ekonomi-1.jpg",
-    },
+    hotel: [
+      {
+        id: 1,
+        namaHotel: "Al Firdous",
+        alamatHotel: "Jl. Timur No. 34, Madinah",
+        ratingHotel: 3.0,
+        tanggalCheckIn: "2024-12-16",
+        tanggalCheckOut: "2024-12-24",
+      }
+    ],
+    gambar_url: "https://example.com/images/paket-regular-4.jpg",
+
   },
   {
-    id: "PKT005",
+    id: 5,
     nama: "Paket VIP 4",
     jenis: JenisPaket.VIP,
     maskapai: Maskapai.SAUDIA_ARABIA,
     jenisPenerbangan: JenisPenerbangan.DIRECT,
     keretaCepat: true,
-    harga: 3000000,
     tglKeberangkatan: "2024-12-20",
     tglKepulangan: "2024-12-30",
     fasilitas: ["Hotel bintang 5", "Transportasi VIP", "Makanan premium"],
     publish: true,
     namaMuthawif: "Nur Aisyah",
     noTelpMuthawif: "0812 5678 9101",
-    namaHotel: "Raffles Mekah",
-    alamatHotel: "Jl. Zamzam No. 12, Mekah",
-    ratingHotel: 4.9,
-    tanggalCheckIn: "2024-12-21",
-    tanggalCheckOut: "2024-12-29",
-    gambar: {
-      id: 5,
-      url: "https://example.com/images/paket-premium-1.jpg",
-      bucket: "travel-packages",
-      path: "images/paket-premium-1.jpg",
-    },
+    hotel: [
+      {
+        id: 1,
+        namaHotel: "Raffles Mekah",
+        alamatHotel: "Jl. Zamzam No. 12, Mekah",
+        ratingHotel: 4.9,
+        tanggalCheckIn: "2024-12-21",
+        tanggalCheckOut: "2024-12-29",
+      }
+    ],
+
+    gambar_url: "https://example.com/images/paket-vip-4.jpg",
+
   },
 ];
 

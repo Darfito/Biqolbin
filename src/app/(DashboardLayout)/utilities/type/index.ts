@@ -46,7 +46,7 @@ export type CicilanType = {
 
   // ! PAKET TYPE
   export interface PaketInterface {
-    id: string;
+    id: number;
     nama: string;
     jenis: JenisPaket;
     maskapai: Maskapai; // Menggunakan enum Maskapai
@@ -54,7 +54,6 @@ export type CicilanType = {
     jenisPenerbangan: JenisPenerbangan;
     noPenerbangan?: string;
     keretaCepat: boolean;
-    harga: number;
     tglKeberangkatan: string;
     tglKepulangan: string;
     fasilitas: string[];
@@ -62,12 +61,20 @@ export type CicilanType = {
     publish: boolean;
     namaMuthawif: string;
     noTelpMuthawif: string;
+    hotel: HotelType[];
+    hargaDouble: number; // Harga untuk kamar double
+    hargaTriple: number; // Harga untuk kamar triple
+    hargaQuad: number;   // Harga untuk kamar quad
+    gambar_url?: string;
+  }
+
+  export type HotelType = {
+    id: number;
     namaHotel: string;
     alamatHotel: string;
     ratingHotel: number;
     tanggalCheckIn: string;
     tanggalCheckOut: string;
-    gambar_url?: string;
   }
 
 
@@ -181,12 +188,7 @@ export enum JenisKelamin {
 
 
 // ! TYPE HOTEL
-export type HotelType = {
-  id: number;
-  namaHotel: string;
-  alamat: string;
-  deskripsi: string;
-}
+
 
 // ! TYPE KAMAR
 

@@ -1,3 +1,4 @@
+import { PaketData } from "../../utilities/data";
 import {
   CardStatsHorizontalWithBorderProps,
   JamaahProps,
@@ -32,69 +33,7 @@ export const scoreCardKeuangan: CardStatsHorizontalWithBorderProps[] = [
   },
 ];
 
-export const PaketData: PaketInterface[] = [
-  {
-    id: "PKT001",
-    nama: "Paket Regular 1",
-    jenis: JenisPaket.REGULAR,
-    maskapai: Maskapai.GARUDA_INDONESIA,
-    jenisPenerbangan: JenisPenerbangan.DIRECT,
-    keretaCepat: false,
-    harga: 1000000,
-    tglKeberangkatan: "2024-12-01",
-    tglKepulangan: "2024-12-10",
-    fasilitas: ["Hotel bintang 3", "Transportasi lokal"],
-    publish: false,
-    gambar_url: "https://picsum.photos/seed/picsum/200/300",
-    namaMuthawif: "Ahmad Yusuf",
-    namaHotel: "Hotel Bintang Jakarta",
-    alamatHotel: "Jl. Gatot Subroto No.10, Jakarta",
-    ratingHotel: 3,
-    tanggalCheckIn: "2024-12-01",
-    tanggalCheckOut: "2024-12-10",
-    noTelpMuthawif: "+62 812 3456 7890",
-  },
-  {
-    id: "PKT002",
-    nama: "Paket Regular 2",
-    jenis: JenisPaket.REGULAR,
-    maskapai: Maskapai.LION_AIRWAYS,
-    jenisPenerbangan: JenisPenerbangan.TRANSIT,
-    keretaCepat: false,
-    harga: 800000,
-    tglKeberangkatan: "2024-12-05",
-    tglKepulangan: "2024-12-15",
-    fasilitas: ["Hotel bintang 3", "Transportasi lokal"],
-    publish: false,
-    namaMuthawif: "Fatimah Anisa",
-    namaHotel: "Hotel Bintang Surabaya",
-    alamatHotel: "Jl. Raya Darmo No.45, Surabaya",
-    ratingHotel: 3,
-    tanggalCheckIn: "2024-12-05",
-    tanggalCheckOut: "2024-12-15",
-    noTelpMuthawif: "+62 813 6543 2100",
-  },
-  {
-    id: "PKT003",
-    nama: "Paket VIP 1",
-    jenis: JenisPaket.VIP,
-    maskapai: Maskapai.ETIHAD_AIRWAYS,
-    jenisPenerbangan: JenisPenerbangan.DIRECT,
-    keretaCepat: true,
-    harga: 2000000,
-    tglKeberangkatan: "2024-12-10",
-    tglKepulangan: "2024-12-20",
-    fasilitas: ["Hotel bintang 3", "Transportasi lokal"],
-    publish: false,
-    namaMuthawif: "Zainal Abidin",
-    namaHotel: "Hotel Premium Bali",
-    alamatHotel: "Jl. Sunset Road No.12, Bali",
-    ratingHotel: 5,
-    tanggalCheckIn: "2024-12-10",
-    tanggalCheckOut: "2024-12-20",
-    noTelpMuthawif: "+62 811 9876 5432",
-  },
-];
+
 
 const jamaahData: JamaahProps[] = [
   {
@@ -119,7 +58,7 @@ const jamaahData: JamaahProps[] = [
     email: "ahmad.fauzi@example.com",
     jenisKelamin: JenisKelamin.LakiLaki,
     tempatLahir: "Surabaya",
-    perkawinan: true,
+    pernikahan: true,
     alamat: "Jl. Pahlawan No. 45, Surabaya",
     varianKamar: {
       id: 1,
@@ -132,8 +71,8 @@ const jamaahData: JamaahProps[] = [
     kursiRoda: false,
     riwayatPenyakit: "Tidak ada",
     jenisPaket: PaketData[0],
-    berangkat: new Date("2024-01-15"),
-    selesai: new Date("2024-01-30"),
+    berangkat: "2024-01-15",
+    selesai: "2024-01-30",
     status: "Dijadwalkan",
     jenisDokumen: [
       {
@@ -190,7 +129,7 @@ const jamaahData: JamaahProps[] = [
     email: "dewi.sartika@example.com",
     jenisKelamin: JenisKelamin.Perempuan,
     tempatLahir: "Bandung",
-    perkawinan: false,
+    pernikahan: false,
     alamat: "Jl. Asia Afrika No. 12, Bandung",
     varianKamar: {
       id: 2,
@@ -203,8 +142,8 @@ const jamaahData: JamaahProps[] = [
     kursiRoda: false,
     riwayatPenyakit: "Asma",
     jenisPaket: PaketData[1],
-    berangkat: new Date("2024-02-10"),
-    selesai: new Date("2024-02-25"),
+    berangkat: "2024-02-10",
+    selesai: "2024-02-25",
     status: "Berangkat",
     jenisDokumen: [
       {
@@ -261,7 +200,7 @@ const jamaahData: JamaahProps[] = [
     email: "rafi.hidayat@example.com",
     jenisKelamin: JenisKelamin.LakiLaki,
     tempatLahir: "Yogyakarta",
-    perkawinan: false,
+    pernikahan: false,
     alamat: "Jl. Malioboro No. 21, Yogyakarta",
     varianKamar: {
       id: 3,
@@ -274,8 +213,8 @@ const jamaahData: JamaahProps[] = [
     kursiRoda: false,
     riwayatPenyakit: "Tidak ada",
     jenisPaket: PaketData[2],
-    berangkat: new Date("2024-03-15"),
-    selesai: new Date("2024-03-30"),
+    berangkat: "2024-03-15",
+    selesai: "2024-03-30",
     status: "Dijadwalkan",
     jenisDokumen: [
       {

@@ -109,8 +109,11 @@ const handleSubmit = (data: SetStateAction<{}>) => {
             >
               {isEditing ? "Simpan Perubahan" : "Sunting Rincian"}
             </Button>
-            <Button variant="contained" disabled sx={{ color: "white" }}>
+            <Button variant="contained" disabled sx={{ color: "white", marginRight: "1rem" }}>
               Telah Lunas
+            </Button>
+            <Button variant="contained" disabled sx={{ color: "white" }}>
+              Invoice
             </Button>
           </Box>
         </Box>

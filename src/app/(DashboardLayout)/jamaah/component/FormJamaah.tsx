@@ -158,7 +158,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
     riwayatPenyakit: "",
     jenisDokumen: [],
     jenisPaket: {
-      id: "0", // Mengambil hanya properti yang relevan
+      id: 0, // Mengambil hanya properti yang relevan
       nama: "",
       jenis: JenisPaket.REGULAR,
       maskapai: Maskapai.SAUDIA_ARABIA,
@@ -166,33 +166,31 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
       jenisPenerbangan: JenisPenerbangan.DIRECT,
       noPenerbangan: "",
       keretaCepat: false,
-      harga: 0,
       tglKeberangkatan: "",
       tglKepulangan: "",
       fasilitas: [],
       publish: false,
       namaMuthawif: "",
       noTelpMuthawif: "",
-      namaHotel: "",
-      alamatHotel: "",
-      ratingHotel: 0,
-      tanggalCheckIn: "",
-      tanggalCheckOut: "",
+      hotel: [],
       gambar_url: "",
+      hargaDouble: 0,
+      hargaTriple: 0,
+      hargaQuad: 0
     },
     berangkat: "",
     selesai: "",
-    status: "Dijadwalkan"
+    status: "Dijadwalkan",
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
 
-  const handleJenisKelaminChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setJenisKelamin(event.target.value as JenisKelamin);
-    setFormValues({
-      ...formValues,
-      jenisKelamin: event.target.value as JenisKelamin,
-    });
-  };
+  // const handleJenisKelaminChange = (event: ChangeEvent<HTMLInputElement>) => {
+  //   setJenisKelamin(event.target.value as JenisKelamin);
+  //   setFormValues({
+  //     ...formValues,
+  //     jenisKelamin: event.target.value as JenisKelamin,
+  //   });
+  // };
 
   const handleContactChange = (
     index: number,
@@ -271,7 +269,6 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
     toast.success("Form berhasil disubmit!"); // Show success toast
   };
 
-
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
@@ -307,7 +304,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
       riwayatPenyakit: "",
       jenisDokumen: [],
       jenisPaket: {
-        id: "0", // Mengambil hanya properti yang relevan
+        id: 0, // Mengambil hanya properti yang relevan
         nama: "",
         jenis: JenisPaket.REGULAR,
         maskapai: Maskapai.SAUDIA_ARABIA,
@@ -315,23 +312,21 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
         jenisPenerbangan: JenisPenerbangan.DIRECT,
         noPenerbangan: "",
         keretaCepat: false,
-        harga: 0,
         tglKeberangkatan: "",
         tglKepulangan: "",
         fasilitas: [],
         publish: false,
         namaMuthawif: "",
         noTelpMuthawif: "",
-        namaHotel: "",
-        alamatHotel: "",
-        ratingHotel: 0,
-        tanggalCheckIn: "",
-        tanggalCheckOut: "",
+        hotel: [],
         gambar_url: "",
+        hargaDouble: 0,
+        hargaTriple: 0,
+        hargaQuad: 0
       },
       berangkat: "",
       selesai: "",
-      status: "Dijadwalkan"
+      status: "Dijadwalkan",
     });
   };
 
@@ -503,26 +498,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                     />
                   </RadioGroup>
                 </FormControl>
-                <CustomTextField
-                  select
-                  fullWidth
-                  label="Varian Kamar"
-                  value={formValues.varianKamar?.tipeKamar}
-                  onChange={(e: { target: { value: string } }) =>
-                    setFormValues({
-                      ...formValues,
-                      varianKamar: {
-                        ...formValues.varianKamar,
-                        tipeKamar: e.target.value as TipeKamar, // Convert to TipeKamar
-                      },
-                    })
-                  }
-                  sx={{ marginBottom: 2 }}
-                >
-                  <MenuItem value={TipeKamar.QUAD}>QUAD</MenuItem>
-                  <MenuItem value={TipeKamar.TRIPLE}>TRIPLE</MenuItem>
-                  <MenuItem value={TipeKamar.DOUBLE}>DOUBLE</MenuItem>
-                </CustomTextField>
+
                 <CustomTextField
                   fullWidth
                   label="Pekerjaan"
@@ -578,7 +554,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                     } else {
                       setFormValues({
                         ...formValues,
-                        jenisPaket: ({} as PaketInterface),
+                        jenisPaket: {} as PaketInterface,
                       });
                     }
                   }}
@@ -592,7 +568,27 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                     />
                   )}
                 />
-               {/* Tanggal Berangkat */}
+                <CustomTextField
+                  select
+                  fullWidth
+                  label="Varian Kamar"
+                  value={formValues.varianKamar?.tipeKamar}
+                  onChange={(e: { target: { value: string } }) =>
+                    setFormValues({
+                      ...formValues,
+                      varianKamar: {
+                        ...formValues.varianKamar,
+                        tipeKamar: e.target.value as TipeKamar, // Convert to TipeKamar
+                      },
+                    })
+                  }
+                  sx={{ marginBottom: 2 }}
+                >
+                  <MenuItem value={TipeKamar.QUAD}>QUAD</MenuItem>
+                  <MenuItem value={TipeKamar.TRIPLE}>TRIPLE</MenuItem>
+                  <MenuItem value={TipeKamar.DOUBLE}>DOUBLE</MenuItem>
+                </CustomTextField>
+                {/* Tanggal Berangkat */}
                 <CustomTextField
                   fullWidth
                   disabled
