@@ -81,7 +81,6 @@ export const HotelSection = ({
                 e.target.value === "" ? 0 : Number(e.target.value)
               )
             }
-            type="number"
             inputProps={{ min: 0 }} // Membatasi nilai minimum ke 0
             sx={{ marginBottom: 2 }}
           />

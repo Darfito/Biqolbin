@@ -15,6 +15,7 @@ import {
   JenisPaket,
   JenisPenerbangan,
   Maskapai,
+  PaketInterface,
 } from "../../utilities/type";
 import {
   FormControlLabel,
@@ -43,11 +44,11 @@ interface FormCMSProps {
 interface FormValues {
   id?: number;
   nama: string;
-  jenis: string;
-  maskapai: string;
+  jenis: JenisPaket;
+  maskapai: Maskapai;
   noPenerbangan?: string;
   customMaskapai: string;
-  jenisPenerbangan: string;
+  jenisPenerbangan: JenisPenerbangan;
   keretaCepat: boolean;
   hargaDouble: number; // Harga untuk kamar double
   hargaTriple: number; // Harga untuk kamar triple
@@ -93,7 +94,9 @@ export const formSchema = v.object({
   maskapai: v.pipe(v.string(), v.nonEmpty("Maskapai harus diisi")),
   jenisPenerbangan: v.pipe(v.string(), v.nonEmpty("Pilih Jenis Penerbangan")),
   keretaCepat: v.boolean(),
-  harga: v.pipe(v.number(), v.minValue(1, "Harga harus lebih dari 0")),
+  hargaDouble: v.pipe(v.number(), v.minValue(1, "Harga Kamar Double harus lebih dari 0")),
+  hargaTriple: v.pipe(v.number(), v.minValue(1, "Harga Kamar Triple harus lebih dari 0")),
+  hargaQuad: v.pipe(v.number(), v.minValue(1, "Harga Kamar Quad harus lebih dari 0")),
   tglKeberangkatan: v.pipe(
     v.string(),
     v.nonEmpty("Tanggal Keberangkatan harus diisi")
@@ -133,11 +136,11 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
   const [formValues, setFormValues] = useState<FormValues>(
     initialValues || {
       nama: "",
-      jenis: "",
-      maskapai: "",
+      jenis: JenisPaket.REGULAR,
+      maskapai: Maskapai.GARUDA_INDONESIA,
       noPenerbangan: "",
       customMaskapai: "",
-      jenisPenerbangan: "",
+      jenisPenerbangan: JenisPenerbangan.DIRECT,
       keretaCepat: false,
       hargaDouble: 0, // Harga untuk kamar double
       hargaTriple: 0, // Harga untuk kamar triple
@@ -242,8 +245,17 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
     }
   };
 
-  const serializeFormData = (values: FormValues): FormValues => {
+  const serializeFormData = (
+    values: FormValues,
+    mode: "create" | "edit",
+    initialValues?: PaketInterface
+  ): PaketInterface | Omit<PaketInterface, "id"> => {
+    if (mode === "edit" && initialValues?.id == null) {
+      throw new Error("ID is required for edit mode");
+    }
+  
     return {
+      ...(mode === "edit" && initialValues?.id ? { id: initialValues.id } : {}),
       nama: values.nama,
       jenis: values.jenis,
       maskapai: values.maskapai,
@@ -258,18 +270,19 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
       tglKepulangan: values.tglKepulangan,
       namaMuthawif: values.namaMuthawif,
       noTelpMuthawif: values.noTelpMuthawif,
-      hotel: Array.isArray(values.hotel) ? values.hotel : [],
       fasilitas: Array.isArray(values.fasilitas) ? values.fasilitas : [],
       gambar_url: values.gambar_url,
     };
   };
+  
+  
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
+  
     // Validate form data
     const result = v.safeParse(formSchema, formValues);
-
+  
     if (!result.success) {
       const errorMap: Record<string, string> = {};
       result.issues.forEach((issue) => {
@@ -278,47 +291,37 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
           errorMap[path] = issue.message;
         }
       });
-
+  
       setFormErrors(errorMap);
       console.error("Validation errors:", errorMap);
       return;
     }
-
+  
     if (!formValues.gambar_url) {
       toast.error("Harap unggah gambar sebelum mengirimkan form!");
       return;
     }
-
+  
     // Serialize form data before sending to server action
-    let serializedData = serializeFormData(formValues);
+    const serializedData = serializeFormData(formValues, mode, initialValues);
 
+  
     try {
       if (mode === "create") {
         const { success, data, error } = await createCmsAction(serializedData);
-
         if (success) {
           toast.success("Form berhasil disubmit!");
-          console.log("Paket created:", data);
           handleClose();
         } else {
           toast.error(`Error: ${error}`);
-          console.error("Error creating Paket:", error);
         }
       } else if (mode === "edit") {
-        serializedData = {
-          ...serializedData,
-          id: initialValues?.id, // Add id from initialValues only for 'edit' mode
-        };
-        console.log("Data to be sent for update:", serializedData); // Log data before update
         const { success, data, error } = await updateCmsAction(serializedData);
-
         if (success) {
           toast.success("Form berhasil di Update!");
-          console.log("Paket updated:", data);
           handleClose();
         } else {
           toast.error(`Error: ${error}`);
-          console.error("Error updating Paket:", error);
         }
       }
     } catch (error) {
@@ -335,10 +338,10 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
     setFormValues(
       initialValues || {
         nama: "",
-        jenis: "",
-        maskapai: "",
+        jenis: JenisPaket.REGULAR,
+        maskapai: Maskapai.GARUDA_INDONESIA,
         customMaskapai: "",
-        jenisPenerbangan: "",
+        jenisPenerbangan: JenisPenerbangan.DIRECT,
         keretaCepat: false,
         hargaDouble: 0, // Harga untuk kamar double
         hargaTriple: 0, // Harga untuk kamar triple
@@ -449,7 +452,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
                 onChange={(e) =>
                   setFormValues({
                     ...formValues,
-                    jenis: e.target.value,
+                    jenis: e.target.value as JenisPaket,
                   })
                 }
                 row
@@ -485,7 +488,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
                   });
                 } else {
                   setIsCustomMaskapai(false); // Nonaktifkan input tambahan
-                  setFormValues({ ...formValues, maskapai: value });
+                  setFormValues({ ...formValues, maskapai: value as Maskapai });
                 }
               }}
             >
@@ -536,7 +539,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
                 onChange={(e) =>
                   setFormValues({
                     ...formValues,
-                    jenisPenerbangan: e.target.value,
+                    jenisPenerbangan: e.target.value as JenisPenerbangan,
                   })
                 }
                 row

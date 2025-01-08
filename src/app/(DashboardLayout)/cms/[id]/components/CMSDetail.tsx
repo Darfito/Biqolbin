@@ -16,7 +16,6 @@ import { useRouter } from "next/navigation";
 import Breadcrumb from "@/app/(DashboardLayout)/utilities/component/breadcrumb/Breadcrumb";
 import { IconArrowLeft } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { PaketData } from "@/app/(DashboardLayout)/jamaah/data";
 import FormCMS, { formSchema } from "../../component/FormCMS";
 import * as v from "valibot";
 import { toast } from "react-toastify";
@@ -179,7 +178,35 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
                   <ListItem>
                     <ListItemText
                       primary="Harga"
-                      secondary={`Rp ${paketDetail.harga.toLocaleString(
+                      secondary={`Rp ${paketDetail.hargaDouble.toLocaleString(
+                        "id-ID"
+                      )}`}
+                      sx={{
+                        "& .MuiListItemText-primary": { fontSize: "1.1rem" },
+                        "& .MuiListItemText-secondary": { fontSize: "1rem" },
+                      }}
+                    />
+                  </ListItem>
+                </Grid>
+                <Grid item xs={6}>
+                  <ListItem>
+                    <ListItemText
+                      primary="Harga"
+                      secondary={`Rp ${paketDetail.hargaTriple.toLocaleString(
+                        "id-ID"
+                      )}`}
+                      sx={{
+                        "& .MuiListItemText-primary": { fontSize: "1.1rem" },
+                        "& .MuiListItemText-secondary": { fontSize: "1rem" },
+                      }}
+                    />
+                  </ListItem>
+                </Grid>
+                <Grid item xs={6}>
+                  <ListItem>
+                    <ListItemText
+                      primary="Harga"
+                      secondary={`Rp ${paketDetail.hargaQuad.toLocaleString(
                         "id-ID"
                       )}`}
                       sx={{

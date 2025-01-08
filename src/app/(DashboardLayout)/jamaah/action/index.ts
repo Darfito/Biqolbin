@@ -22,45 +22,43 @@ export const createJamaahAction = async (formValues: JamaahProps) => {
     .select("id")
     .single();
 
-    if (jamaahError) throw jamaahError;
-    const jamaahId = jamaahData.id;
+  if (jamaahError) throw jamaahError;
+  const jamaahId = jamaahData.id;
 
-    // Step 2: Create Kontak Darurat
+  // Step 2: Create Kontak Darurat
 
-    for (const contact of formValues.kontakDarurat) {
-        const { error: kontakError } = await supabase.from('KontakDarurat').insert({
-            nama: contact.nama,
-            no_telp: contact.noTelp,
-            hubungan: contact.hubungan,
-            relasi_lain: contact.relasiLain,
-            jamaah_id: jamaahId,
-        });
-        if (kontakError) throw kontakError;
-    }
+  for (const contact of formValues.kontakDarurat) {
+    const { error: kontakError } = await supabase.from("KontakDarurat").insert({
+      nama: contact.nama,
+      no_telp: contact.noTelp,
+      hubungan: contact.hubungan,
+      relasi_lain: contact.relasiLain,
+      jamaah_id: jamaahId,
+    });
+    if (kontakError) throw kontakError;
+  }
 
+  // Step 3: Create Jenis Dokumen
+  const dokumenList =
+    formValues.pernikahan === true
+      ? ["KTP", "Paspor", "Buku Nikah", "Kartu Keluarga", "Visa", "Pas Foto"]
+      : ["KTP", "Paspor", "Kartu Keluarga", "Visa", "Pas Foto"];
 
+  const dokumenEntries = dokumenList.map((dokumen) => ({
+    jamaah_id: jamaahId,
+    nama_dokumen: dokumen,
+    file: null, // File akan diupload secara terpisah
+    lampiran: false, // Default: belum ada lampiran
+    action: "Menunggu", // Default: status awal dokumen
+  }));
 
-    // Step 3: Create Jenis Dokumen
-    const dokumenList = formValues.pernikahan === true
-        ? ['KTP', 'Paspor', 'Buku Nikah', 'Kartu Keluarga', 'Visa', 'Pas Foto']
-        : ['KTP', 'Paspor', 'Kartu Keluarga', 'Visa', 'Pas Foto'];
+  const { error: dokumenError } = await supabase
+    .from("jenis_dokumen")
+    .insert(dokumenEntries);
 
-    const dokumenEntries = dokumenList.map((dokumen) => ({
-        jamaah_id: jamaahId,
-        nama_dokumen: dokumen,
-        file: null, // File akan diupload secara terpisah
-        lampiran: false, // Default: belum ada lampiran
-        action: 'Menunggu', // Default: status awal dokumen
-    }));
+  if (dokumenError) throw dokumenError;
 
-    const { error: dokumenError } = await supabase
-        .from('jenis_dokumen')
-        .insert(dokumenEntries);
-
-    if (dokumenError) throw dokumenError;
-
-    console.log("Jamaah created:", jamaahData);
-    revalidatePath("/jamaah");
-    return { success: true, data: jamaahData };
-
+  console.log("Jamaah created:", jamaahData);
+  revalidatePath("/jamaah");
+  return { success: true, data: jamaahData };
 };
