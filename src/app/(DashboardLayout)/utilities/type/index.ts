@@ -65,7 +65,7 @@ export type CicilanType = {
     hargaTriple: number; // Harga untuk kamar triple
     hargaQuad: number;   // Harga untuk kamar quad
     gambar_url?: string;
-    hotel?: HotelType[];
+    Hotel?: HotelType[];
   }
 
   // ! TYPE HOTEL

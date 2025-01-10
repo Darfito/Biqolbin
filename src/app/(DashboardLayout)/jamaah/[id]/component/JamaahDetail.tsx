@@ -19,7 +19,7 @@ import { useRouter } from "next/navigation";
 
 import jamaahData from "../../data";
 import { JamaahProps } from "@/app/(DashboardLayout)/utilities/type";
-import JamaahDetailTable from "@/app/(DashboardLayout)/utilities/component/table/JamaahDetailTable";
+import JamaahDetailTable from "@/app/(DashboardLayout)/utilities/component/table/Jamaah/JamaahDetailTable";
 
 interface JamaahDetailProps {
   id: string;

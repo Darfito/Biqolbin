@@ -26,15 +26,18 @@ import type {
   Table,
   ColumnFiltersState,
   FilterFn,
+  ColumnDef,
 } from "@tanstack/react-table";
 import type { RankingInfo } from "@tanstack/match-sorter-utils";
 
+// Component Imports
+
 // Style Imports
-import styles from "../../../../styles/table.module.css";
+import styles from "../../../styles/table.module.css";
 
 // Data Imports
-import TablePaginationComponent from "../pagination/TablePaginationComponent";
-import CustomTextField from "../textField/TextField";
+import TablePaginationComponent from "../../pagination/TablePaginationComponent";
+import CustomTextField from "../../textField/TextField";
 import { ChevronRight } from "@mui/icons-material";
 import {
   Box,
@@ -45,12 +48,9 @@ import {
   DialogTitle,
   Typography,
 } from "@mui/material";
-import { PaketInterface } from "../../type";
+
 import { useRouter } from "next/navigation";
-import { createClient } from "@/libs/supabase/client";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css"; // Import toast styles
-import { revalidatePath } from "next/cache";
+import { UserProps } from "../../../type";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -172,187 +172,32 @@ const Filter = ({
 };
 
 // Mendeklarasikan interface dengan tipe generik T
-interface CMSProps<T> {
+interface TableProps<T> {
   data: T[];
+  columns: ColumnDef<T, any>[]; // Kolom dinamis yang disesuaikan dengan tipe T
 }
 
-const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
+const UserTable = <T,>({ data, columns }: TableProps<T>) => {
   // States
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
-  const [openDialog, setOpenDialog] = useState(false);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false); // Untuk delete
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [actionType, setActionType] = useState<"publish" | "unpublish" | "delete">(
-    "publish"
-  );
-  const [tableData, setTableData] = useState<PaketInterface[]>(data); // Local state to manage table data
+
 
   const router = useRouter();
 
-  const handleDialogOpen = (id: string, type: "publish" | "unpublish") => {
-    setSelectedId(id);
-    setActionType(type);
-    setOpenDialog(true);
-  };
 
-  const handleDialogClose = () => {
-    setSelectedId(null);
-    setActionType("publish");
-    setOpenDialog(false);
-  };
-
-  const handlePublishToggle = async (id: string, currentStatus: boolean) => {
-    const supabase = createClient();
-
-    try {
-      const { data, error } = await supabase
-        .from("Paket")
-        .update({ publish: !currentStatus }) // Toggle the publish status
-        .eq("id", id); // Match the row by its id
-
-      if (error) {
-        console.error("Error updating publish status:", error);
-        toast.error("Failed to update publish status.");
-        return; // Hentikan eksekusi jika ada error
-      }
-
-      console.log("Publish status updated successfully:", data);
-      toast.success("Publish status updated successfully.");
-
-      // Refresh halaman atau data
-      // Solusi alternatif untuk client-side:
-      // Fetch ulang data dari Supabase dan update state lokal
-      const { data: updatedData, error: fetchError } = await supabase
-        .from("Paket")
-        .select("*");
-
-      if (fetchError) {
-        console.error("Error fetching updated data:", fetchError);
-        toast.error("Failed to fetch updated data.");
-        return;
-      }
-
-      setTableData(updatedData); // Update state dengan data terbaru
-    } catch (err) {
-      console.error("Unexpected error:", err);
-      toast.error("An unexpected error occurred.");
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    const supabase = createClient();
-    try {
-      const { error } = await supabase.from("Paket").delete().eq("id", id);
-      if (error) {
-        console.error("Error deleting data:", error);
-        toast.error("Failed to delete item.");
-        return;
-      }
-      toast.success("Item deleted successfully.");
-      const updatedData = tableData.filter((item) => item.id !== id);
-      setTableData(updatedData);
-    } catch (err) {
-      console.error("Unexpected error:", err);
-      toast.error("An unexpected error occurred.");
-    }
-  };
-
-  const handleSaveChanges = () => {
-    if (selectedId) {
-      const updatedData = tableData.map((paket) =>
-        paket.id === selectedId
-          ? { ...paket, publish: actionType === "publish" }
-          : paket
-      );
-      setTableData(updatedData);
-    }
-    handleDialogClose();
-  };
-
-
-  const columnHelper = createColumnHelper<PaketInterface>();
+  const columnHelper = createColumnHelper<UserProps>();
 
   const handleNavigateToCMS = (rowData: any) => {
-    const actionPath = `/cms/${rowData.id}`;
+    const actionPath = `/user/${rowData.id}`;
     console.log(`Navigating to: ${actionPath}`);
     // Jika menggunakan Next.js, gunakan router.push
     router.push(actionPath);
   };
 
-  const columns = [
-    columnHelper.accessor("nama", {
-      id: "nama",
-      cell: (info) => info.getValue(),
-      header: "Nama Paket",
-      enableColumnFilter: false,
-    }),
-    columnHelper.accessor("namaMuthawif", {
-      id: "namaMuthawif",
-      cell: (info) => info.getValue(),
-      header: "Nama Muthawif",
-      enableColumnFilter: false,
-    }),
-    columnHelper.accessor("jenis", {
-      id: "jenis",
-      cell: (info) => info.getValue(),
-      header: "Jenis Paket",
-      enableColumnFilter: false,
-    }),
-    columnHelper.accessor("tglKeberangkatan", {
-      id: "tglKeberangkatan",
-      cell: (info) => info.getValue(),
-      header: "Tanggal Keberangkatan",
-      enableColumnFilter: false,
-    }),
-    columnHelper.accessor("tglKepulangan", {
-      id: "tglKepulangan",
-      cell: (info) => info.getValue(),
-      header: "Tanggal Kepulangan",
-      enableColumnFilter: false,
-    }),
-    columnHelper.accessor("action", {
-      cell: (info) => (
-        <Box sx={{ display: "flex", gap: "0.5rem" }}>
-          <Button
-            variant="contained"
-            onClick={() =>
-              handlePublishToggle(
-                info.row.original.id,
-                info.row.original.publish
-              )
-            }
-            sx={{
-              color: "#fff",
-              backgroundColor: info.row.original.publish ? "red" : "green",
-            }}
-          >
-            {info.row.original.publish ? "Unpublish" : "Publish"}
-          </Button>
-          <Button
-            onClick={() => handleNavigateToCMS(info.row.original)}
-            variant="contained"
-            className="text-white"
-          >
-            Detail
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            className="text-white"
-            onClick={() => handleDelete(info.row.original.id)} // Tambahkan onClick untuk delete
-          >
-            Delete
-          </Button>
-        </Box>
-      ),
-      header: "Action",
-      enableColumnFilter: false,
-    }),
-  ];
 
   const table = useReactTable({
-    data: tableData || [], // Pastikan data selalu berupa array.
+    data: data || [], // Pastikan data selalu berupa array.
     columns,
     filterFns: {
       fuzzy: fuzzyFilter,
@@ -481,82 +326,8 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
           }}
         />
       </Box>
-      <Dialog open={openDialog} onClose={handleDialogClose}>
-        <DialogTitle>Konfirmasi Aksi</DialogTitle>
-        <DialogContent>
-          <Typography>
-            {actionType === "publish"
-              ? "Apakah Anda yakin ingin mempublikasikan konten ini?"
-              : "Apakah Anda yakin ingin menutup konten ini?"}
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDialogClose} variant="contained" color="error">
-            Batal
-          </Button>
-          <Button
-            onClick={handleSaveChanges}
-            variant="contained"
-            color="primary"
-            sx={{ color: "#fff" }}
-          >
-            Konfirmasi
-          </Button>
-        </DialogActions>
-      </Dialog>
-      {/* Dialog for Publish/Unpublish */}
-      <Dialog open={openDialog} onClose={handleDialogClose}>
-        <DialogTitle>Konfirmasi Aksi</DialogTitle>
-        <DialogContent>
-          <Typography>
-            {actionType === "publish"
-              ? "Apakah Anda yakin ingin mempublikasikan konten ini?"
-              : "Apakah Anda yakin ingin menutup konten ini?"}
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDialogClose} variant="contained" color="error">
-            Batal
-          </Button>
-          <Button
-            onClick={handleSaveChanges}
-            variant="contained"
-            color="primary"
-            sx={{ color: "#fff" }}
-          >
-            Konfirmasi
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Dialog for Delete */}
-      <Dialog open={openDeleteDialog} onClose={handleDialogClose}>
-        <DialogTitle>Konfirmasi Hapus</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Apakah Anda yakin ingin menghapus item ini? Tindakan ini tidak bisa
-            dibatalkan.
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDialogClose} variant="contained" color="error">
-            Batal
-          </Button>
-          <Button
-            onClick={() => {
-              handleDelete(selectedId!);
-              handleDialogClose();
-            }}
-            variant="contained"
-            color="primary"
-            sx={{ color: "#fff" }}
-          >
-            Hapus
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };
 
-export default CMSTable;
+export default UserTable;

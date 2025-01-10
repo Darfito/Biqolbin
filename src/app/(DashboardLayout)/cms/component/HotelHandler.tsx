@@ -24,7 +24,7 @@ export const HotelSection = ({
       <Typography sx={{ marginBottom: 2 }} variant="h5">
         Hotel
       </Typography>
-      {hotel.map((value, index) => (
+      {hotel?.map((value, index) => (
         <Box
           key={index}
           sx={{

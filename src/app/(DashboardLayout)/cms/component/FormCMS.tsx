@@ -37,30 +37,8 @@ import { createClient } from "@/libs/supabase/client";
 import { HotelSection } from "./HotelHandler";
 
 interface FormCMSProps {
-  initialValues?: FormValues; // Nilai default untuk mengedit
+  initialValues?: PaketInterface; // Nilai default untuk mengedit
   mode: "create" | "edit"; // Mode: create atau edit
-}
-
-interface FormValues {
-  id?: number;
-  nama: string;
-  jenis: JenisPaket;
-  maskapai: Maskapai;
-  noPenerbangan?: string;
-  customMaskapai: string;
-  jenisPenerbangan: JenisPenerbangan;
-  keretaCepat: boolean;
-  hargaDouble: number; // Harga untuk kamar double
-  hargaTriple: number; // Harga untuk kamar triple
-  hargaQuad: number; // Harga untuk kamar quad
-  tglKeberangkatan: string;
-  tglKepulangan: string;
-  namaMuthawif: string;
-  noTelpMuthawif: string;
-  hotel: HotelType[];
-  fasilitas: string[];
-  publish?: boolean;
-  gambar_url: string;
 }
 
 interface FormErrors {
@@ -110,7 +88,7 @@ export const formSchema = v.object({
     v.string(),
     v.nonEmpty("No Telp Muthawif harus diisi")
   ),
-  hotel: v.array(
+  Hotel: v.array(
     v.object({
       namaHotel: v.pipe(v.string(), v.nonEmpty("Nama Hotel harus diisi")),
       alamatHotel: v.pipe(v.string(), v.nonEmpty("Alamat Hotel harus diisi")),
@@ -133,7 +111,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
   const [open, setOpen] = useState(false);
   const [isCustomMaskapai, setIsCustomMaskapai] = useState(false); // Untuk melacak apakah pengguna memilih "Lainnya"
 
-  const [formValues, setFormValues] = useState<FormValues>(
+  const [formValues, setFormValues] = useState<PaketInterface>(
     initialValues || {
       nama: "",
       jenis: JenisPaket.REGULAR,
@@ -149,7 +127,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
       tglKepulangan: "",
       namaMuthawif: "",
       noTelpMuthawif: "",
-      hotel: [
+      Hotel: [
         {
           id: 0,
           namaHotel: "",
@@ -172,6 +150,15 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
       setFormValues(initialValues);
     }
   }, [initialValues]);
+
+  const handleChangeHarga = (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
+    const value = e.target.value.replace(/[^\d]/g, ""); // Menghapus non-numeric characters (selain angka)
+  
+    setFormValues((prevValues) => ({
+      ...prevValues,
+      [type]: value === "" ? 0 : Number(value),
+    }));
+  };
 
   const handleAddFasilitas = () => {
     if (newFasilitas.trim() === "") {
@@ -246,7 +233,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
   };
 
   const serializeFormData = (
-    values: FormValues,
+    values: PaketInterface,
     mode: "create" | "edit",
     initialValues?: PaketInterface
   ): PaketInterface | Omit<PaketInterface, "id"> => {
@@ -272,10 +259,19 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
       noTelpMuthawif: values.noTelpMuthawif,
       fasilitas: Array.isArray(values.fasilitas) ? values.fasilitas : [],
       gambar_url: values.gambar_url,
+      Hotel: Array.isArray(values.Hotel) ? values.Hotel : [], // Tambahkan properti hotel
     };
   };
   
   
+  
+const formatRupiah = (angka: number): string => {
+  return angka.toLocaleString("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  });
+};
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -304,7 +300,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
   
     // Serialize form data before sending to server action
     const serializedData = serializeFormData(formValues, mode, initialValues);
-
+    console.log("Serialized Data:", serializedData);
   
     try {
       if (mode === "create") {
@@ -316,6 +312,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
           toast.error(`Error: ${error}`);
         }
       } else if (mode === "edit") {
+        console.log("Submitting updateCmsAction with data:", serializedData);
         const { success, data, error } = await updateCmsAction(serializedData);
         if (success) {
           toast.success("Form berhasil di Update!");
@@ -350,7 +347,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
         tglKepulangan: "",
         namaMuthawif: "",
         noTelpMuthawif: "",
-        hotel: [
+        Hotel: [
           {
             id: 0,
             namaHotel: "",
@@ -378,18 +375,19 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
     field: keyof HotelType,
     value: string | number
   ) => {
-    const updatedHotels = [...formValues.hotel];
+    const updatedHotels = [...(formValues.Hotel ?? [])];
     updatedHotels[index] = { ...updatedHotels[index], [field]: value };
-    setFormValues({ ...formValues, hotel: updatedHotels });
+    setFormValues({ ...formValues, Hotel: updatedHotels });
   };
 
   const handleAddHotel = () => {
+    console.log("add hotel tertekan")
     setFormValues((prev) => ({
       ...prev,
-      hotel: [
-        ...prev.hotel,
+      Hotel: [
+        ...(prev.Hotel ?? []),
         {
-          id: prev.hotel.length + 1,
+          id: (prev.Hotel?.length ?? 0) + 1,
           namaHotel: "",
           alamatHotel: "",
           ratingHotel: 0,
@@ -403,7 +401,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
   const handleRemoveHotel = (indexToRemove: number) => {
     setFormValues((prev) => ({
       ...prev,
-      hotel: prev.hotel.filter((_, index) => index !== indexToRemove),
+      Hotel: prev.Hotel?.filter((_, index) => index !== indexToRemove) ?? [],
     }));
   };
 
@@ -570,38 +568,8 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
               }
               label="Menggunakan Kereta Cepat?"
             />
-            <Divider />
-            {/* Akomodasi */}
-            <Typography variant="h5">Akomodasi</Typography>
-            <CustomTextField
-              fullWidth
-              label="Nama Muthawif"
-              name="namaMuthawif"
-              value={formValues.namaMuthawif}
-              error={!!formErrors.namaMuthawif}
-              helperText={formErrors.namaMuthawif}
-              onChange={(e: { target: { value: string } }) =>
-                setFormValues({ ...formValues, namaMuthawif: e.target.value })
-              }
-            />
-            <CustomTextField
-              fullWidth
-              label="Nomor Telpon Muthawif"
-              name="noTelpMuthawif"
-              value={formValues.noTelpMuthawif}
-              error={!!formErrors.noTelpMuthawif}
-              helperText={formErrors.noTelpMuthawif}
-              onChange={(e: { target: { value: string } }) =>
-                setFormValues({ ...formValues, noTelpMuthawif: e.target.value })
-              }
-            />
-            <HotelSection
-              hotel={formValues.hotel}
-              handleHotelChange={handleHotelChange}
-              handleAddHotel={handleAddHotel}
-              handleRemoveHotel={handleRemoveHotel}
-            />
-            <CustomTextField
+
+                        <CustomTextField
               fullWidth
               label="Tanggal Keberangkatan"
               name="tglKeberangkatan"
@@ -636,48 +604,64 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
             />
             <Divider />
             {/* Akomodasi */}
+            <Typography variant="h5">Muthawif</Typography>
+            <CustomTextField
+              fullWidth
+              label="Nama Muthawif"
+              name="namaMuthawif"
+              value={formValues.namaMuthawif}
+              error={!!formErrors.namaMuthawif}
+              helperText={formErrors.namaMuthawif}
+              onChange={(e: { target: { value: string } }) =>
+                setFormValues({ ...formValues, namaMuthawif: e.target.value })
+              }
+            />
+            <CustomTextField
+              fullWidth
+              label="Nomor Telpon Muthawif"
+              name="noTelpMuthawif"
+              value={formValues.noTelpMuthawif}
+              error={!!formErrors.noTelpMuthawif}
+              helperText={formErrors.noTelpMuthawif}
+              onChange={(e: { target: { value: string } }) =>
+                setFormValues({ ...formValues, noTelpMuthawif: e.target.value })
+              }
+            />
+            <HotelSection
+              hotel={formValues.Hotel ?? []}
+              handleHotelChange={handleHotelChange}
+              handleAddHotel={handleAddHotel}
+              handleRemoveHotel={handleRemoveHotel}
+            />
+            <Divider />
+            {/* Akomodasi */}
             <Typography variant="h5">Harga Sesuai Tipe Kamar</Typography>
             <CustomTextField
               fullWidth
               label="Tipe Kamar Double"
               name="hargaDouble"
-              value={formValues.hargaDouble}
+              value={formatRupiah(formValues.hargaDouble)} // Format harga
               error={!!formErrors.hargaDouble}
               helperText={formErrors.hargaDouble}
-              onChange={(e: { target: { value: string } }) =>
-                setFormValues({
-                  ...formValues,
-                hargaDouble: e.target.value === "" ? 0 : Number(e.target.value),
-                })
-              }
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeHarga(e, "hargaDouble")}
             />
             <CustomTextField
               fullWidth
               label="Tipe Kamar Triple"
               name="hargaTriple"
-              value={formValues.hargaTriple}
+              value={formatRupiah(formValues.hargaTriple)} // Format harga
               error={!!formErrors.hargaTriple}
               helperText={formErrors.hargaTriple}
-              onChange={(e: { target: { value: string } }) =>
-                setFormValues({
-                  ...formValues,
-                hargaTriple: e.target.value === "" ? 0 : Number(e.target.value),
-                })
-              }
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeHarga(e, "hargaTriple")}
             />
             <CustomTextField
               fullWidth
               label="Tipe Kamar Quad"
               name="hargaQuad"
-              value={formValues.hargaQuad}
+              value={formatRupiah(formValues.hargaQuad)} // Format harga
               error={!!formErrors.hargaQuad}
               helperText={formErrors.hargaQuad}
-              onChange={(e: { target: { value: string } }) =>
-                setFormValues({
-                  ...formValues,
-                  hargaQuad: e.target.value === "" ? 0 : Number(e.target.value),
-                })
-              }
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeHarga(e, "hargaQuad")} // Menangani perubahan input
             />
             <Divider />
             {/* Fasilitas */}

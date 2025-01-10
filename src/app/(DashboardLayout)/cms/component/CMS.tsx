@@ -4,7 +4,7 @@ import { Box, Card, Typography } from "@mui/material";
 import PageContainer from "../../components/container/PageContainer";
 
 import FormCMS from "./FormCMS";
-import CMSTable from "../../utilities/component/table/CMSTable";
+import CMSTable from "../../utilities/component/table/CMS/CMSTable";
 import { PaketInterface } from "../../utilities/type";
 
 export type CMSPageProps = {
