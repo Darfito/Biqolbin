@@ -172,7 +172,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
       publish: false,
       namaMuthawif: "",
       noTelpMuthawif: "",
-      hotel: [],
+      Hotel: [],
       gambar_url: "",
       hargaDouble: 0,
       hargaTriple: 0,

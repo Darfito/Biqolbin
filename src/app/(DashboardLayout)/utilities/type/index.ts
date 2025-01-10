@@ -108,7 +108,7 @@ export interface JamaahProps {
   nama: string;
   ayahKandung: string;
   noTelp: string;
-  kontakDarurat: KontakDaruratType[];
+  kontakDarurat?: KontakDaruratType[];
   email:string;
   jenisKelamin: JenisKelamin;
   tempatLahir: string;

@@ -154,6 +154,21 @@ export const updateCmsAction = async (paketData: PaketInterface) => {
 
       console.log("Existing Hotel IDs:", existingHotelIds);
 
+      // **Delete hotels** not in `paketData.Hotel`
+      const { error: deleteError } = await supabase
+        .from("Hotel")
+        .delete()
+        .eq("paket_id", paketData.id)
+        .not("id", "in", `(${existingHotelIds})`);
+
+      if (deleteError) {
+        console.error("Error deleting hotels:", deleteError);
+        throw deleteError;
+      } else {
+        console.log("Hotels not in the current list have been deleted.");
+      }
+
+      // Process remaining hotels for update or insert
       for (const hotel of paketData.Hotel) {
         console.log("Processing hotel:", hotel);
 
@@ -229,7 +244,19 @@ export const updateCmsAction = async (paketData: PaketInterface) => {
         }
       }
     } else {
-      console.log("No hotels provided. Skipping hotel processing.");
+      console.log("No hotels provided. Deleting all related hotels.");
+      // If no hotels are provided, delete all related hotels
+      const { error: deleteAllError } = await supabase
+        .from("Hotel")
+        .delete()
+        .eq("paket_id", paketData.id);
+
+      if (deleteAllError) {
+        console.error("Error deleting all hotels:", deleteAllError);
+        throw deleteAllError;
+      } else {
+        console.log("All hotels related to this Paket have been deleted.");
+      }
     }
 
     // Revalidate CMS path
@@ -240,11 +267,6 @@ export const updateCmsAction = async (paketData: PaketInterface) => {
     return { success: false, error: (error as Error).message };
   }
 };
-
-
-
-
-
 
 
 // supporting function
