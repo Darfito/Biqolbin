@@ -130,7 +130,6 @@ type FormJamaahProps = {
 
 export default function FormJamaah({ paketData }: FormJamaahProps) {
   const [open, setOpen] = useState(false);
-  const [jenisKelamin, setJenisKelamin] = useState<string>("");
 
   
   const [formValues, setFormValues] = useState<FormType>({
@@ -179,13 +178,6 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
 
-  // const handleJenisKelaminChange = (event: ChangeEvent<HTMLInputElement>) => {
-  //   setJenisKelamin(event.target.value as JenisKelamin);
-  //   setFormValues({
-  //     ...formValues,
-  //     jenisKelamin: event.target.value as JenisKelamin,
-  //   });
-  // };
   
   useEffect(() => {
     if (formValues.jenisPaket) {
@@ -234,19 +226,6 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
     }
   };
 
-  // const handleJenisPaketChange = (event: ChangeEvent<{ value: unknown }>) => {
-  //   const selectedPaket = paketData.find(
-  //     (paket) => paket.id === event.target.value
-  //   );
-  //   if (selectedPaket) {
-  //     setFormValues((prevValues) => ({
-  //       ...prevValues,
-  //       jenisPaket: selectedPaket,
-  //       berangkat: selectedPaket.tglKeberangkatan,
-  //       selesai: selectedPaket.tglKepulangan,
-  //     }));
-  //   }
-  // };
 
   // Handle form submission
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {

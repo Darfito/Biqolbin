@@ -8,18 +8,22 @@ import { columnsJamaah } from "./columns/columnsJamaah";
 import JamaahTable from "../../utilities/component/table/JamaahTable";
 import jamaahData from "../data";
 import FormJamaah from "./FormJamaah";
-import { PaketInterface } from "../../utilities/type";
+import { JamaahInterface, PaketInterface } from "../../utilities/type";
 import { useMemo } from "react";
 import { scoreCardJamaah } from "../../utilities/data";
 
 
 export type JamaahProps = {
   paketData: PaketInterface[]
+  jamaahData: JamaahInterface[]
 }
 
-const Jamaah = ({paketData}: JamaahProps) => {
+const Jamaah = ({paketData, jamaahData}: JamaahProps) => {
   const stablePaketData = useMemo(() => paketData || [], [paketData]);
-  const stableJamaahData = useMemo(() => jamaahData, []);
+  const stableJamaahData = useMemo(() => jamaahData || [], [jamaahData]);
+
+  console.log("Paket data:", stablePaketData);
+  console.log("Jamaah data:", stableJamaahData);
   return (
     <>
       <Box

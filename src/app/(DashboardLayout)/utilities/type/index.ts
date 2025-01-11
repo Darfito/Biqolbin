@@ -103,7 +103,7 @@ export enum JenisPenerbangan {
 
 
 // ! JAMAAH TYPE
-export interface JamaahProps {
+export interface JamaahInterface {
   id: number;
   nama: string;
   ayahKandung: string;

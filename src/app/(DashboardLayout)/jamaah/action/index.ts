@@ -1,10 +1,122 @@
 "use server";
 
 import { createClient } from "@/libs/supabase/server";
-import { JamaahProps } from "../../utilities/type";
-import { revalidatePath } from "next/cache";
 
-export const createJamaahAction = async (formValues: JamaahProps) => {
+import { revalidatePath } from "next/cache";
+import { JamaahInterface } from "../../utilities/type";
+
+export const mapJamaahData = (data: any): JamaahInterface[] => {
+  return data.map((item: any) => ({
+    id: item.id,
+    nama: item.nama,
+    ayahKandung: item.ayahKandung,
+    noTelp: item.noTelp,
+    kontakDarurat: item.KontakDarurat.map((contact: any) => ({
+      id: contact.id,
+      nama: contact.nama,
+      noTelp: contact.no_telp,
+      hubungan: contact.hubungan,
+      relasiLain: contact.relasi_lain || undefined,
+    })),
+    email: item.email,
+    jenisKelamin: item.jenisKelamin,
+    tempatLahir: item.tempatLahir,
+    pernikahan: item.pernikahan,
+    alamat: item.alamat,
+    varianKamar: item.varianKamar,
+    kewarganegaraan: item.kewarganegaraan,
+    pekerjaan: item.pekerjaan,
+    kursiRoda: item.kursiRoda,
+    riwayatPenyakit: item.riwayatPenyakit,
+    jenisDokumen: item.jenisDokumen || [],
+    jenisPaket: {
+      id: item.Paket.id,
+      nama: item.Paket.nama,
+      maskapai: item.Paket.maskapai,
+      customMaskapai: item.Paket.customMaskapai || undefined,
+      noPenerbangan: item.Paket.noPenerbangan || undefined,
+      jenisPenerbangan: item.Paket.jenisPenerbangan,
+      keretaCepat: item.Paket.keretaCepat,
+      tglKeberangkatan: item.Paket.tglKeberangkatan,
+      tglKepulangan: item.Paket.tglKepulangan,
+      fasilitas: item.Paket.fasilitas || [],
+      namaMuthawif: item.Paket.namaMuthawif,
+      noTelpMuthawif: item.Paket.noTelpMuthawif,
+      hargaDouble: item.Paket.hargaDouble,
+      hargaTriple: item.Paket.hargaTriple,
+      hargaQuad: item.Paket.hargaQuad,
+      gambar_url: item.Paket.gambar_url || undefined,
+      Hotel: item.Paket.Hotel.map((hotel: any) => ({
+        id: hotel.id,
+        namaHotel: hotel.namaHotel,
+        alamatHotel: hotel.alamatHotel,
+        ratingHotel: hotel.ratingHotel,
+        tanggalCheckIn: hotel.tanggalCheckIn,
+        tanggalCheckOut: hotel.tanggalCheckOut,
+      })),
+    },
+    berangkat: item.Paket.tglKeberangkatan,
+    selesai: item.Paket.tglKepulangan,
+    status: item.status,
+  }));
+};
+
+
+export const getJamaahAction = async (): Promise<JamaahInterface[]> => {
+  const supabase = createClient();
+
+  // Mengambil data Jamaah beserta relasi Paket, hotel, dan Kontak Darurat
+  const { data, error } = await supabase.from("Jamaah").select(`
+    *,
+    KontakDarurat (
+      id,
+      nama,
+      no_telp,
+      hubungan,
+      relasi_lain
+    ),
+    Paket (
+      id,
+      nama,
+      maskapai,
+      customMaskapai,
+      noPenerbangan,
+      jenisPenerbangan,
+      keretaCepat,
+      hargaDouble,
+      hargaTriple,
+      hargaQuad,
+      tglKeberangkatan,
+      tglKepulangan,
+      fasilitas,
+      namaMuthawif,
+      noTelpMuthawif,
+      Hotel (
+        id,
+        namaHotel,
+        alamatHotel,
+        ratingHotel,
+        tanggalCheckIn,
+        tanggalCheckOut
+      )
+    )
+  `);
+
+  if (error) {
+    console.error("Error fetching Jamaah data:", error);
+    throw new Error(error.message);
+  }
+
+  if (!data) {
+    return [];
+  }
+
+  // Mapping data untuk mencocokkan dengan JamaahProps
+  return mapJamaahData(data);
+};
+
+
+export const createJamaahAction = async (formValues: JamaahInterface) => {
   console.log("Form Values di create:", formValues);
   const supabase = createClient();
   try {
