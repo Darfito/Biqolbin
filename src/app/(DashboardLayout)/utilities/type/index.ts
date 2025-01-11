@@ -114,7 +114,7 @@ export interface JamaahProps {
   tempatLahir: string;
   pernikahan: boolean;
   alamat: string;
-  varianKamar: KamarType;
+  varianKamar: TipeKamar;
   kewarganegaraan: boolean;
   pekerjaan: string;
   kursiRoda: boolean;
@@ -190,15 +190,6 @@ export enum JenisKelamin {
 
 
 // ! TYPE KAMAR
-
-export type KamarType = {
-  id: number;
-  tipeKamar: TipeKamar;
-  harga: number;
-  deskripsi: string;
-}
-
-
 export enum TipeKamar {
   QUAD = "QUAD",
   TRIPLE = "TRIPLE",

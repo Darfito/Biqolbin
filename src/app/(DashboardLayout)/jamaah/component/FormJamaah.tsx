@@ -15,7 +15,6 @@ import {
   JenisKelamin,
   JenisPaket,
   JenisPenerbangan,
-  KamarType,
   KontakDaruratRelation,
   KontakDaruratType,
   Maskapai,
@@ -35,7 +34,7 @@ import {
 } from "@mui/material";
 import { KontakDaruratSection } from "./KontakDaruratHandler";
 
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { createJamaahAction } from "../action";
 
 interface FormErrors {
@@ -113,7 +112,7 @@ type FormType = {
   tempatLahir: string;
   pernikahan: boolean;
   alamat: string;
-  varianKamar: KamarType;
+  varianKamar: TipeKamar;
   kewarganegaraan: boolean;
   pekerjaan: string;
   kursiRoda: boolean;
@@ -133,6 +132,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
   const [open, setOpen] = useState(false);
   const [jenisKelamin, setJenisKelamin] = useState<string>("");
 
+  
   const [formValues, setFormValues] = useState<FormType>({
     id: 0,
     nama: "",
@@ -146,12 +146,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
     tempatLahir: "",
     pernikahan: false,
     alamat: "",
-    varianKamar: {
-      id: 0,
-      tipeKamar: TipeKamar.QUAD,
-      harga: 0,
-      deskripsi: "",
-    },
+    varianKamar: TipeKamar.DOUBLE,
     kewarganegaraan: true,
     pekerjaan: "",
     kursiRoda: false,
@@ -176,7 +171,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
       gambar_url: "",
       hargaDouble: 0,
       hargaTriple: 0,
-      hargaQuad: 0
+      hargaQuad: 0,
     },
     berangkat: "",
     selesai: "",
@@ -191,6 +186,16 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
   //     jenisKelamin: event.target.value as JenisKelamin,
   //   });
   // };
+  
+  useEffect(() => {
+    if (formValues.jenisPaket) {
+      setFormValues((prev) => ({
+        ...prev,
+        berangkat: formValues.jenisPaket.tglKeberangkatan || '',
+        selesai: formValues.jenisPaket.tglKepulangan || '',
+      }));
+    }
+  }, [formValues.jenisPaket]);
 
   const handleContactChange = (
     index: number,
@@ -229,19 +234,19 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
     }
   };
 
-  const handleJenisPaketChange = (event: ChangeEvent<{ value: unknown }>) => {
-    const selectedPaket = paketData.find(
-      (paket) => paket.id === event.target.value
-    );
-    if (selectedPaket) {
-      setFormValues((prevValues) => ({
-        ...prevValues,
-        jenisPaket: selectedPaket,
-        berangkat: selectedPaket.tglKeberangkatan,
-        selesai: selectedPaket.tglKepulangan,
-      }));
-    }
-  };
+  // const handleJenisPaketChange = (event: ChangeEvent<{ value: unknown }>) => {
+  //   const selectedPaket = paketData.find(
+  //     (paket) => paket.id === event.target.value
+  //   );
+  //   if (selectedPaket) {
+  //     setFormValues((prevValues) => ({
+  //       ...prevValues,
+  //       jenisPaket: selectedPaket,
+  //       berangkat: selectedPaket.tglKeberangkatan,
+  //       selesai: selectedPaket.tglKepulangan,
+  //     }));
+  //   }
+  // };
 
   // Handle form submission
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -267,6 +272,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
 
     const response = await createJamaahAction(formValues);
     toast.success("Form berhasil disubmit!"); // Show success toast
+    handleClose();
   };
 
   const handleClickOpen = () => setOpen(true);
@@ -292,12 +298,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
       tempatLahir: "",
       pernikahan: false,
       alamat: "",
-      varianKamar: {
-        id: 0,
-        tipeKamar: TipeKamar.QUAD,
-        harga: 0,
-        deskripsi: "",
-      },
+      varianKamar: TipeKamar.DOUBLE,
       kewarganegaraan: true,
       pekerjaan: "",
       kursiRoda: false,
@@ -318,17 +319,19 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
         publish: false,
         namaMuthawif: "",
         noTelpMuthawif: "",
-        hotel: [],
+        Hotel: [],
         gambar_url: "",
         hargaDouble: 0,
         hargaTriple: 0,
-        hargaQuad: 0
+        hargaQuad: 0,
       },
       berangkat: "",
       selesai: "",
       status: "Dijadwalkan",
     });
   };
+
+  console.log("form values di Jamaah:", formValues);
 
   return (
     <>
@@ -572,14 +575,11 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                   select
                   fullWidth
                   label="Varian Kamar"
-                  value={formValues.varianKamar?.tipeKamar}
+                  value={formValues.varianKamar}
                   onChange={(e: { target: { value: string } }) =>
                     setFormValues({
                       ...formValues,
-                      varianKamar: {
-                        ...formValues.varianKamar,
-                        tipeKamar: e.target.value as TipeKamar, // Convert to TipeKamar
-                      },
+                      varianKamar: e.target.value as TipeKamar,
                     })
                   }
                   sx={{ marginBottom: 2 }}
@@ -594,15 +594,9 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                   disabled
                   label="Tanggal Berangkat"
                   type="date"
-                  value={formValues.jenisPaket.tglKeberangkatan} // Format date untuk input type="date"
-                  onChange={(e: { target: { value: string } }) =>
-                    setFormValues({
-                      ...formValues,
-                      berangkat: e.target.value,
-                    })
-                  }
+                  value={formValues.jenisPaket.tglKeberangkatan} // Sudah otomatis terisi dari jenisPaket
                   InputLabelProps={{
-                    shrink: true, // Memastikan label selalu berada di atas
+                    shrink: true, // Memastikan label tetap di atas
                   }}
                   sx={{ marginBottom: 2 }}
                 />
@@ -612,15 +606,9 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                   disabled
                   label="Tanggal Selesai"
                   type="date"
-                  value={formValues.jenisPaket.tglKepulangan} // Format date untuk input type="date"
-                  onChange={(e: { target: { value: string } }) =>
-                    setFormValues({
-                      ...formValues,
-                      selesai: e.target.value,
-                    })
-                  }
+                  value={formValues.jenisPaket.tglKepulangan} // Sudah otomatis terisi dari jenisPaket
                   InputLabelProps={{
-                    shrink: true, // Memastikan label selalu berada di atas
+                    shrink: true, // Memastikan label tetap di atas
                   }}
                   sx={{ marginBottom: 2 }}
                 />
