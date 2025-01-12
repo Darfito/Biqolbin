@@ -126,17 +126,17 @@ const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
               startIcon={<IconArrowLeft />}
               onClick={handleBackClick}
             >
-              Back to List
+              Kembali ke Daftar
             </Button>
           </Box>
 
           <Box>
             <Button
               variant="contained"
-              sx={{ color: "white", marginRight: "1rem" }}
+              sx={{ color: "white", marginRight: "1rem", minWidth: "150px"  }}
               onClick={isEditing ? handleOpenModal : handleEditClick}
             >
-              {isEditing ? "Save Changes" : "Edit Details"}
+              {isEditing ? "Menyimpan Data" : "Sunting"}
             </Button>
           </Box>
         </Box>
@@ -152,10 +152,10 @@ const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
 
       {/* Confirmation Modal */}
       <Dialog open={openModal} onClose={handleCloseModal}>
-        <DialogTitle>Confirm Save Changes</DialogTitle>
+        <DialogTitle>Konfirmasi Perubahan</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to save these changes?
+            Apakah Anda yakin ingin menyimpan perubahan ini?
           </Typography>
         </DialogContent>
         <DialogActions>
@@ -168,7 +168,7 @@ const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
             sx={{ color: "white" }}
             disabled={isSaving} // Disable the button while saving
           >
-            {isSaving ? "Saving..." : "Save Changes"}
+            {isSaving ? "Menyimpan..." : "Perubahan Tersimpan"}
           </Button>
         </DialogActions>
       </Dialog>

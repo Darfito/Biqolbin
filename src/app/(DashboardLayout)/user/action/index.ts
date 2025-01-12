@@ -32,3 +32,21 @@ export const createUserAction = async (userData: Record<string, any>) => {
 	revalidatePath("/user");
   return { success: true, data };
 };
+
+
+export const deleteUserAction = async (userId: number) => {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .from("User")
+    .delete()
+    .eq("id", userId);
+
+  if (error) {
+    console.error("Error deleting user:", error.message);
+    return { success: false, error: error.message };
+  }
+  console.log(`User with ID ${userId} deleted successfully`);
+  revalidatePath("/user");
+  return { success: true };
+};

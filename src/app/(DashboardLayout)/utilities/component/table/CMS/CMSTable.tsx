@@ -133,11 +133,11 @@ const Filter = ({
 };
 
 // Mendeklarasikan interface dengan tipe generik T
-interface CMSProps<T> {
+interface TableProps<T> {
   data: T[];
 }
 
-const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
+const CMSTable = ({ data }: TableProps<PaketInterface>) => {
   // States
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -149,7 +149,6 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
     "publish" | "unpublish" | "delete"
   >("publish");
   const [tableData, setTableData] = useState<PaketInterface[]>(data); // Local state to manage table data
-
   const router = useRouter();
 
   const handleDialogOpen = (id: number, type: "publish" | "unpublish") => {
