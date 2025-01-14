@@ -127,7 +127,7 @@ export interface JamaahInterface {
 }
 
 // ! INTERFACE USER
-export interface UserProps {
+export interface UserInterface {
   id: number;
   nama: string;
   jenisKelamin: JenisKelamin;

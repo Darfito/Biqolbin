@@ -49,31 +49,6 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
     router.push("/cms"); // Navigate to /keuangan page
   };
 
-  const handleEditSubmit = (values: Record<string, any>) => {
-    setFormErrors({}); // Clear previous errors
-
-    // Validasi menggunakan Valibot
-    const result = v.safeParse(formSchema, values);
-
-    if (!result.success) {
-      // Jika ada error, perbarui state `formErrors`
-      const errorMap: Record<string, string> = {};
-      result.issues.forEach((issue) => {
-        const path = issue.path?.[0]?.key as string | undefined;
-        if (path) {
-          errorMap[path] = issue.message;
-        }
-      });
-
-      setFormErrors(errorMap); // Kirim error ke komponen bawah
-      console.error("Validation errors:", errorMap);
-      return;
-    }
-
-    // Jika validasi berhasil
-    console.log("Form berhasil di Update!", values);
-    toast.success("Form berhasil di Update!");
-  };
 
   return (
     <>

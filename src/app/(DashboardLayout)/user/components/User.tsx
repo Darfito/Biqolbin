@@ -5,10 +5,11 @@ import PageContainer from "../../components/container/PageContainer";
 
 import UserTable from "../../utilities/component/table/UserTable";
 import FormUser from "./FormUser";
-import { UserProps } from "../../utilities/type";
+import { UserInterface } from "../../utilities/type";
+
 
 export type UserPageProps = {
-  data: UserProps[];
+  data: UserInterface[];
 };
 
 const User = ({ data }: UserPageProps) => {

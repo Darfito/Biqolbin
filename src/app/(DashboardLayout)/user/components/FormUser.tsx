@@ -17,7 +17,7 @@ import {
   FormControlLabel,
   Radio,
 } from "@mui/material";
-import { Jabatan, JenisKelamin, UserProps } from "../../utilities/type";
+import { Jabatan, JenisKelamin, UserInterface } from "../../utilities/type";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { createUserAction } from "../action";
 
@@ -53,7 +53,7 @@ export default function FormUser() {
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
 
-  const handleInputChange = (field: keyof UserProps, value: any) => {
+  const handleInputChange = (field: keyof UserInterface, value: any) => {
     setFormValues({ ...formValues, [field]: value });
   };
 

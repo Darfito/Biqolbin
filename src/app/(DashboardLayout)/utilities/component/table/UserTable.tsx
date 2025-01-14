@@ -41,12 +41,12 @@ import {
   Box,
 } from "@mui/material";
 
-import { UserProps } from "../../type";
 import ActionButton from "./components/ActionButton";
 import { deleteUserAction } from "@/app/(DashboardLayout)/user/action";
 import ConfirmDialog from "../dialog/ConfirmDialog";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
+import { UserInterface } from "../../type";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -135,15 +135,15 @@ interface TableProps<T> {
   data: T[];
 }
 
-const UserTable = ({ data }: TableProps<UserProps>) => {
+const UserTable = ({ data }: TableProps<UserInterface>) => {
   // States
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [open, setOpen] = useState(false); // State untuk dialog
-  const [selectedRow, setSelectedRow] = useState<UserProps | null>(null); // Data yang dipilih
-  const [tableData, setTableData] = useState<UserProps[]>(data); // Local state to manage table data
+  const [selectedRow, setSelectedRow] = useState<UserInterface | null>(null); // Data yang dipilih
+  const [tableData, setTableData] = useState<UserInterface[]>(data); // Local state to manage table data
 
-  const columnHelper = createColumnHelper<UserProps>();
+  const columnHelper = createColumnHelper<UserInterface>();
 
   const handleCloseDialog = () => {
     setOpen(false); // Tutup dialog
@@ -195,7 +195,7 @@ const UserTable = ({ data }: TableProps<UserProps>) => {
     }),
     columnHelper.accessor("action", {
       cell: (info) => {
-        const handleOpenDialog = (rowData: UserProps) => {
+        const handleOpenDialog = (rowData: UserInterface) => {
           setSelectedRow(rowData); // Set data pengguna
           setOpen(true); // Buka dialog
         };

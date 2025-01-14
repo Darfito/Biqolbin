@@ -110,7 +110,8 @@ export const formSchema = v.object({
 const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
   const [open, setOpen] = useState(false);
   const [isCustomMaskapai, setIsCustomMaskapai] = useState(false); // Untuk melacak apakah pengguna memilih "Lainnya"
-
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
+  const [newFasilitas, setNewFasilitas] = useState<string>("");
   const [formValues, setFormValues] = useState<PaketInterface>(
     initialValues || {
       nama: "",
@@ -142,8 +143,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
       gambar_url: "",
     }
   );
-  const [formErrors, setFormErrors] = useState<FormErrors>({});
-  const [newFasilitas, setNewFasilitas] = useState<string>("");
+
 
   useEffect(() => {
     if (initialValues) {
