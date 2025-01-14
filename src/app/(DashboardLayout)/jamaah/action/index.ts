@@ -5,6 +5,9 @@ import { createClient } from "@/libs/supabase/server";
 import { revalidatePath } from "next/cache";
 import { JamaahInterface } from "../../utilities/type";
 
+  // Data untuk ScoreCard
+
+
 export const mapJamaahData = (data: any): JamaahInterface[] => {
   return data.map((item: any) => ({
     id: item.id,

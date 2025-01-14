@@ -11,6 +11,7 @@ import FormJamaah from "./FormJamaah";
 import { JamaahInterface, PaketInterface } from "../../utilities/type";
 import { useMemo } from "react";
 import { scoreCardJamaah } from "../../utilities/data";
+import { IconLoader, IconPlaneArrival, IconUser } from "@tabler/icons-react";
 
 
 export type JamaahProps = {
@@ -24,6 +25,37 @@ const Jamaah = ({paketData, jamaahData}: JamaahProps) => {
 
   console.log("Paket data:", stablePaketData);
   console.log("Jamaah data:", stableJamaahData);
+
+
+  // Hitung statistik
+  const totalJamaah = stableJamaahData.length;
+  const belumBerangkat = stableJamaahData.filter(
+    (jamaah) => jamaah.status === "Berangkat"
+  ).length;
+  const selesai = stableJamaahData.filter(
+    (jamaah) => jamaah.status === "Selesai"
+  ).length;
+
+  const dynamicScoreCardJamaah = [
+    {
+      title: "Total Jamaah",
+      total: totalJamaah,
+      color: "#3E74FF",
+      icon: IconUser,
+    },
+    {
+      title: "Belum Berangkat",
+      total: belumBerangkat,
+      color: "#F54F63",
+      icon: IconLoader,
+    },
+    {
+      title: "Selesai",
+      total: selesai,
+      color: "#F5BD4F",
+      icon: IconPlaneArrival,
+    },
+  ];
   return (
     <>
       <Box
@@ -44,9 +76,8 @@ const Jamaah = ({paketData, jamaahData}: JamaahProps) => {
         container
         spacing={3}
       >
-        {scoreCardJamaah.map((data, index) => (
+        {dynamicScoreCardJamaah.map((data, index) => (
           <Grid item sm={12} md={5} lg={3} key={index}>
-            {/* Kirim data ke komponen ScoreCard */}
             <ScoreCard
               title={data.title}
               total={data.total}
