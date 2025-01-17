@@ -165,7 +165,7 @@ export const updateCmsAction = async (paketData: PaketInterface) => {
         console.error("Error deleting hotels:", deleteError);
         throw deleteError;
       } else {
-        console.log("Hotels not in the current list have been deleted.");
+        console.log("Hotels not in the current list have been deleted successfully.");
       }
 
       // Process remaining hotels for update or insert
@@ -260,7 +260,7 @@ export const updateCmsAction = async (paketData: PaketInterface) => {
     }
 
     // Revalidate CMS path
-    await revalidatePath("/cms");
+    await revalidatePath(`/cms/${paketData.id}`);
     return { success: true, data: paketDataUpdated };
   } catch (error) {
     console.error("Error updating Paket:", error);

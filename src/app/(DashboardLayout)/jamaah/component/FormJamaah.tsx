@@ -138,7 +138,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
     ayahKandung: "",
     noTelp: "",
     kontakDarurat: [
-      { id: 0, nama: "", noTelp: "", hubungan: KontakDaruratRelation.Lainnya },
+      { id: 0, nama: "", no_telp: "", hubungan: KontakDaruratRelation.Lainnya },
     ],
     email: "",
     jenisKelamin: JenisKelamin.LakiLaki,
@@ -207,7 +207,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
         {
           id: prev.kontakDarurat.length,
           nama: "",
-          noTelp: "",
+          no_telp: "",
           hubungan: KontakDaruratRelation.Lainnya,
         },
       ],
@@ -268,7 +268,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
         {
           id: 0,
           nama: "",
-          noTelp: "",
+          no_telp: "",
           hubungan: KontakDaruratRelation.Lainnya,
         },
       ],
@@ -595,6 +595,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
 
               {/* Kontak Darurat */}
               <KontakDaruratSection
+              isEditing={false}
                 kontakDarurat={formValues.kontakDarurat}
                 handleContactChange={handleContactChange}
                 handleAddContact={handleAddContact}

@@ -1,3 +1,5 @@
+'use client'
+
 import MuiCard from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
@@ -9,7 +11,7 @@ import { CardStatsHorizontalWithBorderProps } from '../../type';
 // Tipe Props untuk Card, termasuk `color` dan `icon`
 type Props = CardProps & {
   color: string; // Mengubah menjadi menerima warna CSS yang valid
-  icon: React.ElementType; // Menetapkan `icon` sebagai komponen React
+  icon?: React.ElementType | null; // Menetapkan `icon` sebagai komponen React
 };
 
 const Card = styled(MuiCard)<Props>(({ color }) => ({

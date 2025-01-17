@@ -213,13 +213,17 @@ const FormDetail = ({ isEditing, userData }: FormDetailProps) => {
               />
             </Grid>
             {isEditing && (
-              <Button
-                sx={{ color: "#fff", minWidth: "150px", marginLeft: "24px" }}
-                variant="contained"
-                onClick={handleOpenModal}
+              <Box
+                sx={{ width: "100%", display: "flex", justifyContent: "end" }}
               >
-                Simpan
-              </Button>
+                <Button
+                  sx={{ color: "#fff", minWidth: "150px", marginLeft: "24px" }}
+                  variant="contained"
+                  onClick={handleOpenModal}
+                >
+                  Simpan
+                </Button>
+              </Box>
             )}
           </Grid>
         </Box>

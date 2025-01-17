@@ -6,9 +6,11 @@ import {
   Box,
   Button,
   Card,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   Typography,
 } from "@mui/material";
@@ -18,73 +20,61 @@ import FormDetail from "./FormDetail";
 import { useRouter } from "next/navigation";
 
 import jamaahData from "../../data";
-import { JamaahProps } from "@/app/(DashboardLayout)/utilities/type";
 import JamaahDetailTable from "@/app/(DashboardLayout)/utilities/component/table/JamaahDetailTable";
+import { JamaahInterface, PaketInterface } from "@/app/(DashboardLayout)/utilities/type";
+import { createClient } from "@/libs/supabase/client";
+import { getJamaahDataById } from "../../action";
 
 
 interface JamaahDetailProps {
   id: string;
+  paketData: PaketInterface[]
   breadcrumbLinks: { label: string; href?: string }[];
 }
 
-const JamaahDetail = ({ id, breadcrumbLinks }: JamaahDetailProps) => {
+const JamaahDetail = ({ id,paketData, breadcrumbLinks }: JamaahDetailProps) => {
   const router = useRouter(); // Initialize useRouter
   const [isEditing, setIsEditing] = useState<boolean>(false); // State to toggle edit mode
-  const [openModal, setOpenModal] = useState<boolean>(false); // Modal state to confirm save
   const [isSaving, setIsSaving] = useState<boolean>(false); // State to check if saving is in progress
-  const [formData, setFormData] = useState({});
-  const [currentData, setCurrentData] = useState<JamaahProps | null>(null); // State untuk menyimpan data jamaah
+  const [currentData, setCurrentData] = useState<JamaahInterface | null>(null); // State untuk menyimpan data jamaah
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (id && !currentData) {
-      const foundJamaah = jamaahData.find((item) => item.id === Number(id));
-      setCurrentData(foundJamaah || null);
-    }
-  }, [currentData, id]); 
+  const supabase = createClient();
+  
+  // Ambil data berdasarkan ID
+useEffect(() => {
+  const fetchData = async () => {
+    const data = await getJamaahDataById(id);
+    if (data) setCurrentData(data);
+  }
 
-  // Handle Submit data sebelum dialog
-  const handleSubmit = (data: SetStateAction<{}>) => {
-    setFormData(data); // Simpan data form ke state
-    setOpenModal(true);
-  };
+  fetchData();
+}, [id])
 
-  // Toggle the isEditing state
-  const handleEditClick = () => {
-    if (!isEditing) {
-      setIsEditing(true); // Set isEditing hanya jika belum dalam mode edit
-    }
-  };
+// Toggle the isEditing state
+const handleEditClick = () => {
+  if (!isEditing) {
+    setIsEditing(true); // Enter edit mode
+  } else {
+    setOpenDialog(true); // Open the dialog
+  }
+};
+
+const handleCancelEdit = () => {
+  setIsEditing(false); // Exit edit mode
+  setOpenDialog(false); // Close dialog
+};
+
+const handleCloseDialog = () => {
+  setOpenDialog(false); // Close dialog without changes
+};
+
 
   // Function to handle the "Kembali ke Daftar" button click
   const handleBackClick = () => {
     router.push("/jamaah"); // Navigate to /keuangan page
   };
 
-  // Open the confirmation modal
-  const handleOpenModal = () => {
-    if (!openModal) {
-      setOpenModal(true); // Hanya buka modal jika belum terbuka
-    }
-  };
-  // Close the confirmation modal
-  const handleCloseModal = () => {
-    if (openModal) {
-      setOpenModal(false); // Hanya tutup modal jika terbuka
-    }
-  };
-  const handleSaveChanges = () => {
-    setIsSaving(true);
-    console.log("Menyimpan data...", formData); // Menampilkan data yang sedang disimpan
-    setTimeout(() => {
-      setIsSaving(false);
-      setIsEditing(false); // Disable edit mode setelah menyimpan
-      setOpenModal(false); // Tutup modal setelah data disimpan
-      console.log("Data berhasil disimpan:", formData); // Menampilkan data setelah disimpan
-      alert("Perubahan berhasil disimpan!"); // Menampilkan pesan sukses
-    }, 1000); // Simulasi operasi async
-  };
-
-  console.log("currentData untuk dioper ke table detail:", currentData?.jenisDokumen);
 
   return (
     <>
@@ -114,12 +104,12 @@ const JamaahDetail = ({ id, breadcrumbLinks }: JamaahDetailProps) => {
           </Box>
 
           <Box>
-            <Button
+          <Button
               variant="contained"
-              sx={{ color: "white", marginRight: "1rem" }}
-              onClick={isEditing ? handleOpenModal : handleEditClick}
+              sx={{ color: "white", marginRight: "1rem", minWidth: "150px" }}
+              onClick={handleEditClick}
             >
-              {isEditing ? "Simpan Perubahan" : "Sunting Rincian"}
+              {isEditing ? "Batal Menyunting" : "Sunting"}
             </Button>
           </Box>
         </Box>
@@ -127,9 +117,7 @@ const JamaahDetail = ({ id, breadcrumbLinks }: JamaahDetailProps) => {
         <Box sx={{ marginTop: "2rem" }}>
           <FormDetail
             isEditing={isEditing}
-            onSaveChanges={handleSubmit}
-            jamaahData={currentData}
-          />
+            jamaahData={currentData} paketData={paketData}          />
         </Box>
 
         <Box sx={{ marginTop: "2rem", backgroundColor: "#fff" }}>
@@ -141,26 +129,24 @@ const JamaahDetail = ({ id, breadcrumbLinks }: JamaahDetailProps) => {
           </Card>
         </Box>
       </PageContainer>
-
-      {/* Confirmation Modal */}
-      <Dialog open={openModal} onClose={handleCloseModal}>
-        <DialogTitle>Konfirmasi Simpan Perubahan</DialogTitle>
+  <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        aria-labelledby="cancel-edit-dialog-title"
+        aria-describedby="cancel-edit-dialog-description"
+      >
+        <DialogTitle id="cancel-edit-dialog-title">Batalkan Penyuntingan</DialogTitle>
         <DialogContent>
-          <Typography>
-            Apakah Anda yakin ingin menyimpan perubahan ini?
-          </Typography>
+          <DialogContentText id="cancel-edit-dialog-description">
+            Apakah Anda yakin ingin membatalkan mode penyuntingan? Perubahan yang belum disimpan akan hilang.
+          </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseModal} variant="contained" color="error">
-            Batal
+          <Button onClick={handleCloseDialog} sx={{ color: "white" }} variant="contained">
+            Tidak
           </Button>
-          <Button
-            onClick={handleSaveChanges}
-            variant="contained"
-            sx={{ color: "white" }}
-            disabled={isSaving} // Disable the button while saving
-          >
-            {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
+          <Button onClick={handleCancelEdit} sx={{ color: "white" }} variant="contained" autoFocus>
+            Ya, Batalkan
           </Button>
         </DialogActions>
       </Dialog>

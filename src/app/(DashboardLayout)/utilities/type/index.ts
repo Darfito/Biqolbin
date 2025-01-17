@@ -9,6 +9,13 @@ export type CardStatsHorizontalWithBorderProps = {
     icon: React.ElementType
   }
 
+  export type CardStatsProps = {
+    title: string
+    total: number
+    color?: string
+    icon: string
+  }
+
 
 // ! KEUANGAN TYPE
   export interface KeuanganProps {
@@ -104,7 +111,7 @@ export enum JenisPenerbangan {
 
 // ! JAMAAH TYPE
 export interface JamaahInterface {
-  id: number;
+  id?: number;
   nama: string;
   ayahKandung: string;
   noTelp: string;
@@ -124,6 +131,7 @@ export interface JamaahInterface {
   berangkat: string; // tanggal berangkat dari paket
   selesai: string; // tanggal pulang dari paket
   status: StatusKepergian;
+  paket_id?: number;
 }
 
 // ! INTERFACE USER
@@ -148,7 +156,7 @@ export enum Jabatan {
 
 export type JenisDokumen ={
   id: number;
-  namaDokumen: string;
+  nama_dokumen: string;
   file?: string
   lampiran: boolean
   action?: string
@@ -157,7 +165,7 @@ export type JenisDokumen ={
 export type KontakDaruratType = {
   id: number;
   nama: string;
-  noTelp: string;
+  no_telp: string;
   hubungan: KontakDaruratRelation;
   relasiLain?: string;
 }

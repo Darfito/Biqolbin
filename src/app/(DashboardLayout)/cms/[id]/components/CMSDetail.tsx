@@ -30,7 +30,6 @@ interface CMSDetailProps {
 const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
   const router = useRouter();
   const [paketDetail, setPaketDetail] = useState<PaketInterface>();
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   console.log("id di detail:", id);
 

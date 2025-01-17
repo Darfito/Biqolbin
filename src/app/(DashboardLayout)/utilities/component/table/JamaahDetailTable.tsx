@@ -12,7 +12,7 @@ import {
   createColumnHelper,
   ColumnFiltersState,
 } from "@tanstack/react-table";
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, CardHeader, TablePagination } from "@mui/material";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TablePagination } from "@mui/material";
 import { Delete, Folder, UploadFile } from "@mui/icons-material";
 import { RankingInfo, rankItem } from "@tanstack/match-sorter-utils";
 
@@ -26,7 +26,6 @@ import styles from "../../../../styles/table.module.css";
 // Type Imports
 import { JenisDokumen } from "../../type";
 import FileUploaderSingle from "../uploader/FileUploaderSingle";
-import { IconEye } from "@tabler/icons-react";
 
 const fuzzyFilter = (row: { getValue: (arg0: any) => any; }, columnId: any, value: string, addMeta: (arg0: { itemRank: RankingInfo; }) => void) => {
   const itemRank = rankItem(row.getValue(columnId), value);
@@ -34,43 +33,6 @@ const fuzzyFilter = (row: { getValue: (arg0: any) => any; }, columnId: any, valu
   return itemRank.passed;
 };
 
-interface DebouncedInputProps {
-  value: string
-  onChange: (value: string) => void;
-  debounce?: number;
-  placeholder?: string; // Tambahkan properti placeholder
-}
-
-// A debounced input react component
-const DebouncedInput: React.FC<DebouncedInputProps> = ({
-  value: initialValue,
-  onChange,
-  debounce = 500,
-  ...props
-}) => {
-  const [value, setValue] = useState(initialValue);
-
-  useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      onChange(value);
-    }, debounce);
-
-    return () => clearTimeout(timeout);
-  }, [value]);
-
-  return (
-    <CustomTextField
-      variant="outlined"
-      {...props}
-      value={value}
-      onChange={(e) => setValue(e.target.value)}
-    />
-  );
-};
 
 interface JamaahDetailProps<T> {
   data: T[];
@@ -98,7 +60,7 @@ const JamaahDetailTable = ({ data, perkawinan }: JamaahDetailProps<JenisDokumen>
   // Filter data "Buku Nikah" hanya jika perkawinan bernilai true
   const filteredData = data.filter(
     (dokumen) =>
-      dokumen.namaDokumen !== "Buku Nikah" || perkawinan
+      dokumen.nama_dokumen !== "Buku Nikah" || perkawinan
   );
   
 
@@ -106,23 +68,12 @@ const JamaahDetailTable = ({ data, perkawinan }: JamaahDetailProps<JenisDokumen>
 
 
   const columns = [
-    columnHelper.accessor("namaDokumen", {
-      id: "namaDokumen",
+    columnHelper.accessor("nama_dokumen", {
+      id: "nama_dokumen",
       cell: (info) => info.getValue(),
       header: "Jenis Dokumen",
       enableColumnFilter: false,
     }),
-    // columnHelper.accessor("lampiran", {
-    //   cell: (info) => (
-    //     <Box sx={{ display: "flex", justifyContent: "start" }}>
-    //       <IconButton>
-    //         <Folder />
-    //       </IconButton>
-    //     </Box> 
-    //   ),
-    //   header: "Lampiran",
-    //   enableColumnFilter: false,
-    // }),
     columnHelper.accessor("action", {
       cell: (info) => (
         <Box sx={{ display: "flex", justifyContent: "start" }}>
@@ -184,16 +135,6 @@ const JamaahDetailTable = ({ data, perkawinan }: JamaahDetailProps<JenisDokumen>
         margin: "20px"
       }}>
       </Box>
-      {/* <CardHeader
-        sx={{ paddingTop: 0 }}
-        action={
-          <DebouncedInput
-            value={globalFilter ?? ""}
-            onChange={(value: any) => setGlobalFilter(String(value))}
-            placeholder="Search all columns..."
-          />
-        }
-      /> */}
       <div className="overflow-x-auto">
         <table className={styles.table}>
           <thead>

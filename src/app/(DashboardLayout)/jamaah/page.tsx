@@ -12,21 +12,51 @@ export default async function JamaahPage() {
   let jamaahData: JamaahInterface[] = [];
 
   try {
-    // Memanggil getCmsAction
     paketData = await getCmsAction() ?? [];
-    console.log("Paket data:", paketData);
-
-    // Memanggil getJamaahAction
     jamaahData = await getJamaahAction();
-    console.log("Jamaah data:", jamaahData);
   } catch (error) {
     console.error("Error fetching data:", error);
   }
 
+  // Gunakan data fallback jika ada error
+  const stablePaketData = paketData || [];
+  const stableJamaahData = jamaahData || [];
+
+  // Hitung statistik
+  const totalJamaah = jamaahData.length;
+  const belumBerangkat = jamaahData.filter(
+    (jamaah) => jamaah.status === "Berangkat"
+  ).length;
+  const selesai = jamaahData.filter(
+    (jamaah) => jamaah.status === "Selesai"
+  ).length;
+
+  const dynamicScoreCardJamaah = [
+    {
+      title: "Total Jamaah",
+      total: totalJamaah,
+      color: "#3E74FF",
+      icon: "IconUser", // Kirim nama ikon sebagai string
+    },
+    {
+      title: "Belum Berangkat",
+      total: belumBerangkat,
+      color: "#F54F63",
+      icon: "IconLuggage", // Kirim nama ikon sebagai string
+    },
+    {
+      title: "Selesai",
+      total: selesai,
+      color: "#F5BD4F",
+      icon: "IconPlaneArrival", // Kirim nama ikon sebagai string
+    },
+  ];
+
+
   return (
     <>
-      {/* Kirimkan data yang telah di-fetch ke komponen Jamaah */}
-      <Jamaah paketData={paketData} jamaahData={jamaahData} />
+      <Jamaah paketData={stablePaketData} jamaahData={stableJamaahData}  scoreCardData={dynamicScoreCardJamaah}  />
     </>
   );
 }
+

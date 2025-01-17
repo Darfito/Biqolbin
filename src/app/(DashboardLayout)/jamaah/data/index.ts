@@ -1,13 +1,9 @@
 import { PaketData } from "../../utilities/data";
 import {
   CardStatsHorizontalWithBorderProps,
-  JamaahProps,
+  JamaahInterface,
   JenisKelamin,
-  JenisPaket,
-  JenisPenerbangan,
   KontakDaruratRelation,
-  Maskapai,
-  PaketInterface,
   TipeKamar,
 } from "../../utilities/type";
 import { IconUser, IconCreditCard, IconReceipt } from "@tabler/icons-react";
@@ -35,7 +31,7 @@ export const scoreCardKeuangan: CardStatsHorizontalWithBorderProps[] = [
 
 
 
-const jamaahData: JamaahProps[] = [
+const jamaahData: JamaahInterface[] = [
   {
     id: 1,
     nama: "Ahmad Fauzi",

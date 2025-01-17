@@ -9,11 +9,12 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   Typography,
 } from "@mui/material";
 import { IconArrowLeft } from "@tabler/icons-react";
-import React, { SetStateAction, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { createClient } from "@/libs/supabase/client";
@@ -29,7 +30,7 @@ const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [currentData, setCurrentData] = useState<UserInterface | null>(null);
-
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
   const supabase = createClient();
 
   // Fetch user data
@@ -55,32 +56,32 @@ const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
     };
 
     fetchUserData();
-  }, [id, currentData, supabase]);
+  }, [id, currentData]);
 
   // Toggle the isEditing state
   const handleEditClick = () => {
     if (!isEditing) {
       setIsEditing(true); // Enter edit mode
+    } else {
+      setOpenDialog(true); // Open the dialog
     }
+  };
+
+   // Handle dialog actions
+   const handleCancelEdit = () => {
+    setIsEditing(false); // Exit edit mode
+    setOpenDialog(false); // Close dialog
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false); // Close dialog without changes
   };
 
   // Function to handle the "Back to List" button click
   const handleBackClick = () => {
     router.push("/user"); // Navigate to the user list
   };
-
-  // const handleSaveChanges = () => {
-  //   setIsSaving(true);
-  //   console.log("Saving data...", formData); // Log the form data being saved
-  //   setTimeout(() => {
-  //     setIsSaving(false);
-  //     setIsEditing(false); // Exit edit mode after saving
-  //     setOpenModal(false); // Close the modal after saving
-  //     console.log("Data successfully saved:", formData); // Log the saved data
-  //     alert("Changes saved successfully!"); // Show success message
-  //   }, 1000); // Simulate async operation
-  // };
-
+  
   return (
     <>
       <Typography variant="h2" component="h1">
@@ -109,18 +110,12 @@ const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
           </Box>
 
           <Box>
-            <Button
+          <Button
               variant="contained"
               sx={{ color: "white", marginRight: "1rem", minWidth: "150px" }}
               onClick={handleEditClick}
-              disabled={isEditing} // Disable button jika sedang menyunting
-              startIcon={
-                isEditing ? (
-                  <CircularProgress size={20} color="inherit" />
-                ) : null
-              } // Tambahkan CircularProgress jika sedang menyunting
             >
-              {isEditing ? "Sedang Menyunting" : "Sunting"}
+              {isEditing ? "Batal Menyunting" : "Sunting"}
             </Button>
           </Box>
         </Box>
@@ -129,6 +124,28 @@ const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
           <FormDetail isEditing={isEditing} userData={currentData} />
         </Box>
       </PageContainer>
+
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        aria-labelledby="cancel-edit-dialog-title"
+        aria-describedby="cancel-edit-dialog-description"
+      >
+        <DialogTitle id="cancel-edit-dialog-title">Batalkan Penyuntingan</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="cancel-edit-dialog-description">
+            Apakah Anda yakin ingin membatalkan mode penyuntingan? Perubahan yang belum disimpan akan hilang.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} sx={{ color: "white" }} variant="contained">
+            Tidak
+          </Button>
+          <Button onClick={handleCancelEdit} sx={{ color: "white" }} variant="contained" autoFocus>
+            Ya, Batalkan
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

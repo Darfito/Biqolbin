@@ -1,6 +1,7 @@
 import { Box, Button, Typography } from "@mui/material";
 import { HotelType } from "../../utilities/type";
 import CustomTextField from "../../components/forms/theme-elements/CustomTextField";
+import { IconPlus } from "@tabler/icons-react";
 
 interface HotelHandlerProps {
   hotel: HotelType[];
@@ -117,9 +118,9 @@ export const HotelSection = ({
       ))}
       <Box sx={{ width: "100%", display: "flex", justifyContent: "end" }}>
         <Button
-          variant="contained"
+          startIcon={<IconPlus />}
           onClick={handleAddHotel}
-          sx={{ color: "white", marginBottom: 2 }}
+          sx={{ color: "#f18b04", marginBottom: 2 }}
         >
           Tambah Hotel
         </Button>
