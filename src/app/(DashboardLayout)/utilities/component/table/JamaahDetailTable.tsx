@@ -121,27 +121,44 @@ const JamaahDetailTable = ({
 
   const handleFileUpload = async (file: File) => {
     if (!dialogRow) return; // Pastikan ada data baris yang sedang aktif
-
+  
     const { jamaah_id: jamaahId, nama_dokumen: namaDokumen } = dialogRow;
-
+  
     if (!jamaahId || !namaDokumen) {
       toast.error("Data Jamaah atau nama dokumen tidak valid.");
       return;
     }
-
+  
+    // Upload file ke Supabase Storage
     const publicUrl = await uploadFileToSupabase(
       file,
       jamaahId.toString(),
       namaDokumen
     );
-
+  
     if (publicUrl) {
-      console.log("File URL:", publicUrl);
-      // Anda bisa melakukan sesuatu dengan URL publik, seperti menyimpan ke database
+      // Jika upload berhasil, lakukan update pada tabel jenisDokumen dengan URL file
+      try {
+        const { data, error } = await supabase
+          .from("jenis_dokumen")
+          .update({ file: publicUrl, action: "Diterima", lampiran: true }) // Update file URL dan status
+          .eq("jamaah_id", jamaahId)
+          .eq("nama_dokumen", namaDokumen);
+  
+        if (error) {
+          throw new Error(error.message);
+        }
+  
+        toast.success("File berhasil diunggah dan data diperbarui!");
+      } catch (error: any) {
+        toast.error(`Gagal memperbarui data: ${error.message}`);
+        console.error("Error updating jenisDokumen:", error);
+      }
     }
-
+  
     handleDialogClose(); // Tutup dialog setelah upload selesai
   };
+  
 
   const getFileUrl = async (jamaahId: string, namaDokumen: string) => {
     try {
@@ -173,6 +190,7 @@ const JamaahDetailTable = ({
       }
 
       toast.success("File berhasil dihapus!");
+      setFileUrl(null);
       return true;
     } catch (error: any) {
       toast.error(`Gagal menghapus file: ${error.message}`);
@@ -240,7 +258,7 @@ const JamaahDetailTable = ({
                 }}
                 sx={{
                   color:
-                    fileUrl && fileUrl.includes(rowData.nama_dokumen)
+                    rowData.action === "Diterima"
                       ? "#F18B04"
                       : "#B0B0B0",
                 }}
