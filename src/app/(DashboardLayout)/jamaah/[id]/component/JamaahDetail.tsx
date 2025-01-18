@@ -15,7 +15,7 @@ import {
   Typography,
 } from "@mui/material";
 import { IconArrowLeft } from "@tabler/icons-react";
-import React, { SetStateAction, useEffect, useState } from "react";
+import React, { SetStateAction, useEffect, useMemo, useState } from "react";
 import FormDetail from "./FormDetail";
 import { useRouter } from "next/navigation";
 
@@ -35,21 +35,21 @@ interface JamaahDetailProps {
 const JamaahDetail = ({ id,paketData, breadcrumbLinks }: JamaahDetailProps) => {
   const router = useRouter(); // Initialize useRouter
   const [isEditing, setIsEditing] = useState<boolean>(false); // State to toggle edit mode
-  const [isSaving, setIsSaving] = useState<boolean>(false); // State to check if saving is in progress
   const [currentData, setCurrentData] = useState<JamaahInterface | null>(null); // State untuk menyimpan data jamaah
   const [openDialog, setOpenDialog] = useState<boolean>(false);
-
-  const supabase = createClient();
   
   // Ambil data berdasarkan ID
-useEffect(() => {
-  const fetchData = async () => {
-    const data = await getJamaahDataById(id);
-    if (data) setCurrentData(data);
-  }
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await getJamaahDataById(id);
+      if (data) setCurrentData(data);
+    };
 
-  fetchData();
-}, [id])
+    fetchData();
+  }, [id]);
+
+  const memoizedJenisDokumen = useMemo(() => currentData?.jenisDokumen || [], [currentData]);
+  const memoizedPernikahan = useMemo(() => currentData?.pernikahan, [currentData]);
 
 // Toggle the isEditing state
 const handleEditClick = () => {
@@ -74,6 +74,8 @@ const handleCloseDialog = () => {
   const handleBackClick = () => {
     router.push("/jamaah"); // Navigate to /keuangan page
   };
+
+  console.log("data jamaah detail ",currentData);
 
 
   return (
@@ -123,8 +125,8 @@ const handleCloseDialog = () => {
         <Box sx={{ marginTop: "2rem", backgroundColor: "#fff" }}>
           <Card sx={{ backgroundColor: "#fff" }}>
             <JamaahDetailTable
-              data={currentData?.jenisDokumen || []}
-              perkawinan={currentData?.pernikahan}
+              data={memoizedJenisDokumen}
+              perkawinan={memoizedPernikahan}
             />
           </Card>
         </Box>

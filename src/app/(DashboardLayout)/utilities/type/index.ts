@@ -160,6 +160,7 @@ export type JenisDokumen ={
   file?: string
   lampiran: boolean
   action?: string
+  jamaah_id?: number
 }
 
 export type KontakDaruratType = {

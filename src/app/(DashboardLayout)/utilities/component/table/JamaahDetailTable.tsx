@@ -1,7 +1,7 @@
 "use client";
 
 // React Imports
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -12,7 +12,16 @@ import {
   createColumnHelper,
   ColumnFiltersState,
 } from "@tanstack/react-table";
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TablePagination } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  TablePagination,
+} from "@mui/material";
 import { Delete, Folder, UploadFile } from "@mui/icons-material";
 import { RankingInfo, rankItem } from "@tanstack/match-sorter-utils";
 
@@ -27,86 +36,89 @@ import styles from "../../../../styles/table.module.css";
 import { JenisDokumen } from "../../type";
 import FileUploaderSingle from "../uploader/FileUploaderSingle";
 
-const fuzzyFilter = (row: { getValue: (arg0: any) => any; }, columnId: any, value: string, addMeta: (arg0: { itemRank: RankingInfo; }) => void) => {
+const fuzzyFilter = (
+  row: { getValue: (arg0: any) => any },
+  columnId: any,
+  value: string,
+  addMeta: (arg0: { itemRank: RankingInfo }) => void
+) => {
   const itemRank = rankItem(row.getValue(columnId), value);
   addMeta({ itemRank });
   return itemRank.passed;
 };
-
 
 interface JamaahDetailProps<T> {
   data: T[];
   perkawinan?: boolean;
 }
 
-
-const JamaahDetailTable = ({ data, perkawinan }: JamaahDetailProps<JenisDokumen>) => {
+const JamaahDetailTable = ({
+  data,
+  perkawinan,
+}: JamaahDetailProps<JenisDokumen>) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null); // State untuk menyimpan file yang diunggah
+  const [dialogRow, setDialogRow] = useState<JenisDokumen | null>(null);
 
-
-  const handleDialogOpen = () => setOpenDialog(true);
-  const handleDialogClose = () => setOpenDialog(false);
+  const handleDialogOpen = (row: JenisDokumen) => {
+    setDialogRow(row); // Tetapkan baris yang sedang dibuka dialognya
+  };
+  const handleDialogClose = () => {
+    setDialogRow(null); // Tutup dialog
+  };
 
   const handleFileUpload = (file: File) => {
     setUploadedFile(file); // Simpan file yang diunggah ke state
     console.log("File uploaded:", file);
   };
 
-
-
   // Filter data "Buku Nikah" hanya jika perkawinan bernilai true
-  const filteredData = data.filter(
-    (dokumen) =>
-      dokumen.nama_dokumen !== "Buku Nikah" || perkawinan
-  );
-  
+  const filteredData = useMemo(() => {
+    return data.filter(
+      (dokumen) => dokumen.nama_dokumen !== "Buku Nikah" || perkawinan
+    );
+  }, [data, perkawinan]);
 
   const columnHelper = createColumnHelper<JenisDokumen>();
 
-
-  const columns = [
-    columnHelper.accessor("nama_dokumen", {
-      id: "nama_dokumen",
-      cell: (info) => info.getValue(),
-      header: "Jenis Dokumen",
-      enableColumnFilter: false,
-    }),
-    columnHelper.accessor("action", {
-      cell: (info) => (
-        <Box sx={{ display: "flex", justifyContent: "start" }}>
-          <IconButton onClick={handleDialogOpen}>
-            <UploadFile />
-          </IconButton>
-          <IconButton>
-            <Folder />
-          </IconButton>
-          <IconButton>
-            <Delete />
-          </IconButton>
-
-          <Dialog open={openDialog} onClose={handleDialogClose}>
-            <DialogTitle>Upload File</DialogTitle>
-            <DialogContent>
-            <FileUploaderSingle onFileUpload={handleFileUpload} /> {/* Oper onFileUpload */}
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleDialogClose} color="primary">
-                Cancel
-              </Button>
-              <Button onClick={() => console.log("Upload file")} color="primary">
-                Upload
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </Box>
-      ),
-      header: "Action",
-      enableColumnFilter: false,
-    }),
-  ];
+  // Definisi kolom tabel
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("nama_dokumen", {
+        id: "nama_dokumen",
+        cell: (info) => info.getValue(),
+        header: "Jenis Dokumen",
+        enableColumnFilter: false,
+      }),
+      columnHelper.accessor("action", {
+        id: "action",
+        cell: ({ row }) => {
+          const rowData = row.original;
+          return (
+            <Box sx={{ display: "flex", justifyContent: "start" }}>
+              {/* Tombol Upload */}
+              <IconButton onClick={() => handleDialogOpen(rowData)}>
+                <UploadFile />
+              </IconButton>
+              {/* Tombol Folder */}
+              <IconButton>
+                <Folder />
+              </IconButton>
+              {/* Tombol Delete */}
+              <IconButton>
+                <Delete />
+              </IconButton>
+            </Box>
+          );
+        },
+        header: "Action",
+        enableColumnFilter: false,
+      }),
+    ],
+    []
+  );
 
   const table = useReactTable({
     data: filteredData,
@@ -129,12 +141,13 @@ const JamaahDetailTable = ({ data, perkawinan }: JamaahDetailProps<JenisDokumen>
 
   return (
     <Box sx={{ paddingX: "1rem" }}>
-      <Box sx={{ 
-        width: "100%", 
-        display: "flex",
-        margin: "20px"
-      }}>
-      </Box>
+      <Box
+        sx={{
+          width: "100%",
+          display: "flex",
+          margin: "20px",
+        }}
+      ></Box>
       <div className="overflow-x-auto">
         <table className={styles.table}>
           <thead>
@@ -144,7 +157,10 @@ const JamaahDetailTable = ({ data, perkawinan }: JamaahDetailProps<JenisDokumen>
                   <th key={header.id} className={styles.tableTh}>
                     {header.isPlaceholder
                       ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                   </th>
                 ))}
               </tr>
@@ -172,7 +188,20 @@ const JamaahDetailTable = ({ data, perkawinan }: JamaahDetailProps<JenisDokumen>
           table.setPageIndex(page);
         }}
       />
-
+      {/* Dialog Upload */}
+      {dialogRow && (
+        <Dialog open={!!dialogRow} onClose={handleDialogClose}>
+          <DialogTitle>Upload File untuk {dialogRow.nama_dokumen}</DialogTitle>
+          <DialogContent>
+            <FileUploaderSingle onFileUpload={handleFileUpload} />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDialogClose} color="primary">
+              Cancel
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </Box>
   );
 };

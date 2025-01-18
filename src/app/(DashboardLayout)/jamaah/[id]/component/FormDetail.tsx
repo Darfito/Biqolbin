@@ -1,3 +1,5 @@
+"use client"
+
 import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import CustomTextField from "@/app/(DashboardLayout)/components/forms/theme-elements/CustomTextField";
 import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCard";
@@ -69,14 +71,6 @@ const formSchema = v.object({
   nama: v.pipe(v.string(), v.nonEmpty("Nama harus diisi")),
   ayahKandung: v.pipe(v.string(), v.nonEmpty("Nama Ayah Kandung harus diisi")),
   noTelp: v.pipe(v.string(), v.nonEmpty("No Telp harus diisi")),
-  // kontakDarurat: v.array(
-  //   v.object({
-  //     nama: v.string(),
-  //     noTelp: v.string(),
-  //     hubungan: v.string(),
-  //     relasiLain: v.optional(v.string()),
-  //   })
-  // ),
   email: v.pipe(v.string(), v.nonEmpty("Email harus diisi")),
   jenisKelamin: v.pipe(v.string(), v.nonEmpty("Jenis Kelamin harus diisi")),
   tempatLahir: v.pipe(v.string(), v.nonEmpty("Tempat Lahir harus diisi")),
@@ -90,15 +84,6 @@ const formSchema = v.object({
     v.string(),
     v.nonEmpty("Riwayat Penyakit harus diisi")
   ),
-  // jenisDokumen: v.array(v.string()),
-  // jenisPaket: v.object({
-  //   id: v.number(),
-  //   nama: v.string(),
-  //   harga: v.number(),
-  //   berangkat: v.date(),
-  //   selesai: v.date(),
-  //   status: v.string(),
-  // }),
   berangkat: v.string(),
   selesai: v.string(),
   status: v.string(),
