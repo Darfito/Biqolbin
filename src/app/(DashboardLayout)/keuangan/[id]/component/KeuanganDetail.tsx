@@ -4,7 +4,7 @@ import PageContainer from "@/app/(DashboardLayout)/components/container/PageCont
 import Breadcrumb from "@/app/(DashboardLayout)/utilities/component/breadcrumb/Breadcrumb";
 import { Box, Button, Card, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
 import { IconArrowLeft } from "@tabler/icons-react";
-import React, { useEffect, useState } from "react";
+import React, { SetStateAction, useEffect, useState } from "react";
 import FormDetail from "./FormDetail";
 import { useRouter } from "next/navigation";
 
@@ -38,7 +38,7 @@ const KeuanganDetail = ({ id, breadcrumbLinks }: KeuanganDetailProps) => {
   }, []);
 
 // Handle Submit data sebelum dialog
-const handleSubmit = (data: React.SetStateAction<{}>) => {
+const handleSubmit = (data: SetStateAction<{}>) => {
   setFormData(data); // Simpan data form ke state
   setOpenModal(true);
 };
@@ -109,8 +109,11 @@ const handleSubmit = (data: React.SetStateAction<{}>) => {
             >
               {isEditing ? "Simpan Perubahan" : "Sunting Rincian"}
             </Button>
-            <Button variant="contained" disabled sx={{ color: "white" }}>
+            <Button variant="contained" disabled sx={{ color: "white", marginRight: "1rem" }}>
               Telah Lunas
+            </Button>
+            <Button variant="contained" disabled sx={{ color: "white" }}>
+              Invoice
             </Button>
           </Box>
         </Box>

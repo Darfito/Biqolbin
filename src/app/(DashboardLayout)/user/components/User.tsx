@@ -5,11 +5,11 @@ import PageContainer from "../../components/container/PageContainer";
 
 import UserTable from "../../utilities/component/table/UserTable";
 import FormUser from "./FormUser";
-import { columnsUser } from "./columnsUser";
-import { UserProps } from "../../utilities/type";
+import { UserInterface } from "../../utilities/type";
+
 
 export type UserPageProps = {
-  data: UserProps[];
+  data: UserInterface[];
 };
 
 const User = ({ data }: UserPageProps) => {
@@ -31,7 +31,7 @@ const User = ({ data }: UserPageProps) => {
           <FormUser />
         </Box>
         <Card sx={{ mt: 3 }}>
-          <UserTable data={data} columns={columnsUser} />
+          <UserTable data={data} />
         </Card>
       </PageContainer>
     </>

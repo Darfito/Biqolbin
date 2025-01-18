@@ -2,6 +2,7 @@ import React from "react";
 import { Grid, Box, Typography, Button, MenuItem } from "@mui/material";
 import CustomTextField from "../../components/forms/theme-elements/CustomTextField";
 import { KontakDaruratRelation, KontakDaruratType } from "../../utilities/type";
+import { IconPlus } from "@tabler/icons-react";
 
 interface KontakDaruratSectionProps {
   kontakDarurat: KontakDaruratType[];
@@ -12,30 +13,35 @@ interface KontakDaruratSectionProps {
   ) => void;
   handleAddContact: () => void;
   handleRemoveContact: (index: number) => void;
+  isEditing: boolean; // Status edit mode
 }
 
-export const KontakDaruratSection: React.FC<KontakDaruratSectionProps> = ({
+export const KontakDaruratSection = ({
   kontakDarurat,
   handleContactChange,
   handleAddContact,
   handleRemoveContact,
-}) => {
+  isEditing,
+}: KontakDaruratSectionProps) => {
   return (
     <Grid item xs={12}>
       <Typography sx={{ marginBottom: 2 }} variant="h5">
         Kontak Darurat
       </Typography>
       {kontakDarurat.map((contact, index) => (
-        <Box key={index} sx={{ marginBottom: 3, display: "flex", width: "100%", flexDirection: "column" }}>
-          {kontakDarurat.length > 1 && (
+        <Box
+          key={index}
+          sx={{ display: "flex", width: "100%", flexDirection: "column" }}
+        >
+          {kontakDarurat.length > 1 && isEditing && (
             <Button
               variant="contained"
               color="error"
               onClick={() => handleRemoveContact(index)}
-              sx={{ 
-                width: "25%",
+              sx={{
                 alignSelf: "flex-end",
-                marginBottom: 2,}}
+                marginBottom: 2,
+              }}
             >
               Hapus
             </Button>
@@ -44,6 +50,7 @@ export const KontakDaruratSection: React.FC<KontakDaruratSectionProps> = ({
             fullWidth
             label={`Nama Kontak Darurat ${index + 1}`}
             value={contact.nama}
+            disabled={!isEditing}
             onChange={(e: { target: { value: string } }) =>
               handleContactChange(index, "nama", e.target.value)
             }
@@ -52,9 +59,10 @@ export const KontakDaruratSection: React.FC<KontakDaruratSectionProps> = ({
           <CustomTextField
             fullWidth
             label={`No Telepon Kontak Darurat ${index + 1}`}
-            value={contact.noTelp}
+            value={contact.no_telp}
+            disabled={!isEditing}
             onChange={(e: { target: { value: string } }) =>
-              handleContactChange(index, "noTelp", e.target.value)
+              handleContactChange(index, "no_telp", e.target.value)
             }
             sx={{ marginBottom: 2 }}
           />
@@ -63,6 +71,7 @@ export const KontakDaruratSection: React.FC<KontakDaruratSectionProps> = ({
             fullWidth
             label={`Hubungan Kontak Darurat ${index + 1}`}
             value={contact.hubungan}
+            disabled={!isEditing}
             onChange={(e: { target: { value: string } }) =>
               handleContactChange(index, "hubungan", e.target.value)
             }
@@ -85,13 +94,15 @@ export const KontakDaruratSection: React.FC<KontakDaruratSectionProps> = ({
           </CustomTextField>
         </Box>
       ))}
-      <Button
-        variant="contained"
-        onClick={handleAddContact}
-        sx={{ marginTop: 2, color: "white" }}
-      >
-        Tambah Kontak Darurat
-      </Button>
+      {isEditing && (
+        <Button
+          onClick={handleAddContact}
+          sx={{ color: "#f18b04" }}
+          startIcon={<IconPlus />}
+        >
+          Tambah Kontak Darurat
+        </Button>
+      )}
     </Grid>
   );
 };

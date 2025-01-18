@@ -1,11 +1,11 @@
 "use client";
 
 // React Imports
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import CardHeader from "@mui/material/CardHeader";
 import TablePagination from "@mui/material/TablePagination";
-import type { TextFieldProps } from "@mui/material/TextField";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 
 // Third-party Imports
 import classnames from "classnames";
@@ -19,6 +19,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   flexRender,
+  createColumnHelper,
 } from "@tanstack/react-table";
 import { rankItem } from "@tanstack/match-sorter-utils";
 import type {
@@ -26,7 +27,6 @@ import type {
   Table,
   ColumnFiltersState,
   FilterFn,
-  ColumnDef,
 } from "@tanstack/react-table";
 import type { RankingInfo } from "@tanstack/match-sorter-utils";
 
@@ -39,7 +39,11 @@ import styles from "../../../../styles/table.module.css";
 import TablePaginationComponent from "../pagination/TablePaginationComponent";
 import CustomTextField from "../textField/TextField";
 import { ChevronRight } from "@mui/icons-material";
-import { Autocomplete, Box, FormControl } from "@mui/material";
+import { Box, Chip, Link } from "@mui/material";
+import { JamaahInterface } from "../../type";
+import ActionButton from "./components/ActionButton";
+import { deleteJamaahAction } from "@/app/(DashboardLayout)/jamaah/action";
+import ConfirmDialog from "../dialog/ConfirmDialog";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -61,43 +65,6 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
 
   // Return if the item should be filtered in/out
   return itemRank.passed;
-};
-
-// A debounced input react component
-const DebouncedInput = ({
-  value: initialValue,
-  onChange,
-  debounce = 500,
-  ...props
-}: {
-  value: string | number;
-  onChange: (value: string | number) => void;
-  debounce?: number;
-} & TextFieldProps) => {
-  // States
-  const [value, setValue] = useState(initialValue);
-
-  useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      onChange(value);
-    }, debounce);
-
-    return () => clearTimeout(timeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value]);
-
-  return (
-    <CustomTextField
-      variant="outlined"
-      {...props}
-      value={value}
-      onChange={(e) => setValue(e.target.value)}
-    />
-  );
 };
 
 const Filter = ({
@@ -161,15 +128,164 @@ const Filter = ({
 };
 
 // Mendeklarasikan interface dengan tipe generik T
-interface JamaahTableProps<T> {
-  columns: ColumnDef<T, any>[]; // Kolom dinamis yang disesuaikan dengan tipe T
+interface TableProps<T> {
   data: T[]; // Data dinamis sesuai tipe T
 }
 
-const JamaahTable = <T,>({ columns, data }: JamaahTableProps<T>) => {
+const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
   // States
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
+  const [open, setOpen] = useState(false); // State untuk dialog
+  const [selectedRow, setSelectedRow] = useState<JamaahInterface | null>(null); // Data yang dipilih
+  const [tableData, setTableData] = useState<JamaahInterface[]>(data); // Local state to manage table data
+
+  const handleCloseDialog = () => {
+    setOpen(false); // Tutup dialog
+    setSelectedRow(null); // Reset data
+  };
+
+  const handleDelete = async () => {
+    if (selectedRow) {
+      const result = await deleteJamaahAction(selectedRow.id ?? 0); // Eksekusi delete
+      if (result.success) {
+        toast.success(`User with ID ${selectedRow.id} has been deleted.`);
+      } else {
+        toast.error(`Failed to delete user: ${result.error}`);
+      }
+      handleCloseDialog(); // Tutup dialog setelah selesai
+    }
+  };
+
+  const columnHelper = createColumnHelper<JamaahInterface>();
+
+  const columns = [
+    // Kolom Nama
+    columnHelper.accessor("nama", {
+      id: "nama",
+      cell: (info) => info.getValue(),
+      header: "NAMA",
+    }),
+
+    // Kolom Paket
+    columnHelper.accessor("jenisPaket.nama", {
+      id: "jenisPaket",
+      cell: (info) => info.getValue(),
+      header: "PAKET",
+    }),
+
+    // Kolom No Telp
+
+    columnHelper.accessor("noTelp", {
+      id: "noTelp",
+      cell: (info) => {
+        const phoneNumber = info.getValue(); // Dapatkan nomor telepon dari data
+        const formattedNumber = phoneNumber.replace(/^0/, "62"); // Ubah awalan "0" ke "62"
+        const waLink = `https://wa.me/${formattedNumber}`; // Buat tautan WhatsApp
+
+        return (
+          <Link
+            href={waLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{
+              textDecoration: "none",
+              color: "#f18b04", // Warna khas WhatsApp
+              fontWeight: "bold",
+              "&:hover": {
+                textDecoration: "underline",
+                color: "#f18b04", // Warna lebih gelap saat hover
+              },
+            }}
+          >
+            {phoneNumber}
+          </Link>
+        );
+      },
+      header: "NO TELP",
+    }),
+
+    // Kolom Email
+    columnHelper.accessor("email", {
+      id: "email",
+      cell: (info) => info.getValue(),
+      header: "EMAIL",
+    }),
+
+    // Kolom Jenis Kelamin
+    columnHelper.accessor("jenisKelamin", {
+      id: "jenisKelamin",
+      cell: (info) => info.getValue(),
+      header: "JENIS KELAMIN",
+    }),
+
+    // Kolom Status (Berangkat dan Selesai)
+    columnHelper.accessor("status", {
+      id: "status",
+      cell: (info) => {
+        const status = info.getValue();
+        let chipColor = "";
+
+        switch (status) {
+          case "Berangkat":
+            chipColor = "lightblue"; // Biru muda
+            break;
+          case "Selesai":
+            chipColor = "green"; // Hijau
+            break;
+          default:
+            chipColor = "#F18B04"; // Warna khusus untuk Dijadwalkan
+            break;
+        }
+
+        return (
+          <Chip
+            label={
+              status === "Berangkat" || status === "Selesai"
+                ? status
+                : "Dijadwalkan"
+            }
+            sx={{
+              backgroundColor: chipColor,
+              color: "white", // Warna teks putih agar kontras
+              fontWeight: "bold",
+            }}
+          />
+        );
+      },
+      header: "Status",
+    }),
+
+    // Kolom Aksi
+    columnHelper.display({
+      id: "action",
+      header: "Detail",
+      cell: (info) => {
+        const handleOpenDialog = (rowData: JamaahInterface) => {
+          setSelectedRow(rowData); // Set data pengguna
+          setOpen(true); // Buka dialog
+        };
+
+        return (
+          <Box sx={{ display: "flex", justifyContent: "start" }}>
+            {/* Tombol Edit */}
+            <ActionButton
+              rowData={info.row.original}
+              actionPath={(rowData) => `/jamaah/${rowData.id}`} // Path dinamis berdasarkan ID User
+            />
+
+            {/* Tombol Delete */}
+            <ActionButton
+              rowData={info.row.original}
+              mode="delete"
+              onDelete={() => handleOpenDialog(info.row.original)} // Buka dialog konfirmasi
+            />
+          </Box>
+        );
+      },
+      enableColumnFilter: false,
+    }),
+  ];
 
   const table = useReactTable({
     data: data || [], // Pastikan data selalu berupa array.
@@ -203,20 +319,7 @@ const JamaahTable = <T,>({ columns, data }: JamaahTableProps<T>) => {
         sx={{
           width: "100%",
         }}
-      >
-        {/* <CardHeader
-        sx={{ 
-          paddingTop: 0
-        }}
-          action={
-            <DebouncedInput
-              value={globalFilter ?? ""}
-              onChange={(value) => setGlobalFilter(String(value))}
-              placeholder="Search all columns..."
-            />
-          }
-        /> */}
-      </Box>
+      ></Box>
       <div className="overflow-x-auto">
         <table className={styles.table}>
           <thead>
@@ -301,6 +404,14 @@ const JamaahTable = <T,>({ columns, data }: JamaahTableProps<T>) => {
           }}
         />
       </Box>
+      {/* Dialog Konfirmasi */}
+      <ConfirmDialog
+        open={open}
+        onClose={handleCloseDialog}
+        onConfirm={handleDelete}
+        title="Konfirmasi Penghapusan"
+        description={`Apakah Anda yakin ingin menghapus jamaah "${selectedRow?.nama}"?`}
+      />
     </Box>
   );
 };

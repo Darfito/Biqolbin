@@ -17,10 +17,9 @@ import {
   FormControlLabel,
   Radio,
 } from "@mui/material";
-import { Jabatan, JenisKelamin, UserProps } from "../../utilities/type";
-import { useState } from "react";
+import { Jabatan, JenisKelamin, UserInterface } from "../../utilities/type";
+import { ChangeEvent, FormEvent, useState } from "react";
 import { createUserAction } from "../action";
-import { revalidatePath } from "next/cache";
 
 interface FormErrors {
   nama?: string;
@@ -54,12 +53,12 @@ export default function FormUser() {
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
 
-  const handleInputChange = (field: keyof UserProps, value: any) => {
+  const handleInputChange = (field: keyof UserInterface, value: any) => {
     setFormValues({ ...formValues, [field]: value });
   };
 
   // Handle form submission
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // setFormErrors({}); // Clear previous errors
 
@@ -153,7 +152,7 @@ export default function FormUser() {
               <FormLabel component="legend">Jenis Kelamin</FormLabel>
               <RadioGroup
                 value={formValues.jenisKelamin}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   handleInputChange("jenisKelamin", e.target.value)
                 }
                 row

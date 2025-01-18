@@ -5,9 +5,11 @@ import Breadcrumb from "@/app/(DashboardLayout)/utilities/component/breadcrumb/B
 import {
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   Typography,
 } from "@mui/material";
@@ -15,9 +17,9 @@ import { IconArrowLeft } from "@tabler/icons-react";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { UserProps } from "@/app/(DashboardLayout)/utilities/type";
 import { createClient } from "@/libs/supabase/client";
 import FormDetail from "./FormDetail";
+import { UserInterface } from "@/app/(DashboardLayout)/utilities/type";
 
 interface UserDetailProps {
   id: string;
@@ -27,11 +29,8 @@ interface UserDetailProps {
 const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [openModal, setOpenModal] = useState<boolean>(false);
-  const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [formData, setFormData] = useState({});
-  const [currentData, setCurrentData] = useState<UserProps | null>(null);
-  
+  const [currentData, setCurrentData] = useState<UserInterface | null>(null);
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
   const supabase = createClient();
 
   // Fetch user data
@@ -57,52 +56,32 @@ const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
     };
 
     fetchUserData();
-  }, [id, currentData, supabase]);
-
-  // Handle Submit data before dialog
-  const handleSubmit = (data: React.SetStateAction<{}>) => {
-    setFormData(data); // Save form data to state
-    setOpenModal(true); // Open the modal for confirmation
-  };
+  }, [id, currentData]);
 
   // Toggle the isEditing state
   const handleEditClick = () => {
     if (!isEditing) {
       setIsEditing(true); // Enter edit mode
+    } else {
+      setOpenDialog(true); // Open the dialog
     }
+  };
+
+   // Handle dialog actions
+   const handleCancelEdit = () => {
+    setIsEditing(false); // Exit edit mode
+    setOpenDialog(false); // Close dialog
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false); // Close dialog without changes
   };
 
   // Function to handle the "Back to List" button click
   const handleBackClick = () => {
     router.push("/user"); // Navigate to the user list
   };
-
-  // Open the confirmation modal
-  const handleOpenModal = () => {
-    if (!openModal) {
-      setOpenModal(true); // Only open the modal if it's not already open
-    }
-  };
-
-  // Close the confirmation modal
-  const handleCloseModal = () => {
-    if (openModal) {
-      setOpenModal(false); // Close the modal if it's open
-    }
-  };
-
-  const handleSaveChanges = () => {
-    setIsSaving(true);
-    console.log("Saving data...", formData); // Log the form data being saved
-    setTimeout(() => {
-      setIsSaving(false);
-      setIsEditing(false); // Exit edit mode after saving
-      setOpenModal(false); // Close the modal after saving
-      console.log("Data successfully saved:", formData); // Log the saved data
-      alert("Changes saved successfully!"); // Show success message
-    }, 1000); // Simulate async operation
-  };
-
+  
   return (
     <>
       <Typography variant="h2" component="h1">
@@ -126,49 +105,44 @@ const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
               startIcon={<IconArrowLeft />}
               onClick={handleBackClick}
             >
-              Back to List
+              Kembali ke Daftar
             </Button>
           </Box>
 
           <Box>
-            <Button
+          <Button
               variant="contained"
-              sx={{ color: "white", marginRight: "1rem" }}
-              onClick={isEditing ? handleOpenModal : handleEditClick}
+              sx={{ color: "white", marginRight: "1rem", minWidth: "150px" }}
+              onClick={handleEditClick}
             >
-              {isEditing ? "Save Changes" : "Edit Details"}
+              {isEditing ? "Batal Menyunting" : "Sunting"}
             </Button>
           </Box>
         </Box>
 
         <Box sx={{ marginTop: "2rem" }}>
-          <FormDetail
-            isEditing={isEditing}
-            onSaveChanges={handleSubmit}
-            userData={currentData} // Pass the fetched user data
-          />
+          <FormDetail isEditing={isEditing} userData={currentData} />
         </Box>
       </PageContainer>
 
-      {/* Confirmation Modal */}
-      <Dialog open={openModal} onClose={handleCloseModal}>
-        <DialogTitle>Confirm Save Changes</DialogTitle>
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        aria-labelledby="cancel-edit-dialog-title"
+        aria-describedby="cancel-edit-dialog-description"
+      >
+        <DialogTitle id="cancel-edit-dialog-title">Batalkan Penyuntingan</DialogTitle>
         <DialogContent>
-          <Typography>
-            Are you sure you want to save these changes?
-          </Typography>
+          <DialogContentText id="cancel-edit-dialog-description">
+            Apakah Anda yakin ingin membatalkan mode penyuntingan? Perubahan yang belum disimpan akan hilang.
+          </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseModal} variant="contained" color="error">
-            Cancel
+          <Button onClick={handleCloseDialog} sx={{ color: "white" }} variant="contained">
+            Tidak
           </Button>
-          <Button
-            onClick={handleSaveChanges}
-            variant="contained"
-            sx={{ color: "white" }}
-            disabled={isSaving} // Disable the button while saving
-          >
-            {isSaving ? "Saving..." : "Save Changes"}
+          <Button onClick={handleCancelEdit} sx={{ color: "white" }} variant="contained" autoFocus>
+            Ya, Batalkan
           </Button>
         </DialogActions>
       </Dialog>

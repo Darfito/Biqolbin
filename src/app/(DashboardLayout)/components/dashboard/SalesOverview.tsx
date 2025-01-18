@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Select, MenuItem } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import DashboardCard from '@/app/(DashboardLayout)/components/shared/DashboardCard';
@@ -9,7 +9,7 @@ const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 const SalesOverview = () => {
 
     // select
-    const [month, setMonth] = React.useState('1');
+    const [month, setMonth] = useState('1');
 
     const handleChange = (event: any) => {
         setMonth(event.target.value);

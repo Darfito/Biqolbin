@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import CustomTextField from "@/app/(DashboardLayout)/components/forms/theme-elements/CustomTextField";
 import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCard";
 import { Box, Grid, MenuItem, Button } from "@mui/material";
@@ -14,10 +14,10 @@ interface FormDetailProps {
 const FormDetail = ({ isEditing, onSaveChanges, keuanganData }: FormDetailProps) => {
 
   console.log("keuanganData di detail:", keuanganData);
-  const [metode, setMetode] = React.useState<string>("");
-  const [jenisPaket, setJenisPaket] = React.useState<string>("");
+  const [metode, setMetode] = useState<string>("");
+  const [jenisPaket, setJenisPaket] = useState<string>("");
 
-  const [formValues, setFormValues] = React.useState({
+  const [formValues, setFormValues] = useState({
     nama: "",
     jenisPaket: "",
     metodePembayaran: "",
@@ -33,7 +33,7 @@ const FormDetail = ({ isEditing, onSaveChanges, keuanganData }: FormDetailProps)
   });
 
   // Effect untuk mengatur data awal berdasarkan `keuanganData`
-  React.useEffect(() => {
+  useEffect(() => {
     if (keuanganData) {
       setFormValues({
         nama: keuanganData.nama || "",
@@ -59,11 +59,11 @@ const FormDetail = ({ isEditing, onSaveChanges, keuanganData }: FormDetailProps)
     }
   }, [keuanganData]);
 
-  const handleMetodeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMetodeChange = (event: ChangeEvent<HTMLInputElement>) => {
     setMetode(event.target.value);
   };
 
-  const handleJenisPaketChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleJenisPaketChange = (event: ChangeEvent<HTMLInputElement>) => {
     setJenisPaket(event.target.value);
   };
 
@@ -73,7 +73,7 @@ const FormDetail = ({ isEditing, onSaveChanges, keuanganData }: FormDetailProps)
     showToast('Form berhasil disimpan', 'minor-success');
   };
 
-  const [formErrors, setFormErrors] = React.useState<any>({});
+  const [formErrors, setFormErrors] = useState<any>({});
 
   return (
     <DashboardCard>
@@ -149,7 +149,7 @@ const FormDetail = ({ isEditing, onSaveChanges, keuanganData }: FormDetailProps)
                 value={formValues.tenggatPembayaran}
                 error={!!formErrors.tenggatPembayaran}
                 helperText={formErrors.tenggatPembayaran}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   setFormValues({
                     ...formValues,
                     tenggatPembayaran: e.target.value,

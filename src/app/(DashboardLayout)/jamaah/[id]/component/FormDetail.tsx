@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+"use client"
+
+import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import CustomTextField from "@/app/(DashboardLayout)/components/forms/theme-elements/CustomTextField";
 import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCard";
 import {
@@ -13,29 +15,84 @@ import {
   FormLabel,
   Radio,
   RadioGroup,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Autocomplete,
 } from "@mui/material";
+import * as v from "valibot";
 import {
-  JamaahProps,
+  JamaahInterface,
   JenisKelamin,
   JenisPaket,
   JenisPenerbangan,
   KontakDaruratRelation,
+  KontakDaruratType,
   Maskapai,
+  PaketInterface,
   TipeKamar,
 } from "@/app/(DashboardLayout)/utilities/type";
+import { updateJamaahAction } from "../../action";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Import toast styles
+import { KontakDaruratSection } from "../../component/KontakDaruratHandler";
 
 interface FormDetailProps {
   isEditing: boolean; // Status edit mode
-  onSaveChanges: (data: JamaahProps) => void; // Kirim data ke parent
-  jamaahData?: JamaahProps | null;
+  jamaahData?: JamaahInterface | null;
+  paketData: PaketInterface[];
 }
 
-const FormDetail = ({
-  isEditing,
-  onSaveChanges,
-  jamaahData,
-}: FormDetailProps) => {
-  const [formValues, setFormValues] = useState<JamaahProps>(
+interface FormErrors {
+  id?: string;
+  nama?: string;
+  ayahKandung?: string;
+  noTelp?: string;
+  // kontakDarurat?: string[];
+  email?: string;
+  jenisKelamin?: string;
+  tempatLahir?: string;
+  pernikahan?: string;
+  alamat?: string;
+  varianKamar?: string;
+  kewarganegaraan?: string;
+  pekerjaan?: string;
+  kursiRoda?: string;
+  riwayatPenyakit?: string;
+  // jenisDokumen?: string[];
+  // jenisPaket?: string;
+  berangkat?: string;
+  selesai?: string;
+  status?: string;
+}
+
+const formSchema = v.object({
+  nama: v.pipe(v.string(), v.nonEmpty("Nama harus diisi")),
+  ayahKandung: v.pipe(v.string(), v.nonEmpty("Nama Ayah Kandung harus diisi")),
+  noTelp: v.pipe(v.string(), v.nonEmpty("No Telp harus diisi")),
+  email: v.pipe(v.string(), v.nonEmpty("Email harus diisi")),
+  jenisKelamin: v.pipe(v.string(), v.nonEmpty("Jenis Kelamin harus diisi")),
+  tempatLahir: v.pipe(v.string(), v.nonEmpty("Tempat Lahir harus diisi")),
+  pernikahan: v.boolean(),
+  alamat: v.pipe(v.string(), v.nonEmpty("Alamat harus diisi")),
+  varianKamar: v.pipe(v.string(), v.nonEmpty("Varian Kamar harus diisi")),
+  kewarganegaraan: v.boolean(),
+  pekerjaan: v.pipe(v.string(), v.nonEmpty("Pekerjaan harus diisi")),
+  kursiRoda: v.boolean(),
+  riwayatPenyakit: v.pipe(
+    v.string(),
+    v.nonEmpty("Riwayat Penyakit harus diisi")
+  ),
+  berangkat: v.string(),
+  selesai: v.string(),
+  status: v.string(),
+});
+
+const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
+  const [formValues, setFormValues] = useState<JamaahInterface>(
     jamaahData || {
       id: 0,
       nama: "",
@@ -45,55 +102,45 @@ const FormDetail = ({
         {
           id: 0,
           nama: "",
-          noTelp: "",
+          no_telp: "",
           hubungan: KontakDaruratRelation.Lainnya,
         },
       ],
       email: "",
       jenisKelamin: JenisKelamin.LakiLaki,
       tempatLahir: "",
-      perkawinan: false,
+      pernikahan: false,
       alamat: "",
-      varianKamar: {
-        id: 0,
-        tipeKamar: TipeKamar.QUAD,
-        harga: 0,
-        deskripsi: "",
-      },
+      varianKamar: TipeKamar.DOUBLE,
       kewarganegaraan: true,
       pekerjaan: "",
       kursiRoda: false,
       riwayatPenyakit: "",
       jenisDokumen: [],
       jenisPaket: {
-        id: "0",
+        id: 0, // Mengambil hanya properti yang relevan
         nama: "",
         jenis: JenisPaket.REGULAR,
-        maskapai: Maskapai.GARUDA_INDONESIA,
+        maskapai: Maskapai.SAUDIA_ARABIA,
+        customMaskapai: "",
         jenisPenerbangan: JenisPenerbangan.DIRECT,
+        noPenerbangan: "",
         keretaCepat: false,
-        harga: 0,
         tglKeberangkatan: "",
         tglKepulangan: "",
         fasilitas: [],
         publish: false,
         namaMuthawif: "",
         noTelpMuthawif: "",
-        namaHotel: "",
-        alamatHotel: "",
-        ratingHotel: 0,
-        tanggalCheckIn: "",
-        tanggalCheckOut: "",
-        gambar: {
-          id: 0,
-          url: "",
-          bucket: "",
-          path: "",
-        },
+        Hotel: [],
+        gambar_url: "",
+        hargaDouble: 0,
+        hargaTriple: 0,
+        hargaQuad: 0,
       },
-      berangkat: new Date(),
-      selesai: new Date(),
-      status: { id: 0, status: "Dijadwalkan" },
+      berangkat: "",
+      selesai: "",
+      status: "Dijadwalkan",
     }
   );
 
@@ -101,28 +148,91 @@ const FormDetail = ({
     if (jamaahData) setFormValues(jamaahData);
   }, [jamaahData]);
 
-  const handleInputChange = (field: keyof JamaahProps, value: any) => {
+  const handleInputChange = (field: keyof JamaahInterface, value: any) => {
     setFormValues({ ...formValues, [field]: value });
+  };
+
+  const handleOpenModal = () => {
+    if (!openModal) {
+      setOpenModal(true); // Only open the modal if it's not already open
+    }
+  };
+
+  // Close the confirmation modal
+  const handleCloseModal = () => {
+    if (openModal) {
+      setOpenModal(false); // Close the modal if it's open
+    }
   };
 
   const handleContactChange = (
     index: number,
-    field: "nama" | "noTelp" | "hubungan", // Memperbaiki tipe field
+    field: keyof KontakDaruratType,
     value: string
   ) => {
-    const updatedContacts = [...formValues.kontakDarurat];
+    const updatedContacts = [...(formValues.kontakDarurat ?? [])];
     updatedContacts[index] = { ...updatedContacts[index], [field]: value };
     setFormValues({ ...formValues, kontakDarurat: updatedContacts });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSaveChanges(formValues);
+  const handleAddContact = () => {
+    setFormValues((prev) => ({
+      ...prev,
+      kontakDarurat: [
+        ...(prev.kontakDarurat ?? []), // Jika undefined, default ke array kosong
+        {
+          id: prev.kontakDarurat?.length ?? 0, // Cegah akses undefined
+          nama: "",
+          no_telp: "",
+          hubungan: KontakDaruratRelation.Lainnya,
+        },
+      ],
+    }));
+  };
+
+  const handleRemoveContact = (indexToRemove: number) => {
+    // Pastikan kontakDarurat bukan undefined
+    if ((formValues.kontakDarurat?.length ?? 0) > 1) {
+      setFormValues((prev) => ({
+        ...prev,
+        kontakDarurat: prev.kontakDarurat!.filter(
+          (_, index) => index !== indexToRemove
+        ),
+      }));
+    }
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    console.log("data yang mau di update:", formValues);
+
+    // Validate form data
+    const result = v.safeParse(formSchema, formValues);
+
+    if (!result.success) {
+      const errorMap: Record<string, string> = {};
+      result.issues.forEach((issue) => {
+        const path = issue.path?.[0]?.key as string | undefined;
+        if (path) {
+          errorMap[path] = issue.message;
+        }
+      });
+      setFormErrors(errorMap);
+      console.error("Validation errors:", errorMap);
+      return;
+    }
+
+    const response = await updateJamaahAction(formValues);
+
+    if (response.success) {
+      toast.success("Data berhasil diperbarui"); // Show success toast
+      handleCloseModal(); // Tutup dialog setelah selesai
+    }
   };
 
   return (
     <DashboardCard>
-      <form onSubmit={handleSubmit}>
+      <form id="form-detail" onSubmit={handleSubmit}>
         <Box sx={{ width: "100%" }}>
           <Grid container spacing={3}>
             {/* Kolom Kiri */}
@@ -161,7 +271,7 @@ const FormDetail = ({
                 <FormLabel component="legend">Jenis Kelamin</FormLabel>
                 <RadioGroup
                   value={formValues.jenisKelamin}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     handleInputChange("jenisKelamin", e.target.value)
                   }
                   row
@@ -214,20 +324,16 @@ const FormDetail = ({
                 disabled={!isEditing}
                 sx={{ marginBottom: 2 }}
               />
-            </Grid>
-
-            {/* Kolom Kanan */}
-            <Grid item xs={12} sm={6}>
               <Box>
                 <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
                   <FormLabel component="legend">Status Perkawinan</FormLabel>
                   <RadioGroup
                     value={
-                      formValues.perkawinan ? "Sudah Menikah" : "Belum Menikah"
+                      formValues.pernikahan ? "Sudah Menikah" : "Belum Menikah"
                     }
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
                       handleInputChange(
-                        "perkawinan",
+                        "pernikahan",
                         e.target.value === "Sudah Menikah"
                       )
                     }
@@ -248,70 +354,57 @@ const FormDetail = ({
                   </RadioGroup>
                 </FormControl>
               </Box>
-              <Box>
-                <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
-                  <FormLabel component="legend">Kewarganegaraan</FormLabel>
-                  <RadioGroup
-                    value={formValues.kewarganegaraan ? "WNI" : "WNA"}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      handleInputChange(
-                        "kewarganegaraan",
-                        e.target.value === "WNI"
-                      )
-                    }
-                    row
-                  >
-                    <FormControlLabel
-                      value="WNI"
-                      control={<Radio />}
-                      label="WNI"
-                      disabled={!isEditing}
-                    />
-                    <FormControlLabel
-                      value="WNA"
-                      control={<Radio />}
-                      label="WNA"
-                      disabled={!isEditing}
-                    />
-                  </RadioGroup>
-                </FormControl>
-              </Box>
-              <CustomTextField
-                select
-                fullWidth
-                label="Varian Kamar"
-                value={formValues.varianKamar?.tipeKamar}
-                onChange={(e: { target: { value: string } }) =>
-                  handleInputChange("varianKamar", {
-                    ...formValues.varianKamar,
-                    tipeKamar: e.target.value,
-                  })
-                }
-                disabled={!isEditing}
-                sx={{ marginBottom: 2 }}
-              >
-                <MenuItem value={TipeKamar.QUAD}>QUAD</MenuItem>
-                <MenuItem value={TipeKamar.TRIPLE}>TRIPLE</MenuItem>
-                <MenuItem value={TipeKamar.DOUBLE}>DOUBLE</MenuItem>
-              </CustomTextField>
+            </Grid>
+
+            {/* Kolom Kanan */}
+            <Grid item xs={12} sm={6}>
+              <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
+                <FormLabel component="legend">Status Bernegara</FormLabel>
+                <RadioGroup
+                  value={formValues.kewarganegaraan ? "WNI" : "WNA"}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setFormValues({
+                      ...formValues,
+                      kewarganegaraan: e.target.value === "WNI",
+                    })
+                  }
+                  row
+                >
+                  <FormControlLabel
+                    value="WNI"
+                    control={<Radio />}
+                    label="WNI"
+                    disabled={!isEditing}
+                  />
+                  <FormControlLabel
+                    value="WNA"
+                    control={<Radio />}
+                    label="WNA"
+                    disabled={!isEditing}
+                  />
+                </RadioGroup>
+              </FormControl>
               <CustomTextField
                 fullWidth
                 label="Pekerjaan"
                 value={formValues.pekerjaan}
                 onChange={(e: { target: { value: string } }) =>
-                  handleInputChange("pekerjaan", e.target.value)
+                  setFormValues({ ...formValues, pekerjaan: e.target.value })
                 }
-                disabled={!isEditing}
                 sx={{ marginBottom: 2 }}
+                disabled={!isEditing}
               />
               <FormControlLabel
                 control={
                   <Checkbox
                     checked={formValues.kursiRoda}
-                    onChange={(e) =>
-                      handleInputChange("kursiRoda", e.target.checked)
-                    }
                     disabled={!isEditing}
+                    onChange={(e) =>
+                      setFormValues({
+                        ...formValues,
+                        kursiRoda: e.target.checked,
+                      })
+                    }
                   />
                 }
                 label="Butuh Kursi Roda"
@@ -322,81 +415,144 @@ const FormDetail = ({
                 label="Riwayat Penyakit"
                 value={formValues.riwayatPenyakit}
                 onChange={(e: { target: { value: string } }) =>
-                  handleInputChange("riwayatPenyakit", e.target.value)
+                  setFormValues({
+                    ...formValues,
+                    riwayatPenyakit: e.target.value,
+                  })
                 }
+                sx={{ marginBottom: 2 }}
                 disabled={!isEditing}
+              />
+              {/* Jenis Paket */}
+              <Autocomplete
+                fullWidth
+                options={paketData}
+                disabled={!isEditing}
+                getOptionLabel={(option) => option.nama} // Menampilkan nama paket
+                value={
+                  paketData.find((paket) => paket.id === formValues.paket_id) ||
+                  null
+                }
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    setFormValues({
+                      ...formValues,
+                      jenisPaket: newValue || ({} as PaketInterface),
+                    });
+                  } else {
+                    setFormValues({
+                      ...formValues,
+                      jenisPaket: {} as PaketInterface,
+                    });
+                  }
+                }}
+                renderInput={(params) => (
+                  <CustomTextField
+                  
+                    {...params}
+                    label="Jenis Paket"
+                    variant="outlined"
+                    fullWidth
+                    sx={{ marginBottom: 2 }}
+                  />
+                )}
+              />
+              <CustomTextField
+                select
+                fullWidth
+                label="Varian Kamar"
+                value={formValues.varianKamar}
+                onChange={(e: { target: { value: string } }) =>
+                  setFormValues({
+                    ...formValues,
+                    varianKamar: e.target.value as TipeKamar,
+                  })
+                }
+                sx={{ marginBottom: 2 }}
+                disabled={!isEditing}
+              >
+                <MenuItem value={TipeKamar.QUAD}>QUAD</MenuItem>
+                <MenuItem value={TipeKamar.TRIPLE}>TRIPLE</MenuItem>
+                <MenuItem value={TipeKamar.DOUBLE}>DOUBLE</MenuItem>
+              </CustomTextField>
+
+              {/* Tanggal Berangkat */}
+              <CustomTextField
+                fullWidth
+                disabled
+                label="Tanggal Berangkat"
+                type="date"
+                value={formValues.berangkat} // Sudah otomatis terisi dari jenisPaket
+                InputLabelProps={{
+                  shrink: true, // Memastikan label tetap di atas
+                }}
+                sx={{ marginBottom: 2 }}
+              />
+              {/* Tanggal Selesai */}
+              <CustomTextField
+                fullWidth
+                disabled
+                label="Tanggal Selesai"
+                type="date"
+                value={formValues.selesai} // Sudah otomatis terisi dari jenisPaket
+                InputLabelProps={{
+                  shrink: true, // Memastikan label tetap di atas
+                }}
                 sx={{ marginBottom: 2 }}
               />
             </Grid>
 
             {/* Kontak Darurat */}
             <Grid item xs={12}>
-              <Typography sx={{ marginBottom: 2 }} variant="h5">
-                Kontak Darurat
-              </Typography>
-              {formValues.kontakDarurat.map((contact, index) => (
-                <Box key={index}>
-                  <CustomTextField
-                    fullWidth
-                    label={`Nama Kontak Darurat ${index + 1}`}
-                    value={contact.nama}
-                    onChange={(e: { target: { value: string } }) =>
-                      handleContactChange(index, "nama", e.target.value)
-                    }
-                    disabled={!isEditing}
-                    sx={{ marginBottom: 2 }}
-                  />
-                  <CustomTextField
-                    fullWidth
-                    label={`No Telepon Kontak Darurat ${index + 1}`}
-                    value={contact.noTelp}
-                    onChange={(e: { target: { value: string } }) =>
-                      handleContactChange(index, "noTelp", e.target.value)
-                    }
-                    disabled={!isEditing}
-                    sx={{ marginBottom: 2 }}
-                  />
-                  <CustomTextField
-                    select
-                    fullWidth
-                    label={`Hubungan Kontak Darurat ${index + 1}`}
-                    value={contact.hubungan}
-                    onChange={(e: { target: { value: string } }) =>
-                      handleContactChange(index, "hubungan", e.target.value)
-                    }
-                    disabled={!isEditing}
-                    sx={{ marginBottom: 2 }}
-                  >
-                    <MenuItem value={KontakDaruratRelation.Ayah}>Ayah</MenuItem>
-                    <MenuItem value={KontakDaruratRelation.Ibu}>Ibu</MenuItem>
-                    <MenuItem value={KontakDaruratRelation.Suami}>
-                      Suami
-                    </MenuItem>
-                    <MenuItem value={KontakDaruratRelation.Istri}>
-                      Istri
-                    </MenuItem>
-                    <MenuItem value={KontakDaruratRelation.Anak}>Anak</MenuItem>
-                    <MenuItem value={KontakDaruratRelation.SaudaraKandung}>
-                      Saudara Kandung
-                    </MenuItem>
-                    <MenuItem value={KontakDaruratRelation.KerabatLain}>
-                      Kerabat Lain
-                    </MenuItem>
-                    <MenuItem value={KontakDaruratRelation.Teman}>
-                      Teman
-                    </MenuItem>
-                    <MenuItem value={KontakDaruratRelation.Tetangga}>
-                      Tetangga
-                    </MenuItem>
-                    <MenuItem value={KontakDaruratRelation.Lainnya}>
-                      Lainnya
-                    </MenuItem>
-                  </CustomTextField>
-                </Box>
-              ))}
+              <KontakDaruratSection
+                isEditing={isEditing}
+                kontakDarurat={formValues.kontakDarurat ?? []}
+                handleContactChange={handleContactChange}
+                handleAddContact={handleAddContact}
+                handleRemoveContact={handleRemoveContact}
+              />
             </Grid>
+            {isEditing && (
+              <Box
+                sx={{ width: "100%", display: "flex", justifyContent: "end" }}
+              >
+                <Button
+                  sx={{ color: "#fff", minWidth: "150px", marginLeft: "24px" }}
+                  variant="contained"
+                  onClick={handleOpenModal}
+                >
+                  Simpan
+                </Button>
+              </Box>
+            )}
           </Grid>
         </Box>
+        {/* Confirmation Modal */}
+        <Dialog open={openModal} onClose={handleCloseModal}>
+          <DialogTitle>Konfirmasi Perubahan</DialogTitle>
+          <DialogContent>
+            <Typography>
+              Apakah Anda yakin ingin menyimpan perubahan ini?
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={handleCloseModal}
+              variant="contained"
+              color="error"
+            >
+              Batal
+            </Button>
+            <Button
+              form="form-detail"
+              type="submit"
+              variant="contained"
+              sx={{ color: "white" }}
+            >
+              Simpan Perubahan
+            </Button>
+          </DialogActions>
+        </Dialog>
       </form>
     </DashboardCard>
   );

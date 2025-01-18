@@ -1,11 +1,11 @@
 import ActionButton from "@/app/(DashboardLayout)/utilities/component/table/components/ActionButton";
-import { JamaahProps } from "@/app/(DashboardLayout)/utilities/type";
+import { JamaahInterface } from "@/app/(DashboardLayout)/utilities/type";
 import { Chip } from "@mui/material";
 import { createColumnHelper, ColumnDef } from "@tanstack/react-table";
 
-const columnHelper = createColumnHelper<JamaahProps>();
+const columnHelper = createColumnHelper<JamaahInterface>();
 
-export const columnsJamaah: ColumnDef<JamaahProps, any>[] = [
+export const columnsJamaah: ColumnDef<JamaahInterface, any>[] = [
 
   // Kolom Nama
   columnHelper.accessor("nama", {
@@ -43,7 +43,7 @@ export const columnsJamaah: ColumnDef<JamaahProps, any>[] = [
   }),
 
   // Kolom Status (Berangkat dan Selesai)
-  columnHelper.accessor("status.status", {
+  columnHelper.accessor("status", {
     id: "status",
     cell: (info) => {
       const status = info.getValue();

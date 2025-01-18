@@ -1,10 +1,9 @@
 "use client";
 
 // React Imports
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import TablePagination from "@mui/material/TablePagination";
-import type { TextFieldProps } from "@mui/material/TextField";
 
 // Third-party Imports
 import classnames from "classnames";
@@ -30,11 +29,11 @@ import type {
 import type { RankingInfo } from "@tanstack/match-sorter-utils";
 
 // Style Imports
-import styles from "../../../../styles/table.module.css";
+import styles from "../../../../../styles/table.module.css";
 
 // Data Imports
-import TablePaginationComponent from "../pagination/TablePaginationComponent";
-import CustomTextField from "../textField/TextField";
+import TablePaginationComponent from "../../pagination/TablePaginationComponent";
+import CustomTextField from "../../textField/TextField";
 import { ChevronRight } from "@mui/icons-material";
 import {
   Box,
@@ -45,12 +44,11 @@ import {
   DialogTitle,
   Typography,
 } from "@mui/material";
-import { PaketInterface } from "../../type";
+import { PaketInterface } from "../../../type";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/libs/supabase/client";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
-import { revalidatePath } from "next/cache";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -72,43 +70,6 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
 
   // Return if the item should be filtered in/out
   return itemRank.passed;
-};
-
-// A debounced input react component
-const DebouncedInput = ({
-  value: initialValue,
-  onChange,
-  debounce = 500,
-  ...props
-}: {
-  value: string | number;
-  onChange: (value: string | number) => void;
-  debounce?: number;
-} & TextFieldProps) => {
-  // States
-  const [value, setValue] = useState(initialValue);
-
-  useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      onChange(value);
-    }, debounce);
-
-    return () => clearTimeout(timeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value]);
-
-  return (
-    <CustomTextField
-      variant="outlined"
-      {...props}
-      value={value}
-      onChange={(e) => setValue(e.target.value)}
-    />
-  );
 };
 
 const Filter = ({
@@ -172,37 +133,45 @@ const Filter = ({
 };
 
 // Mendeklarasikan interface dengan tipe generik T
-interface CMSProps<T> {
+interface TableProps<T> {
   data: T[];
 }
 
-const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
+const CMSTable = ({ data }: TableProps<PaketInterface>) => {
   // States
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false); // Untuk delete
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [actionType, setActionType] = useState<"publish" | "unpublish" | "delete">(
-    "publish"
-  );
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedNama, setSelectedNama] = useState<string | null>(null);
+  const [actionType, setActionType] = useState<
+    "publish" | "unpublish" | "delete"
+  >("publish");
   const [tableData, setTableData] = useState<PaketInterface[]>(data); // Local state to manage table data
-
   const router = useRouter();
 
-  const handleDialogOpen = (id: string, type: "publish" | "unpublish") => {
+  const handleDialogOpen = (id: number, type: "publish" | "unpublish") => {
     setSelectedId(id);
     setActionType(type);
     setOpenDialog(true);
   };
 
+  const handleDialogDeleteOpen = (id: number, paketNama: string) => {
+    setSelectedId(id);
+    setSelectedNama(paketNama);
+    setOpenDeleteDialog(true);
+  };
+
   const handleDialogClose = () => {
+    setOpenDeleteDialog(false);
     setSelectedId(null);
     setActionType("publish");
     setOpenDialog(false);
+    setSelectedNama(null);
   };
 
-  const handlePublishToggle = async (id: string, currentStatus: boolean) => {
+  const handlePublishToggle = async (id: number, currentStatus: boolean) => {
     const supabase = createClient();
 
     try {
@@ -240,36 +209,70 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async () => {
+    if (!selectedId || !selectedNama) return;
+  
     const supabase = createClient();
+  
     try {
-      const { error } = await supabase.from("Paket").delete().eq("id", id);
-      if (error) {
-        console.error("Error deleting data:", error);
+      // 1. Menghapus data dari tabel Paket
+      const { error: paketError } = await supabase
+        .from("Paket")
+        .delete()
+        .eq("id", selectedId);
+      if (paketError) {
+        console.error("Error deleting data:", paketError);
         toast.error("Failed to delete item.");
         return;
       }
+  
+      console.log("selectedNama:", selectedNama);
+      
+      // 2. Menghapus folder di Supabase Storage
+      const { data: files, error: listError } = await supabase.storage
+        .from("Paket") // Nama bucket
+        .remove([`/${selectedNama}`]);
+  
+      if (listError) {
+        console.error("Error listing files:", listError);
+        toast.error("Failed to list files for deletion.");
+        return;
+      }
+  
+      if (files && files.length > 0) {
+        const filePaths = files.map((file) => `Paket/${selectedNama}/${file.name}`); // Path lengkap file
+        const { error: deleteError } = await supabase.storage
+          .from("Paket") // Nama bucket
+          .remove(filePaths); // Menghapus file berdasarkan path
+  
+        if (deleteError) {
+          console.error("Error deleting files:", deleteError);
+          toast.error("Failed to delete related files.");
+          return;
+        }
+      }
+  
       toast.success("Item deleted successfully.");
-      const updatedData = tableData.filter((item) => item.id !== id);
+      
+      // 3. Mengupdate data di tableData setelah item dihapus
+      const updatedData = tableData.filter((item) => item.id !== selectedId);
       setTableData(updatedData);
+  
+      // Menutup dialog setelah penghapusan selesai
+      handleDialogClose();
     } catch (err) {
       console.error("Unexpected error:", err);
       toast.error("An unexpected error occurred.");
     }
   };
 
-  const handleSaveChanges = () => {
-    if (selectedId) {
-      const updatedData = tableData.map((paket) =>
-        paket.id === selectedId
-          ? { ...paket, publish: actionType === "publish" }
-          : paket
-      );
-      setTableData(updatedData);
-    }
-    handleDialogClose();
-  };
+  const handleSaveChanges = async () => {
+    if (!selectedId || !actionType) return;
 
+    const isPublishAction = actionType === "publish";
+    await handlePublishToggle(selectedId, !isPublishAction); // Status kebalikannya
+    handleDialogClose(); // Tutup dialog setelah selesai
+  };
 
   const columnHelper = createColumnHelper<PaketInterface>();
 
@@ -317,9 +320,9 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
           <Button
             variant="contained"
             onClick={() =>
-              handlePublishToggle(
-                info.row.original.id,
-                info.row.original.publish
+              handleDialogOpen(
+                info.row.original.id ?? 0,
+                info.row.original.publish ? "unpublish" : "publish"
               )
             }
             sx={{
@@ -340,7 +343,12 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
             variant="contained"
             color="error"
             className="text-white"
-            onClick={() => handleDelete(info.row.original.id)} // Tambahkan onClick untuk delete
+            onClick={() =>
+              handleDialogDeleteOpen(
+                info.row.original.id ?? 0,
+                info.row.original.nama
+              )
+            }
           >
             Delete
           </Button>
@@ -383,20 +391,7 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
         sx={{
           width: "100%",
         }}
-      >
-        {/* <CardHeader
-          sx={{
-            paddingTop: 0,
-          }}
-          action={
-            <DebouncedInput
-              value={globalFilter ?? ""}
-              onChange={(value) => setGlobalFilter(String(value))}
-              placeholder="Search all columns..."
-            />
-          }
-        /> */}
-      </Box>
+      ></Box>
       <div className="overflow-x-auto">
         <table className={styles.table}>
           <thead>
@@ -534,8 +529,7 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
         <DialogTitle>Konfirmasi Hapus</DialogTitle>
         <DialogContent>
           <Typography>
-            Apakah Anda yakin ingin menghapus item ini? Tindakan ini tidak bisa
-            dibatalkan.
+            Apakah Anda yakin ingin menghapus item ini?
           </Typography>
         </DialogContent>
         <DialogActions>
@@ -543,10 +537,7 @@ const CMSTable = ({ data }: CMSProps<PaketInterface>) => {
             Batal
           </Button>
           <Button
-            onClick={() => {
-              handleDelete(selectedId!);
-              handleDialogClose();
-            }}
+            onClick={handleDelete} // Memanggil handleDelete tanpa parameter karena sudah diset sebelumnya
             variant="contained"
             color="primary"
             sx={{ color: "#fff" }}

@@ -9,6 +9,13 @@ export type CardStatsHorizontalWithBorderProps = {
     icon: React.ElementType
   }
 
+  export type CardStatsProps = {
+    title: string
+    total: number
+    color?: string
+    icon: string
+  }
+
 
 // ! KEUANGAN TYPE
   export interface KeuanganProps {
@@ -42,8 +49,11 @@ export type CicilanType = {
 
   export type StatusType = 'Belum Bayar' | 'Sedang Menyicil' | 'Sedang Menabung' | 'Lunas';
 
+
+
+  // ! PAKET TYPE
   export interface PaketInterface {
-    id: string;
+    id?: number;
     nama: string;
     jenis: JenisPaket;
     maskapai: Maskapai; // Menggunakan enum Maskapai
@@ -51,20 +61,28 @@ export type CicilanType = {
     jenisPenerbangan: JenisPenerbangan;
     noPenerbangan?: string;
     keretaCepat: boolean;
-    harga: number;
     tglKeberangkatan: string;
     tglKepulangan: string;
     fasilitas: string[];
     action?: string;
-    publish: boolean;
+    publish?: boolean;
     namaMuthawif: string;
     noTelpMuthawif: string;
+    hargaDouble: number; // Harga untuk kamar double
+    hargaTriple: number; // Harga untuk kamar triple
+    hargaQuad: number;   // Harga untuk kamar quad
+    gambar_url?: string;
+    Hotel?: HotelType[];
+  }
+
+  // ! TYPE HOTEL
+  export type HotelType = {
+    id?: number;
     namaHotel: string;
     alamatHotel: string;
     ratingHotel: number;
     tanggalCheckIn: string;
     tanggalCheckOut: string;
-    gambar_url?: string;
   }
 
 
@@ -92,31 +110,32 @@ export enum JenisPenerbangan {
 
 
 // ! JAMAAH TYPE
-export interface JamaahProps {
-  id: number;
+export interface JamaahInterface {
+  id?: number;
   nama: string;
   ayahKandung: string;
   noTelp: string;
-  kontakDarurat: KontakDaruratType[];
+  kontakDarurat?: KontakDaruratType[];
   email:string;
   jenisKelamin: JenisKelamin;
   tempatLahir: string;
-  perkawinan: boolean;
+  pernikahan: boolean;
   alamat: string;
-  varianKamar: KamarType;
+  varianKamar: TipeKamar;
   kewarganegaraan: boolean;
   pekerjaan: string;
   kursiRoda: boolean;
   riwayatPenyakit: string;
   jenisDokumen: JenisDokumen[];
   jenisPaket : PaketInterface;
-  berangkat: Date; // tanggal berangkat dari paket
-  selesai: Date; // tanggal pulang dari paket
+  berangkat: string; // tanggal berangkat dari paket
+  selesai: string; // tanggal pulang dari paket
   status: StatusKepergian;
+  paket_id?: number;
 }
 
 // ! INTERFACE USER
-export interface UserProps {
+export interface UserInterface {
   id: number;
   nama: string;
   jenisKelamin: JenisKelamin;
@@ -137,26 +156,27 @@ export enum Jabatan {
 
 export type JenisDokumen ={
   id: number;
-  namaDokumen: string;
+  nama_dokumen: string;
   file?: string
   lampiran: boolean
   action?: string
+  jamaah_id?: number
 }
 
 export type KontakDaruratType = {
   id: number;
   nama: string;
-  noTelp: string;
+  no_telp: string;
   hubungan: KontakDaruratRelation;
   relasiLain?: string;
 }
 
-export type StatusKepergian = {
-  id: number;
-  status: 'Berangkat' | 'Dijadwalkan' | 'Selesai';
-  deskripsi?: string;
-}
-// export type StatusKepergian = 'Berangkat' | 'Dijadwalkan' | 'Selesai'
+// export type StatusKepergian = {
+//   id: number;
+//   status: 'Berangkat' | 'Dijadwalkan' | 'Selesai';
+//   deskripsi?: string;
+// }
+export type StatusKepergian = 'Berangkat' | 'Dijadwalkan' | 'Selesai'
 
 export enum KontakDaruratRelation {
   Ayah = "Ayah",
@@ -177,24 +197,8 @@ export enum JenisKelamin {
 }
 
 
-// ! TYPE HOTEL
-export type HotelType = {
-  id: number;
-  namaHotel: string;
-  alamat: string;
-  deskripsi: string;
-}
 
 // ! TYPE KAMAR
-
-export type KamarType = {
-  id: number;
-  tipeKamar: TipeKamar;
-  harga: number;
-  deskripsi: string;
-}
-
-
 export enum TipeKamar {
   QUAD = "QUAD",
   TRIPLE = "TRIPLE",

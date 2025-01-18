@@ -1,10 +1,9 @@
 "use client";
 
 // React Imports
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import TablePagination from "@mui/material/TablePagination";
-import type { TextFieldProps } from "@mui/material/TextField";
 
 // Third-party Imports
 import classnames from "classnames";
@@ -26,7 +25,6 @@ import type {
   Table,
   ColumnFiltersState,
   FilterFn,
-  ColumnDef,
 } from "@tanstack/react-table";
 import type { RankingInfo } from "@tanstack/match-sorter-utils";
 
@@ -41,17 +39,14 @@ import CustomTextField from "../textField/TextField";
 import { ChevronRight } from "@mui/icons-material";
 import {
   Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Typography,
 } from "@mui/material";
 
-import { useRouter } from "next/navigation";
-import { UserProps } from "../../type";
 import ActionButton from "./components/ActionButton";
+import { deleteUserAction } from "@/app/(DashboardLayout)/user/action";
+import ConfirmDialog from "../dialog/ConfirmDialog";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Import toast styles
+import { UserInterface } from "../../type";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -73,43 +68,6 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
 
   // Return if the item should be filtered in/out
   return itemRank.passed;
-};
-
-// A debounced input react component
-const DebouncedInput = ({
-  value: initialValue,
-  onChange,
-  debounce = 500,
-  ...props
-}: {
-  value: string | number;
-  onChange: (value: string | number) => void;
-  debounce?: number;
-} & TextFieldProps) => {
-  // States
-  const [value, setValue] = useState(initialValue);
-
-  useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      onChange(value);
-    }, debounce);
-
-    return () => clearTimeout(timeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value]);
-
-  return (
-    <CustomTextField
-      variant="outlined"
-      {...props}
-      value={value}
-      onChange={(e) => setValue(e.target.value)}
-    />
-  );
 };
 
 const Filter = ({
@@ -175,30 +133,98 @@ const Filter = ({
 // Mendeklarasikan interface dengan tipe generik T
 interface TableProps<T> {
   data: T[];
-  columns: ColumnDef<T, any>[]; // Kolom dinamis yang disesuaikan dengan tipe T
 }
 
-const UserTable = <T,>({ data, columns }: TableProps<T>) => {
+const UserTable = ({ data }: TableProps<UserInterface>) => {
   // States
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
+  const [open, setOpen] = useState(false); // State untuk dialog
+  const [selectedRow, setSelectedRow] = useState<UserInterface | null>(null); // Data yang dipilih
+  const [tableData, setTableData] = useState<UserInterface[]>(data); // Local state to manage table data
 
+  const columnHelper = createColumnHelper<UserInterface>();
 
-  const router = useRouter();
-
-
-  const columnHelper = createColumnHelper<UserProps>();
-
-  const handleNavigateToCMS = (rowData: any) => {
-    const actionPath = `/user/${rowData.id}`;
-    console.log(`Navigating to: ${actionPath}`);
-    // Jika menggunakan Next.js, gunakan router.push
-    router.push(actionPath);
+  const handleCloseDialog = () => {
+    setOpen(false); // Tutup dialog
+    setSelectedRow(null); // Reset data
   };
 
+  const handleDelete = async () => {
+    if (selectedRow) {
+      const result = await deleteUserAction(selectedRow.id); // Eksekusi delete
+      if (result.success) {
+        toast.success(`User with ID ${selectedRow.id} has been deleted.`);
+      } else {
+        toast.error(`Failed to delete user: ${result.error}`);
+      }
+      handleCloseDialog(); // Tutup dialog setelah selesai
+    }
+  };
+
+  const columns = [
+    columnHelper.accessor("nama", {
+      id: "nama",
+      cell: (info) => info.getValue(),
+      header: "Nama",
+      enableColumnFilter: true,
+    }),
+    columnHelper.accessor("jenisKelamin", {
+      id: "jenisKelamin",
+      cell: (info) => info.getValue(),
+      header: "Jenis Kelamin",
+      enableColumnFilter: true,
+    }),
+    columnHelper.accessor("noTelp", {
+      id: "noTelp",
+      cell: (info) => info.getValue(),
+      header: "Nomor Telepon",
+      enableColumnFilter: true,
+    }),
+    columnHelper.accessor("role", {
+      id: "role",
+      cell: (info) => info.getValue(),
+      header: "Jabatan",
+      enableColumnFilter: true,
+    }),
+    columnHelper.accessor("penempatan", {
+      id: "penempatan",
+      cell: (info) => info.getValue(),
+      header: "Penempatan",
+      enableColumnFilter: true,
+    }),
+    columnHelper.accessor("action", {
+      cell: (info) => {
+        const handleOpenDialog = (rowData: UserInterface) => {
+          setSelectedRow(rowData); // Set data pengguna
+          setOpen(true); // Buka dialog
+        };
+
+
+        return (
+          <Box sx={{ display: "flex", justifyContent: "start" }}>
+            {/* Tombol Edit */}
+            <ActionButton
+              rowData={info.row.original}
+              actionPath={(rowData) => `/user/${rowData.id}`} // Path dinamis berdasarkan ID User
+            />
+
+            {/* Tombol Delete */}
+            <ActionButton
+              rowData={info.row.original}
+              mode="delete"
+              onDelete={() => handleOpenDialog(info.row.original)} // Buka dialog konfirmasi
+            />
+          </Box>
+        );
+      },
+      header: "Aksi",
+      enableColumnFilter: false,
+    }),
+  ];
 
   const table = useReactTable({
-    data: data || [], // Pastikan data selalu berupa array.
+    data: tableData || [], // Pastikan data selalu berupa array.
     columns,
     filterFns: {
       fuzzy: fuzzyFilter,
@@ -229,20 +255,7 @@ const UserTable = <T,>({ data, columns }: TableProps<T>) => {
         sx={{
           width: "100%",
         }}
-      >
-        {/* <CardHeader
-          sx={{
-            paddingTop: 0,
-          }}
-          action={
-            <DebouncedInput
-              value={globalFilter ?? ""}
-              onChange={(value) => setGlobalFilter(String(value))}
-              placeholder="Search all columns..."
-            />
-          }
-        /> */}
-      </Box>
+      ></Box>
       <div className="overflow-x-auto">
         <table className={styles.table}>
           <thead>
@@ -327,6 +340,14 @@ const UserTable = <T,>({ data, columns }: TableProps<T>) => {
           }}
         />
       </Box>
+      {/* Dialog Konfirmasi */}
+      <ConfirmDialog
+        open={open}
+        onClose={handleCloseDialog}
+        onConfirm={handleDelete}
+        title="Konfirmasi Penghapusan"
+        description={`Apakah Anda yakin ingin menghapus pengguna "${selectedRow?.nama}"?`}
+      />
     </Box>
   );
 };

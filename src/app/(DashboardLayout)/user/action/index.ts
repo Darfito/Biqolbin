@@ -2,6 +2,8 @@
 
 import { createClient } from "@/libs/supabase/server";
 import { revalidatePath } from "next/cache";
+import { UserInterface } from "../../utilities/type";
+
 
 export const getUserAction = async () => {
   const supabase = createClient(); // Membuat instance Supabase client
@@ -32,3 +34,41 @@ export const createUserAction = async (userData: Record<string, any>) => {
 	revalidatePath("/user");
   return { success: true, data };
 };
+
+export const updateUserAction = async (UserData: UserInterface) => {
+  const supabase = createClient(); // Membuat instance Supabase client
+
+  // Memasukkan data ke dalam tabel `User`
+  const { data, error } = await supabase
+    .from("User")
+    .update(UserData)
+    .eq("id", UserData.id)
+    .select();
+
+  if (error) {
+    console.error("Error updating user:", error.message);
+    return { success: false, error: error.message };
+  }
+  console.log("User updated:", data);
+  revalidatePath("/user");
+  return { success: true, data };
+}
+
+
+export const deleteUserAction = async (userId: number) => {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .from("User")
+    .delete()
+    .eq("id", userId);
+
+  if (error) {
+    console.error("Error deleting user:", error.message);
+    return { success: false, error: error.message };
+  }
+  console.log(`User with ID ${userId} deleted successfully`);
+  revalidatePath("/user");
+  return { success: true };
+};
+

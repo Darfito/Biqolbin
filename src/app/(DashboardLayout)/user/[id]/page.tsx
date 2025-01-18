@@ -6,7 +6,7 @@ export default async function DetailUser({
     params: Promise<{ id: string }>;
   }) {
     const breadcrumbLinks = [
-      { label: "Jamaah", href: "/jamaah" },
+      { label: "User", href: "/user" },
       { label: `${(await params).id}` }, // No href for the current page
     ];
     return <>

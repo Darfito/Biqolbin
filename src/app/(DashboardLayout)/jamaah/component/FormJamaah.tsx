@@ -11,9 +11,15 @@ import CustomTextField from "../../components/forms/theme-elements/CustomTextFie
 import { toast } from "react-toastify"; // Import toast
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 import {
+  JenisDokumen,
   JenisKelamin,
+  JenisPaket,
+  JenisPenerbangan,
   KontakDaruratRelation,
   KontakDaruratType,
+  Maskapai,
+  PaketInterface,
+  StatusKepergian,
   TipeKamar,
 } from "../../utilities/type";
 import {
@@ -24,9 +30,12 @@ import {
   RadioGroup,
   FormControl,
   FormLabel,
+  Autocomplete,
 } from "@mui/material";
 import { KontakDaruratSection } from "./KontakDaruratHandler";
-import { PaketData } from "../data";
+
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { createJamaahAction } from "../action";
 
 interface FormErrors {
   id?: string;
@@ -37,7 +46,7 @@ interface FormErrors {
   email?: string;
   jenisKelamin?: string;
   tempatLahir?: string;
-  perkawinan?: string;
+  pernikahan?: string;
   alamat?: string;
   varianKamar?: string;
   kewarganegaraan?: string;
@@ -68,7 +77,7 @@ const formSchema = v.object({
   email: v.pipe(v.string(), v.nonEmpty("Email harus diisi")),
   jenisKelamin: v.pipe(v.string(), v.nonEmpty("Jenis Kelamin harus diisi")),
   tempatLahir: v.pipe(v.string(), v.nonEmpty("Tempat Lahir harus diisi")),
-  perkawinan: v.boolean(),
+  pernikahan: v.boolean(),
   alamat: v.pipe(v.string(), v.nonEmpty("Alamat harus diisi")),
   varianKamar: v.pipe(v.string(), v.nonEmpty("Varian Kamar harus diisi")),
   kewarganegaraan: v.boolean(),
@@ -92,60 +101,93 @@ const formSchema = v.object({
   status: v.string(),
 });
 
-export default function FormJamaah() {
-  const [open, setOpen] = React.useState(false);
-  const [jenisKelamin, setJenisKelamin] = React.useState<string>("");
+type FormType = {
+  id: number;
+  nama: string;
+  ayahKandung: string;
+  noTelp: string;
+  kontakDarurat: KontakDaruratType[];
+  email: string;
+  jenisKelamin: JenisKelamin;
+  tempatLahir: string;
+  pernikahan: boolean;
+  alamat: string;
+  varianKamar: TipeKamar;
+  kewarganegaraan: boolean;
+  pekerjaan: string;
+  kursiRoda: boolean;
+  riwayatPenyakit: string;
+  jenisDokumen: JenisDokumen[];
+  jenisPaket: PaketInterface;
+  berangkat: string;
+  selesai: string;
+  status: StatusKepergian;
+};
 
-  const [formValues, setFormValues] = React.useState({
+type FormJamaahProps = {
+  paketData: PaketInterface[];
+};
+
+export default function FormJamaah({ paketData }: FormJamaahProps) {
+  const [open, setOpen] = useState(false);
+
+  
+  const [formValues, setFormValues] = useState<FormType>({
+    id: 0,
     nama: "",
     ayahKandung: "",
     noTelp: "",
     kontakDarurat: [
-      { id: 0, nama: "", noTelp: "", hubungan: KontakDaruratRelation.Lainnya },
+      { id: 0, nama: "", no_telp: "", hubungan: KontakDaruratRelation.Lainnya },
     ],
     email: "",
     jenisKelamin: JenisKelamin.LakiLaki,
     tempatLahir: "",
-    perkawinan: false,
+    pernikahan: false,
     alamat: "",
-    varianKamar: {
-      id: 0,
-      tipeKamar: TipeKamar.QUAD,
-      harga: 0,
-      deskripsi: "",
-    },
+    varianKamar: TipeKamar.DOUBLE,
     kewarganegaraan: true,
     pekerjaan: "",
     kursiRoda: false,
     riwayatPenyakit: "",
     jenisDokumen: [],
     jenisPaket: {
-      id: "0",
+      id: 0, // Mengambil hanya properti yang relevan
       nama: "",
-      jenis: "REGULAR",
-      maskapai: "",
-      jenisPenerbangan: "DIRECT",
+      jenis: JenisPaket.REGULAR,
+      maskapai: Maskapai.SAUDIA_ARABIA,
+      customMaskapai: "",
+      jenisPenerbangan: JenisPenerbangan.DIRECT,
+      noPenerbangan: "",
       keretaCepat: false,
-      harga: 0,
       tglKeberangkatan: "",
       tglKepulangan: "",
       fasilitas: [],
+      publish: false,
+      namaMuthawif: "",
+      noTelpMuthawif: "",
+      Hotel: [],
+      gambar_url: "",
+      hargaDouble: 0,
+      hargaTriple: 0,
+      hargaQuad: 0,
     },
     berangkat: "",
     selesai: "",
-    status: { id: 0, status: "Dijadwalkan" },
+    status: "Dijadwalkan",
   });
-  const [formErrors, setFormErrors] = React.useState<FormErrors>({});
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
 
-  const handleJenisKelaminChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setJenisKelamin(event.target.value as JenisKelamin);
-    setFormValues({
-      ...formValues,
-      jenisKelamin: event.target.value as JenisKelamin,
-    });
-  };
+  
+  useEffect(() => {
+    if (formValues.jenisPaket) {
+      setFormValues((prev) => ({
+        ...prev,
+        berangkat: formValues.jenisPaket.tglKeberangkatan || '',
+        selesai: formValues.jenisPaket.tglKepulangan || '',
+      }));
+    }
+  }, [formValues.jenisPaket]);
 
   const handleContactChange = (
     index: number,
@@ -165,7 +207,7 @@ export default function FormJamaah() {
         {
           id: prev.kontakDarurat.length,
           nama: "",
-          noTelp: "",
+          no_telp: "",
           hubungan: KontakDaruratRelation.Lainnya,
         },
       ],
@@ -184,24 +226,9 @@ export default function FormJamaah() {
     }
   };
 
-  const handleJenisPaketChange = (
-    event: React.ChangeEvent<{ value: unknown }>
-  ) => {
-    const selectedPaket = PaketData.find(
-      (paket) => paket.id === event.target.value
-    );
-    if (selectedPaket) {
-      setFormValues((prevValues) => ({
-        ...prevValues,
-        jenisPaket: selectedPaket,
-        berangkat: selectedPaket.tglKeberangkatan,
-        selesai: selectedPaket.tglKepulangan,
-      }));
-    }
-  };
 
   // Handle form submission
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFormErrors({}); // Clear previous errors
 
@@ -211,36 +238,21 @@ export default function FormJamaah() {
     const result = v.safeParse(formSchema, formValues);
 
     if (!result.success) {
-      const errorMap: FormErrors = {};
-
+      const errorMap: Record<string, string> = {};
       result.issues.forEach((issue) => {
-        const path = issue.path?.[0]?.key as keyof FormErrors | undefined;
+        const path = issue.path?.[0]?.key as string | undefined;
         if (path) {
-          if (path === "jenisDokumen") {
-            // Jika error untuk jenisDokumen, simpan dalam array
-            if (!errorMap.jenisDokumen) {
-              errorMap.jenisDokumen = [];
-            }
-            errorMap.jenisDokumen.push(issue.message);
-          } else {
-            // Jika field lain, langsung simpan pesan kesalahan
-            errorMap[path] = issue.message;
-          }
+          errorMap[path] = issue.message;
         }
       });
-
-      setFormErrors(errorMap);
-      console.error("Validation errors:", errorMap);
-      return;
     }
 
     console.log("Form submitted:", formValues);
-    toast.success("Form berhasil disubmit!"); // Show success toast
 
+    const response = await createJamaahAction(formValues);
+    toast.success("Form berhasil disubmit!"); // Show success toast
     handleClose();
   };
-
-  // Calculate installment (angsuran) if "Cicilan" is selected
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => {
@@ -248,6 +260,7 @@ export default function FormJamaah() {
 
     // Reset all form values
     setFormValues({
+      id: 0,
       nama: "",
       ayahKandung: "",
       noTelp: "",
@@ -255,43 +268,49 @@ export default function FormJamaah() {
         {
           id: 0,
           nama: "",
-          noTelp: "",
+          no_telp: "",
           hubungan: KontakDaruratRelation.Lainnya,
         },
       ],
       email: "",
       jenisKelamin: JenisKelamin.LakiLaki,
       tempatLahir: "",
-      perkawinan: false,
+      pernikahan: false,
       alamat: "",
-      varianKamar: {
-        id: 0,
-        tipeKamar: TipeKamar.QUAD,
-        harga: 0,
-        deskripsi: "",
-      },
+      varianKamar: TipeKamar.DOUBLE,
       kewarganegaraan: true,
       pekerjaan: "",
       kursiRoda: false,
       riwayatPenyakit: "",
       jenisDokumen: [],
       jenisPaket: {
-        id: "0",
+        id: 0, // Mengambil hanya properti yang relevan
         nama: "",
-        jenis: "REGULAR",
-        maskapai: "",
-        jenisPenerbangan: "DIRECT",
+        jenis: JenisPaket.REGULAR,
+        maskapai: Maskapai.SAUDIA_ARABIA,
+        customMaskapai: "",
+        jenisPenerbangan: JenisPenerbangan.DIRECT,
+        noPenerbangan: "",
         keretaCepat: false,
-        harga: 0,
         tglKeberangkatan: "",
         tglKepulangan: "",
         fasilitas: [],
+        publish: false,
+        namaMuthawif: "",
+        noTelpMuthawif: "",
+        Hotel: [],
+        gambar_url: "",
+        hargaDouble: 0,
+        hargaTriple: 0,
+        hargaQuad: 0,
       },
       berangkat: "",
       selesai: "",
-      status: { id: 0, status: "Dijadwalkan" },
+      status: "Dijadwalkan",
     });
   };
+
+  console.log("form values di Jamaah:", formValues);
 
   return (
     <>
@@ -353,7 +372,7 @@ export default function FormJamaah() {
                   <FormLabel component="legend">Jenis Kelamin</FormLabel>
                   <RadioGroup
                     value={formValues.jenisKelamin}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
                       setFormValues({
                         ...formValues,
                         jenisKelamin: e.target.value as JenisKelamin, // Cast ke JenisKelamin
@@ -411,12 +430,12 @@ export default function FormJamaah() {
                   <FormLabel component="legend">Status Menikah</FormLabel>
                   <RadioGroup
                     value={
-                      formValues.perkawinan ? "Sudah Menikah" : "Belum Menikah"
+                      formValues.pernikahan ? "Sudah Menikah" : "Belum Menikah"
                     }
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
                       setFormValues({
                         ...formValues,
-                        perkawinan: e.target.value === "Sudah Menikah",
+                        pernikahan: e.target.value === "Sudah Menikah",
                       })
                     }
                     row
@@ -441,7 +460,7 @@ export default function FormJamaah() {
                   <FormLabel component="legend">Status Bernegara</FormLabel>
                   <RadioGroup
                     value={formValues.kewarganegaraan ? "WNI" : "WNA"}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
                       setFormValues({
                         ...formValues,
                         kewarganegaraan: e.target.value === "WNI",
@@ -461,26 +480,7 @@ export default function FormJamaah() {
                     />
                   </RadioGroup>
                 </FormControl>
-                <CustomTextField
-                  select
-                  fullWidth
-                  label="Varian Kamar"
-                  value={formValues.varianKamar?.tipeKamar}
-                  onChange={(e: { target: { value: string } }) =>
-                    setFormValues({
-                      ...formValues,
-                      varianKamar: {
-                        ...formValues.varianKamar,
-                        tipeKamar: e.target.value as TipeKamar, // Convert to TipeKamar
-                      },
-                    })
-                  }
-                  sx={{ marginBottom: 2 }}
-                >
-                  <MenuItem value={TipeKamar.QUAD}>QUAD</MenuItem>
-                  <MenuItem value={TipeKamar.TRIPLE}>TRIPLE</MenuItem>
-                  <MenuItem value={TipeKamar.DOUBLE}>DOUBLE</MenuItem>
-                </CustomTextField>
+
                 <CustomTextField
                   fullWidth
                   label="Pekerjaan"
@@ -517,55 +517,77 @@ export default function FormJamaah() {
                   }
                   sx={{ marginBottom: 2 }}
                 />
-
                 {/* Jenis Paket */}
+                <Autocomplete
+                  fullWidth
+                  options={paketData}
+                  getOptionLabel={(option) => option.nama} // Menampilkan nama paket
+                  value={
+                    paketData.find(
+                      (paket) => paket.id === formValues.jenisPaket.id
+                    ) || null
+                  }
+                  onChange={(event, newValue) => {
+                    if (newValue) {
+                      setFormValues({
+                        ...formValues,
+                        jenisPaket: newValue || ({} as PaketInterface),
+                      });
+                    } else {
+                      setFormValues({
+                        ...formValues,
+                        jenisPaket: {} as PaketInterface,
+                      });
+                    }
+                  }}
+                  renderInput={(params) => (
+                    <CustomTextField
+                      {...params}
+                      label="Jenis Paket"
+                      variant="outlined"
+                      fullWidth
+                      sx={{ marginBottom: 2 }}
+                    />
+                  )}
+                />
                 <CustomTextField
                   select
                   fullWidth
-                  label="Jenis Paket"
-                  value={formValues.jenisPaket.id}
-                  onChange={handleJenisPaketChange}
+                  label="Varian Kamar"
+                  value={formValues.varianKamar}
+                  onChange={(e: { target: { value: string } }) =>
+                    setFormValues({
+                      ...formValues,
+                      varianKamar: e.target.value as TipeKamar,
+                    })
+                  }
                   sx={{ marginBottom: 2 }}
                 >
-                  {PaketData.map((paket) => (
-                    <MenuItem key={paket.id} value={paket.id}>
-                      {paket.nama}
-                    </MenuItem>
-                  ))}
+                  <MenuItem value={TipeKamar.QUAD}>QUAD</MenuItem>
+                  <MenuItem value={TipeKamar.TRIPLE}>TRIPLE</MenuItem>
+                  <MenuItem value={TipeKamar.DOUBLE}>DOUBLE</MenuItem>
                 </CustomTextField>
-
                 {/* Tanggal Berangkat */}
                 <CustomTextField
                   fullWidth
+                  disabled
                   label="Tanggal Berangkat"
                   type="date"
-                  value={formValues.berangkat} // Format date untuk input type="date"
-                  onChange={(e: { target: { value: string } }) =>
-                    setFormValues({
-                      ...formValues,
-                      berangkat: e.target.value,
-                    })
-                  }
+                  value={formValues.jenisPaket.tglKeberangkatan} // Sudah otomatis terisi dari jenisPaket
                   InputLabelProps={{
-                    shrink: true, // Memastikan label selalu berada di atas
+                    shrink: true, // Memastikan label tetap di atas
                   }}
                   sx={{ marginBottom: 2 }}
                 />
-
                 {/* Tanggal Selesai */}
                 <CustomTextField
                   fullWidth
+                  disabled
                   label="Tanggal Selesai"
                   type="date"
-                  value={formValues.selesai} // Format date untuk input type="date"
-                  onChange={(e: { target: { value: string } }) =>
-                    setFormValues({
-                      ...formValues,
-                      selesai: e.target.value,
-                    })
-                  }
+                  value={formValues.jenisPaket.tglKepulangan} // Sudah otomatis terisi dari jenisPaket
                   InputLabelProps={{
-                    shrink: true, // Memastikan label selalu berada di atas
+                    shrink: true, // Memastikan label tetap di atas
                   }}
                   sx={{ marginBottom: 2 }}
                 />
@@ -573,6 +595,7 @@ export default function FormJamaah() {
 
               {/* Kontak Darurat */}
               <KontakDaruratSection
+              isEditing={false}
                 kontakDarurat={formValues.kontakDarurat}
                 handleContactChange={handleContactChange}
                 handleAddContact={handleAddContact}

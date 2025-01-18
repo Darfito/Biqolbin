@@ -1,6 +1,6 @@
 "use client";
 import { styled, Container, Box } from "@mui/material";
-import React, { useState } from "react";
+import React, { ReactNode, useState } from "react";
 import Header from "@/app/(DashboardLayout)/layout/header/Header";
 import Sidebar from "@/app/(DashboardLayout)/layout/sidebar/Sidebar";
 import { ToastContainer } from "react-toastify";
@@ -22,7 +22,7 @@ const PageWrapper = styled("div")(() => ({
 }));
 
 interface Props {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 
@@ -30,7 +30,7 @@ interface Props {
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);

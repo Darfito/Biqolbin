@@ -10,7 +10,13 @@ import MenuItem from "@mui/material/MenuItem";
 import CustomTextField from "../../components/forms/theme-elements/CustomTextField";
 import { toast } from "react-toastify"; // Import toast
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
-import { JenisPaket, JenisPenerbangan, Maskapai } from "../../utilities/type";
+import {
+  HotelType,
+  JenisPaket,
+  JenisPenerbangan,
+  Maskapai,
+  PaketInterface,
+} from "../../utilities/type";
 import {
   FormControlLabel,
   Checkbox,
@@ -25,41 +31,14 @@ import {
 } from "@mui/material";
 import { Delete } from "@mui/icons-material";
 import FileUploaderSingle from "../../utilities/component/uploader/FileUploaderSingle";
-import { useEffect, useState } from "react";
-import {
-  createCmsAction,
-  sanitizeFolderName,
-  updateCmsAction,
-} from "../action";
+import { FormEvent, useEffect, useState } from "react";
+import { createCmsAction, updateCmsAction } from "../action";
 import { createClient } from "@/libs/supabase/client";
+import { HotelSection } from "./HotelHandler";
 
 interface FormCMSProps {
-  initialValues?: FormValues; // Nilai default untuk mengedit
+  initialValues?: PaketInterface; // Nilai default untuk mengedit
   mode: "create" | "edit"; // Mode: create atau edit
-}
-
-interface FormValues {
-  id?: number;
-  nama: string;
-  jenis: string;
-  maskapai: string;
-  noPenerbangan?: string;
-  customMaskapai: string;
-  jenisPenerbangan: string;
-  keretaCepat: boolean;
-  harga: number;
-  tglKeberangkatan: string;
-  tglKepulangan: string;
-  namaMuthawif: string;
-  noTelpMuthawif: string;
-  namaHotel: string;
-  alamatHotel: string;
-  ratingHotel: number;
-  tanggalCheckIn: string;
-  tanggalCheckOut: string;
-  fasilitas: string[];
-  publish?: boolean;
-  gambar_url: string;
 }
 
 interface FormErrors {
@@ -70,7 +49,9 @@ interface FormErrors {
   customMaskapai?: string;
   jenisPenerbangan?: string;
   keretaCepat?: boolean;
-  harga?: number;
+  hargaDouble?: number; // Harga untuk kamar double
+  hargaTriple?: number; // Harga untuk kamar triple
+  hargaQuad?: number; // Harga untuk kamar quad
   tglKeberangkatan?: string;
   tglKepulangan?: string;
   namaMuthawif?: string;
@@ -89,15 +70,11 @@ export const formSchema = v.object({
   nama: v.pipe(v.string(), v.nonEmpty("Nama harus diisi")),
   jenis: v.pipe(v.string(), v.nonEmpty("Pilih jenis paket")),
   maskapai: v.pipe(v.string(), v.nonEmpty("Maskapai harus diisi")),
-  // customMaskapai: v.optional(
-  //   v.pipe(
-  //     v.string(),
-  //     v.nonEmpty("Nama maskapai harus diisi jika memilih 'Lainnya'")
-  //   )
-  // ),
   jenisPenerbangan: v.pipe(v.string(), v.nonEmpty("Pilih Jenis Penerbangan")),
   keretaCepat: v.boolean(),
-  harga: v.pipe(v.number(), v.minValue(1, "Harga harus lebih dari 0")),
+  hargaDouble: v.pipe(v.number(), v.minValue(1, "Harga Kamar Double harus lebih dari 0")),
+  hargaTriple: v.pipe(v.number(), v.minValue(1, "Harga Kamar Triple harus lebih dari 0")),
+  hargaQuad: v.pipe(v.number(), v.minValue(1, "Harga Kamar Quad harus lebih dari 0")),
   tglKeberangkatan: v.pipe(
     v.string(),
     v.nonEmpty("Tanggal Keberangkatan harus diisi")
@@ -111,16 +88,20 @@ export const formSchema = v.object({
     v.string(),
     v.nonEmpty("No Telp Muthawif harus diisi")
   ),
-  namaHotel: v.pipe(v.string(), v.nonEmpty("Nama Hotel harus diisi")),
-  alamatHotel: v.pipe(v.string(), v.nonEmpty("Alamat Hotel harus diisi")),
-  ratingHotel: v.number(),
-  tanggalCheckIn: v.pipe(
-    v.string(),
-    v.nonEmpty("Tanggal Check In harus diisi")
-  ),
-  tanggalCheckOut: v.pipe(
-    v.string(),
-    v.nonEmpty("Tanggal Check Out harus diisi")
+  Hotel: v.array(
+    v.object({
+      namaHotel: v.pipe(v.string(), v.nonEmpty("Nama Hotel harus diisi")),
+      alamatHotel: v.pipe(v.string(), v.nonEmpty("Alamat Hotel harus diisi")),
+      ratingHotel: v.number(),
+      tanggalCheckIn: v.pipe(
+        v.string(),
+        v.nonEmpty("Tanggal Check In harus diisi")
+      ),
+      tanggalCheckOut: v.pipe(
+        v.string(),
+        v.nonEmpty("Tanggal Check Out harus diisi")
+      ),
+    })
   ),
   fasilitas: v.array(v.string()),
   gambar_url: v.string(),
@@ -129,41 +110,55 @@ export const formSchema = v.object({
 const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
   const [open, setOpen] = useState(false);
   const [isCustomMaskapai, setIsCustomMaskapai] = useState(false); // Untuk melacak apakah pengguna memilih "Lainnya"
-
-  const [formValues, setFormValues] = useState<FormValues>(
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
+  const [newFasilitas, setNewFasilitas] = useState<string>("");
+  const [formValues, setFormValues] = useState<PaketInterface>(
     initialValues || {
       nama: "",
-      jenis: "",
-      maskapai: "",
+      jenis: JenisPaket.REGULAR,
+      maskapai: Maskapai.GARUDA_INDONESIA,
       noPenerbangan: "",
       customMaskapai: "",
-      jenisPenerbangan: "",
+      jenisPenerbangan: JenisPenerbangan.DIRECT,
       keretaCepat: false,
-      harga: 0,
+      hargaDouble: 0, // Harga untuk kamar double
+      hargaTriple: 0, // Harga untuk kamar triple
+      hargaQuad: 0, // Harga untuk kamar quad
       tglKeberangkatan: "",
       tglKepulangan: "",
       namaMuthawif: "",
       noTelpMuthawif: "",
-      namaHotel: "",
-      alamatHotel: "",
-      ratingHotel: 0,
-      tanggalCheckIn: "",
-      tanggalCheckOut: "",
+      Hotel: [
+        {
+          id: 0,
+          namaHotel: "",
+          alamatHotel: "",
+          ratingHotel: 0,
+          tanggalCheckIn: "",
+          tanggalCheckOut: "",
+        },
+      ],
       fasilitas: [] as string[],
       publish: false,
       gambar_url: "",
     }
   );
-  const [formErrors, setFormErrors] = useState<FormErrors>({});
-  const [newFasilitas, setNewFasilitas] = useState<string>("");
 
-  
 
   useEffect(() => {
     if (initialValues) {
       setFormValues(initialValues);
     }
   }, [initialValues]);
+
+  const handleChangeHarga = (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
+    const value = e.target.value.replace(/[^\d]/g, ""); // Menghapus non-numeric characters (selain angka)
+  
+    setFormValues((prevValues) => ({
+      ...prevValues,
+      [type]: value === "" ? 0 : Number(value),
+    }));
+  };
 
   const handleAddFasilitas = () => {
     if (newFasilitas.trim() === "") {
@@ -193,7 +188,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
     const { data, error } = await supabase.storage
       .from("Paket") // Ganti dengan nama bucket Anda
       .upload(`${folderName}/${file.name}`, file);
-  
+
     if (error) {
       throw new Error(error.message);
     }
@@ -204,65 +199,81 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
     try {
       // Log untuk memeriksa nilai formValues.nama
       console.log("formValues.nama:", formValues.nama);
-  
+
       // Pastikan formValues.nama adalah string
       const namaPaket = await formValues.nama; // Jika formValues.nama adalah Promise, tunggu hasilnya
-  
+
       // Cek apakah nilai sudah valid
       if (typeof namaPaket !== "string") {
         throw new Error("Nama paket harus berupa string");
       }
-  
+
       // Sanitize folder name
       // const folderName = sanitizeFolderName(namaPaket);
       const folderName = namaPaket;
       console.log("Folder Name:", folderName);
-  
+
       // Upload file
       const result = await uploadImageToSupabase(folderName, file);
-  
+
       // Buat URL publik
       const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Paket/${result.path}`;
-  
+
       // Simpan URL ke state
       setFormValues((prevValues) => ({
         ...prevValues,
         gambar_url: publicUrl,
       }));
-  
+
       console.log("File uploaded successfully:", result);
     } catch (error) {
       console.error("Upload failed:", error);
       toast.error("Gagal mengunggah gambar!");
     }
   };
+
+  const serializeFormData = (
+    values: PaketInterface,
+    mode: "create" | "edit",
+    initialValues?: PaketInterface
+  ): PaketInterface | Omit<PaketInterface, "id"> => {
+    if (mode === "edit" && initialValues?.id == null) {
+      throw new Error("ID is required for edit mode");
+    }
   
-
-
-  const serializeFormData = (values: FormValues): FormValues => {
     return {
+      ...(mode === "edit" && initialValues?.id ? { id: initialValues.id } : {}),
       nama: values.nama,
       jenis: values.jenis,
       maskapai: values.maskapai,
+      noPenerbangan: values.noPenerbangan || "",
       customMaskapai: values.customMaskapai,
       jenisPenerbangan: values.jenisPenerbangan,
       keretaCepat: Boolean(values.keretaCepat),
-      harga: values.harga,
+      hargaDouble: values.hargaDouble,
+      hargaTriple: values.hargaTriple,
+      hargaQuad: values.hargaQuad,
       tglKeberangkatan: values.tglKeberangkatan,
       tglKepulangan: values.tglKepulangan,
       namaMuthawif: values.namaMuthawif,
       noTelpMuthawif: values.noTelpMuthawif,
-      namaHotel: values.namaHotel,
-      alamatHotel: values.alamatHotel,
-      ratingHotel: Number(values.ratingHotel),
-      tanggalCheckIn: values.tanggalCheckIn,
-      tanggalCheckOut: values.tanggalCheckOut,
       fasilitas: Array.isArray(values.fasilitas) ? values.fasilitas : [],
       gambar_url: values.gambar_url,
+      Hotel: Array.isArray(values.Hotel) ? values.Hotel : [], // Tambahkan properti hotel
     };
   };
   
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  
+  
+const formatRupiah = (angka: number): string => {
+  return angka.toLocaleString("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  });
+};
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
   
     // Validate form data
@@ -288,35 +299,26 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
     }
   
     // Serialize form data before sending to server action
-    let serializedData = serializeFormData(formValues);
+    const serializedData = serializeFormData(formValues, mode, initialValues);
+    console.log("Serialized Data:", serializedData);
   
     try {
       if (mode === "create") {
         const { success, data, error } = await createCmsAction(serializedData);
-        
         if (success) {
           toast.success("Form berhasil disubmit!");
-          console.log("Paket created:", data);
           handleClose();
         } else {
           toast.error(`Error: ${error}`);
-          console.error("Error creating Paket:", error);
         }
       } else if (mode === "edit") {
-        serializedData = {
-          ...serializedData,
-          id: initialValues?.id, // Add id from initialValues only for 'edit' mode
-        };
-        console.log("Data to be sent for update:", serializedData); // Log data before update
+        console.log("Submitting updateCmsAction with data:", serializedData);
         const { success, data, error } = await updateCmsAction(serializedData);
-        
         if (success) {
           toast.success("Form berhasil di Update!");
-          console.log("Paket updated:", data);
           handleClose();
         } else {
           toast.error(`Error: ${error}`);
-          console.error("Error updating Paket:", error);
         }
       }
     } catch (error) {
@@ -333,21 +335,28 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
     setFormValues(
       initialValues || {
         nama: "",
-        jenis: "",
-        maskapai: "",
+        jenis: JenisPaket.REGULAR,
+        maskapai: Maskapai.GARUDA_INDONESIA,
         customMaskapai: "",
-        jenisPenerbangan: "",
+        jenisPenerbangan: JenisPenerbangan.DIRECT,
         keretaCepat: false,
-        harga: 0,
+        hargaDouble: 0, // Harga untuk kamar double
+        hargaTriple: 0, // Harga untuk kamar triple
+        hargaQuad: 0, // Harga untuk kamar quad
         tglKeberangkatan: "",
         tglKepulangan: "",
         namaMuthawif: "",
         noTelpMuthawif: "",
-        namaHotel: "",
-        alamatHotel: "",
-        ratingHotel: 0,
-        tanggalCheckIn: "",
-        tanggalCheckOut: "",
+        Hotel: [
+          {
+            id: 0,
+            namaHotel: "",
+            alamatHotel: "",
+            ratingHotel: 0,
+            tanggalCheckIn: "",
+            tanggalCheckOut: "",
+          },
+        ],
         fasilitas: [],
         publish: false,
         gambar_url: "",
@@ -360,6 +369,41 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
 
   console.log("initial values masuk:", initialValues);
   console.log("form values di detail:", formValues);
+
+  const handleHotelChange = (
+    index: number,
+    field: keyof HotelType,
+    value: string | number
+  ) => {
+    const updatedHotels = [...(formValues.Hotel ?? [])];
+    updatedHotels[index] = { ...updatedHotels[index], [field]: value };
+    setFormValues({ ...formValues, Hotel: updatedHotels });
+  };
+
+  const handleAddHotel = () => {
+    console.log("add hotel tertekan")
+    setFormValues((prev) => ({
+      ...prev,
+      Hotel: [
+        ...(prev.Hotel ?? []),
+        {
+          id: (prev.Hotel?.length ?? 0) + 1,
+          namaHotel: "",
+          alamatHotel: "",
+          ratingHotel: 0,
+          tanggalCheckIn: "",
+          tanggalCheckOut: "",
+        },
+      ],
+    }));
+  };
+
+  const handleRemoveHotel = (indexToRemove: number) => {
+    setFormValues((prev) => ({
+      ...prev,
+      Hotel: prev.Hotel?.filter((_, index) => index !== indexToRemove) ?? [],
+    }));
+  };
 
   return (
     <>
@@ -406,7 +450,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
                 onChange={(e) =>
                   setFormValues({
                     ...formValues,
-                    jenis: e.target.value,
+                    jenis: e.target.value as JenisPaket,
                   })
                 }
                 row
@@ -442,7 +486,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
                   });
                 } else {
                   setIsCustomMaskapai(false); // Nonaktifkan input tambahan
-                  setFormValues({ ...formValues, maskapai: value });
+                  setFormValues({ ...formValues, maskapai: value as Maskapai });
                 }
               }}
             >
@@ -493,7 +537,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
                 onChange={(e) =>
                   setFormValues({
                     ...formValues,
-                    jenisPenerbangan: e.target.value,
+                    jenisPenerbangan: e.target.value as JenisPenerbangan,
                   })
                 }
                 row
@@ -524,116 +568,8 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
               }
               label="Menggunakan Kereta Cepat?"
             />
-            <CustomTextField
-              fullWidth
-              label="Harga Paket"
-              name="harga"
-              value={formValues.harga}
-              error={!!formErrors.harga}
-              helperText={formErrors.harga}
-              onChange={(e: { target: { value: string } }) =>
-                setFormValues({ ...formValues, harga: e.target.value === "" ? 0 : Number(e.target.value) })
-              }
-            />
-            <Divider />
-            {/* Akomodasi */}
-            <Typography variant="h5">Akomodasi</Typography>
-            <CustomTextField
-              fullWidth
-              label="Nama Muthawif"
-              name="namaMuthawif"
-              value={formValues.namaMuthawif}
-              error={!!formErrors.namaMuthawif}
-              helperText={formErrors.namaMuthawif}
-              onChange={(e: { target: { value: string } }) =>
-                setFormValues({ ...formValues, namaMuthawif: e.target.value })
-              }
-            />
-            <CustomTextField
-              fullWidth
-              label="Nomor Telpon Muthawif"
-              name="noTelpMuthawif"
-              value={formValues.noTelpMuthawif}
-              error={!!formErrors.noTelpMuthawif}
-              helperText={formErrors.noTelpMuthawif}
-              onChange={(e: { target: { value: string } }) =>
-                setFormValues({ ...formValues, noTelpMuthawif: e.target.value })
-              }
-            />
-            <CustomTextField
-              fullWidth
-              label="Nama Hotel"
-              name="namaHotel"
-              value={formValues.namaHotel}
-              error={!!formErrors.namaHotel}
-              helperText={formErrors.namaHotel}
-              onChange={(e: { target: { value: string } }) =>
-                setFormValues({ ...formValues, namaHotel: e.target.value })
-              }
-            />
-            <CustomTextField
-              fullWidth
-              label="Alamat Hotel"
-              name="alamatHotel"
-              value={formValues.alamatHotel}
-              error={!!formErrors.alamatHotel}
-              helperText={formErrors.alamatHotel}
-              onChange={(e: { target: { value: string } }) =>
-                setFormValues({ ...formValues, alamatHotel: e.target.value })
-              }
-              multiline
-              rows={2}
-            />
-            <CustomTextField
-              fullWidth
-              label="Rating Hotel"
-              name="ratingHotel"
-              type="number"
-              value={formValues.ratingHotel}
-              error={!!formErrors.ratingHotel}
-              helperText={formErrors.ratingHotel}
-              onChange={(e: { target: { value: string } }) =>
-                setFormValues({
-                  ...formValues,
-                  ratingHotel: e.target.value === "" ? 0 : Number(e.target.value),
-                })
-              }
-            />
 
-            <CustomTextField
-              fullWidth
-              label="Tanggal Check In Hotel"
-              name="tanggalCheckIn"
-              type="date"
-              value={formValues.tanggalCheckIn}
-              error={!!formErrors.tanggalCheckIn}
-              helperText={formErrors.tanggalCheckIn}
-              onChange={(e: { target: { value: string } }) =>
-                setFormValues({ ...formValues, tanggalCheckIn: e.target.value })
-              }
-              InputLabelProps={{
-                shrink: true,
-              }}
-            />
-            <CustomTextField
-              fullWidth
-              label="Tanggal Check Out Hotel"
-              name="tanggalCheckOut"
-              type="date"
-              value={formValues.tanggalCheckOut}
-              error={!!formErrors.tanggalCheckOut}
-              helperText={formErrors.tanggalCheckOut}
-              onChange={(e: { target: { value: string } }) =>
-                setFormValues({
-                  ...formValues,
-                  tanggalCheckOut: e.target.value,
-                })
-              }
-              InputLabelProps={{
-                shrink: true,
-              }}
-            />
-            <CustomTextField
+                        <CustomTextField
               fullWidth
               label="Tanggal Keberangkatan"
               name="tglKeberangkatan"
@@ -667,26 +603,87 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
               }}
             />
             <Divider />
+            {/* Akomodasi */}
+            <Typography variant="h5">Muthawif</Typography>
+            <CustomTextField
+              fullWidth
+              label="Nama Muthawif"
+              name="namaMuthawif"
+              value={formValues.namaMuthawif}
+              error={!!formErrors.namaMuthawif}
+              helperText={formErrors.namaMuthawif}
+              onChange={(e: { target: { value: string } }) =>
+                setFormValues({ ...formValues, namaMuthawif: e.target.value })
+              }
+            />
+            <CustomTextField
+              fullWidth
+              label="Nomor Telpon Muthawif"
+              name="noTelpMuthawif"
+              value={formValues.noTelpMuthawif}
+              error={!!formErrors.noTelpMuthawif}
+              helperText={formErrors.noTelpMuthawif}
+              onChange={(e: { target: { value: string } }) =>
+                setFormValues({ ...formValues, noTelpMuthawif: e.target.value })
+              }
+            />
+            <HotelSection
+              hotel={formValues.Hotel ?? []}
+              handleHotelChange={handleHotelChange}
+              handleAddHotel={handleAddHotel}
+              handleRemoveHotel={handleRemoveHotel}
+            />
+            <Divider />
+            {/* Akomodasi */}
+            <Typography variant="h5">Harga Sesuai Tipe Kamar</Typography>
+            <CustomTextField
+              fullWidth
+              label="Tipe Kamar Double"
+              name="hargaDouble"
+              value={formatRupiah(formValues.hargaDouble)} // Format harga
+              error={!!formErrors.hargaDouble}
+              helperText={formErrors.hargaDouble}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeHarga(e, "hargaDouble")}
+            />
+            <CustomTextField
+              fullWidth
+              label="Tipe Kamar Triple"
+              name="hargaTriple"
+              value={formatRupiah(formValues.hargaTriple)} // Format harga
+              error={!!formErrors.hargaTriple}
+              helperText={formErrors.hargaTriple}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeHarga(e, "hargaTriple")}
+            />
+            <CustomTextField
+              fullWidth
+              label="Tipe Kamar Quad"
+              name="hargaQuad"
+              value={formatRupiah(formValues.hargaQuad)} // Format harga
+              error={!!formErrors.hargaQuad}
+              helperText={formErrors.hargaQuad}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeHarga(e, "hargaQuad")} // Menangani perubahan input
+            />
+            <Divider />
             {/* Fasilitas */}
             <Box sx={{ width: "100%" }}>
-              <Typography variant="h5" sx={{ mb: 2 }}>Fasilitas</Typography>
-              {formValues.fasilitas.map(
-                (fasilitas: string, index: number) => (
-                  <Box
-                    key={index}
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="space-between"
-                  >
-                    <Typography>
-                      {index + 1}. {fasilitas}
-                    </Typography>
-                    <IconButton onClick={() => handleRemoveFasilitas(index)}>
-                      <Delete />
-                    </IconButton>
-                  </Box>
-                )
-              )}
+              <Typography variant="h5" sx={{ mb: 2 }}>
+                Fasilitas
+              </Typography>
+              {formValues.fasilitas.map((fasilitas: string, index: number) => (
+                <Box
+                  key={index}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                >
+                  <Typography>
+                    {index + 1}. {fasilitas}
+                  </Typography>
+                  <IconButton onClick={() => handleRemoveFasilitas(index)}>
+                    <Delete />
+                  </IconButton>
+                </Box>
+              ))}
               <Box display="flex" gap="0.5rem" alignItems="center">
                 <CustomTextField
                   label="Tambah Fasilitas"
