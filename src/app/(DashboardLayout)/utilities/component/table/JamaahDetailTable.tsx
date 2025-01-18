@@ -62,11 +62,13 @@ const JamaahDetailTable = ({
 }: JamaahDetailProps<JenisDokumen>) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
-  const [openDialog, setOpenDialog] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null); // State untuk menyimpan file yang diunggah
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [rowToDelete, setRowToDelete] = useState<JenisDokumen | null>(null);
   const [dialogRow, setDialogRow] = useState<JenisDokumen | null>(null);
   const [openFileDialog, setOpenFileDialog] = useState(false); // Status dialog
   const [fileUrl, setFileUrl] = useState<string | null>(null); // URL file untuk dialog
+  const [tableData, setTableData] = useState<JenisDokumen[]>(data);
+
   const supabase = createClient();
 
   const uploadFileToSupabase = async (
@@ -107,6 +109,16 @@ const JamaahDetailTable = ({
     setDialogRow(null); // Tutup dialog
   };
 
+  const handleOpenDeleteDialog = (row: JenisDokumen) => {
+    setRowToDelete(row);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setRowToDelete(null);
+    setOpenDeleteDialog(false);
+  };
+
   const handleFileUpload = async (file: File) => {
     if (!dialogRow) return; // Pastikan ada data baris yang sedang aktif
 
@@ -145,6 +157,27 @@ const JamaahDetailTable = ({
       toast.error(`Gagal mendapatkan URL file: ${error.message}`);
       console.error("Error fetching file URL:", error);
       return null;
+    }
+  };
+
+  const deleteFileFromSupabase = async (
+    jamaahId: string,
+    namaDokumen: string
+  ) => {
+    try {
+      const path = `${jamaahId}/${namaDokumen}`;
+      const { error } = await supabase.storage.from("Dokumen").remove([path]);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      toast.success("File berhasil dihapus!");
+      return true;
+    } catch (error: any) {
+      toast.error(`Gagal menghapus file: ${error.message}`);
+      console.error("Error deleting file:", error);
+      return false;
     }
   };
 
@@ -206,14 +239,26 @@ const JamaahDetailTable = ({
                   }
                 }}
                 sx={{
-                  color: fileUrl && fileUrl.includes(rowData.nama_dokumen) ? '#F18B04' : '#B0B0B0',
+                  color:
+                    fileUrl && fileUrl.includes(rowData.nama_dokumen)
+                      ? "#F18B04"
+                      : "#B0B0B0",
                 }}
               >
                 <Folder />
               </IconButton>
 
               {/* Tombol Delete */}
-              <IconButton>
+              <IconButton
+                color="error"
+                onClick={() => {
+                  if (rowData.jamaah_id && rowData.nama_dokumen) {
+                    handleOpenDeleteDialog(rowData);
+                  } else {
+                    toast.error("Data Jamaah atau dokumen tidak valid.");
+                  }
+                }}
+              >
                 <Delete />
               </IconButton>
             </Box>
@@ -330,6 +375,62 @@ const JamaahDetailTable = ({
             color="error"
           >
             Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={openDeleteDialog}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">
+          Konfirmasi Penghapusan
+        </DialogTitle>
+        <DialogContent>
+          <p id="delete-dialog-description">
+            Apakah Anda yakin ingin menghapus dokumen{" "}
+            <strong>{rowToDelete?.nama_dokumen}</strong>?
+          </p>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            Batal
+          </Button>
+          <Button
+            onClick={async () => {
+              if (
+                rowToDelete &&
+                rowToDelete.jamaah_id &&
+                rowToDelete.nama_dokumen
+              ) {
+                const success = await deleteFileFromSupabase(
+                  rowToDelete.jamaah_id.toString(),
+                  rowToDelete.nama_dokumen
+                );
+
+                if (success) {
+                  setTableData((prevData) =>
+                    prevData.filter(
+                      (dokumen) =>
+                        !(
+                          dokumen.jamaah_id === rowToDelete.jamaah_id &&
+                          dokumen.nama_dokumen === rowToDelete.nama_dokumen
+                        )
+                    )
+                  );
+                }
+
+                handleCloseDeleteDialog();
+              } else {
+                toast.error("Data Jamaah atau dokumen tidak valid.");
+              }
+            }}
+            color="error"
+            variant="contained"
+          >
+            Hapus
           </Button>
         </DialogActions>
       </Dialog>
