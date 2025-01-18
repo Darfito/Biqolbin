@@ -39,7 +39,7 @@ import styles from "../../../../styles/table.module.css";
 import TablePaginationComponent from "../pagination/TablePaginationComponent";
 import CustomTextField from "../textField/TextField";
 import { ChevronRight } from "@mui/icons-material";
-import { Box, Chip } from "@mui/material";
+import { Box, Chip, Link } from "@mui/material";
 import { JamaahInterface } from "../../type";
 import ActionButton from "./components/ActionButton";
 import { deleteJamaahAction } from "@/app/(DashboardLayout)/jamaah/action";
@@ -66,7 +66,6 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   // Return if the item should be filtered in/out
   return itemRank.passed;
 };
-
 
 const Filter = ({
   column,
@@ -133,7 +132,7 @@ interface TableProps<T> {
   data: T[]; // Data dinamis sesuai tipe T
 }
 
-const JamaahTable =({ data }: TableProps<JamaahInterface>) => {
+const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
   // States
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -161,107 +160,132 @@ const JamaahTable =({ data }: TableProps<JamaahInterface>) => {
   const columnHelper = createColumnHelper<JamaahInterface>();
 
   const columns = [
+    // Kolom Nama
+    columnHelper.accessor("nama", {
+      id: "nama",
+      cell: (info) => info.getValue(),
+      header: "NAMA",
+    }),
 
-  // Kolom Nama
-  columnHelper.accessor("nama", {
-    id: "nama",
-    cell: (info) => info.getValue(),
-    header: "NAMA",
-  }),
+    // Kolom Paket
+    columnHelper.accessor("jenisPaket.nama", {
+      id: "jenisPaket",
+      cell: (info) => info.getValue(),
+      header: "PAKET",
+    }),
 
-  // Kolom Paket
-  columnHelper.accessor("jenisPaket.nama", {
-    id: "jenisPaket",
-    cell: (info) => info.getValue(),
-    header: "PAKET",
-  }),
+    // Kolom No Telp
 
-  // Kolom No Telp
-  columnHelper.accessor("noTelp", {
-    id: "noTelp",
-    cell: (info) => info.getValue(),
-    header: "NO TELP",
-  }),
+    columnHelper.accessor("noTelp", {
+      id: "noTelp",
+      cell: (info) => {
+        const phoneNumber = info.getValue(); // Dapatkan nomor telepon dari data
+        const formattedNumber = phoneNumber.replace(/^0/, "62"); // Ubah awalan "0" ke "62"
+        const waLink = `https://wa.me/${formattedNumber}`; // Buat tautan WhatsApp
 
-  // Kolom Email
-  columnHelper.accessor("email", {
-    id: "email",
-    cell: (info) => info.getValue(),
-    header: "EMAIL",
-  }),
+        return (
+          <Link
+            href={waLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{
+              textDecoration: "none",
+              color: "#f18b04", // Warna khas WhatsApp
+              fontWeight: "bold",
+              "&:hover": {
+                textDecoration: "underline",
+                color: "#f18b04", // Warna lebih gelap saat hover
+              },
+            }}
+          >
+            {phoneNumber}
+          </Link>
+        );
+      },
+      header: "NO TELP",
+    }),
 
-  // Kolom Jenis Kelamin
-  columnHelper.accessor("jenisKelamin", {
-    id: "jenisKelamin",
-    cell: (info) => info.getValue(),
-    header: "JENIS KELAMIN",
-  }),
+    // Kolom Email
+    columnHelper.accessor("email", {
+      id: "email",
+      cell: (info) => info.getValue(),
+      header: "EMAIL",
+    }),
 
-  // Kolom Status (Berangkat dan Selesai)
-  columnHelper.accessor("status", {
-    id: "status",
-    cell: (info) => {
-      const status = info.getValue();
-      let chipColor = "";
-  
-      switch (status) {
-        case "Berangkat":
-          chipColor = "lightblue"; // Biru muda
-          break;
-        case "Selesai":
-          chipColor = "green"; // Hijau
-          break;
-        default:
-          chipColor = "#F18B04"; // Warna khusus untuk Dijadwalkan
-          break;
-      }
-  
-      return (
-        <Chip
-          label={status === "Berangkat" || status === "Selesai" ? status : "Dijadwalkan"}
-          sx={{
-            backgroundColor: chipColor,
-            color: "white", // Warna teks putih agar kontras
-            fontWeight: "bold",
-          }}
-        />
-      );
-    },
-    header: "Status",
-  }),
-  
+    // Kolom Jenis Kelamin
+    columnHelper.accessor("jenisKelamin", {
+      id: "jenisKelamin",
+      cell: (info) => info.getValue(),
+      header: "JENIS KELAMIN",
+    }),
 
-  // Kolom Aksi
-  columnHelper.display({
-    id: "action",
-    header: "Detail",
-    cell: (info) => {
-      const handleOpenDialog = (rowData: JamaahInterface) => {
-        setSelectedRow(rowData); // Set data pengguna
-        setOpen(true); // Buka dialog
-      };
+    // Kolom Status (Berangkat dan Selesai)
+    columnHelper.accessor("status", {
+      id: "status",
+      cell: (info) => {
+        const status = info.getValue();
+        let chipColor = "";
 
+        switch (status) {
+          case "Berangkat":
+            chipColor = "lightblue"; // Biru muda
+            break;
+          case "Selesai":
+            chipColor = "green"; // Hijau
+            break;
+          default:
+            chipColor = "#F18B04"; // Warna khusus untuk Dijadwalkan
+            break;
+        }
 
-      return (
-        <Box sx={{ display: "flex", justifyContent: "start" }}>
-          {/* Tombol Edit */}
-          <ActionButton
-            rowData={info.row.original}
-            actionPath={(rowData) => `/jamaah/${rowData.id}`} // Path dinamis berdasarkan ID User
+        return (
+          <Chip
+            label={
+              status === "Berangkat" || status === "Selesai"
+                ? status
+                : "Dijadwalkan"
+            }
+            sx={{
+              backgroundColor: chipColor,
+              color: "white", // Warna teks putih agar kontras
+              fontWeight: "bold",
+            }}
           />
+        );
+      },
+      header: "Status",
+    }),
 
-          {/* Tombol Delete */}
-          <ActionButton
-            rowData={info.row.original}
-            mode="delete"
-            onDelete={() => handleOpenDialog(info.row.original)} // Buka dialog konfirmasi
-          />
-        </Box>
-      );
-    },
-    enableColumnFilter: false,
-  }),
-  ]
+    // Kolom Aksi
+    columnHelper.display({
+      id: "action",
+      header: "Detail",
+      cell: (info) => {
+        const handleOpenDialog = (rowData: JamaahInterface) => {
+          setSelectedRow(rowData); // Set data pengguna
+          setOpen(true); // Buka dialog
+        };
+
+        return (
+          <Box sx={{ display: "flex", justifyContent: "start" }}>
+            {/* Tombol Edit */}
+            <ActionButton
+              rowData={info.row.original}
+              actionPath={(rowData) => `/jamaah/${rowData.id}`} // Path dinamis berdasarkan ID User
+            />
+
+            {/* Tombol Delete */}
+            <ActionButton
+              rowData={info.row.original}
+              mode="delete"
+              onDelete={() => handleOpenDialog(info.row.original)} // Buka dialog konfirmasi
+            />
+          </Box>
+        );
+      },
+      enableColumnFilter: false,
+    }),
+  ];
 
   const table = useReactTable({
     data: data || [], // Pastikan data selalu berupa array.
@@ -295,8 +319,7 @@ const JamaahTable =({ data }: TableProps<JamaahInterface>) => {
         sx={{
           width: "100%",
         }}
-      >
-      </Box>
+      ></Box>
       <div className="overflow-x-auto">
         <table className={styles.table}>
           <thead>
@@ -381,8 +404,8 @@ const JamaahTable =({ data }: TableProps<JamaahInterface>) => {
           }}
         />
       </Box>
-       {/* Dialog Konfirmasi */}
-       <ConfirmDialog
+      {/* Dialog Konfirmasi */}
+      <ConfirmDialog
         open={open}
         onClose={handleCloseDialog}
         onConfirm={handleDelete}
