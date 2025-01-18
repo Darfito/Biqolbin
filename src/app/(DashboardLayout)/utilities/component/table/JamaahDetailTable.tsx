@@ -24,6 +24,8 @@ import {
 } from "@mui/material";
 import { Delete, Folder, UploadFile } from "@mui/icons-material";
 import { RankingInfo, rankItem } from "@tanstack/match-sorter-utils";
+import { toast } from "react-toastify"; // Import toast
+import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 
 // Component Imports
 import CustomTextField from "../textField/TextField";
@@ -35,6 +37,8 @@ import styles from "../../../../styles/table.module.css";
 // Type Imports
 import { JenisDokumen } from "../../type";
 import FileUploaderSingle from "../uploader/FileUploaderSingle";
+import { createClient } from "@/libs/supabase/client";
+import PdfViewer from "./components/PdfViewer";
 
 const fuzzyFilter = (
   row: { getValue: (arg0: any) => any },
@@ -61,6 +65,40 @@ const JamaahDetailTable = ({
   const [openDialog, setOpenDialog] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null); // State untuk menyimpan file yang diunggah
   const [dialogRow, setDialogRow] = useState<JenisDokumen | null>(null);
+  const [openFileDialog, setOpenFileDialog] = useState(false); // Status dialog
+  const [fileUrl, setFileUrl] = useState<string | null>(null); // URL file untuk dialog
+  const supabase = createClient();
+
+  const uploadFileToSupabase = async (
+    file: File,
+    jamaahId: string,
+    namaDokumen: string
+  ) => {
+    try {
+      const path = `${jamaahId}/${namaDokumen}`;
+      const { data, error } = await supabase.storage
+        .from("Dokumen") // Nama bucket
+        .upload(path, file, {
+          cacheControl: "3600",
+          upsert: true, // Overwrite file jika sudah ada
+        });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from("Dokumen")
+        .getPublicUrl(path);
+
+      toast.success("File berhasil diunggah!");
+      return publicUrlData.publicUrl; // Kembalikan URL publik
+    } catch (error: any) {
+      toast.error(`Gagal mengunggah file: ${error.message}`);
+      console.error("Error uploading file:", error);
+      return null;
+    }
+  };
 
   const handleDialogOpen = (row: JenisDokumen) => {
     setDialogRow(row); // Tetapkan baris yang sedang dibuka dialognya
@@ -69,9 +107,61 @@ const JamaahDetailTable = ({
     setDialogRow(null); // Tutup dialog
   };
 
-  const handleFileUpload = (file: File) => {
-    setUploadedFile(file); // Simpan file yang diunggah ke state
-    console.log("File uploaded:", file);
+  const handleFileUpload = async (file: File) => {
+    if (!dialogRow) return; // Pastikan ada data baris yang sedang aktif
+
+    const { jamaah_id: jamaahId, nama_dokumen: namaDokumen } = dialogRow;
+
+    if (!jamaahId || !namaDokumen) {
+      toast.error("Data Jamaah atau nama dokumen tidak valid.");
+      return;
+    }
+
+    const publicUrl = await uploadFileToSupabase(
+      file,
+      jamaahId.toString(),
+      namaDokumen
+    );
+
+    if (publicUrl) {
+      console.log("File URL:", publicUrl);
+      // Anda bisa melakukan sesuatu dengan URL publik, seperti menyimpan ke database
+    }
+
+    handleDialogClose(); // Tutup dialog setelah upload selesai
+  };
+
+  const getFileUrl = async (jamaahId: string, namaDokumen: string) => {
+    try {
+      const path = `${jamaahId}/${namaDokumen}`;
+      const { data } = supabase.storage.from("Dokumen").getPublicUrl(path);
+
+      if (data?.publicUrl) {
+        return data.publicUrl;
+      } else {
+        throw new Error("File tidak ditemukan.");
+      }
+    } catch (error: any) {
+      toast.error(`Gagal mendapatkan URL file: ${error.message}`);
+      console.error("Error fetching file URL:", error);
+      return null;
+    }
+  };
+
+  const handleOpenFileDialog = async (
+    jamaahId: string,
+    namaDokumen: string
+  ) => {
+    const url = await getFileUrl(jamaahId, namaDokumen);
+    if (url) {
+      setFileUrl(url);
+      setOpenFileDialog(true);
+    }
+  };
+
+  const handleCloseFileDialog = () => {
+    setFileUrl(null);
+    setOpenFileDialog(false);
   };
 
   // Filter data "Buku Nikah" hanya jika perkawinan bernilai true
@@ -96,6 +186,7 @@ const JamaahDetailTable = ({
         id: "action",
         cell: ({ row }) => {
           const rowData = row.original;
+          console.log("file url di kolom action:", fileUrl);
           return (
             <Box sx={{ display: "flex", justifyContent: "start" }}>
               {/* Tombol Upload */}
@@ -103,9 +194,24 @@ const JamaahDetailTable = ({
                 <UploadFile />
               </IconButton>
               {/* Tombol Folder */}
-              <IconButton>
+              <IconButton
+                onClick={() => {
+                  if (rowData.jamaah_id && rowData.nama_dokumen) {
+                    handleOpenFileDialog(
+                      rowData.jamaah_id.toString(),
+                      rowData.nama_dokumen
+                    );
+                  } else {
+                    toast.error("Data Jamaah atau dokumen tidak valid.");
+                  }
+                }}
+                sx={{
+                  color: fileUrl && fileUrl.includes(rowData.nama_dokumen) ? '#F18B04' : '#B0B0B0',
+                }}
+              >
                 <Folder />
               </IconButton>
+
               {/* Tombol Delete */}
               <IconButton>
                 <Delete />
@@ -202,6 +308,31 @@ const JamaahDetailTable = ({
           </DialogActions>
         </Dialog>
       )}
+
+      <Dialog
+        open={openFileDialog}
+        onClose={handleCloseFileDialog}
+        sx={{ padding: "1rem" }}
+      >
+        <DialogTitle>Preview File</DialogTitle>
+        <DialogContent>
+          {fileUrl ? (
+            <PdfViewer fileUrl={fileUrl} />
+          ) : (
+            <p>File tidak tersedia.</p>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleCloseFileDialog}
+            sx={{ color: "white" }}
+            variant="contained"
+            color="error"
+          >
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
