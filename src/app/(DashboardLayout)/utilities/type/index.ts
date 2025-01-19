@@ -18,7 +18,7 @@ export type CardStatsHorizontalWithBorderProps = {
 
 
 // ! KEUANGAN TYPE
-  export interface KeuanganProps {
+  export interface KeuanganInterface {
     id: number;
     nama: string;
     jenisPaket : PaketInterface
@@ -27,12 +27,13 @@ export type CardStatsHorizontalWithBorderProps = {
     totalTagihan: number
     sisaTagihan: number
     jumlahBiayaPerAngsuran?: number
-    tenggatPembayaran: Date
+    tenggatPembayaran: string
     banyaknyaCicilan?: number
     catatanPembayaran?: string
     status: StatusType
     action?: string; // Optional field for action
     cicilan?: CicilanType[];
+    paket_id?: number;
   }
   
 export type CicilanType = {

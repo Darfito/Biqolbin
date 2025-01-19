@@ -1,11 +1,11 @@
 import ActionButton from "@/app/(DashboardLayout)/utilities/component/table/components/ActionButton";
-import { KeuanganProps } from "@/app/(DashboardLayout)/utilities/type";
+import { KeuanganInterface } from "@/app/(DashboardLayout)/utilities/type";
 import { createColumnHelper, ColumnDef } from "@tanstack/react-table";
 
 
-const columnHelper = createColumnHelper<KeuanganProps>();
+const columnHelper = createColumnHelper<KeuanganInterface>();
 
-export const columnsKeuangan: ColumnDef<KeuanganProps, any>[] = [
+export const columnsKeuangan: ColumnDef<KeuanganInterface, any>[] = [
   columnHelper.accessor("nama", {
     cell: (info) => info.getValue(),
     header: "Nama",

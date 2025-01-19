@@ -1,4 +1,4 @@
-import { CardStatsHorizontalWithBorderProps, Jabatan, JenisKelamin, JenisPaket, JenisPenerbangan, KeuanganProps, Maskapai, PaketInterface, UserProps } from "../type";
+import { CardStatsHorizontalWithBorderProps, Jabatan, JenisKelamin, JenisPaket, JenisPenerbangan, KeuanganInterface, Maskapai, PaketInterface, UserProps } from "../type";
 import { IconUser, IconProgress,IconReceipt, IconPlaneDeparture, IconPlaneArrival, IconLoader } from "@tabler/icons-react";
 
 
@@ -179,7 +179,7 @@ export const PaketData: PaketInterface[] = [
 
 
 
-export const KeuanganData: KeuanganProps[] = [
+export const KeuanganData: KeuanganInterface[] = [
   {
     id: 1,
     nama: "Keuangan 1",

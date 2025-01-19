@@ -4,7 +4,6 @@ import { createClient } from "@/libs/supabase/server";
 
 import { revalidatePath } from "next/cache";
 import { JamaahInterface } from "../../utilities/type";
-import { number } from "valibot";
 
   // Data untuk ScoreCard
 

@@ -21,6 +21,7 @@ import {
   DialogTitle,
   IconButton,
   TablePagination,
+  Typography,
 } from "@mui/material";
 import { Delete, Folder, UploadFile } from "@mui/icons-material";
 import { RankingInfo, rankItem } from "@tanstack/match-sorter-utils";
@@ -382,7 +383,7 @@ const JamaahDetailTable = ({
           {fileUrl ? (
             <PdfViewer fileUrl={fileUrl} />
           ) : (
-            <p>File tidak tersedia.</p>
+            <Typography>File tidak tersedia.</Typography>
           )}
         </DialogContent>
         <DialogActions>

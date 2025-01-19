@@ -251,18 +251,6 @@ const KeuanganTable = <T,>({ columns, data }: KeuanganTableProps<T>) => {
           width: "100%",
         }}
       >
-        {/* <CardHeader
-        sx={{ 
-          paddingTop: 0
-        }}
-          action={
-            <DebouncedInput
-              value={globalFilter ?? ""}
-              onChange={(value) => setGlobalFilter(String(value))}
-              placeholder="Search all columns..."
-            />
-          }
-        /> */}
       </Box>
       <div className="overflow-x-auto">
         <table className={styles.table}>

@@ -2,13 +2,13 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 import CustomTextField from "@/app/(DashboardLayout)/components/forms/theme-elements/CustomTextField";
 import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCard";
 import { Box, Grid, MenuItem, Button } from "@mui/material";
-import { KeuanganProps } from "@/app/(DashboardLayout)/utilities/type";
+import { KeuanganInterface } from "@/app/(DashboardLayout)/utilities/type";
 import { showToast } from "@/app/(DashboardLayout)/utilities/component/toast/Toast";
 
 interface FormDetailProps {
   isEditing: boolean; // Receive isEditing from the parent component
   onSaveChanges: (data: any) => void; // Kirim data ke parent
-  keuanganData?: KeuanganProps | null; // Current selected data
+  keuanganData?: KeuanganInterface | null; // Current selected data
 }
 
 const FormDetail = ({ isEditing, onSaveChanges, keuanganData }: FormDetailProps) => {

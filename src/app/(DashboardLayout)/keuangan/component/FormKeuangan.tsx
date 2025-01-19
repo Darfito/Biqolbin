@@ -11,21 +11,42 @@ import CustomTextField from "../../components/forms/theme-elements/CustomTextFie
 import { toast } from "react-toastify"; // Import toast
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import {
+  JamaahInterface,
+  JenisKelamin,
+  JenisPaket,
+  JenisPenerbangan,
+  KontakDaruratRelation,
+  Maskapai,
+  PaketInterface,
+  TipeKamar,
+} from "../../utilities/type";
+import { Autocomplete } from "@mui/material";
 
 interface FormErrors {
   nama?: string;
   jenisPaket?: string;
   metodePembayaran?: string;
-  tenggatPembayaran?: string;
-  totalTagihan?: string;
   uangMuka?: string;
-  banyaknyaAngsuran?: string;
+  totalTagihan?: string;
+  tenggatPembayaran?: string;
+  banyaknyaCicilan?: string; // Simpan pesan error
   jumlahBiayaPerAngsuran?: string;
 }
 
+type FormType = {
+  jamaah: JamaahInterface;
+  jenisPaket: PaketInterface;
+  metodePembayaran: string;
+  uangMuka?: number;
+  totalTagihan: number;
+  tenggatPembayaran: string;
+  banyaknyaCicilan?: number;
+  jumlahBiayaPerAngsuran?: number;
+};
+
 // Valibot Schema
 const formSchema = v.object({
-  nama: v.pipe(v.string(), v.nonEmpty("Nama harus diisi")),
   jenisPaket: v.pipe(v.string(), v.nonEmpty("Pilih jenis paket")),
   metodePembayaran: v.pipe(v.string(), v.nonEmpty("Pilih metode pembayaran")),
   tenggatPembayaran: v.pipe(
@@ -44,24 +65,106 @@ const formSchema = v.object({
     v.transform(Number),
     v.minValue(0, "Uang muka harus lebih dari atau sama dengan 0")
   ),
-  banyaknyaAngsuran: v.optional(v.string()),
-  jumlahBiayaPerAngsuran: v.optional(v.string()),
+  banyaknyaCicilan: v.optional(v.string()),
+  jumlahBiayaPerAngsuran: v.optional(
+    v.pipe(
+      v.string(),
+      v.transform(Number), // Ubah ke angka
+      v.minValue(0, "Jumlah Biaya per Angsuran harus lebih dari 0") // Validasi angka
+    )
+  ),
 });
 
-export default function FormKeuangan() {
+type FormKeuanganProps = {
+  paketData: PaketInterface[];
+  jamaahData: JamaahInterface[];
+};
+
+export default function FormKeuangan({
+  paketData,
+  jamaahData,
+}: FormKeuanganProps) {
   const [open, setOpen] = useState(false);
   const [metode, setMetode] = useState<string>("");
   const [jenisPaket, setJenisPaket] = useState<string>("");
 
-  const [formValues, setFormValues] = useState({
-    nama: "",
-    jenisPaket: "",
+  const [formValues, setFormValues] = useState<FormType>({
+    jamaah: {
+      id: 0,
+      nama: "",
+      ayahKandung: "",
+      noTelp: "",
+      kontakDarurat: [
+        {
+          id: 0,
+          nama: "",
+          no_telp: "",
+          hubungan: KontakDaruratRelation.Lainnya,
+        },
+      ],
+      email: "",
+      jenisKelamin: JenisKelamin.LakiLaki,
+      tempatLahir: "",
+      pernikahan: false,
+      alamat: "",
+      varianKamar: TipeKamar.DOUBLE,
+      kewarganegaraan: true,
+      pekerjaan: "",
+      kursiRoda: false,
+      riwayatPenyakit: "",
+      jenisDokumen: [],
+      jenisPaket: {
+        id: 0, // Mengambil hanya properti yang relevan
+        nama: "",
+        jenis: JenisPaket.REGULAR,
+        maskapai: Maskapai.SAUDIA_ARABIA,
+        customMaskapai: "",
+        jenisPenerbangan: JenisPenerbangan.DIRECT,
+        noPenerbangan: "",
+        keretaCepat: false,
+        tglKeberangkatan: "",
+        tglKepulangan: "",
+        fasilitas: [],
+        publish: false,
+        namaMuthawif: "",
+        noTelpMuthawif: "",
+        Hotel: [],
+        gambar_url: "",
+        hargaDouble: 0,
+        hargaTriple: 0,
+        hargaQuad: 0,
+      },
+      berangkat: "",
+      selesai: "",
+      status: "Dijadwalkan",
+    },
+    jenisPaket: {
+      id: 0, // Mengambil hanya properti yang relevan
+      nama: "",
+      jenis: JenisPaket.REGULAR,
+      maskapai: Maskapai.SAUDIA_ARABIA,
+      customMaskapai: "",
+      jenisPenerbangan: JenisPenerbangan.DIRECT,
+      noPenerbangan: "",
+      keretaCepat: false,
+      tglKeberangkatan: "",
+      tglKepulangan: "",
+      fasilitas: [],
+      publish: false,
+      namaMuthawif: "",
+      noTelpMuthawif: "",
+      Hotel: [],
+      gambar_url: "",
+      hargaDouble: 0,
+      hargaTriple: 0,
+      hargaQuad: 0,
+    },
     metodePembayaran: "",
     tenggatPembayaran: "",
-    totalTagihan: "",
-    uangMuka: "",
-    banyaknyaAngsuran: "",
-    jumlahBiayaPerAngsuran: "",
+    totalTagihan: 0,
+    uangMuka: 0,
+    banyaknyaCicilan: 0,
+    jumlahBiayaPerAngsuran: 0,
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
 
@@ -75,8 +178,8 @@ export default function FormKeuangan() {
       setFormValues((prev) => ({
         ...prev,
         metodePembayaran: event.target.value,
-        banyaknyaAngsuran: "",
-        jumlahBiayaPerAngsuran: "",
+        banyaknyaCicilan: 0,
+        jumlahBiayaPerAngsuran: 0,
       }));
     } else {
       setFormValues((prev) => ({
@@ -84,13 +187,6 @@ export default function FormKeuangan() {
         metodePembayaran: event.target.value,
       }));
     }
-  };
-
-  const handleJenisPaketChange = (
-    event: ChangeEvent<HTMLInputElement>
-  ) => {
-    setJenisPaket(event.target.value);
-    setFormValues({ ...formValues, jenisPaket: event.target.value });
   };
 
   // Handle form submission
@@ -110,15 +206,15 @@ export default function FormKeuangan() {
 
     // Specific validations for Cicilan method
     if (formValues.metodePembayaran === "Cicilan") {
-      if (!formValues.banyaknyaAngsuran) {
-        methodErrors.banyaknyaAngsuran = "Banyaknya angsuran harus dipilih";
+      if (!formValues.banyaknyaCicilan) {
+        methodErrors.banyaknyaCicilan = "Masukkan banyaknya cicilan";
       }
     } else {
       // Clear installment-related fields for non-Cicilan methods
       setFormValues((prev) => ({
         ...prev,
-        banyaknyaAngsuran: "",
-        jumlahBiayaPerAngsuran: "",
+        banyaknyaCicilan: 0,
+        jumlahBiayaPerAngsuran: 0,
       }));
     }
 
@@ -132,17 +228,15 @@ export default function FormKeuangan() {
     const result = v.safeParse(formSchema, formValues);
 
     if (!result.success) {
-      const errorMap: FormErrors = {};
+      const errorMap: Record<string, string> = {};
       result.issues.forEach((issue) => {
-        const path = issue.path?.[0]?.key as keyof FormErrors | undefined;
+        // Pastikan path adalah string
+        const path = String(issue.path?.[0]?.key);
         if (path) {
-          errorMap[path] = issue.message;
+          // Pastikan issue.message adalah string
+          errorMap[path] = String(issue.message);
         }
       });
-
-      setFormErrors(errorMap);
-      console.error("Validation errors:", errorMap);
-      return;
     }
 
     console.log("Form submitted:", formValues);
@@ -151,23 +245,40 @@ export default function FormKeuangan() {
     handleClose();
   };
 
+  const formatRupiah = (angka: number): string => {
+  return angka.toLocaleString("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  });
+};
+
+const handleChangeHarga = (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
+  const value = e.target.value.replace(/[^\d]/g, ""); // Menghapus non-numeric characters (selain angka)
+
+  setFormValues((prevValues) => ({
+    ...prevValues,
+    [type]: value === "" ? 0 : Number(value),
+  }));
+};
+
   // Calculate installment (angsuran) if "Cicilan" is selected
   const calculateAngsuran = () => {
     if (
       metode === "Cicilan" &&
       formValues.totalTagihan &&
       formValues.uangMuka &&
-      formValues.banyaknyaAngsuran
+      formValues.banyaknyaCicilan
     ) {
       const jumlahAngsuran =
         (Number(formValues.totalTagihan) - Number(formValues.uangMuka)) /
-        Number(formValues.banyaknyaAngsuran);
+        Number(formValues.banyaknyaCicilan);
 
       // Round the installment amount to whole number
       const roundedAngsuran = Math.round(jumlahAngsuran);
       setFormValues({
         ...formValues,
-        jumlahBiayaPerAngsuran: roundedAngsuran.toString(),
+        jumlahBiayaPerAngsuran: roundedAngsuran,
       });
     }
   };
@@ -177,7 +288,7 @@ export default function FormKeuangan() {
   }, [
     formValues.totalTagihan,
     formValues.uangMuka,
-    formValues.banyaknyaAngsuran,
+    formValues.banyaknyaCicilan,
   ]);
 
   const handleClickOpen = () => setOpen(true);
@@ -186,14 +297,82 @@ export default function FormKeuangan() {
 
     // Reset all form values
     setFormValues({
-      nama: "",
-      jenisPaket: "",
+      jamaah: {
+        id: 0,
+        nama: "",
+        ayahKandung: "",
+        noTelp: "",
+        kontakDarurat: [
+          {
+            id: 0,
+            nama: "",
+            no_telp: "",
+            hubungan: KontakDaruratRelation.Lainnya,
+          },
+        ],
+        email: "",
+        jenisKelamin: JenisKelamin.LakiLaki,
+        tempatLahir: "",
+        pernikahan: false,
+        alamat: "",
+        varianKamar: TipeKamar.DOUBLE,
+        kewarganegaraan: true,
+        pekerjaan: "",
+        kursiRoda: false,
+        riwayatPenyakit: "",
+        jenisDokumen: [],
+        jenisPaket: {
+          id: 0, // Mengambil hanya properti yang relevan
+          nama: "",
+          jenis: JenisPaket.REGULAR,
+          maskapai: Maskapai.SAUDIA_ARABIA,
+          customMaskapai: "",
+          jenisPenerbangan: JenisPenerbangan.DIRECT,
+          noPenerbangan: "",
+          keretaCepat: false,
+          tglKeberangkatan: "",
+          tglKepulangan: "",
+          fasilitas: [],
+          publish: false,
+          namaMuthawif: "",
+          noTelpMuthawif: "",
+          Hotel: [],
+          gambar_url: "",
+          hargaDouble: 0,
+          hargaTriple: 0,
+          hargaQuad: 0,
+        },
+        berangkat: "",
+        selesai: "",
+        status: "Dijadwalkan",
+      },
+      jenisPaket: {
+        id: 0, // Mengambil hanya properti yang relevan
+        nama: "",
+        jenis: JenisPaket.REGULAR,
+        maskapai: Maskapai.SAUDIA_ARABIA,
+        customMaskapai: "",
+        jenisPenerbangan: JenisPenerbangan.DIRECT,
+        noPenerbangan: "",
+        keretaCepat: false,
+        tglKeberangkatan: "",
+        tglKepulangan: "",
+        fasilitas: [],
+        publish: false,
+        namaMuthawif: "",
+        noTelpMuthawif: "",
+        Hotel: [],
+        gambar_url: "",
+        hargaDouble: 0,
+        hargaTriple: 0,
+        hargaQuad: 0,
+      },
       metodePembayaran: "",
       tenggatPembayaran: "",
-      totalTagihan: "",
-      uangMuka: "",
-      banyaknyaAngsuran: "",
-      jumlahBiayaPerAngsuran: "",
+      totalTagihan: 0,
+      uangMuka: 0,
+      banyaknyaCicilan: 0,
+      jumlahBiayaPerAngsuran: 0,
     });
 
     // Reset method selection
@@ -227,30 +406,74 @@ export default function FormKeuangan() {
           >
             <DialogContentText>Masukkan detail pembayaran.</DialogContentText>
 
-            <CustomTextField
+            <Autocomplete
               fullWidth
-              label="Nama Lengkap"
-              name="nama"
-              value={formValues.nama}
-              error={!!formErrors.nama}
-              helperText={formErrors.nama}
-              onChange={(e: { target: { value: any } }) =>
-                setFormValues({ ...formValues, nama: e.target.value })
+              options={jamaahData}
+              getOptionLabel={(option) => option.nama} // Menampilkan nama Jamaah
+              value={
+                jamaahData.find(
+                  (jamaah) => jamaah.id === formValues.jamaah.id
+                ) || null
               }
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  setFormValues({
+                    ...formValues,
+                    jamaah: newValue || ({} as JamaahInterface),
+                    jenisPaket: newValue.jenisPaket || ({} as PaketInterface), // Mengatur paket otomatis
+                    totalTagihan: newValue.jenisPaket?.hargaDouble || 0, // Mengatur harga totalTagihan berdasarkan paket
+                  });
+                } else {
+                  setFormValues({
+                    ...formValues,
+                    jamaah: {} as JamaahInterface,
+                    jenisPaket: {} as PaketInterface,
+                    totalTagihan: 0, // Reset totalTagihan jika Jamaah dihapus
+                  });
+                }
+              }}
+              renderInput={(params) => (
+                <CustomTextField
+                  {...params}
+                  label="Pilih Jamaah"
+                  variant="outlined"
+                  fullWidth
+                />
+              )}
             />
 
-            <CustomTextField
-              select
+            <Autocomplete
               fullWidth
-              label="Jenis Paket"
-              value={jenisPaket}
-              onChange={handleJenisPaketChange}
-              error={formErrors.jenisPaket}
-            >
-              <MenuItem value="Paket Regular 1">Paket Regular 1</MenuItem>
-              <MenuItem value="Paket Regular 2">Paket Regular 2</MenuItem>
-              <MenuItem value="Paket VIP 1">Paket VIP 1</MenuItem>
-            </CustomTextField>
+              options={paketData}
+              getOptionLabel={(option) => option.nama} // Menampilkan nama paket
+              value={
+                paketData.find(
+                  (paket) => paket.id === formValues.jenisPaket.id
+                ) || null
+              }
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  setFormValues({
+                    ...formValues,
+                    jenisPaket: newValue || ({} as PaketInterface),
+                  });
+                } else {
+                  setFormValues({
+                    ...formValues,
+                    jenisPaket: {} as PaketInterface,
+                  });
+                }
+              }}
+              renderInput={(params) => (
+                <CustomTextField
+                  {...params}
+                  label="Jenis Paket"
+                  variant="outlined"
+                  fullWidth
+
+                />
+              )}
+            />
 
             <CustomTextField
               select
@@ -289,7 +512,7 @@ export default function FormKeuangan() {
               fullWidth
               label="Total Tagihan"
               name="totalTagihan"
-              value={formValues.totalTagihan}
+              value={formatRupiah(formValues.totalTagihan)}
               error={!!formErrors.totalTagihan}
               helperText={formErrors.totalTagihan}
               onChange={(e: { target: { value: any } }) =>
@@ -304,30 +527,25 @@ export default function FormKeuangan() {
               fullWidth
               label="Uang Muka"
               name="uangMuka"
-              value={formValues.uangMuka}
+              value={formatRupiah(formValues.uangMuka ?? 0)}
               error={!!formErrors.uangMuka}
               helperText={formErrors.uangMuka}
-              onChange={(e: { target: { value: any } }) =>
-                setFormValues({
-                  ...formValues,
-                  uangMuka: e.target.value,
-                })
-              }
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeHarga(e, "uangMuka")} 
             />
 
             {metode === "Cicilan" && (
               <>
                 <CustomTextField
                   fullWidth
-                  label="Banyaknya Angsuran"
-                  name="banyaknyaAngsuran"
-                  value={formValues.banyaknyaAngsuran}
-                  error={!!formErrors.banyaknyaAngsuran}
-                  helperText={formErrors.banyaknyaAngsuran}
+                  label="Banyaknya Cicilan"
+                  name="banyaknyaCicilan"
+                  value={formValues.banyaknyaCicilan}
+                  error={!!formErrors.banyaknyaCicilan}
+                  helperText={formErrors.banyaknyaCicilan}
                   onChange={(e: { target: { value: any } }) =>
                     setFormValues({
                       ...formValues,
-                      banyaknyaAngsuran: e.target.value,
+                      banyaknyaCicilan: e.target.value,
                     })
                   }
                 />
@@ -335,7 +553,7 @@ export default function FormKeuangan() {
                   fullWidth
                   label="Jumlah Biaya Per Angsuran"
                   name="jumlahBiayaPerAngsuran"
-                  value={formValues.jumlahBiayaPerAngsuran || ""}
+                  value={formatRupiah(formValues.jumlahBiayaPerAngsuran ?? 0)}
                   error={!!formErrors.jumlahBiayaPerAngsuran}
                   helperText={formErrors.jumlahBiayaPerAngsuran}
                   disabled
@@ -344,7 +562,9 @@ export default function FormKeuangan() {
             )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose} variant="contained" color="error">Batal</Button>
+            <Button onClick={handleClose} variant="contained" color="error">
+              Batal
+            </Button>
             <Button type="submit" variant="contained" sx={{ color: "white" }}>
               Simpan
             </Button>

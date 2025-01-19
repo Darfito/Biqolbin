@@ -4,11 +4,9 @@ import { Box, Card, Grid, Typography } from "@mui/material";
 import PageContainer from "../../components/container/PageContainer";
 
 import ScoreCard from "../../utilities/component/card/ScoreCard";
-import { columnsJamaah } from "./columns/columnsJamaah";
 import JamaahTable from "../../utilities/component/table/JamaahTable";
 import FormJamaah from "./FormJamaah";
-import { CardStatsHorizontalWithBorderProps, CardStatsProps, JamaahInterface, PaketInterface } from "../../utilities/type";
-import { useMemo } from "react";
+import { CardStatsProps, JamaahInterface, PaketInterface } from "../../utilities/type";
 import { IconLuggage, IconPlaneArrival, IconUser } from "@tabler/icons-react";
 
 
@@ -21,11 +19,10 @@ export type JamaahProps = {
 
 // Peta ikon
 const iconMap: Record<string, React.ElementType> = {
-  IconUser,
-  IconLuggage,
-  IconPlaneArrival,
+  IconUser: IconUser,
+  IconLuggage: IconLuggage,
+  IconPlaneArrival: IconPlaneArrival,
 };
-
 const Jamaah = ({ paketData, jamaahData, scoreCardData  }: JamaahProps) => {
   console.log("Paket data:", paketData);
   console.log("Jamaah data:", jamaahData);

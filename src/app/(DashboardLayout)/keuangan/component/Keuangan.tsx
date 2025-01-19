@@ -3,13 +3,19 @@
 import { Box, Card, Grid, Typography } from "@mui/material";
 import PageContainer from "../../components/container/PageContainer";
 import ScoreCard from "../../utilities/component/card/ScoreCard";
-import { KeuanganData, scoreCardKeuangan } from "../../utilities/data";
+import { scoreCardKeuangan } from "../../utilities/data";
 import FormKeuangan from "./FormKeuangan";
 
 import { columnsKeuangan } from "./columns/columnsKeuangan";
 import KeuanganTable from "../../utilities/component/table/KeuanganTable";
+import { JamaahInterface, PaketInterface } from "../../utilities/type";
 
-const Keuangan = () => {
+export type KeuanganProps = {
+  paketData: PaketInterface[]
+  jamaahData: JamaahInterface[]
+}
+
+const Keuangan = ({paketData, jamaahData}: KeuanganProps) => {
   return (
     <>
       <Box
@@ -45,10 +51,10 @@ const Keuangan = () => {
 
       <PageContainer title="Keuangan">
         <Box sx={{ margin: "20px", display: "flex", justifyContent: "end" }}>
-          <FormKeuangan />
+          <FormKeuangan paketData={paketData} jamaahData={jamaahData} />
         </Box>
         <Card sx={{ mt: 2 }}>
-          <KeuanganTable columns={columnsKeuangan} data={KeuanganData} />
+          <KeuanganTable columns={columnsKeuangan} data={[]} />
         </Card>
       </PageContainer>
     </>

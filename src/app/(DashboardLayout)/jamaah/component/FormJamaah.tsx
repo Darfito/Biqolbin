@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react";
 import * as v from "valibot";
 import Button from "@mui/material/Button";
