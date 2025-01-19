@@ -8,14 +8,19 @@ import FormKeuangan from "./FormKeuangan";
 
 import { columnsKeuangan } from "./columns/columnsKeuangan";
 import KeuanganTable from "../../utilities/component/table/KeuanganTable";
-import { JamaahInterface, PaketInterface } from "../../utilities/type";
+import { JamaahInterface, KeuanganInterface, PaketInterface } from "../../utilities/type";
 
 export type KeuanganProps = {
   paketData: PaketInterface[]
   jamaahData: JamaahInterface[]
+  keuanganData: KeuanganInterface[]
 }
 
-const Keuangan = ({paketData, jamaahData}: KeuanganProps) => {
+const Keuangan = ({paketData, jamaahData, keuanganData}: KeuanganProps) => {
+
+  console.log("jamaahData di keuangan:", jamaahData);
+
+  console.log("Keuangan data:", keuanganData);
   return (
     <>
       <Box
@@ -54,7 +59,7 @@ const Keuangan = ({paketData, jamaahData}: KeuanganProps) => {
           <FormKeuangan paketData={paketData} jamaahData={jamaahData} />
         </Box>
         <Card sx={{ mt: 2 }}>
-          <KeuanganTable columns={columnsKeuangan} data={[]} />
+          <KeuanganTable data={keuanganData} />
         </Card>
       </PageContainer>
     </>

@@ -2,15 +2,19 @@ import ActionButton from "@/app/(DashboardLayout)/utilities/component/table/comp
 import { KeuanganInterface } from "@/app/(DashboardLayout)/utilities/type";
 import { createColumnHelper, ColumnDef } from "@tanstack/react-table";
 
-
 const columnHelper = createColumnHelper<KeuanganInterface>();
 
 export const columnsKeuangan: ColumnDef<KeuanganInterface, any>[] = [
-  columnHelper.accessor("nama", {
+  columnHelper.accessor("Jamaah.nama", {
     cell: (info) => info.getValue(),
     header: "Nama",
   }),
-  columnHelper.accessor("jenisPaket.nama", {
+  columnHelper.accessor("namaPaket", {
+    cell: (info) => info.getValue(),
+    header: "Nama Paket",
+    enableColumnFilter: true,
+  }),
+  columnHelper.accessor("jenisPaket", {
     cell: (info) => info.getValue(),
     header: "Jenis Paket",
     enableColumnFilter: true,

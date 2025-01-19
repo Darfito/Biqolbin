@@ -18,14 +18,17 @@ import {
   JenisPenerbangan,
   KontakDaruratRelation,
   Maskapai,
+  MetodePembayaranType,
   PaketInterface,
+  StatusType,
   TipeKamar,
 } from "../../utilities/type";
 import { Autocomplete } from "@mui/material";
+import { createKeuaganAction } from "../action";
 
 interface FormErrors {
   nama?: string;
-  jenisPaket?: string;
+  Paket?: string;
   metodePembayaran?: string;
   uangMuka?: string;
   totalTagihan?: string;
@@ -35,14 +38,15 @@ interface FormErrors {
 }
 
 type FormType = {
-  jamaah: JamaahInterface;
-  jenisPaket: PaketInterface;
-  metodePembayaran: string;
+  Jamaah: JamaahInterface;
+  Paket: PaketInterface;
+  metodePembayaran: MetodePembayaranType;
   uangMuka?: number;
   totalTagihan: number;
   tenggatPembayaran: string;
   banyaknyaCicilan?: number;
   jumlahBiayaPerAngsuran?: number;
+  status: StatusType;
 };
 
 // Valibot Schema
@@ -87,9 +91,8 @@ export default function FormKeuangan({
   const [open, setOpen] = useState(false);
   const [metode, setMetode] = useState<string>("");
   const [jenisPaket, setJenisPaket] = useState<string>("");
-
   const [formValues, setFormValues] = useState<FormType>({
-    jamaah: {
+    Jamaah: {
       id: 0,
       nama: "",
       ayahKandung: "",
@@ -138,7 +141,7 @@ export default function FormKeuangan({
       selesai: "",
       status: "Dijadwalkan",
     },
-    jenisPaket: {
+    Paket: {
       id: 0, // Mengambil hanya properti yang relevan
       nama: "",
       jenis: JenisPaket.REGULAR,
@@ -159,38 +162,41 @@ export default function FormKeuangan({
       hargaTriple: 0,
       hargaQuad: 0,
     },
-    metodePembayaran: "",
+    metodePembayaran: MetodePembayaranType.TUNAI,
     tenggatPembayaran: "",
     totalTagihan: 0,
     uangMuka: 0,
     banyaknyaCicilan: 0,
     jumlahBiayaPerAngsuran: 0,
+    status: StatusType.BELUM_BAYAR,
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
 
   // Handle metode pembayaran selection
   const handleMetodeChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setMetode(event.target.value);
-    setFormValues({ ...formValues, metodePembayaran: event.target.value });
+    const newMetode = event.target.value as MetodePembayaranType; // Casting tipe
+
+    setMetode(newMetode);
+    setFormValues({ ...formValues, metodePembayaran: newMetode });
 
     // Reset installment values if method is not "Cicilan"
-    if (event.target.value !== "Cicilan") {
+    if (newMetode !== "Cicilan") {
       setFormValues((prev) => ({
         ...prev,
-        metodePembayaran: event.target.value,
+        metodePembayaran: newMetode,
         banyaknyaCicilan: 0,
         jumlahBiayaPerAngsuran: 0,
       }));
     } else {
       setFormValues((prev) => ({
         ...prev,
-        metodePembayaran: event.target.value,
+        metodePembayaran: newMetode,
       }));
     }
   };
 
   // Handle form submission
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFormErrors({}); // Clear previous errors
 
@@ -240,27 +246,37 @@ export default function FormKeuangan({
     }
 
     console.log("Form submitted:", formValues);
+    const response = await createKeuaganAction(formValues);
     toast.success("Form berhasil disubmit!"); // Show success toast
-
     handleClose();
+
+    if (response.success) {
+      toast.success("Item Keuangan berhasil ditambahkan!");
+      handleClose(); // Tutup dialog setelah berhasil
+    } else {
+      toast.error(`Gagal menambahkan Item Keuangan: ${response.error}`);
+    }
   };
 
   const formatRupiah = (angka: number): string => {
-  return angka.toLocaleString("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  });
-};
+    return angka.toLocaleString("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    });
+  };
 
-const handleChangeHarga = (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
-  const value = e.target.value.replace(/[^\d]/g, ""); // Menghapus non-numeric characters (selain angka)
+  const handleChangeHarga = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: string
+  ) => {
+    const value = e.target.value.replace(/[^\d]/g, ""); // Menghapus non-numeric characters (selain angka)
 
-  setFormValues((prevValues) => ({
-    ...prevValues,
-    [type]: value === "" ? 0 : Number(value),
-  }));
-};
+    setFormValues((prevValues) => ({
+      ...prevValues,
+      [type]: value === "" ? 0 : Number(value),
+    }));
+  };
 
   // Calculate installment (angsuran) if "Cicilan" is selected
   const calculateAngsuran = () => {
@@ -297,7 +313,7 @@ const handleChangeHarga = (e: React.ChangeEvent<HTMLInputElement>, type: string)
 
     // Reset all form values
     setFormValues({
-      jamaah: {
+      Jamaah: {
         id: 0,
         nama: "",
         ayahKandung: "",
@@ -346,7 +362,7 @@ const handleChangeHarga = (e: React.ChangeEvent<HTMLInputElement>, type: string)
         selesai: "",
         status: "Dijadwalkan",
       },
-      jenisPaket: {
+      Paket: {
         id: 0, // Mengambil hanya properti yang relevan
         nama: "",
         jenis: JenisPaket.REGULAR,
@@ -367,12 +383,13 @@ const handleChangeHarga = (e: React.ChangeEvent<HTMLInputElement>, type: string)
         hargaTriple: 0,
         hargaQuad: 0,
       },
-      metodePembayaran: "",
+      metodePembayaran: MetodePembayaranType.TUNAI,
       tenggatPembayaran: "",
       totalTagihan: 0,
       uangMuka: 0,
       banyaknyaCicilan: 0,
       jumlahBiayaPerAngsuran: 0,
+      status: StatusType.BELUM_BAYAR,
     });
 
     // Reset method selection
@@ -412,22 +429,22 @@ const handleChangeHarga = (e: React.ChangeEvent<HTMLInputElement>, type: string)
               getOptionLabel={(option) => option.nama} // Menampilkan nama Jamaah
               value={
                 jamaahData.find(
-                  (jamaah) => jamaah.id === formValues.jamaah.id
+                  (jamaah) => jamaah.id === formValues.Jamaah.id
                 ) || null
               }
               onChange={(event, newValue) => {
                 if (newValue) {
                   setFormValues({
                     ...formValues,
-                    jamaah: newValue || ({} as JamaahInterface),
-                    jenisPaket: newValue.jenisPaket || ({} as PaketInterface), // Mengatur paket otomatis
+                    Jamaah: newValue || ({} as JamaahInterface),
+                    Paket: newValue.jenisPaket || ({} as PaketInterface), // Mengatur paket otomatis
                     totalTagihan: newValue.jenisPaket?.hargaDouble || 0, // Mengatur harga totalTagihan berdasarkan paket
                   });
                 } else {
                   setFormValues({
                     ...formValues,
-                    jamaah: {} as JamaahInterface,
-                    jenisPaket: {} as PaketInterface,
+                    Jamaah: {} as JamaahInterface,
+                    Paket: {} as PaketInterface,
                     totalTagihan: 0, // Reset totalTagihan jika Jamaah dihapus
                   });
                 }
@@ -448,19 +465,19 @@ const handleChangeHarga = (e: React.ChangeEvent<HTMLInputElement>, type: string)
               getOptionLabel={(option) => option.nama} // Menampilkan nama paket
               value={
                 paketData.find(
-                  (paket) => paket.id === formValues.jenisPaket.id
+                  (paket) => paket.id === formValues.Paket.id
                 ) || null
               }
               onChange={(event, newValue) => {
                 if (newValue) {
                   setFormValues({
                     ...formValues,
-                    jenisPaket: newValue || ({} as PaketInterface),
+                    Paket: newValue || ({} as PaketInterface),
                   });
                 } else {
                   setFormValues({
                     ...formValues,
-                    jenisPaket: {} as PaketInterface,
+                    Paket: {} as PaketInterface,
                   });
                 }
               }}
@@ -470,7 +487,6 @@ const handleChangeHarga = (e: React.ChangeEvent<HTMLInputElement>, type: string)
                   label="Jenis Paket"
                   variant="outlined"
                   fullWidth
-
                 />
               )}
             />
@@ -515,11 +531,8 @@ const handleChangeHarga = (e: React.ChangeEvent<HTMLInputElement>, type: string)
               value={formatRupiah(formValues.totalTagihan)}
               error={!!formErrors.totalTagihan}
               helperText={formErrors.totalTagihan}
-              onChange={(e: { target: { value: any } }) =>
-                setFormValues({
-                  ...formValues,
-                  totalTagihan: e.target.value,
-                })
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                handleChangeHarga(e, "totalTagihan")
               }
             />
 
@@ -530,7 +543,9 @@ const handleChangeHarga = (e: React.ChangeEvent<HTMLInputElement>, type: string)
               value={formatRupiah(formValues.uangMuka ?? 0)}
               error={!!formErrors.uangMuka}
               helperText={formErrors.uangMuka}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeHarga(e, "uangMuka")} 
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                handleChangeHarga(e, "uangMuka")
+              }
             />
 
             {metode === "Cicilan" && (

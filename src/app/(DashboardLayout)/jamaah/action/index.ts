@@ -35,6 +35,7 @@ export const mapJamaahData = (data: any): JamaahInterface[] => {
     jenisPaket: {
       id: item.Paket.id,
       nama: item.Paket.nama,
+      jenis: item.Paket.jenis,
       maskapai: item.Paket.maskapai,
       customMaskapai: item.Paket.customMaskapai || undefined,
       noPenerbangan: item.Paket.noPenerbangan || undefined,
@@ -115,6 +116,7 @@ export const getJamaahAction = async (): Promise<JamaahInterface[]> => {
       fasilitas,
       namaMuthawif,
       noTelpMuthawif,
+      jenis,
       Hotel (
         id,
         namaHotel,

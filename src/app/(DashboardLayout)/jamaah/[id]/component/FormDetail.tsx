@@ -60,8 +60,6 @@ interface FormErrors {
   pekerjaan?: string;
   kursiRoda?: string;
   riwayatPenyakit?: string;
-  // jenisDokumen?: string[];
-  // jenisPaket?: string;
   berangkat?: string;
   selesai?: string;
   status?: string;
