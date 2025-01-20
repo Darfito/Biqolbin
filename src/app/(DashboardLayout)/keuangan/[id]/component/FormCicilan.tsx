@@ -1,6 +1,9 @@
+"use client";
+
 import CustomTextField from "@/app/(DashboardLayout)/components/forms/theme-elements/CustomTextField";
-import { showToast } from "@/app/(DashboardLayout)/utilities/component/toast/Toast";
 import { CicilanType } from "@/app/(DashboardLayout)/utilities/type";
+import { toast } from "react-toastify"; // Import toast
+import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 import {
   Button,
   Dialog,
@@ -11,12 +14,22 @@ import {
 } from "@mui/material";
 import React, { FormEvent, useEffect, useState } from "react";
 import * as v from "valibot";
+import { createCicilanAction, updateCicilanAction } from "../../action";
+import { revalidatePath } from "next/cache";
 
 interface FormErrors {
   cicilanKe?: string;
-  tanggalBayar?: string;
+  tanggalPembayaran?: string;
   nominalCicilan?: string;
 }
+
+type FormType = {
+  id?: number;
+  keuangan_id: number;
+  cicilanKe: number;
+  tanggalPembayaran: string;
+  nominalCicilan: number;
+};
 
 const formSchema = v.object({
   cicilanKe: v.pipe(
@@ -24,7 +37,7 @@ const formSchema = v.object({
     v.transform(Number),
     v.minValue(1, "Cicilan keberapa harus lebih dari 0")
   ),
-  tanggalBayar: v.pipe(
+  tanggalPembayaran: v.pipe(
     v.string(),
     v.nonEmpty("Tenggat pembayaran harus diisi") // Validasi
   ),
@@ -40,20 +53,24 @@ interface FormCicilanProps {
   handleClose: () => void;
   initialData?: CicilanType | null;
   currentCicilanKe?: number;
+  keuanganId?: number;
 }
 
-const FormCicilan= ({
+const FormCicilan = ({
   open,
   handleClose,
   initialData,
   currentCicilanKe,
-}:FormCicilanProps) => {
+  keuanganId,
+}: FormCicilanProps) => {
   console.log("initialData cicilan:", initialData);
   console.log("cicilan ke:", currentCicilanKe);
 
-  const [formValues, setFormValues] = useState({
+  const [formValues, setFormValues] = useState<FormType>({
+    id: 0,
+    keuangan_id: keuanganId || 0,
     cicilanKe: 0,
-    tanggalBayar: "",
+    tanggalPembayaran: "",
     nominalCicilan: 0,
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
@@ -62,61 +79,91 @@ const FormCicilan= ({
   useEffect(() => {
     if (initialData) {
       setFormValues({
+        id: initialData.id || 0,
+        keuangan_id: initialData.keuangan_id || 0,
         cicilanKe: initialData.cicilanKe || 0,
-        tanggalBayar: initialData.tanggalPembayaran
-          ? new Date(initialData.tanggalPembayaran).toISOString().split("T")[0]
-          : "",
+        tanggalPembayaran: initialData.tanggalPembayaran || "",
         nominalCicilan: initialData.nominalCicilan || 0,
       });
     } else {
       setFormValues({
+        keuangan_id: keuanganId || 0,
         cicilanKe: currentCicilanKe || 0,
-        tanggalBayar: "",
+        tanggalPembayaran: "",
         nominalCicilan: 0,
       });
     }
-  }, [initialData]);
+  }, [currentCicilanKe, initialData, keuanganId]);
 
+  const formatRupiah = (angka: number): string => {
+    return angka.toLocaleString("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    });
+  };
+
+  const handleChangeHarga = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: string
+  ) => {
+    const value = e.target.value.replace(/[^\d]/g, ""); // Menghapus non-numeric characters (selain angka)
+
+    setFormValues((prevValues) => ({
+      ...prevValues,
+      [type]: value === "" ? 0 : Number(value),
+    }));
+  };
   // Handle form submission
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    // Parse and validate form values
-    const parsedValues = {
-      cicilanKe: Number(formValues.cicilanKe),
-      tanggalBayar: formValues.tanggalBayar,
-      nominalCicilan: Number(formValues.nominalCicilan),
-    };
-
-    const result = v.safeParse(formSchema, parsedValues);
-
+  
+    // Validasi data form
+    const result = v.safeParse(formSchema, formValues);
+  
     if (!result.success) {
-      const errorMap: FormErrors = {};
+      const errorMap: Record<string, string> = {};
       result.issues.forEach((issue) => {
-        const path = issue.path?.[0]?.key as keyof FormErrors | undefined;
+        const path = issue.path?.[0]?.key as string | undefined;
         if (path) {
           errorMap[path] = issue.message;
         }
       });
-
+  
       setFormErrors(errorMap);
       console.error("Validation errors:", errorMap);
       return;
     }
-
-    // If validation passes, log form values
-    console.log("Form submitted successfully:", parsedValues);
-    // If validation passes
-    if (initialData) {
-      console.log("Update Cicilan:", parsedValues); // Log update for now
-    } else {
-      console.log("Add New Cicilan:", parsedValues); // Log addition for now
+  
+    try {
+      // Tentukan apakah ini operasi create atau update berdasarkan ada/tidaknya id
+      let response;
+      if (formValues.id) {
+        response = await updateCicilanAction(formValues);
+      } else {
+        response = await createCicilanAction(formValues);
+      }
+  
+      if (response.success) {
+        toast.success(
+          formValues.id
+            ? "Cicilan berhasil diperbarui!"
+            : "Cicilan berhasil ditambahkan!"
+        );
+        handleClose(); // Tutup dialog setelah berhasil
+      } else {
+        toast.error(
+          `Gagal ${
+            formValues.id ? "memperbarui" : "menambahkan"
+          } cicilan: ${response.error}`
+        );
+      }
+    } catch (error: any) {
+      console.error("Unexpected error:", error);
+      toast.error("Terjadi kesalahan saat memproses form.");
     }
-
-    // Close the dialog
-    handleClose();
-    showToast("Form berhasil disimpan", "success");
   };
+  
 
   return (
     <>
@@ -158,14 +205,17 @@ const FormCicilan= ({
 
             <CustomTextField
               fullWidth
-              label="Tanggal Bayar"
-              name="tanggalBayar"
+              label="Tanggal Pembayaran"
+              name="tanggalPembayaran"
               type="date"
-              value={formValues.tanggalBayar}
-              error={!!formErrors.tanggalBayar}
-              helperText={formErrors.tanggalBayar}
+              value={formValues.tanggalPembayaran}
+              error={!!formErrors.tanggalPembayaran}
+              helperText={formErrors.tanggalPembayaran}
               onChange={(e: { target: { value: string } }) =>
-                setFormValues({ ...formValues, tanggalBayar: e.target.value })
+                setFormValues({
+                  ...formValues,
+                  tanggalPembayaran: e.target.value,
+                })
               }
               InputLabelProps={{
                 shrink: true,
@@ -176,14 +226,11 @@ const FormCicilan= ({
               fullWidth
               label="Nominal Cicilan"
               name="nominalCicilan"
-              value={formValues.nominalCicilan}
+              value={formatRupiah(formValues.nominalCicilan)}
               error={!!formErrors.nominalCicilan}
               helperText={formErrors.nominalCicilan}
-              onChange={(e: { target: { value: number } }) => {
-                setFormValues({
-                  ...formValues,
-                  nominalCicilan: Number(e.target.value),
-                });
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleChangeHarga(e, "nominalCicilan");
               }}
             />
           </DialogContent>

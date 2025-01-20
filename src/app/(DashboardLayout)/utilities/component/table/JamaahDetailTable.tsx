@@ -40,6 +40,7 @@ import { JenisDokumen } from "../../type";
 import FileUploaderSingle from "../uploader/FileUploaderSingle";
 import { createClient } from "@/libs/supabase/client";
 import PdfViewer from "./components/PdfViewer";
+import ActionButton from "./components/ActionButton";
 
 const fuzzyFilter = (
   row: { getValue: (arg0: any) => any },
@@ -268,7 +269,7 @@ const JamaahDetailTable = ({
               </IconButton>
 
               {/* Tombol Delete */}
-              <IconButton
+              {/* <IconButton
                 color="error"
                 onClick={() => {
                   if (rowData.jamaah_id && rowData.nama_dokumen) {
@@ -279,7 +280,19 @@ const JamaahDetailTable = ({
                 }}
               >
                 <Delete />
-              </IconButton>
+              </IconButton> */}
+
+              <ActionButton
+              rowData={row.original}
+              mode="delete"
+              onDelete={() => {
+                if (rowData.jamaah_id && rowData.nama_dokumen) {
+                  handleOpenDeleteDialog(rowData);
+                } else {
+                  toast.error("Data Jamaah atau dokumen tidak valid.");
+                }
+              }} // Buka dialog konfirmasi
+            />
             </Box>
           );
         },

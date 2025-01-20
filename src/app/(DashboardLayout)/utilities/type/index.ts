@@ -33,16 +33,16 @@ export interface KeuanganInterface {
   catatanPembayaran?: string;
   status: StatusType;
   action?: string; // Optional field for action
-  cicilan?: CicilanType[];
+  Cicilan?: CicilanType[];
   paket_id?: number;
 }
 
 export type CicilanType = {
-  id: number;
+  keuangan_id?: number;
+  id?: number;
   cicilanKe: number;
-  jumlahCicilan: number;
   nominalCicilan: number;
-  tanggalPembayaran: Date;
+  tanggalPembayaran: string;
   lampiran?: string;
   action?: string;
 };

@@ -17,33 +17,59 @@ import React, { useEffect, useState } from "react";
 import FormDetail from "./FormDetail";
 import { useRouter } from "next/navigation";
 
-import { JamaahInterface, KeuanganInterface, PaketInterface } from "@/app/(DashboardLayout)/utilities/type";
-import { getKeuanganByIdAction } from "../../action";
+import {
+  CicilanType,
+  JamaahInterface,
+  KeuanganInterface,
+  PaketInterface,
+  StatusType,
+} from "@/app/(DashboardLayout)/utilities/type";
+import {
+  getCicilanAction,
+  getKeuanganByIdAction,
+  updateStatusLunas,
+} from "../../action";
+import KeuanganDetailTable from "@/app/(DashboardLayout)/utilities/component/table/KeuanganDetailTable";
 
 interface KeuanganDetailProps {
   id: number;
-  paketData: PaketInterface[]
-  jamaahData: JamaahInterface[]
+  paketData: PaketInterface[];
+  jamaahData: JamaahInterface[];
   breadcrumbLinks: { label: string; href?: string }[];
 }
 
-const KeuanganDetail = ({ id,paketData, jamaahData, breadcrumbLinks }: KeuanganDetailProps) => {
+const KeuanganDetail = ({
+  id,
+  paketData,
+  jamaahData,
+  breadcrumbLinks,
+}: KeuanganDetailProps) => {
   const router = useRouter(); // Initialize useRouter
   const [isEditing, setIsEditing] = useState<boolean>(false); // State to toggle edit mode
   const [currentData, setCurrentData] = useState<KeuanganInterface | null>(
     null
   ); // State untuk menyimpan data jamaah
+  const [nextCicilanKe, setNextCicilanKe] = useState<number>(0);
+  const [dataCicilan, setDataCicilan] = useState<CicilanType[]>([]);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState<boolean>(false); // State untuk dialog konfirmasi
+  const [statusLunasDialog, setStatusLunasDialog] = useState(false); // Untuk menandakan status lunas
   // Ambil data berdasarkan ID
   useEffect(() => {
     const fetchData = async () => {
       const data = await getKeuanganByIdAction(id);
-      if (data) setCurrentData(data);
+      const cicilan = await getCicilanAction(id);
+      if (data) {
+        setCurrentData(data.keuangan); // Set keuangan data
+        setNextCicilanKe(data.nextCicilanKe); // Set nextCicilanKe separately
+        setDataCicilan(cicilan);
+      }
     };
 
     fetchData();
   }, [id]);
 
+  const isLunas = currentData && currentData.sisaTagihan === 0;
   // Toggle the isEditing state
   const handleEditClick = () => {
     if (!isEditing) {
@@ -66,6 +92,33 @@ const KeuanganDetail = ({ id,paketData, jamaahData, breadcrumbLinks }: KeuanganD
   const handleBackClick = () => {
     router.push("/keuangan"); // Navigate to /keuangan page
   };
+
+  const handleLunasClick = () => {
+    setOpenConfirmDialog(true); // Open confirmation dialog
+  };
+
+  // Function to update status to Lunas
+  const handleConfirmLunas = async () => {
+    if (currentData && currentData.id) {
+      // Memastikan currentData dan id tidak undefined
+      const response = await updateStatusLunas(currentData.id); // Function to update status to Lunas
+      if (response.success) {
+        setCurrentData((prevState) => {
+          if (!prevState) return null; // Memastikan prevState tidak null sebelum update
+
+          return {
+            ...prevState, // Mengambil data sebelumnya
+            status: StatusType.LUNAS, // Mengubah status menjadi "Lunas"
+          };
+        });
+        setOpenConfirmDialog(false); // Close the dialog after confirmation
+      } else {
+        console.error("Failed to update status to Lunas");
+      }
+    }
+  };
+
+  console.log("dataCicilan: ", dataCicilan);
 
   return (
     <>
@@ -104,10 +157,17 @@ const KeuanganDetail = ({ id,paketData, jamaahData, breadcrumbLinks }: KeuanganD
             </Button>
             <Button
               variant="contained"
-              disabled
-              sx={{ color: "white", marginRight: "1rem" }}
+              disabled={!isLunas || currentData?.status === StatusType.LUNAS} // Disable the button if it's already LUNAS
+              sx={{
+                backgroundColor: "#008000",
+                color: "white",
+                marginRight: "1rem",
+              }}
+              onClick={handleLunasClick}
             >
-              Telah Lunas
+              {currentData?.status === StatusType.LUNAS
+                ? "Sudah Lunas"
+                : "Tandai Lunas"}
             </Button>
             <Button variant="contained" disabled sx={{ color: "white" }}>
               Invoice
@@ -118,11 +178,18 @@ const KeuanganDetail = ({ id,paketData, jamaahData, breadcrumbLinks }: KeuanganD
         <Box sx={{ marginTop: "2rem" }}>
           <FormDetail
             isEditing={isEditing}
-            keuanganData={currentData} paketData={paketData} jamaahData={jamaahData}          />
+            keuanganData={currentData}
+            paketData={paketData}
+            jamaahData={jamaahData}
+          />
         </Box>
 
         <Box sx={{ marginTop: "2rem", backgroundColor: "#fff" }}>
-          {/* <KeuanganDetailTable data={currentData} cicilanKe={nextCicilanKe} /> */}
+          <KeuanganDetailTable
+            data={dataCicilan}
+            cicilanKe={nextCicilanKe}
+            keuanganId={id}
+          />
         </Box>
       </PageContainer>
 
@@ -157,6 +224,40 @@ const KeuanganDetail = ({ id,paketData, jamaahData, breadcrumbLinks }: KeuanganD
             autoFocus
           >
             Ya, Batalkan
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Confirmation Modal */}
+      <Dialog
+        open={openConfirmDialog}
+        onClose={() => setOpenConfirmDialog(false)}
+        aria-labelledby="cancel-edit-dialog-title"
+        aria-describedby="cancel-edit-dialog-description"
+      >
+        <DialogTitle id="cancel-edit-dialog-title">
+          Konfirmasi Pembayaran Lunas
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="cancel-edit-dialog-description">
+            Apakah Anda yakin ingin menandai status ini sebagai Lunas?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setOpenConfirmDialog(false)}
+            sx={{ color: "white" }}
+            variant="contained"
+          >
+            Tidak
+          </Button>
+          <Button
+            onClick={handleConfirmLunas}
+            sx={{backgroundColor: "#008000", color: "white" }}
+            variant="contained"
+            autoFocus
+          >
+            Ya, Tandai Lunas
           </Button>
         </DialogActions>
       </Dialog>

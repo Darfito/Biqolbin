@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import CustomTextField from "@/app/(DashboardLayout)/components/forms/theme-elements/CustomTextField";
@@ -31,6 +31,7 @@ import {
   KontakDaruratType,
   Maskapai,
   PaketInterface,
+  StatusKepergian,
   TipeKamar,
 } from "@/app/(DashboardLayout)/utilities/type";
 import { updateJamaahAction } from "../../action";
@@ -446,7 +447,6 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
                 }}
                 renderInput={(params) => (
                   <CustomTextField
-                  
                     {...params}
                     label="Jenis Paket"
                     variant="outlined"
@@ -498,6 +498,25 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
                 }}
                 sx={{ marginBottom: 2 }}
               />
+
+              <CustomTextField
+                select
+                fullWidth
+                label="Varian Kamar"
+                value={formValues.status}
+                onChange={(e: { target: { value: string } }) =>
+                  setFormValues({
+                    ...formValues,
+                    status: e.target.value as StatusKepergian,
+                  })
+                }
+                sx={{ marginBottom: 2 }}
+                disabled={!isEditing}
+              >
+                <MenuItem value="Dijadwalkan">Dijadwalkan</MenuItem>
+                <MenuItem value="Berangkat">Berangkat</MenuItem>
+                <MenuItem value="Selesai">Selesai</MenuItem>
+              </CustomTextField>
             </Grid>
 
             {/* Kontak Darurat */}

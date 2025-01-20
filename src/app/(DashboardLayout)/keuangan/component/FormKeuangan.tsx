@@ -247,9 +247,7 @@ export default function FormKeuangan({
       });
     }
 
-    console.log("Form submitted:", formValues);
     const response = await createKeuaganAction(formValues);
-    toast.success("Form berhasil disubmit!"); // Show success toast
     handleClose();
 
     if (response.success) {

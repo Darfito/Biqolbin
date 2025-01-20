@@ -1,7 +1,7 @@
 "use client";
 
 // React Imports
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -11,7 +11,7 @@ import {
   flexRender,
   createColumnHelper,
   ColumnFiltersState,
-  Table,
+  SortingState,
 } from "@tanstack/react-table";
 import {
   Box,
@@ -21,15 +21,13 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
-  CardHeader,
   TablePagination,
   Card,
 } from "@mui/material";
-import { Delete, Edit, Folder, UploadFile } from "@mui/icons-material";
+import { Edit, Folder, UploadFile } from "@mui/icons-material";
 import { RankingInfo, rankItem } from "@tanstack/match-sorter-utils";
 
 // Component Imports
-import CustomTextField from "../textField/TextField";
 import TablePaginationComponent from "../pagination/TablePaginationComponent";
 
 // Style Imports
@@ -39,13 +37,10 @@ import styles from "../../../../styles/table.module.css";
 import { CicilanType } from "../../type";
 import FileUploaderSingle from "../uploader/FileUploaderSingle";
 import FormCicilan from "@/app/(DashboardLayout)/keuangan/[id]/component/FormCicilan";
-
-interface DebouncedInputProps {
-  value: string;
-  onChange: (value: string) => void;
-  debounce?: number;
-  placeholder?: string; // Tambahkan properti placeholder
-}
+import ConfirmDialog from "../dialog/ConfirmDialog";
+import ActionButton from "./components/ActionButton";
+import { IconEditCircle } from "@tabler/icons-react";
+import { deleteCicilanAndUpdateSisaTagihan } from "@/app/(DashboardLayout)/keuangan/action";
 
 const fuzzyFilter = (
   row: { getValue: (arg0: any) => any },
@@ -57,40 +52,11 @@ const fuzzyFilter = (
   addMeta({ itemRank });
   return itemRank.passed;
 };
-// A debounced input react component
-const DebouncedInput: React.FC<DebouncedInputProps> = ({
-  value: initialValue,
-  onChange,
-  debounce = 500,
-  ...props
-}) => {
-  const [value, setValue] = useState(initialValue);
-
-  useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      onChange(value);
-    }, debounce);
-
-    return () => clearTimeout(timeout);
-  }, [value]);
-
-  return (
-    <CustomTextField
-      variant="outlined"
-      {...props}
-      value={value}
-      onChange={(e) => setValue(e.target.value)}
-    />
-  );
-};
 
 interface KeuanganDetailProps<T> {
   data: T[];
   cicilanKe: number;
+  keuanganId: number;
 }
 
 interface EditCicilanFormProps {
@@ -98,11 +64,18 @@ interface EditCicilanFormProps {
 }
 
 const KeuanganDetailTable = ({
+  keuanganId,
   data,
   cicilanKe,
 }: KeuanganDetailProps<CicilanType>) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
+  const [rowToDelete, setRowToDelete] = useState<CicilanType | null>(null);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "cicilanKe", desc: false }, // Default sorting ascending pada kolom cicilanKe
+  ]);
+
   const [openDialog, setOpenDialog] = useState(false);
   const [openFormCicilan, setOpenFormCicilan] = useState(false);
   const [editData, setEditData] = useState<CicilanType | null>(null); // Data cicilan yang sedang diedit
@@ -124,9 +97,38 @@ const KeuanganDetailTable = ({
     setOpenFormCicilan(true); // Buka dialog
   };
 
-  const handleAddCicilan = () => {
-    setEditData(null); // Reset data cicilan
-    setOpenFormCicilan(true); // Buka dialog
+  const handleOpenDeleteDialog = (row: CicilanType) => {
+    setRowToDelete(row);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setRowToDelete(null);
+    setOpenDeleteDialog(false);
+  };
+
+  const handleDelete = () => {
+    if (rowToDelete && rowToDelete.id && rowToDelete.keuangan_id) {
+      deleteCicilanAndUpdateSisaTagihan(rowToDelete.id, rowToDelete.keuangan_id); // Perform delete and update actions
+    } else {
+      console.error("Invalid cicilan data for deletion");
+    }
+    handleCloseDeleteDialog(); // Close the dialog after deletion
+  };
+  
+
+
+  const handleAddCicilan = async () => {
+    const newCicilan: CicilanType = {
+      keuangan_id: keuanganId,
+      cicilanKe: cicilanKe,
+      nominalCicilan: 0,
+      tanggalPembayaran: "",
+    };
+
+    // Buka form cicilan dengan data baru
+    setEditData(newCicilan); // Set data awal untuk form
+    setOpenFormCicilan(true); // Buka form
   };
 
   const handleCloseFormCicilan = () => {
@@ -142,6 +144,7 @@ const KeuanganDetailTable = ({
       cell: (info) => info.getValue(),
       header: "Cicilan Ke",
       enableColumnFilter: false,
+      sortingFn: "basic",
     }),
     columnHelper.accessor("tanggalPembayaran", {
       id: "tanggalPembayaran",
@@ -153,12 +156,6 @@ const KeuanganDetailTable = ({
       id: "nominalCicilan",
       cell: (info) => `Rp ${info.getValue().toLocaleString()}`,
       header: "Cicilan Yang Dibayar",
-      enableColumnFilter: false,
-    }),
-    columnHelper.accessor("jumlahCicilan", {
-      id: "jumlahCicilan",
-      cell: (info) => `Rp ${info.getValue().toLocaleString()}`,
-      header: "Jumlah Cicilan",
       enableColumnFilter: false,
     }),
     columnHelper.accessor("lampiran", {
@@ -181,37 +178,43 @@ const KeuanganDetailTable = ({
       enableColumnFilter: false,
     }),
     columnHelper.accessor("action", {
-      cell: (info) => (
-        <Box sx={{ display: "flex", justifyContent: "start" }}>
-          <IconButton onClick={handleDialogOpen}>
-            <UploadFile />
-          </IconButton>
-          <IconButton onClick={() => handleOpenFormCicilan(info.row.original)}>
-            <Edit />
-          </IconButton>
-          <IconButton>
-            <Delete />
-          </IconButton>
-
-          <Dialog open={openDialog} onClose={handleDialogClose}>
-            <DialogTitle>Upload File</DialogTitle>
-            <DialogContent>
-              <FileUploaderSingle onFileUpload={handleFileUpload} />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleDialogClose} color="primary">
-                Cancel
-              </Button>
-              <Button
-                onClick={() => console.log("Upload file")}
-                color="primary"
-              >
-                Upload
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </Box>
-      ),
+      cell: (info) => {
+        return (
+          <Box sx={{ display: "flex", justifyContent: "start" }}>
+            <IconButton onClick={handleDialogOpen}>
+              <UploadFile />
+            </IconButton>
+            <IconButton
+            color="primary"
+              onClick={() => handleOpenFormCicilan(info.row.original)}
+            >
+              <IconEditCircle />
+            </IconButton>
+            <ActionButton
+              rowData={info.row.original}
+              mode="delete"
+              onDelete={() => handleOpenDeleteDialog(info.row.original)} // Buka dialog konfirmasi
+            />
+            <Dialog open={openDialog} onClose={handleDialogClose}>
+              <DialogTitle>Upload File</DialogTitle>
+              <DialogContent>
+                <FileUploaderSingle onFileUpload={handleFileUpload} />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleDialogClose} color="primary">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => console.log("Upload file")}
+                  color="primary"
+                >
+                  Upload
+                </Button>
+              </DialogActions>
+            </Dialog>
+          </Box>
+        );
+      },
       header: "Action",
       enableColumnFilter: false,
     }),
@@ -226,9 +229,11 @@ const KeuanganDetailTable = ({
     state: {
       columnFilters,
       globalFilter,
+      sorting,
     },
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
+    onSortingChange: setSorting,
     globalFilterFn: fuzzyFilter,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -248,77 +253,75 @@ const KeuanganDetailTable = ({
         </Button>
       </Box>
       <Card sx={{ backgroundColor: "#fff", paddingX: "1rem" }}>
-        
-          <Box
-            sx={{
-              width: "100%",
-              display: "flex",
-              justifyContent: "end",
-            }}
-          ></Box>
-          {/* <CardHeader
-        sx={{ paddingTop: 0 }}
-        action={
-          <DebouncedInput
-            value={globalFilter ?? ""}
-            onChange={(value: any) => setGlobalFilter(String(value))}
-            placeholder="Search all columns..."
-          />
-        }
-      /> */}
-          <div className="overflow-x-auto">
-            <table className={styles.table}>
-              <thead>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <th key={header.id} className={styles.tableTh}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </th>
-                    ))}
-                  </tr>
-                ))}
-              </thead>
-              <tbody>
-                {table.getRowModel().rows.map((row) => (
-                  <tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <TablePagination
-            component={() => <TablePaginationComponent table={table} />}
-            count={table.getFilteredRowModel().rows.length}
-            rowsPerPage={table.getState().pagination.pageSize}
-            page={table.getState().pagination.pageIndex}
-            onPageChange={(_, page) => {
-              table.setPageIndex(page);
-            }}
-          />
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "end",
+          }}
+        ></Box>
+        <div className="overflow-x-auto">
+          <table className={styles.table}>
+            <thead>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <th key={header.id} className={styles.tableTh}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody>
+              {table.getRowModel().rows.map((row) => (
+                <tr key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <TablePagination
+          component={() => <TablePaginationComponent table={table} />}
+          count={table.getFilteredRowModel().rows.length}
+          rowsPerPage={table.getState().pagination.pageSize}
+          page={table.getState().pagination.pageIndex}
+          onPageChange={(_, page) => {
+            table.setPageIndex(page);
+          }}
+        />
 
-          {/* Form Cicilan Dialog */}
-          {openFormCicilan && (
-            <FormCicilan
-              open={openFormCicilan}
-              handleClose={handleCloseFormCicilan}
-              initialData={editData}
-              currentCicilanKe={cicilanKe}
-            />
-          )}
+        {/* Confirm Dialog for Delete */}
+      <ConfirmDialog
+        open={openDeleteDialog}
+        onClose={handleCloseDeleteDialog}
+        onConfirm={handleDelete}
+        title="Konfirmasi Penghapusan"
+        description={`Apakah Anda yakin ingin menghapus cicilan ini?`}
+      />
+
+        {/* Form Cicilan Dialog */}
+        {openFormCicilan && (
+          <FormCicilan
+            open={openFormCicilan}
+            handleClose={handleCloseFormCicilan}
+            initialData={editData}
+            currentCicilanKe={cicilanKe}
+          />
+        )}
       </Card>
     </>
   );

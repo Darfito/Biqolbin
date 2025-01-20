@@ -297,6 +297,7 @@ const FormDetail = ({
   const handleCloseModal = () => {
     if (openModal) {
       setOpenModal(false); // Close the modal if it's open
+      
     }
   };
 
@@ -533,24 +534,6 @@ const FormDetail = ({
                   handleChangeHarga(e, "sisaTagihan")
                 }
               />
-
-              <CustomTextField
-                fullWidth
-                label="Total Tagihan"
-                name="totalTagihan"
-                value={formatRupiah(formValues.totalTagihan)}
-                error={!!formErrors.totalTagihan}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                disabled={!isEditing}
-                sx={{ mb: 2 }}
-                helperText={formErrors.totalTagihan}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  handleChangeHarga(e, "totalTagihan")
-                }
-              />
-
               <CustomTextField
                 fullWidth
                 label="Catatan Pembayaran"
