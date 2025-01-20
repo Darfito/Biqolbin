@@ -5,7 +5,6 @@ import Breadcrumb from "@/app/(DashboardLayout)/utilities/component/breadcrumb/B
 import {
   Box,
   Button,
-  Card,
   Dialog,
   DialogActions,
   DialogContent,
@@ -14,12 +13,10 @@ import {
   Typography,
 } from "@mui/material";
 import { IconArrowLeft } from "@tabler/icons-react";
-import React, { SetStateAction, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import FormDetail from "./FormDetail";
 import { useRouter } from "next/navigation";
 
-import KeuanganDetailTable from "@/app/(DashboardLayout)/utilities/component/table/KeuanganDetailTable";
-import { KeuanganData } from "../../../utilities/data";
 import { JamaahInterface, KeuanganInterface, PaketInterface } from "@/app/(DashboardLayout)/utilities/type";
 import { getKeuanganByIdAction } from "../../action";
 

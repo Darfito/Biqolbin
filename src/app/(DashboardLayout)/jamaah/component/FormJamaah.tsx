@@ -605,7 +605,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
 
               {/* Kontak Darurat */}
               <KontakDaruratSection
-              isEditing={false}
+              isEditing={true}
                 kontakDarurat={formValues.kontakDarurat}
                 handleContactChange={handleContactChange}
                 handleAddContact={handleAddContact}

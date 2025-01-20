@@ -119,6 +119,46 @@ export const createKeuaganAction = async (formValues: KeuanganInterface) => {
 };
 
 
+export const updateKeuanganAction = async (formValues: KeuanganInterface) => {
+  const supabase = createClient();
+  console.log("Form Values yang akan dikirim:", formValues);
+
+  if (!formValues.id) {
+    console.error("ID tidak ditemukan!");
+    return { success: false, error: "ID tidak ditemukan!" };
+  }
+
+  const { data, error } = await supabase
+    .from("Keuangan")
+    .update({
+      metodePembayaran: formValues.metodePembayaran,
+      namaPaket: formValues.namaPaket,
+      jenisPaket: formValues.jenisPaket,
+      uangMuka: formValues.uangMuka ?? 0,
+      totalTagihan: formValues.totalTagihan ?? 0,
+      sisaTagihan: formValues.sisaTagihan ?? 0,
+      jumlahBiayaPerAngsuran: formValues.jumlahBiayaPerAngsuran ?? 0,
+      tenggatPembayaran: formValues.tenggatPembayaran,
+      banyaknyaCicilan: formValues.banyaknyaCicilan ?? 0,
+      catatanPembayaran: formValues.catatanPembayaran ?? '',
+      paket_id: formValues.paket_id ?? 0, // Pastikan paket_id ada
+    })
+    .eq("id", formValues.id)
+    .select("id")
+    .single();
+
+  if (error) {
+    console.error("Error updating keuangan:", error.message);
+    return { success: false, error: error.message };
+  }
+
+  console.log(`Keuangan with ID ${formValues.id} updated successfully`);
+  console.log("Updated data:", data);
+  revalidatePath("/keuangan");
+  return { success: true };
+};
+
+
 export const deleteKeuanganAction = async (keuanganId: number) => {
   const supabase = createClient();
   const { error } = await supabase

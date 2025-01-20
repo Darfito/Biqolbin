@@ -22,6 +22,7 @@ export interface KeuanganInterface {
   Jamaah: JamaahInterface;
   Paket: PaketInterface;
   namaPaket?: string;
+  jenisPaket?: string;
   metodePembayaran: MetodePembayaranType;
   uangMuka?: number;
   totalTagihan: number;

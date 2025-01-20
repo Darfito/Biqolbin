@@ -1,10 +1,21 @@
 "use client";
 
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import * as v from "valibot";
 import CustomTextField from "@/app/(DashboardLayout)/components/forms/theme-elements/CustomTextField";
 import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCard";
-import { Box, Grid, MenuItem, Button, Autocomplete } from "@mui/material";
+import {
+  Box,
+  Grid,
+  MenuItem,
+  Button,
+  Autocomplete,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Typography,
+} from "@mui/material";
 import {
   JamaahInterface,
   JenisKelamin,
@@ -18,7 +29,9 @@ import {
   StatusType,
   TipeKamar,
 } from "@/app/(DashboardLayout)/utilities/type";
-import { showToast } from "@/app/(DashboardLayout)/utilities/component/toast/Toast";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Import toast styles
+import { updateKeuanganAction } from "../../action";
 
 interface FormErrors {
   nama?: string;
@@ -34,8 +47,10 @@ interface FormErrors {
 }
 
 type FormType = {
+  id?: number;
   Jamaah: JamaahInterface;
   Paket: PaketInterface;
+  jenisPaket?: string;
   metodePembayaran: MetodePembayaranType;
   uangMuka?: number;
   totalTagihan: number;
@@ -45,41 +60,31 @@ type FormType = {
   jumlahBiayaPerAngsuran?: number;
   status: StatusType;
   catatanPembayaran?: string;
+  paket_id?: number;
 };
 
 // Valibot Schema
 const formSchema = v.object({
-  jenisPaket: v.pipe(v.string(), v.nonEmpty("Pilih jenis paket")),
   metodePembayaran: v.pipe(v.string(), v.nonEmpty("Pilih metode pembayaran")),
   tenggatPembayaran: v.pipe(
     v.string(),
-    v.nonEmpty("Tenggat pembayaran harus diisi") // Validasi
+    v.nonEmpty("Tenggat pembayaran harus diisi")
   ),
   totalTagihan: v.pipe(
-    v.string(),
-    v.nonEmpty("Total Tagihan harus diisi"),
-    v.transform(Number),
+    v.number(),
     v.minValue(1, "Total Tagihan harus lebih dari 0")
   ),
   uangMuka: v.pipe(
-    v.string(),
-    v.nonEmpty("Uang muka harus diisi"),
-    v.transform(Number),
+    v.number(),
     v.minValue(0, "Uang muka harus lebih dari atau sama dengan 0")
   ),
-  banyaknyaCicilan: v.optional(v.string()),
+  banyaknyaCicilan: v.optional(
+    v.pipe(v.number(), v.minValue(1, "Banyaknya cicilan harus lebih dari 0"))
+  ),
   jumlahBiayaPerAngsuran: v.optional(
     v.pipe(
-      v.string(),
-      v.transform(Number), // Ubah ke angka
-      v.minValue(0, "Jumlah Biaya per Angsuran harus lebih dari 0") // Validasi angka
-    )
-  ),
-  sisaTagihan: v.optional(
-    v.pipe(
-      v.string(),
-      v.transform(Number), // Ubah ke angka
-      v.minValue(0, "Jumlah sisa tagihan harus lebih dari 0") // Validasi angka
+      v.number(),
+      v.minValue(0, "Jumlah Biaya per Angsuran harus lebih dari 0")
     )
   ),
 });
@@ -98,8 +103,11 @@ const FormDetail = ({
   jamaahData,
 }: FormDetailProps) => {
   console.log("keuanganData di detail:", keuanganData);
-  const [metode, setMetode] = useState<string>(keuanganData?.metodePembayaran || "");
-  const [formErrors, setFormErrors] = useState<any>({});
+  const [metode, setMetode] = useState<string>(
+    keuanganData?.metodePembayaran || ""
+  );
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [formValues, setFormValues] = useState<FormType>({
     Jamaah: {
       id: 0,
@@ -170,7 +178,9 @@ const FormDetail = ({
       hargaTriple: 0,
       hargaQuad: 0,
     },
+    id: 0,
     metodePembayaran: MetodePembayaranType.TUNAI,
+    jenisPaket: "",
     sisaTagihan: 0,
     tenggatPembayaran: "",
     totalTagihan: 0,
@@ -178,6 +188,8 @@ const FormDetail = ({
     banyaknyaCicilan: 0,
     jumlahBiayaPerAngsuran: 0,
     status: StatusType.BELUM_BAYAR,
+    paket_id: 0,
+    catatanPembayaran: "",
   });
 
   // Gunakan useEffect untuk memperbarui state ketika keuanganData berubah
@@ -192,7 +204,10 @@ const FormDetail = ({
           },
         },
         Paket: keuanganData.Paket,
-        metodePembayaran:keuanganData.metodePembayaran || MetodePembayaranType.TUNAI,
+        id: keuanganData.id || 0,
+        metodePembayaran:
+          keuanganData.metodePembayaran || MetodePembayaranType.TUNAI,
+        jenisPaket: keuanganData.jenisPaket || "",
         sisaTagihan: keuanganData.sisaTagihan || 0,
         tenggatPembayaran: keuanganData.tenggatPembayaran || "",
         totalTagihan: keuanganData.totalTagihan || 0,
@@ -200,6 +215,8 @@ const FormDetail = ({
         banyaknyaCicilan: keuanganData.banyaknyaCicilan || 0,
         jumlahBiayaPerAngsuran: keuanganData.jumlahBiayaPerAngsuran || 0,
         status: keuanganData.status || StatusType.BELUM_BAYAR,
+        paket_id: keuanganData.paket_id || 0,
+        catatanPembayaran: keuanganData.catatanPembayaran || "",
       });
     }
   }, [keuanganData]);
@@ -243,8 +260,6 @@ const FormDetail = ({
     }));
   };
 
-
-
   const calculateAngsuran = () => {
     if (
       metode === "Cicilan" &&
@@ -273,16 +288,78 @@ const FormDetail = ({
     formValues.banyaknyaCicilan,
   ]);
 
-  const handleSubmit = () => {
-    // Kirim data ke parent
-    showToast("Form berhasil disimpan", "minor-success");
+  const handleOpenModal = () => {
+    if (!openModal) {
+      setOpenModal(true); // Only open the modal if it's not already open
+    }
   };
 
+  const handleCloseModal = () => {
+    if (openModal) {
+      setOpenModal(false); // Close the modal if it's open
+    }
+  };
 
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    // Kirim data ke parent
+    e.preventDefault();
+    console.log("data yang mau di update:", formValues);
+
+    // Special handling based on payment method
+    const methodErrors: FormErrors = {};
+
+    // Validate metodePembayaran
+    if (!formValues.metodePembayaran) {
+      methodErrors.metodePembayaran = "Pilih metode pembayaran";
+    }
+
+    // Specific validations for Cicilan method
+    if (formValues.metodePembayaran === "Cicilan") {
+      if (!formValues.banyaknyaCicilan) {
+        methodErrors.banyaknyaCicilan = "Masukkan banyaknya cicilan";
+      }
+    } else {
+      // Clear installment-related fields for non-Cicilan methods
+      setFormValues((prev) => ({
+        ...prev,
+        banyaknyaCicilan: 0,
+        jumlahBiayaPerAngsuran: 0,
+      }));
+    }
+
+    // If method errors exist, set them and return
+    if (Object.keys(methodErrors).length > 0) {
+      setFormErrors(methodErrors);
+      return;
+    }
+
+    // Validate form data
+    const result = v.safeParse(formSchema, formValues);
+
+    if (!result.success) {
+      const errorMap: Record<string, string> = {};
+      result.issues.forEach((issue) => {
+        const path = issue.path?.[0]?.key as string | undefined;
+        if (path) {
+          errorMap[path] = issue.message;
+        }
+      }),
+        setFormErrors(errorMap);
+      toast.error("Validation errors:", errorMap);
+      return;
+    }
+
+    const response = await updateKeuanganAction(formValues);
+
+    if (response.success) {
+      toast.success("Data berhasil diperbarui"); // Show success toast
+      handleCloseModal(); // Tutup dialog setelah selesai
+    }
+  };
 
   return (
     <DashboardCard>
-      <form onSubmit={handleSubmit}>
+      <form id="form-detail" onSubmit={handleSubmit}>
         <Box sx={{ width: "100%" }}>
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6} md={6} lg={6}>
@@ -422,12 +499,13 @@ const FormDetail = ({
                     helperText={formErrors.banyaknyaCicilan}
                     sx={{ mb: 2 }}
                     disabled={!isEditing}
-                    onChange={(e: { target: { value: any } }) =>
+                    onChange={(e: { target: { value: any } }) => {
+                      const value = parseInt(e.target.value, 10);
                       setFormValues({
                         ...formValues,
-                        banyaknyaCicilan: e.target.value,
-                      })
-                    }
+                        banyaknyaCicilan: isNaN(value) ? undefined : value, // Pastikan validasi angka
+                      });
+                    }}
                   />
                   <CustomTextField
                     fullWidth
@@ -490,20 +568,49 @@ const FormDetail = ({
               />
             </Grid>
           </Grid>
-
-          {isEditing && (
-            <Box sx={{ marginTop: 3 }}>
-              <Button
-                variant="contained"
-                color="primary"
-                sx={{ color: "white" }}
-                onClick={handleSubmit}
-              >
-                Simpan Perubahan
-              </Button>
-            </Box>
-          )}
         </Box>
+        {isEditing && (
+          <Box sx={{ width: "100%", display: "flex", justifyContent: "end" }}>
+            <Button
+              sx={{
+                color: "#fff",
+                minWidth: "150px",
+                marginLeft: "24px",
+                marginTop: "1rem",
+              }}
+              variant="contained"
+              onClick={handleOpenModal}
+            >
+              Simpan
+            </Button>
+          </Box>
+        )}
+        {/* Confirmation Modal */}
+        <Dialog open={openModal} onClose={handleCloseModal}>
+          <DialogTitle>Konfirmasi Perubahan</DialogTitle>
+          <DialogContent>
+            <Typography>
+              Apakah Anda yakin ingin menyimpan perubahan ini?
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={handleCloseModal}
+              variant="contained"
+              color="error"
+            >
+              Batal
+            </Button>
+            <Button
+              form="form-detail"
+              type="submit"
+              variant="contained"
+              sx={{ color: "white" }}
+            >
+              Simpan Perubahan
+            </Button>
+          </DialogActions>
+        </Dialog>
       </form>
     </DashboardCard>
   );

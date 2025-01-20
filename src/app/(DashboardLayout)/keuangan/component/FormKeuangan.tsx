@@ -69,7 +69,9 @@ const formSchema = v.object({
     v.transform(Number),
     v.minValue(0, "Uang muka harus lebih dari atau sama dengan 0")
   ),
-  banyaknyaCicilan: v.optional(v.string()),
+  banyaknyaCicilan: v.optional(
+    v.pipe(v.number(), v.minValue(1, "Banyaknya cicilan harus lebih dari 0"))
+  ),
   jumlahBiayaPerAngsuran: v.optional(
     v.pipe(
       v.string(),
