@@ -1,7 +1,7 @@
 "use client";
 
 // React Imports
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -23,13 +23,12 @@ import {
   TablePagination,
   Typography,
 } from "@mui/material";
-import { Delete, Folder, UploadFile } from "@mui/icons-material";
+import { Folder, UploadFile } from "@mui/icons-material";
 import { RankingInfo, rankItem } from "@tanstack/match-sorter-utils";
 import { toast } from "react-toastify"; // Import toast
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 
 // Component Imports
-import CustomTextField from "../textField/TextField";
 import TablePaginationComponent from "../pagination/TablePaginationComponent";
 
 // Style Imports
@@ -123,21 +122,21 @@ const JamaahDetailTable = ({
 
   const handleFileUpload = async (file: File) => {
     if (!dialogRow) return; // Pastikan ada data baris yang sedang aktif
-  
+
     const { jamaah_id: jamaahId, nama_dokumen: namaDokumen } = dialogRow;
-  
+
     if (!jamaahId || !namaDokumen) {
       toast.error("Data Jamaah atau nama dokumen tidak valid.");
       return;
     }
-  
+
     // Upload file ke Supabase Storage
     const publicUrl = await uploadFileToSupabase(
       file,
       jamaahId.toString(),
       namaDokumen
     );
-  
+
     if (publicUrl) {
       // Jika upload berhasil, lakukan update pada tabel jenisDokumen dengan URL file
       try {
@@ -146,21 +145,20 @@ const JamaahDetailTable = ({
           .update({ file: publicUrl, action: "Diterima", lampiran: true }) // Update file URL dan status
           .eq("jamaah_id", jamaahId)
           .eq("nama_dokumen", namaDokumen);
-  
+
         if (error) {
           throw new Error(error.message);
         }
-  
+
         toast.success("File berhasil diunggah dan data diperbarui!");
       } catch (error: any) {
         toast.error(`Gagal memperbarui data: ${error.message}`);
         console.error("Error updating jenisDokumen:", error);
       }
     }
-  
+
     handleDialogClose(); // Tutup dialog setelah upload selesai
   };
-  
 
   const getFileUrl = async (jamaahId: string, namaDokumen: string) => {
     try {
@@ -259,10 +257,7 @@ const JamaahDetailTable = ({
                   }
                 }}
                 sx={{
-                  color:
-                    rowData.action === "Diterima"
-                      ? "#F18B04"
-                      : "#B0B0B0",
+                  color: rowData.action === "Diterima" ? "#F18B04" : "#B0B0B0",
                 }}
               >
                 <Folder />
@@ -283,16 +278,16 @@ const JamaahDetailTable = ({
               </IconButton> */}
 
               <ActionButton
-              rowData={row.original}
-              mode="delete"
-              onDelete={() => {
-                if (rowData.jamaah_id && rowData.nama_dokumen) {
-                  handleOpenDeleteDialog(rowData);
-                } else {
-                  toast.error("Data Jamaah atau dokumen tidak valid.");
-                }
-              }} // Buka dialog konfirmasi
-            />
+                rowData={row.original}
+                mode="delete"
+                onDelete={() => {
+                  if (rowData.jamaah_id && rowData.nama_dokumen) {
+                    handleOpenDeleteDialog(rowData);
+                  } else {
+                    toast.error("Data Jamaah atau dokumen tidak valid.");
+                  }
+                }} // Buka dialog konfirmasi
+              />
             </Box>
           );
         },
@@ -385,7 +380,6 @@ const JamaahDetailTable = ({
           </DialogActions>
         </Dialog>
       )}
-
       <Dialog
         open={openFileDialog}
         onClose={handleCloseFileDialog}

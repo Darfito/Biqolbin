@@ -6,7 +6,6 @@ import ScoreCard from "../../utilities/component/card/ScoreCard";
 import { scoreCardKeuangan } from "../../utilities/data";
 import FormKeuangan from "./FormKeuangan";
 
-import { columnsKeuangan } from "./columns/columnsKeuangan";
 import KeuanganTable from "../../utilities/component/table/KeuanganTable";
 import { JamaahInterface, KeuanganInterface, PaketInterface } from "../../utilities/type";
 
