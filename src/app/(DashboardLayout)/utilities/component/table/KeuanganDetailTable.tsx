@@ -12,6 +12,7 @@ import {
   createColumnHelper,
   ColumnFiltersState,
   SortingState,
+  Updater,
 } from "@tanstack/react-table";
 import {
   Box,
@@ -408,7 +409,7 @@ const KeuanganDetailTable = ({
           count={table.getFilteredRowModel().rows.length}
           rowsPerPage={table.getState().pagination.pageSize}
           page={table.getState().pagination.pageIndex}
-          onPageChange={(_, page) => {
+          onPageChange={(_: any, page: Updater<number>) => {
             table.setPageIndex(page);
           }}
         />

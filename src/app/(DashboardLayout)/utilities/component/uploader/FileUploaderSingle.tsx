@@ -40,6 +40,7 @@ const FileUploaderSingle = ({onFileUpload}: FileUploaderSingleProps) => {
   })
 
   const img = files.map((file: FileProp) => (
+    // eslint-disable-next-line @next/next/no-img-element
     <img key={file.name} alt={file.name} className='single-file-image' src={URL.createObjectURL(file as any)} />
   ))
 

@@ -56,7 +56,7 @@ const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
     };
 
     fetchUserData();
-  }, [id, currentData]);
+  }, [id, currentData, supabase]);
 
   // Toggle the isEditing state
   const handleEditClick = () => {

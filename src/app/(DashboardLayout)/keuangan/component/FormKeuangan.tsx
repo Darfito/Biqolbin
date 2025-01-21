@@ -295,6 +295,7 @@ export default function FormKeuangan({
   };
 
   // Calculate installment (angsuran) if "Cicilan" is selected
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const calculateAngsuran = () => {
     if (
       metode === "Cicilan" &&
@@ -317,11 +318,7 @@ export default function FormKeuangan({
 
   useEffect(() => {
     calculateAngsuran();
-  }, [
-    formValues.totalTagihan,
-    formValues.uangMuka,
-    formValues.banyaknyaCicilan,
-  ]);
+  }, [formValues.totalTagihan, formValues.uangMuka, formValues.banyaknyaCicilan, calculateAngsuran]);
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => {
