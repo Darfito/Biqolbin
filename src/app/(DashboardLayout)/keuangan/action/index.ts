@@ -457,3 +457,22 @@ export const updateStatusLunas = async (keuanganId: number) => {
 
   return { success: true, data };
 };
+
+export const getFileUrl = async (keuanganId: number, cicilanKe: number) => {
+  const supabase = createClient();
+  const {data, error} = await supabase
+    .from('Cicilan')
+    .select('lampiran')
+    .eq('keuangan_id', keuanganId)
+    .eq('cicilanKe', cicilanKe)
+    .single();
+
+  if (error) {
+    console.error('Error fetching file URL:', error.message);
+    return { success: false, error: error.message };
+  }
+
+  console.log('File URL:', data.lampiran);
+
+  return { success: true, data };
+};

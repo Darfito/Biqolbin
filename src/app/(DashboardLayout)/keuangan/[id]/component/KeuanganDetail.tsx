@@ -53,7 +53,7 @@ const KeuanganDetail = ({
   const [dataCicilan, setDataCicilan] = useState<CicilanType[]>([]);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openConfirmDialog, setOpenConfirmDialog] = useState<boolean>(false); // State untuk dialog konfirmasi
-  const [statusLunasDialog, setStatusLunasDialog] = useState(false); // Untuk menandakan status lunas
+  // const [statusLunasDialog, setStatusLunasDialog] = useState(false); // Untuk menandakan status lunas
   // Ambil data berdasarkan ID
   useEffect(() => {
     const fetchData = async () => {
@@ -119,6 +119,7 @@ const KeuanganDetail = ({
   };
 
   console.log("dataCicilan: ", dataCicilan);
+  console.log("currentData di keuangan Detail: ", currentData);
 
   return (
     <>
@@ -146,7 +147,6 @@ const KeuanganDetail = ({
               Kembali ke Daftar
             </Button>
           </Box>
-
           <Box>
             <Button
               variant="contained"
@@ -155,20 +155,33 @@ const KeuanganDetail = ({
             >
               {isEditing ? "Batal Menyunting" : "Sunting"}
             </Button>
-            <Button
-              variant="contained"
-              disabled={!isLunas || currentData?.status === StatusType.LUNAS} // Disable the button if it's already LUNAS
-              sx={{
-                backgroundColor: "#008000",
-                color: "white",
-                marginRight: "1rem",
-              }}
-              onClick={handleLunasClick}
-            >
-              {currentData?.status === StatusType.LUNAS
-                ? "Sudah Lunas"
-                : "Tandai Lunas"}
-            </Button>
+            {currentData?.status === "Lunas" ? (
+              <Button
+                variant="contained"
+                disabled
+                sx={{
+                  backgroundColor: "#008000",
+                  color: "white",
+                  marginRight: "1rem",
+                }}
+              >
+                Sudah Lunas
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                sx={{
+                  backgroundColor: "#008000",
+                  color: "white",
+                  marginRight: "1rem",
+                }}
+                onClick={handleLunasClick}
+              >
+                {currentData?.status === "Sedang Menabung"
+                  ? "Tandai Lunas"
+                  : "Tandai Lunas"}
+              </Button>
+            )}
             <Button variant="contained" disabled sx={{ color: "white" }}>
               Invoice
             </Button>
@@ -253,7 +266,7 @@ const KeuanganDetail = ({
           </Button>
           <Button
             onClick={handleConfirmLunas}
-            sx={{backgroundColor: "#008000", color: "white" }}
+            sx={{ backgroundColor: "#008000", color: "white" }}
             variant="contained"
             autoFocus
           >

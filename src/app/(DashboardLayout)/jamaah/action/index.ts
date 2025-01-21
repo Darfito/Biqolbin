@@ -398,3 +398,23 @@ export const deleteJamaahAction = async (jamaahId: number) => {
   revalidatePath("/jamaah");
   return { success: true };
 };
+
+
+export const getFileUrl = async (jamaahId: string, namaDokumen: string) => {
+  const supabase = createClient();
+  const {data, error} = await supabase
+    .from('jenis_dokumen')
+    .select('file')
+    .eq('nama_dokumen', namaDokumen)
+    .eq('jamaah_id', jamaahId)
+    .single();
+
+  if (error) {
+    console.error('Error fetching file URL:', error.message);
+    return { success: false, error: error.message };
+  }
+
+  console.log('File URL:', data.file);
+
+  return { success: true, data };
+};

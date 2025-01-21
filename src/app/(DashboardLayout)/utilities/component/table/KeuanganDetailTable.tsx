@@ -41,7 +41,10 @@ import FormCicilan from "@/app/(DashboardLayout)/keuangan/[id]/component/FormCic
 import ConfirmDialog from "../dialog/ConfirmDialog";
 import ActionButton from "./components/ActionButton";
 import { IconEditCircle } from "@tabler/icons-react";
-import { deleteCicilanAndUpdateSisaTagihan } from "@/app/(DashboardLayout)/keuangan/action";
+import {
+  deleteCicilanAndUpdateSisaTagihan,
+  getFileUrl,
+} from "@/app/(DashboardLayout)/keuangan/action";
 import { createClient } from "@/libs/supabase/client";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
@@ -98,36 +101,49 @@ const KeuanganDetailTable = ({
     cicilanKe: number
   ) => {
     try {
+      // Ambil ekstensi file dari nama file asli
+      const fileExtension = file.name.split(".").pop(); // Contoh: 'pdf', 'jpg'
+
+      if (!fileExtension) {
+        toast.error("Ekstensi file tidak valid.");
+        return;
+      }
+
       // Get current date for file name
-      const formattedDate = new Date().toLocaleDateString("id-ID").replace(/\//g, "_");
-      const newFileName = `CicilanKe_${cicilanKe}_Tanggal_${formattedDate}.pdf`;
-  
-      // Define the file path
+      const formattedDate = new Date()
+        .toLocaleDateString("id-ID")
+        .replace(/\//g, "_");
+
+      // Buat nama file dengan ekstensi asli
+      const newFileName = `CicilanKe_${cicilanKe}_Tanggal_${formattedDate}.${fileExtension}`;
+
+      // Tentukan path file di dalam storage
       const folderPath = `${keuanganId}/cicilanKe_${cicilanKe}`;
       const fileName = `${folderPath}/${newFileName}`;
-  
-      // Upload the file to Supabase storage
+
+      // Upload file ke Supabase storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("Cicilan")
         .upload(fileName, file);
-  
+
       if (uploadError) {
         console.error("Error uploading file:", uploadError.message);
         toast.error("Gagal mengunggah file.");
         return;
       }
-  
-      // Get the file URL from the storage
-      const fileUrl = supabase.storage.from("Cicilan").getPublicUrl(fileName).data?.publicUrl;
-  
+
+      // Ambil URL publik dari file yang diunggah
+      const fileUrl = supabase.storage.from("Cicilan").getPublicUrl(fileName)
+        .data?.publicUrl;
+
       if (fileUrl) {
-        // Update the URL in the Cicilan table
+        // Update URL file di tabel Cicilan
         const { error: updateError } = await supabase
           .from("Cicilan")
           .update({ lampiran: fileUrl })
           .eq("keuangan_id", keuanganId) // Assuming `keuangan_id` is the unique identifier
           .eq("cicilanKe", cicilanKe);
-  
+
         if (updateError) {
           console.error("Error updating lampiran:", updateError.message);
           toast.error("Gagal menyimpan lampiran ke database.");
@@ -140,8 +156,6 @@ const KeuanganDetailTable = ({
       toast.error("Terjadi kesalahan saat mengunggah file.");
     }
   };
-  
-  
 
   const handleOpenFileDialog = async (
     keuanganId: number,
@@ -149,7 +163,7 @@ const KeuanganDetailTable = ({
   ) => {
     try {
       // Ambil URL file dari bucket
-      const url = await getFileUrl(keuanganId, cicilanKe);
+      const url = await getFile(keuanganId, cicilanKe);
 
       if (url) {
         setFileUrl(url); // Set URL file untuk ditampilkan
@@ -197,16 +211,20 @@ const KeuanganDetailTable = ({
     handleCloseDeleteDialog(); // Close the dialog after deletion
   };
 
-  const getFileUrl = async (keuanganId: number, cicilanKe: number) => {
+  const getFile = async (keuanganId: number, cicilanKe: number) => {
     try {
-      // Sesuaikan path file sesuai format yang digunakan untuk upload
-      const path = `${keuanganId}/cicilanKe_${cicilanKe}`;
-      const { data } = supabase.storage.from("Cicilan").getPublicUrl(path);
+      // Mengambil path file dari tabel Cicilan
+      const filePath = await getFileUrl(keuanganId, cicilanKe);
 
-      if (data?.publicUrl) {
-        return data.publicUrl; // Kembalikan URL yang bisa diakses publik
-      } else {
-        throw new Error("File tidak ditemukan.");
+      if (!filePath.success || !filePath.data?.lampiran) {
+        throw new Error("File path tidak ditemukan.");
+      }
+
+      // Mengambil URL publik dari Supabase Storage bucket "Cicilan"
+      const lampiranPath = filePath.data.lampiran; // Mengakses properti `lampiran`
+
+      if (lampiranPath) {
+        return lampiranPath; // Kembalikan URL publik yang bisa diakses
       }
     } catch (error: any) {
       toast.error(`Gagal mendapatkan URL file: ${error.message}`);
@@ -262,16 +280,13 @@ const KeuanganDetailTable = ({
           <IconButton
             onClick={() => {
               if (rowData.keuangan_id && rowData.cicilanKe) {
-                handleOpenFileDialog(
-                  rowData.keuangan_id,
-                  rowData.cicilanKe
-                );
+                handleOpenFileDialog(rowData.keuangan_id, rowData.cicilanKe);
               } else {
                 toast.error("Data Jamaah atau dokumen tidak valid.");
               }
             }}
             sx={{
-              color: rowData.action === "Diterima" ? "#F18B04" : "#B0B0B0",
+              color: rowData.lampiran ? "#F18B04" : "#B0B0B0",
             }}
           >
             <Folder />
@@ -423,7 +438,7 @@ const KeuanganDetailTable = ({
         <DialogContent>
           <FileUploaderSingle
             onFileUpload={(file) => {
-              setUploadedFile(file); // Simpan file yang diunggah ke state
+            setUploadedFile(file); // Simpan file yang diunggah ke state
             }}
           />
         </DialogContent>
@@ -434,7 +449,11 @@ const KeuanganDetailTable = ({
           <Button
             onClick={async () => {
               if (uploadedFile && editData) {
-                await handleFileUpload(uploadedFile, keuanganId, editData.cicilanKe); // Proses upload file
+                await handleFileUpload(
+                  uploadedFile,
+                  keuanganId,
+                  editData.cicilanKe
+                ); // Proses upload file
                 setUploadedFile(null); // Reset file setelah upload selesai
                 handleDialogClose(); // Tutup dialog setelah berhasil upload
               } else {
@@ -456,11 +475,26 @@ const KeuanganDetailTable = ({
         <DialogTitle>Preview File</DialogTitle>
         <DialogContent>
           {fileUrl ? (
-            <PdfViewer fileUrl={fileUrl} />
+            // Cek ekstensi file
+            fileUrl.endsWith(".pdf") ? (
+              <PdfViewer fileUrl={fileUrl} />
+            ) : (
+              // Tampilkan gambar jika bukan PDF
+              <Box
+                component="img"
+                src={fileUrl}
+                alt="Lampiran"
+                sx={{
+                  maxWidth: "400px",
+                  objectFit: "contain",
+                }}
+              />
+            )
           ) : (
             <Typography>File tidak tersedia.</Typography>
           )}
         </DialogContent>
+
         <DialogActions>
           <Button
             onClick={handleCloseFileDialog}

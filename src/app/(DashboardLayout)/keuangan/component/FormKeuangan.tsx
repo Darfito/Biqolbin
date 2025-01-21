@@ -181,18 +181,34 @@ export default function FormKeuangan({
     setMetode(newMetode);
     setFormValues({ ...formValues, metodePembayaran: newMetode });
 
-    // Reset installment values if method is not "Cicilan"
+    // Tentukan status berdasarkan metode pembayaran
+    let newStatus: StatusType;
+    switch (newMetode) {
+      case "Tunai":
+        newStatus = StatusType.BELUM_BAYAR;
+        break;
+      case "Cicilan":
+        newStatus = StatusType.SEDANG_MENYICIL;
+        break;
+      case "Tabungan":
+        newStatus = StatusType.SEDANG_MENABUNG;
+        break;
+      default:
+        newStatus = StatusType.BELUM_BAYAR; // Default status jika diperlukan
+    }
+
+    // Atur nilai status pembayaran
+    setFormValues((prev) => ({
+      ...prev,
+      status: newStatus, // Tambahkan status pembayaran ke formValues
+    }));
+
+    // Reset installment values jika metode bukan "Cicilan"
     if (newMetode !== "Cicilan") {
       setFormValues((prev) => ({
         ...prev,
-        metodePembayaran: newMetode,
         banyaknyaCicilan: 0,
         jumlahBiayaPerAngsuran: 0,
-      }));
-    } else {
-      setFormValues((prev) => ({
-        ...prev,
-        metodePembayaran: newMetode,
       }));
     }
   };
@@ -400,6 +416,8 @@ export default function FormKeuangan({
     setFormErrors({});
   };
 
+  console.log("formvalues: ", formValues);
+
   return (
     <>
       <Button
@@ -464,9 +482,8 @@ export default function FormKeuangan({
               options={paketData}
               getOptionLabel={(option) => option.nama} // Menampilkan nama paket
               value={
-                paketData.find(
-                  (paket) => paket.id === formValues.Paket.id
-                ) || null
+                paketData.find((paket) => paket.id === formValues.Paket.id) ||
+                null
               }
               onChange={(event, newValue) => {
                 if (newValue) {
