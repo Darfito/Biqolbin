@@ -49,7 +49,7 @@ import {
 import { createClient } from "@/libs/supabase/client";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
-import PdfViewer from "./components/PdfViewer";
+// import PdfViewer from "./components/PdfViewer";
 
 const fuzzyFilter = (
   row: { getValue: (arg0: any) => any },
@@ -478,7 +478,13 @@ const KeuanganDetailTable = ({
           {fileUrl ? (
             // Cek ekstensi file
             fileUrl.endsWith(".pdf") ? (
-              <PdfViewer fileUrl={fileUrl} />
+              // <PdfViewer fileUrl={fileUrl} />
+              <iframe
+                src={fileUrl}
+                width="100%"
+                height="500px"
+                style={{ border: "none" }}
+              ></iframe>
             ) : (
               // Tampilkan gambar jika bukan PDF
               <Box

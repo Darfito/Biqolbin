@@ -1,8 +1,13 @@
-'use server';
+"use server";
 
 import { getCmsAction } from "../cms/action";
 import { getJamaahAction } from "../jamaah/action";
-import { JamaahInterface, KeuanganInterface, PaketInterface } from "../utilities/type";
+import {
+  JamaahInterface,
+  KeuanganInterface,
+  PaketInterface,
+  StatusType,
+} from "../utilities/type";
 import { getKeuanganAction } from "./action";
 import Keuangan from "./component/Keuangan"; // Client Component
 
@@ -12,7 +17,7 @@ export default async function KeuanganPage() {
   let keuanganData: KeuanganInterface[] = [];
 
   try {
-    paketData = await getCmsAction() ?? [];
+    paketData = (await getCmsAction()) ?? [];
     jamaahData = await getJamaahAction();
     keuanganData = await getKeuanganAction();
   } catch (error) {
@@ -26,10 +31,41 @@ export default async function KeuanganPage() {
 
   console.log("stableJamaahData:", stableJamaahData);
 
+  // Hitung statistik
+  const totalJamaah = stableKeuanganData.length;
+  const belumLunas = stableKeuanganData.filter(
+    (keuangan) => keuangan.status !== StatusType.LUNAS
+  ).length;
+  const lunas = stableKeuanganData.filter(
+    (keuangan) => keuangan.status === StatusType.LUNAS
+  ).length;
+  const dynamicScoreCardJamaah = [
+    {
+      title: "Total Jamaah",
+      total: totalJamaah,
+      color: "#3E74FF",
+      icon: "IconUser", // Kirim nama ikon sebagai string
+    },
+    {
+      title: "Belum Lunas",
+      total: belumLunas,
+      color: "#F54F63",
+      icon: "IconProgress", // Kirim nama ikon sebagai string
+    },
+    {
+      title: "lunas",
+      total: lunas,
+      color: "#F5BD4F",
+      icon: "IconReceipt", // Kirim nama ikon sebagai string
+    },
+  ];
 
   return (
     <>
-      <Keuangan paketData={stablePaketData} jamaahData={stableJamaahData} keuanganData={stableKeuanganData} />
+      <Keuangan
+        paketData={stablePaketData}
+        jamaahData={stableJamaahData}
+        keuanganData={stableKeuanganData} scoreCardData={dynamicScoreCardJamaah}      />
     </>
   );
 }
