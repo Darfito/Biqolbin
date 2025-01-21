@@ -1,12 +1,12 @@
 "use client";
 
 // React Imports
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import CardHeader from "@mui/material/CardHeader";
 import TablePagination from "@mui/material/TablePagination";
-import type { TextFieldProps } from "@mui/material/TextField";
 
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 
 // Third-party Imports
 import classnames from "classnames";
@@ -20,6 +20,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   flexRender,
+  createColumnHelper,
 } from "@tanstack/react-table";
 import { rankItem } from "@tanstack/match-sorter-utils";
 import type {
@@ -27,7 +28,6 @@ import type {
   Table,
   ColumnFiltersState,
   FilterFn,
-  ColumnDef,
 } from "@tanstack/react-table";
 import type { RankingInfo } from "@tanstack/match-sorter-utils";
 
@@ -40,14 +40,11 @@ import styles from "../../../../styles/table.module.css";
 import TablePaginationComponent from "../pagination/TablePaginationComponent";
 import CustomTextField from "../textField/TextField";
 import { ChevronRight } from "@mui/icons-material";
-import {
-  Autocomplete,
-  Box,
-  FormControl,
-} from "@mui/material";
-
-
-
+import { Autocomplete, Box, FormControl } from "@mui/material";
+import { KeuanganInterface } from "../../type";
+import ActionButton from "./components/ActionButton";
+import { deleteKeuanganAction } from "@/app/(DashboardLayout)/keuangan/action";
+import ConfirmDialog from "../dialog/ConfirmDialog";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -71,43 +68,6 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   return itemRank.passed;
 };
 
-// A debounced input react component
-const DebouncedInput = ({
-  value: initialValue,
-  onChange,
-  debounce = 500,
-  ...props
-}: {
-  value: string | number;
-  onChange: (value: string | number) => void;
-  debounce?: number;
-} & TextFieldProps) => {
-  // States
-  const [value, setValue] = useState(initialValue);
-
-  useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      onChange(value);
-    }, debounce);
-
-    return () => clearTimeout(timeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value]);
-
-  return (
-    <CustomTextField
-      variant="outlined"
-      {...props}
-      value={value}
-      onChange={(e) => setValue(e.target.value)}
-    />
-  );
-};
-
 const Filter = ({
   column,
   table,
@@ -125,7 +85,13 @@ const Filter = ({
   const getColumnOptions = (columnId: string) => {
     switch (columnId) {
       case "status":
-        return ["Semua", "Belum Bayar", "Sedang Menyicil", "Sedang Menabung", "Lunas"];
+        return [
+          "Semua",
+          "Belum Bayar",
+          "Sedang Menyicil",
+          "Sedang Menabung",
+          "Lunas",
+        ];
       case "metodePembayaran":
         return ["Semua", "Cicilan", "Tunai", "Tabungan"];
       case "jenisPaket.nama": // Ensure this matches exactly with the column id in the table
@@ -204,19 +170,102 @@ const Filter = ({
 };
 
 // Mendeklarasikan interface dengan tipe generik T
-interface KeuanganTableProps<T> {
-  columns: ColumnDef<T, any>[];  // Kolom dinamis yang disesuaikan dengan tipe T
-  data: T[];  // Data dinamis sesuai tipe T
+interface TableProps<T> {
+  data: T[]; // Data dinamis sesuai tipe T
 }
 
-
-
-
-const KeuanganTable = <T,>({ columns, data }: KeuanganTableProps<T>) => {
+const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
   // States
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
+  const [open, setOpen] = useState(false); // State untuk dialog
+  const [selectedRow, setSelectedRow] = useState<KeuanganInterface | null>(
+    null
+  ); // Data yang dipilih
 
+  const columnHelper = createColumnHelper<KeuanganInterface>();
+
+  const columns = [
+    columnHelper.accessor("Jamaah.nama", {
+      cell: (info) => info.getValue(),
+      header: "Nama",
+    }),
+    columnHelper.accessor("namaPaket", {
+      cell: (info) => info.getValue(),
+      header: "Nama Paket",
+      enableColumnFilter: true,
+    }),
+    columnHelper.accessor("jenisPaket", {
+      cell: (info) => info.getValue(),
+      header: "Jenis Paket",
+      enableColumnFilter: true,
+    }),
+    columnHelper.accessor("metodePembayaran", {
+      cell: (info) => info.getValue(),
+      header: "Metode Pembayaran",
+    }),
+    columnHelper.accessor("totalTagihan", {
+      cell: (info) => `Rp ${info.getValue().toLocaleString()}`,
+      header: "Total Tagihan",
+    }),
+    columnHelper.accessor("sisaTagihan", {
+      cell: (info) => `Rp ${info.getValue()?.toLocaleString()}`,
+      header: "Sisa Tagihan",
+    }),
+    columnHelper.accessor("tenggatPembayaran", {
+      cell: (info) => new Date(info.getValue()).toLocaleDateString("id-ID"),
+      header: "Tenggat Pembayaran",
+    }),
+    columnHelper.accessor("status", {
+      cell: (info) => info.getValue(),
+      header: "Status",
+    }),
+    columnHelper.display({
+      id: "action",
+      header: "Detail",
+      cell: (info) => {
+        const handleOpenDialog = (rowData: KeuanganInterface) => {
+          setSelectedRow(rowData); // Set data pengguna
+          setOpen(true); // Buka dialog
+        };
+
+        return (
+          <Box sx={{ display: "flex", justifyContent: "start" }}>
+            {/* Tombol Edit */}
+            <ActionButton
+              rowData={info.row.original}
+              actionPath={(rowData) => `/keuangan/${rowData.id}`} // Path dinamis berdasarkan ID Jamaah
+            />
+
+            {/* Tombol Delete */}
+            <ActionButton
+              rowData={info.row.original}
+              mode="delete"
+              onDelete={() => handleOpenDialog(info.row.original)} // Buka dialog konfirmasi
+            />
+          </Box>
+        );
+      },
+      enableColumnFilter: false,
+    }),
+  ];
+
+  const handleCloseDialog = () => {
+    setOpen(false); // Tutup dialog
+    setSelectedRow(null); // Reset data
+  };
+
+  const handleDelete = async () => {
+    if (selectedRow) {
+      const result = await deleteKeuanganAction(selectedRow.id ?? 0); // Eksekusi delete
+      if (result.success) {
+        toast.success(`User with ID ${selectedRow.id} has been deleted.`);
+      } else {
+        toast.error(`Failed to delete user: ${result.error}`);
+      }
+      handleCloseDialog(); // Tutup dialog setelah selesai
+    }
+  };
 
   const table = useReactTable({
     data: data || [], // Pastikan data selalu berupa array.
@@ -250,20 +299,7 @@ const KeuanganTable = <T,>({ columns, data }: KeuanganTableProps<T>) => {
         sx={{
           width: "100%",
         }}
-      >
-        {/* <CardHeader
-        sx={{ 
-          paddingTop: 0
-        }}
-          action={
-            <DebouncedInput
-              value={globalFilter ?? ""}
-              onChange={(value) => setGlobalFilter(String(value))}
-              placeholder="Search all columns..."
-            />
-          }
-        /> */}
-      </Box>
+      ></Box>
       <div className="overflow-x-auto">
         <table className={styles.table}>
           <thead>
@@ -288,16 +324,8 @@ const KeuanganTable = <T,>({ columns, data }: KeuanganTableProps<T>) => {
                             )}
                             {header.column.getIsSorted() &&
                               {
-                                asc: (
-                                  <ChevronRight
-                                    className="-rotate-90"
-                                  />
-                                ),
-                                desc: (
-                                  <ChevronRight
-                                    className="rotate-90"
-                                  />
-                                ),
+                                asc: <ChevronRight className="-rotate-90" />,
+                                desc: <ChevronRight className="rotate-90" />,
                               }[header.column.getIsSorted() as "asc" | "desc"]}
                           </div>
                           {header.column.getCanFilter() && (
@@ -356,6 +384,14 @@ const KeuanganTable = <T,>({ columns, data }: KeuanganTableProps<T>) => {
           }}
         />
       </Box>
+      {/* Dialog Konfirmasi */}
+      <ConfirmDialog
+        open={open}
+        onClose={handleCloseDialog}
+        onConfirm={handleDelete}
+        title="Konfirmasi Penghapusan"
+        description={`Apakah Anda yakin ingin menghapus item kuangan "${selectedRow?.id}"?`}
+      />
     </Box>
   );
 };

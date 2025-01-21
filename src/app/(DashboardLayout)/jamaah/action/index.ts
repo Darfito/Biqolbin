@@ -4,7 +4,6 @@ import { createClient } from "@/libs/supabase/server";
 
 import { revalidatePath } from "next/cache";
 import { JamaahInterface } from "../../utilities/type";
-import { number } from "valibot";
 
   // Data untuk ScoreCard
 
@@ -36,6 +35,7 @@ export const mapJamaahData = (data: any): JamaahInterface[] => {
     jenisPaket: {
       id: item.Paket.id,
       nama: item.Paket.nama,
+      jenis: item.Paket.jenis,
       maskapai: item.Paket.maskapai,
       customMaskapai: item.Paket.customMaskapai || undefined,
       noPenerbangan: item.Paket.noPenerbangan || undefined,
@@ -116,6 +116,7 @@ export const getJamaahAction = async (): Promise<JamaahInterface[]> => {
       fasilitas,
       namaMuthawif,
       noTelpMuthawif,
+      jenis,
       Hotel (
         id,
         namaHotel,
@@ -396,4 +397,24 @@ export const deleteJamaahAction = async (jamaahId: number) => {
   console.log(`Jamaah with ID ${jamaahId} deleted successfully`);
   revalidatePath("/jamaah");
   return { success: true };
+};
+
+
+export const getFileUrl = async (jamaahId: string, namaDokumen: string) => {
+  const supabase = createClient();
+  const {data, error} = await supabase
+    .from('jenis_dokumen')
+    .select('file')
+    .eq('nama_dokumen', namaDokumen)
+    .eq('jamaah_id', jamaahId)
+    .single();
+
+  if (error) {
+    console.error('Error fetching file URL:', error.message);
+    return { success: false, error: error.message };
+  }
+
+  console.log('File URL:', data.file);
+
+  return { success: true, data };
 };

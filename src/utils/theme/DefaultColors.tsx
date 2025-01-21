@@ -8,6 +8,8 @@ export const plus = Plus_Jakarta_Sans({
   fallback: ["Helvetica", "Arial", "sans-serif"],
 });
 
+console.log(plus.style.fontFamily);
+
 const baselightTheme = createTheme({
   direction: "ltr",
   palette: {

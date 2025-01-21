@@ -1,103 +1,109 @@
-import React from "react"
+import React from "react";
 
 // ! GENERAL TYPE
 
 export type CardStatsHorizontalWithBorderProps = {
-    title: string
-    total: number
-    color?: string
-    icon: React.ElementType
-  }
+  title: string;
+  total: number;
+  color?: string;
+  icon: React.ElementType;
+};
 
-  export type CardStatsProps = {
-    title: string
-    total: number
-    color?: string
-    icon: string
-  }
-
+export type CardStatsProps = {
+  title: string;
+  total: number;
+  color?: string;
+  icon: string;
+};
 
 // ! KEUANGAN TYPE
-  export interface KeuanganProps {
-    id: number;
-    nama: string;
-    jenisPaket : PaketInterface
-    metodePembayaran: MetodePembayaranType
-    uangMuka?: number
-    totalTagihan: number
-    sisaTagihan: number
-    jumlahBiayaPerAngsuran?: number
-    tenggatPembayaran: Date
-    banyaknyaCicilan?: number
-    catatanPembayaran?: string
-    status: StatusType
-    action?: string; // Optional field for action
-    cicilan?: CicilanType[];
-  }
-  
-export type CicilanType = {
-  id: number;
-  cicilanKe: number;
-  jumlahCicilan: number;
-  nominalCicilan: number;
-  tanggalPembayaran: Date;
-  lampiran?: string;
-  action?: string;
+export interface KeuanganInterface {
+  id?: number;
+  Jamaah: JamaahInterface;
+  Paket: PaketInterface;
+  namaPaket?: string;
+  jenisPaket?: string;
+  metodePembayaran: MetodePembayaranType;
+  uangMuka?: number;
+  totalTagihan: number;
+  sisaTagihan?: number;
+  jumlahBiayaPerAngsuran?: number;
+  tenggatPembayaran: string;
+  banyaknyaCicilan?: number;
+  catatanPembayaran?: string;
+  status: StatusType;
+  action?: string; // Optional field for action
+  Cicilan?: CicilanType[];
+  paket_id?: number;
 }
 
-  export type MetodePembayaranType = 'Cicilan' | 'Tunai' | 'Tabungan'
+export type CicilanType = {
+  keuangan_id?: number;
+  id?: number;
+  cicilanKe: number;
+  nominalCicilan: number;
+  tanggalPembayaran: string;
+  lampiran?: string;
+  action?: string;
+};
 
-  export type StatusType = 'Belum Bayar' | 'Sedang Menyicil' | 'Sedang Menabung' | 'Lunas';
+export enum MetodePembayaranType {
+  CICILAN = "Cicilan",
+  TUNAI = "Tunai",
+  TABUNGAN = "Tabungan",
+}
 
+export enum StatusType {
+  BELUM_BAYAR = "Belum Bayar",
+  SEDANG_MENYICIL = "Sedang Menyicil",
+  SEDANG_MENABUNG = "Sedang Menabung",
+  LUNAS = "Lunas",
+}
 
+// ! PAKET TYPE
+export interface PaketInterface {
+  id?: number;
+  nama: string;
+  jenis: JenisPaket;
+  maskapai: Maskapai; // Menggunakan enum Maskapai
+  customMaskapai?: string; // Untuk maskapai lainnya jika memilih "Lainnya"
+  jenisPenerbangan: JenisPenerbangan;
+  noPenerbangan?: string;
+  keretaCepat: boolean;
+  tglKeberangkatan: string;
+  tglKepulangan: string;
+  fasilitas: string[];
+  action?: string;
+  publish?: boolean;
+  namaMuthawif: string;
+  noTelpMuthawif: string;
+  hargaDouble: number; // Harga untuk kamar double
+  hargaTriple: number; // Harga untuk kamar triple
+  hargaQuad: number; // Harga untuk kamar quad
+  gambar_url?: string;
+  Hotel?: HotelType[];
+}
 
-  // ! PAKET TYPE
-  export interface PaketInterface {
-    id?: number;
-    nama: string;
-    jenis: JenisPaket;
-    maskapai: Maskapai; // Menggunakan enum Maskapai
-    customMaskapai?: string; // Untuk maskapai lainnya jika memilih "Lainnya"
-    jenisPenerbangan: JenisPenerbangan;
-    noPenerbangan?: string;
-    keretaCepat: boolean;
-    tglKeberangkatan: string;
-    tglKepulangan: string;
-    fasilitas: string[];
-    action?: string;
-    publish?: boolean;
-    namaMuthawif: string;
-    noTelpMuthawif: string;
-    hargaDouble: number; // Harga untuk kamar double
-    hargaTriple: number; // Harga untuk kamar triple
-    hargaQuad: number;   // Harga untuk kamar quad
-    gambar_url?: string;
-    Hotel?: HotelType[];
-  }
+// ! TYPE HOTEL
+export type HotelType = {
+  id?: number;
+  namaHotel: string;
+  alamatHotel: string;
+  ratingHotel: number;
+  tanggalCheckIn: string;
+  tanggalCheckOut: string;
+};
 
-  // ! TYPE HOTEL
-  export type HotelType = {
-    id?: number;
-    namaHotel: string;
-    alamatHotel: string;
-    ratingHotel: number;
-    tanggalCheckIn: string;
-    tanggalCheckOut: string;
-  }
+export enum Maskapai {
+  SAUDIA_ARABIA = "Saudia Arabia",
+  GARUDA_INDONESIA = "Garuda Indonesia",
+  QATAR_AIRWAYS = "Qatar Airways",
+  ETIHAD_AIRWAYS = "Etihad Airways",
+  LION_AIRWAYS = "Lion Airways",
+  LAINNYA = "Lainnya", // Opsi untuk memilih maskapai lainnya
+}
 
-
-
-  export enum Maskapai {
-    SAUDIA_ARABIA = "Saudia Arabia",
-    GARUDA_INDONESIA = "Garuda Indonesia",
-    QATAR_AIRWAYS = "Qatar Airways",
-    ETIHAD_AIRWAYS = "Etihad Airways",
-    LION_AIRWAYS = "Lion Airways",
-    LAINNYA = "Lainnya", // Opsi untuk memilih maskapai lainnya
-  }
-
-
-export enum JenisPaket{
+export enum JenisPaket {
   REGULAR = "REGULAR",
   VIP = "VIP",
 }
@@ -107,8 +113,6 @@ export enum JenisPenerbangan {
   TRANSIT = "TRANSIT",
 }
 
-
-
 // ! JAMAAH TYPE
 export interface JamaahInterface {
   id?: number;
@@ -116,7 +120,7 @@ export interface JamaahInterface {
   ayahKandung: string;
   noTelp: string;
   kontakDarurat?: KontakDaruratType[];
-  email:string;
+  email: string;
   jenisKelamin: JenisKelamin;
   tempatLahir: string;
   pernikahan: boolean;
@@ -127,7 +131,7 @@ export interface JamaahInterface {
   kursiRoda: boolean;
   riwayatPenyakit: string;
   jenisDokumen: JenisDokumen[];
-  jenisPaket : PaketInterface;
+  jenisPaket: PaketInterface;
   berangkat: string; // tanggal berangkat dari paket
   selesai: string; // tanggal pulang dari paket
   status: StatusKepergian;
@@ -143,7 +147,7 @@ export interface UserInterface {
   role: Jabatan;
   penempatan: string;
   alamatCabang: string;
-  action?: string
+  action?: string;
 }
 
 export enum Jabatan {
@@ -154,14 +158,14 @@ export enum Jabatan {
   Superadmin = "Superadmin",
 }
 
-export type JenisDokumen ={
+export type JenisDokumen = {
   id: number;
   nama_dokumen: string;
-  file?: string
-  lampiran: boolean
-  action?: string
-  jamaah_id?: number
-}
+  file?: string;
+  lampiran: boolean;
+  action?: string;
+  jamaah_id?: number;
+};
 
 export type KontakDaruratType = {
   id: number;
@@ -169,14 +173,14 @@ export type KontakDaruratType = {
   no_telp: string;
   hubungan: KontakDaruratRelation;
   relasiLain?: string;
-}
+};
 
 // export type StatusKepergian = {
 //   id: number;
 //   status: 'Berangkat' | 'Dijadwalkan' | 'Selesai';
 //   deskripsi?: string;
 // }
-export type StatusKepergian = 'Berangkat' | 'Dijadwalkan' | 'Selesai'
+export type StatusKepergian = "Berangkat" | "Dijadwalkan" | "Selesai";
 
 export enum KontakDaruratRelation {
   Ayah = "Ayah",
@@ -196,12 +200,9 @@ export enum JenisKelamin {
   Perempuan = "Perempuan",
 }
 
-
-
 // ! TYPE KAMAR
 export enum TipeKamar {
   QUAD = "QUAD",
   TRIPLE = "TRIPLE",
   DOUBLE = "DOUBLE",
 }
-

@@ -1,7 +1,7 @@
 "use client";
 
 // React Imports
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -21,14 +21,14 @@ import {
   DialogTitle,
   IconButton,
   TablePagination,
+  Typography,
 } from "@mui/material";
-import { Delete, Folder, UploadFile } from "@mui/icons-material";
+import { Folder, UploadFile } from "@mui/icons-material";
 import { RankingInfo, rankItem } from "@tanstack/match-sorter-utils";
 import { toast } from "react-toastify"; // Import toast
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 
 // Component Imports
-import CustomTextField from "../textField/TextField";
 import TablePaginationComponent from "../pagination/TablePaginationComponent";
 
 // Style Imports
@@ -39,6 +39,8 @@ import { JenisDokumen } from "../../type";
 import FileUploaderSingle from "../uploader/FileUploaderSingle";
 import { createClient } from "@/libs/supabase/client";
 import PdfViewer from "./components/PdfViewer";
+import ActionButton from "./components/ActionButton";
+import { getFileUrl } from "@/app/(DashboardLayout)/jamaah/action";
 
 const fuzzyFilter = (
   row: { getValue: (arg0: any) => any },
@@ -67,6 +69,7 @@ const JamaahDetailTable = ({
   const [dialogRow, setDialogRow] = useState<JenisDokumen | null>(null);
   const [openFileDialog, setOpenFileDialog] = useState(false); // Status dialog
   const [fileUrl, setFileUrl] = useState<string | null>(null); // URL file untuk dialog
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null); // State untuk menyimpan file yang diunggah
   const [tableData, setTableData] = useState<JenisDokumen[]>(data);
 
   const supabase = createClient();
@@ -79,7 +82,7 @@ const JamaahDetailTable = ({
     try {
       const path = `${jamaahId}/${namaDokumen}`;
       const { data, error } = await supabase.storage
-        .from("Dokumen") // Nama bucket
+        .from("Dokumen") // Nama bucketini 
         .upload(path, file, {
           cacheControl: "3600",
           upsert: true, // Overwrite file jika sudah ada
@@ -93,7 +96,6 @@ const JamaahDetailTable = ({
         .from("Dokumen")
         .getPublicUrl(path);
 
-      toast.success("File berhasil diunggah!");
       return publicUrlData.publicUrl; // Kembalikan URL publik
     } catch (error: any) {
       toast.error(`Gagal mengunggah file: ${error.message}`);
@@ -129,12 +131,24 @@ const JamaahDetailTable = ({
       return;
     }
   
-    // Upload file ke Supabase Storage
-    const publicUrl = await uploadFileToSupabase(
-      file,
-      jamaahId.toString(),
-      namaDokumen
-    );
+    // Dapatkan ekstensi file dari nama file asli
+    const fileExtension = file.name.split(".").pop();
+  
+    if (!fileExtension) {
+      toast.error("File tidak memiliki ekstensi.");
+      return;
+    }
+  
+    // Pastikan ekstensi valid (opsional, untuk membatasi file tertentu)
+    const allowedExtensions = ["jpg", "jpeg", "png", "pdf"];
+    if (!allowedExtensions.includes(fileExtension.toLowerCase())) {
+      toast.error("Format file tidak didukung. Hanya JPG, PNG, dan PDF yang diizinkan.");
+      return;
+    }
+  
+    // Buat nama file dengan ekstensi
+    const fileName = `${namaDokumen}.${fileExtension}`;
+    const publicUrl = await uploadFileToSupabase(file, jamaahId.toString(), fileName);
   
     if (publicUrl) {
       // Jika upload berhasil, lakukan update pada tabel jenisDokumen dengan URL file
@@ -160,15 +174,20 @@ const JamaahDetailTable = ({
   };
   
 
-  const getFileUrl = async (jamaahId: string, namaDokumen: string) => {
+  const getFile = async (jamaahId: string, namaDokumen: string) => {
     try {
-      const path = `${jamaahId}/${namaDokumen}`;
-      const { data } = supabase.storage.from("Dokumen").getPublicUrl(path);
+      // Mengambil path file dari tabel Cicilan
+      const filePath = await getFileUrl(jamaahId, namaDokumen);
 
-      if (data?.publicUrl) {
-        return data.publicUrl;
-      } else {
-        throw new Error("File tidak ditemukan.");
+      if (!filePath.success || !filePath.data?.file) {
+        throw new Error("File path tidak ditemukan.");
+      }
+
+      // Mengambil URL publik dari Supabase Storage bucket "Cicilan"
+      const lampiranPath = filePath.data.file; // Mengakses properti `lampiran`
+
+      if (lampiranPath) {
+        return lampiranPath; // Kembalikan URL publik yang bisa diakses
       }
     } catch (error: any) {
       toast.error(`Gagal mendapatkan URL file: ${error.message}`);
@@ -203,7 +222,7 @@ const JamaahDetailTable = ({
     jamaahId: string,
     namaDokumen: string
   ) => {
-    const url = await getFileUrl(jamaahId, namaDokumen);
+    const url = await getFile(jamaahId, namaDokumen);
     if (url) {
       setFileUrl(url);
       setOpenFileDialog(true);
@@ -257,17 +276,14 @@ const JamaahDetailTable = ({
                   }
                 }}
                 sx={{
-                  color:
-                    rowData.action === "Diterima"
-                      ? "#F18B04"
-                      : "#B0B0B0",
+                  color: rowData.action === "Diterima" ? "#F18B04" : "#B0B0B0",
                 }}
               >
                 <Folder />
               </IconButton>
 
               {/* Tombol Delete */}
-              <IconButton
+              {/* <IconButton
                 color="error"
                 onClick={() => {
                   if (rowData.jamaah_id && rowData.nama_dokumen) {
@@ -278,7 +294,19 @@ const JamaahDetailTable = ({
                 }}
               >
                 <Delete />
-              </IconButton>
+              </IconButton> */}
+
+              <ActionButton
+                rowData={row.original}
+                mode="delete"
+                onDelete={() => {
+                  if (rowData.jamaah_id && rowData.nama_dokumen) {
+                    handleOpenDeleteDialog(rowData);
+                  } else {
+                    toast.error("Data Jamaah atau dokumen tidak valid.");
+                  }
+                }} // Buka dialog konfirmasi
+              />
             </Box>
           );
         },
@@ -362,16 +390,37 @@ const JamaahDetailTable = ({
         <Dialog open={!!dialogRow} onClose={handleDialogClose}>
           <DialogTitle>Upload File untuk {dialogRow.nama_dokumen}</DialogTitle>
           <DialogContent>
-            <FileUploaderSingle onFileUpload={handleFileUpload} />
+          <FileUploaderSingle
+            onFileUpload={(file) => {
+            setUploadedFile(file); // Simpan file yang diunggah ke state
+            }}
+          />
           </DialogContent>
           <DialogActions>
             <Button onClick={handleDialogClose} color="primary">
               Cancel
             </Button>
+            <Button
+            onClick={async () => {
+              if (uploadedFile && dialogRow) {
+                await handleFileUpload(
+                  uploadedFile,
+                ); // Proses upload file
+                setUploadedFile(null); // Reset file setelah upload selesai
+                handleDialogClose(); // Tutup dialog setelah berhasil upload
+              } else {
+                toast.error("Silakan pilih file terlebih dahulu."); // Tampilkan pesan error jika file belum dipilih
+              }
+            }}
+            color="primary"
+            variant="contained"
+            sx={{ color: "white" }}
+          >
+            Simpan
+          </Button>
           </DialogActions>
         </Dialog>
       )}
-
       <Dialog
         open={openFileDialog}
         onClose={handleCloseFileDialog}
@@ -380,9 +429,23 @@ const JamaahDetailTable = ({
         <DialogTitle>Preview File</DialogTitle>
         <DialogContent>
           {fileUrl ? (
-            <PdfViewer fileUrl={fileUrl} />
+            // Cek ekstensi file
+            fileUrl.endsWith(".pdf") ? (
+              <PdfViewer fileUrl={fileUrl} />
+            ) : (
+              // Tampilkan gambar jika bukan PDF
+              <Box
+                component="img"
+                src={fileUrl}
+                alt="Lampiran"
+                sx={{
+                  maxWidth: "400px",
+                  objectFit: "contain",
+                }}
+              />
+            )
           ) : (
-            <p>File tidak tersedia.</p>
+            <Typography>File tidak tersedia.</Typography>
           )}
         </DialogContent>
         <DialogActions>

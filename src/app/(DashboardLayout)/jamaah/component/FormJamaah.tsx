@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react";
 import * as v from "valibot";
 import Button from "@mui/material/Button";
@@ -252,6 +254,14 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
     const response = await createJamaahAction(formValues);
     toast.success("Form berhasil disubmit!"); // Show success toast
     handleClose();
+
+    if (response.success) {
+      toast.success("Jamaah berhasil ditambahkan!");
+      handleClose(); // Tutup dialog setelah berhasil
+
+    } else {
+      toast.error(`Gagal menambahkan Jamaah: ${response.error}`);
+    }
   };
 
   const handleClickOpen = () => setOpen(true);
@@ -595,7 +605,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
 
               {/* Kontak Darurat */}
               <KontakDaruratSection
-              isEditing={false}
+              isEditing={true}
                 kontakDarurat={formValues.kontakDarurat}
                 handleContactChange={handleContactChange}
                 handleAddContact={handleAddContact}
