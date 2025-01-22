@@ -221,7 +221,7 @@ const FormDetail = ({
     }
   }, [keuanganData]);
 
-  console.log("Keuangan data di detail:", keuanganData);
+  // console.log("Keuangan data di detail:", keuanganData);
 
   // Handle metode pembayaran selection
   const handleMetodeChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -260,7 +260,6 @@ const FormDetail = ({
     }));
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const calculateAngsuran = () => {
     if (
       metode === "Cicilan" &&
@@ -283,7 +282,11 @@ const FormDetail = ({
 
   useEffect(() => {
     calculateAngsuran();
-  }, [formValues.totalTagihan, formValues.uangMuka, formValues.banyaknyaCicilan, calculateAngsuran]);
+  }, [
+    formValues.totalTagihan,
+    formValues.uangMuka,
+    formValues.banyaknyaCicilan,
+  ]);
 
   const handleOpenModal = () => {
     if (!openModal) {

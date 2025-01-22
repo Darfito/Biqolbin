@@ -36,6 +36,9 @@ interface KeuanganDetailProps {
   paketData: PaketInterface[];
   jamaahData: JamaahInterface[];
   breadcrumbLinks: { label: string; href?: string }[];
+  keuanganData: KeuanganInterface | null;
+  dataCicilan: CicilanType[];
+  nextCicilanKe: number;
 }
 
 const KeuanganDetail = ({
@@ -43,33 +46,21 @@ const KeuanganDetail = ({
   paketData,
   jamaahData,
   breadcrumbLinks,
+  keuanganData,
+  dataCicilan,
+  nextCicilanKe,
 }: KeuanganDetailProps) => {
   const router = useRouter(); // Initialize useRouter
   const [isEditing, setIsEditing] = useState<boolean>(false); // State to toggle edit mode
   const [currentData, setCurrentData] = useState<KeuanganInterface | null>(
-    null
+    keuanganData
   ); // State untuk menyimpan data jamaah
-  const [nextCicilanKe, setNextCicilanKe] = useState<number>(0);
-  const [dataCicilan, setDataCicilan] = useState<CicilanType[]>([]);
+  // const [dataCicilan, setDataCicilan] = useState<CicilanType[]>([]);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openConfirmDialog, setOpenConfirmDialog] = useState<boolean>(false); // State untuk dialog konfirmasi
   // const [statusLunasDialog, setStatusLunasDialog] = useState(false); // Untuk menandakan status lunas
   // Ambil data berdasarkan ID
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await getKeuanganByIdAction(id);
-      const cicilan = await getCicilanAction(id);
-      if (data) {
-        setCurrentData(data.keuangan); // Set keuangan data
-        setNextCicilanKe(data.nextCicilanKe); // Set nextCicilanKe separately
-        setDataCicilan(cicilan);
-      }
-    };
 
-    fetchData();
-  }, [id]);
-
-  const isLunas = currentData && currentData.sisaTagihan === 0;
   // Toggle the isEditing state
   const handleEditClick = () => {
     if (!isEditing) {
