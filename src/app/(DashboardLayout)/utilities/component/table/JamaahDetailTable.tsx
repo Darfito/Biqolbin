@@ -39,7 +39,6 @@ import styles from "../../../../styles/table.module.css";
 import { JenisDokumen } from "../../type";
 import FileUploaderSingle from "../uploader/FileUploaderSingle";
 import { createClient } from "@/libs/supabase/client";
-// import PdfViewer from "./components/PdfViewer";
 import ActionButton from "./components/ActionButton";
 import { getFileUrl } from "@/app/(DashboardLayout)/jamaah/action";
 
@@ -434,7 +433,6 @@ const JamaahDetailTable = ({
           {fileUrl ? (
             // Cek ekstensi file
             fileUrl.endsWith(".pdf") ? (
-              // <PdfViewer fileUrl={fileUrl} />
               <iframe
                 src={fileUrl}
                 width="100%"
