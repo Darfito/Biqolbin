@@ -7,41 +7,38 @@ import { redirect } from 'next/navigation'
 
 
 export async function login(formData: FormData) {
-  const supabase = await createClient()
+  const supabase = await createClient();
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
   const data = {
     email: formData.get('email') as string,
     password: formData.get('password') as string,
-  }
+  };
 
-  const { error } = await supabase.auth.signInWithPassword(data)
+  const { error } = await supabase.auth.signInWithPassword(data);
 
   if (error) {
-    redirect('/error')
+    return { success: false, error: error.message };
   }
 
-  revalidatePath('/', 'layout')
-  redirect('/dashboard')
+  // Tidak menggunakan redirect di sini
+  return { success: true };
 }
 
-export async function signup(formData: FormData) {
-  const supabase = await createClient()
+
+export async function signup(formData: { email: string, password: string }) {
+  const supabase = await createClient();
 
   // type-casting here for convenience
-  // in practice, you should validate your inputs
   const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
-  }
+    email: formData.email,
+    password: formData.password,
+  };
 
-  const { error } = await supabase.auth.signUp(data)
+  const { error } = await supabase.auth.signUp(data);
 
   if (error) {
-    redirect('/error')
+    return { success: false, error: error.message };
   }
 
-  revalidatePath('/', 'layout')
-  redirect('/account')
+  return { success: true };
 }

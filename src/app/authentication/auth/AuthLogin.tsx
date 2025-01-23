@@ -6,11 +6,14 @@ import {
   Typography,
   Button,
   Stack,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 import CustomTextField from "@/app/(DashboardLayout)/components/forms/theme-elements/CustomTextField";
 import { login } from "../login/action";
-
+import { toast } from "react-toastify"; // Pastikan toast diinstal
 
 interface loginType {
   title?: string;
@@ -21,16 +24,30 @@ interface loginType {
 const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // State untuk toggle password visibility
+  const [error, setError] = useState(""); // State untuk menangani error
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
+  
     const formData = new FormData();
     formData.append("email", email);
     formData.append("password", password);
-
-    await login(formData);
+  
+    const response = await login(formData);
+  
+    if (!response.success) {
+      setError(response.error || "Login failed. Please check your email and password.");
+      toast.error(response.error || "Login failed. Please try again.");
+    } else {
+      setError(""); // Clear error if login is successful
+      toast.success("Login successful!");
+      window.location.href = "/dashboard"; // Redirect to dashboard
+    }
   };
+  
+
+  const handleClickShowPassword = () => setShowPassword(!showPassword); // Toggle function
 
   return (
     <>
@@ -76,39 +93,32 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
             </Typography>
             <CustomTextField
               id="password"
-              type="password"
+              type={showPassword ? "text" : "password"} // Show text if password is visible
               variant="outlined"
               fullWidth
               value={password}
               onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setPassword(e.target.value)}
               required
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
           </Box>
-          {/* <Stack
-            justifyContent="space-between"
-            direction="row"
-            alignItems="center"
-            my={2}
-          >
-            <FormGroup>
-              <FormControlLabel
-                control={<Checkbox defaultChecked />}
-                label="Remember this Device"
-              />
-            </FormGroup>
-            <Typography
-              component={Link}
-              href="/"
-              fontWeight="500"
-              sx={{
-                textDecoration: "none",
-                color: "primary.main",
-              }}
-            >
-              Forgot Password ?
-            </Typography>
-          </Stack> */}
         </Stack>
+
+        {/* Menampilkan pesan error jika login gagal */}
+        {error && <Typography color="error" variant="body2">{error}</Typography>}
+
         <Box sx={{ my: 2 }}>
           <Button
             sx={{ color: "white" }}
@@ -128,3 +138,29 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
 };
 
 export default AuthLogin;
+
+
+            {/* <Stack
+              justifyContent="space-between"
+              direction="row"
+              alignItems="center"
+              my={2}
+            >
+              <FormGroup>
+                <FormControlLabel
+                  control={<Checkbox defaultChecked />}
+                  label="Remember this Device"
+                />
+              </FormGroup>
+              <Typography
+                component={Link}
+                href="/"
+                fontWeight="500"
+                sx={{
+                  textDecoration: "none",
+                  color: "primary.main",
+                }}
+              >
+                Forgot Password ?
+              </Typography>
+            </Stack> */}

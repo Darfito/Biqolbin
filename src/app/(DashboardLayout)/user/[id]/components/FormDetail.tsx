@@ -55,13 +55,15 @@ const FormDetail = ({ isEditing, userData }: FormDetailProps) => {
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [formValues, setFormValues] = useState<UserInterface>(
     userData || {
-      id: 0,
+      id: "",
       nama: "",
       jenisKelamin: JenisKelamin.LakiLaki,
       noTelp: "",
       role: Jabatan.Marketing,
       penempatan: "",
       alamatCabang: "",
+      email: "",
+      password: "",
     }
   );
 

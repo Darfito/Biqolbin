@@ -39,7 +39,7 @@ const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
       if (id && !currentData) {
         try {
           const { data, error } = await supabase
-            .from("User")
+            .from("Users")
             .select("*") // Get all necessary fields, not just 'id'
             .eq("id", id)
             .single(); // To get only one user based on the id
@@ -82,6 +82,7 @@ const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
     router.push("/user"); // Navigate to the user list
   };
   
+  console.log("currentData:", currentData);
   return (
     <>
       <Typography variant="h2" component="h1">

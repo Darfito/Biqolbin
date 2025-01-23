@@ -140,13 +140,16 @@ export interface JamaahInterface {
 
 // ! INTERFACE USER
 export interface UserInterface {
-  id: number;
+  id?: string;
+  email: string;
   nama: string;
   jenisKelamin: JenisKelamin;
   noTelp: string;
   role: Jabatan;
   penempatan: string;
   alamatCabang: string;
+  password: string;
+  confirmPassword?: string;
   action?: string;
 }
 

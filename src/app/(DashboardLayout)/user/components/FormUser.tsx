@@ -16,10 +16,14 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
 import { Jabatan, JenisKelamin, UserInterface } from "../../utilities/type";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { createUserAction } from "../action";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { signup } from "@/app/authentication/login/action";
 
 interface FormErrors {
   nama?: string;
@@ -28,30 +32,56 @@ interface FormErrors {
   role?: string;
   penempatan?: string;
   alamatCabang?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+}
+
+type FormType = {
+  email: string;
+  nama: string;
+  jenisKelamin: JenisKelamin;
+  noTelp: string;
+  role: Jabatan;
+  penempatan: string;
+  alamatCabang: string;
+  password: string;
+  confirmPassword?: string;
 }
 
 // Valibot Schema
 const formSchema = v.object({
   nama: v.pipe(v.string(), v.nonEmpty("Nama harus diisi")),
+  email: v.pipe(v.string(), v.email("Email tidak valid"), v.nonEmpty("Email harus diisi")),
   jenisKelamin: v.pipe(v.string(), v.nonEmpty("Jenis Kelamin harus diisi")),
   noTelp: v.pipe(v.string(), v.nonEmpty("Nomor Telepon harus diisi")),
   role: v.pipe(v.string(), v.nonEmpty("Role harus diisi")),
   penempatan: v.pipe(v.string(), v.nonEmpty("Penempatan harus diisi")),
   alamatCabang: v.pipe(v.string(), v.nonEmpty("Alamat Cabang harus diisi")),
+  password: v.pipe(
+    v.string(),
+    v.minLength(8, "Password minimal 8 karakter"),
+    v.nonEmpty("Password harus diisi")
+  ),
 });
 
 export default function FormUser() {
   const [open, setOpen] = useState(false);
 
-  const [formValues, setFormValues] = useState({
+  const [formValues, setFormValues] = useState<FormType>({
     nama: "",
-    jenisKelamin: "",
+    email: "",
+    jenisKelamin: JenisKelamin.LakiLaki,
     noTelp: "",
-    role: "",
+    role: Jabatan.Marketing,
     penempatan: "",
+    password: "",
+    confirmPassword: "",
     alamatCabang: "",
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
+  const [showPassword, setShowPassword] = useState(false); // State untuk visibilitas password
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // State untuk visibilitas confirm password
 
   const handleInputChange = (field: keyof UserInterface, value: any) => {
     setFormValues({ ...formValues, [field]: value });
@@ -60,38 +90,38 @@ export default function FormUser() {
   // Handle form submission
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // setFormErrors({}); // Clear previous errors
-
-    // Validasi menggunakan Valibot
-    const result = v.safeParse(formSchema, formValues);
-
-    if (!result.success) {
-      const errorMap: Record<string, string> = {};
-      result.issues.forEach((issue) => {
-        const path = issue.path?.[0]?.key as string | undefined;
-        if (path) {
-          errorMap[path] = issue.message;
-        }
-      });
-
-      setFormErrors(errorMap);
-      console.error("Validation errors:", errorMap);
+  
+    // Validasi password dan confirmPassword
+    if (formValues.password !== formValues.confirmPassword) {
+      toast.error("Password dan Confirm Password tidak cocok!");
       return;
     }
+  
 
-    console.log("Form User submitted:", formValues);
+  
+    // // Lakukan signup (mendaftarkan user di Supabase Auth)
+    // const signupResponse = await signup({ email: formValues.email, password });
+  
 
-    // Jika validasi berhasil, panggil createUserAction
-    const response = await createUserAction(formValues);
+      // Jika signup berhasil, masukkan data ke tabel `User` tanpa `confirmPassword`
+      // const userData = { ...userDetails, email: formValues.email }; // Menggabungkan data user tanpa password dan confirmPassword
+      // const { confirmPassword, jenisKelamin, ...rest } = formValues;
+      // const userData = {
+      //   ...rest,
+      //   jenisKelamin: jenisKelamin === "Laki-laki" ? JenisKelamin.LakiLaki : JenisKelamin.Perempuan,
+      // };
+      const userInsertResponse = await createUserAction(formValues);
+  
+      if (userInsertResponse.success) {
+        toast.success("User berhasil ditambahkan!");
+        handleClose();
+      } else {
+        toast.error(`Gagal menambahkan user: ${userInsertResponse.error}`);
+      }
 
-    if (response.success) {
-      toast.success("User berhasil ditambahkan!");
-      handleClose(); // Tutup dialog setelah berhasil
-
-    } else {
-      toast.error(`Gagal menambahkan user: ${response.error}`);
-    }
   };
+  
+  
 
 
   const handleClickOpen = () => setOpen(true);
@@ -101,11 +131,14 @@ export default function FormUser() {
     // Reset all form values
     setFormValues({
       nama: "",
-      jenisKelamin: "",
+      email: "",
+      jenisKelamin: JenisKelamin.LakiLaki,
       noTelp: "",
-      role: "",
+      role: Jabatan.Marketing,
       penempatan: "",
       alamatCabang: "",
+      password: "",
+      confirmPassword: "",
     });
 
 
@@ -146,6 +179,64 @@ export default function FormUser() {
               onChange={(e: { target: { value: string } }) =>
                 setFormValues({ ...formValues, nama: e.target.value })
               }
+            />
+
+<CustomTextField
+              fullWidth
+              label="Email"
+              name="email"
+              value={formValues.email}
+              error={!!formErrors.email}
+              helperText={formErrors.email}
+              onChange={(e: { target: { value: string } }) => setFormValues({ ...formValues, email: e.target.value })}
+            />
+
+<CustomTextField
+              fullWidth
+              label="Password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              value={formValues.password}
+              error={!!formErrors.password}
+              helperText={formErrors.password}
+              onChange={(e: { target: { value: string } }) => setFormValues({ ...formValues, password: e.target.value })}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <CustomTextField
+              fullWidth
+              label="Konfirmasi Password"
+              name="confirmPassword"
+              type={showConfirmPassword ? "text" : "password"}
+              value={formValues.confirmPassword}
+              error={!!formErrors.confirmPassword}
+              helperText={formErrors.confirmPassword}
+              onChange={(e: { target: { value: string } }) =>
+                setFormValues({ ...formValues, confirmPassword: e.target.value })
+              }
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      edge="end"
+                    >
+                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
 
             <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
