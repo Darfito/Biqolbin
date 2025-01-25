@@ -8,6 +8,11 @@
   white-space: nowrap;
 }
 
+.table th,
+.table td {
+  padding-right: 1.5rem; /* Menambahkan jarak antar kolom */
+}
+
 .table [align='right'] > * {
   text-align: end;
 }
@@ -70,6 +75,11 @@
 .tableTbody td:last-of-type {
   padding-block: 0.5rem;
   padding-inline: 1rem 1.5rem;
+}
+
+.tableTbody td {
+  padding-block: 0.5rem;
+  padding-inline: 0 1rem 0 0;
 }
 
 .tableTbody tr:not(:last-child) {

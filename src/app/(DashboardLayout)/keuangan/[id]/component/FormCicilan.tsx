@@ -15,7 +15,6 @@ import {
 import React, { FormEvent, useEffect, useState } from "react";
 import * as v from "valibot";
 import { createCicilanAction, updateCicilanAction } from "../../action";
-import { revalidatePath } from "next/cache";
 
 interface FormErrors {
   cicilanKe?: string;

@@ -16,42 +16,97 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  InputAdornment,
+  IconButton,
+  Autocomplete,
 } from "@mui/material";
-import { Jabatan, JenisKelamin, UserInterface } from "../../utilities/type";
-import { ChangeEvent, FormEvent, useState } from "react";
+import {
+  CabangInterface,
+  Jabatan,
+  JenisKelamin,
+  UserInterface,
+} from "../../utilities/type";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { createUserAction } from "../action";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 interface FormErrors {
+  email?: string;
   nama?: string;
   jenisKelamin?: string;
   noTelp?: string;
   role?: string;
   penempatan?: string;
   alamatCabang?: string;
+  password?: string;
+  confirmPassword?: string;
 }
+
+type FormType = {
+  email: string;
+  nama: string;
+  jenisKelamin: JenisKelamin;
+  noTelp: string;
+  role: Jabatan;
+  penempatan: CabangInterface;
+  alamatCabang: string;
+  password: string;
+  confirmPassword?: string;
+};
 
 // Valibot Schema
 const formSchema = v.object({
   nama: v.pipe(v.string(), v.nonEmpty("Nama harus diisi")),
+  email: v.pipe(
+    v.string(),
+    v.email("Email tidak valid"),
+    v.nonEmpty("Email harus diisi")
+  ),
   jenisKelamin: v.pipe(v.string(), v.nonEmpty("Jenis Kelamin harus diisi")),
+  // umur: v.number("Umur harus berupa angka dan tidak boleh kosong"),
   noTelp: v.pipe(v.string(), v.nonEmpty("Nomor Telepon harus diisi")),
   role: v.pipe(v.string(), v.nonEmpty("Role harus diisi")),
   penempatan: v.pipe(v.string(), v.nonEmpty("Penempatan harus diisi")),
   alamatCabang: v.pipe(v.string(), v.nonEmpty("Alamat Cabang harus diisi")),
+  password: v.pipe(
+    v.string(),
+    v.minLength(8, "Password minimal 8 karakter"),
+    v.nonEmpty("Password harus diisi")
+  ),
 });
 
-export default function FormUser() {
+type FormUserProps = {
+  cabangData: CabangInterface[];
+};
+
+export default function FormUser({ cabangData }: FormUserProps) {
   const [open, setOpen] = useState(false);
 
-  const [formValues, setFormValues] = useState({
+  const [formValues, setFormValues] = useState<FormType>({
     nama: "",
-    jenisKelamin: "",
+    email: "",
+    jenisKelamin: JenisKelamin.LakiLaki,
     noTelp: "",
-    role: "",
-    penempatan: "",
+    role: Jabatan.Marketing,
+    penempatan: {
+      id: 0,
+      nama: "",
+      alamatCabang: "",
+    },
+    password: "",
+    confirmPassword: "",
     alamatCabang: "",
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
+  const [showPassword, setShowPassword] = useState(false); // State untuk visibilitas password
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // State untuk visibilitas confirm password
+
+  useEffect(() => {
+    setFormValues((prev)=> ({
+      ...prev,
+      alamatCabang: formValues.penempatan.alamatCabang || ""
+    }))
+  }, [formValues.penempatan])
 
   const handleInputChange = (field: keyof UserInterface, value: any) => {
     setFormValues({ ...formValues, [field]: value });
@@ -60,39 +115,21 @@ export default function FormUser() {
   // Handle form submission
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // setFormErrors({}); // Clear previous errors
 
-    // Validasi menggunakan Valibot
-    const result = v.safeParse(formSchema, formValues);
-
-    if (!result.success) {
-      const errorMap: Record<string, string> = {};
-      result.issues.forEach((issue) => {
-        const path = issue.path?.[0]?.key as string | undefined;
-        if (path) {
-          errorMap[path] = issue.message;
-        }
-      });
-
-      setFormErrors(errorMap);
-      console.error("Validation errors:", errorMap);
+    // Validasi password dan confirmPassword
+    if (formValues.password !== formValues.confirmPassword) {
+      toast.error("Password dan Confirm Password tidak cocok!");
       return;
     }
+    const userInsertResponse = await createUserAction(formValues);
 
-    console.log("Form User submitted:", formValues);
-
-    // Jika validasi berhasil, panggil createUserAction
-    const response = await createUserAction(formValues);
-
-    if (response.success) {
+    if (userInsertResponse.success) {
       toast.success("User berhasil ditambahkan!");
-      handleClose(); // Tutup dialog setelah berhasil
-
+      handleClose();
     } else {
-      toast.error(`Gagal menambahkan user: ${response.error}`);
+      toast.error(`Gagal menambahkan user: ${userInsertResponse.error}`);
     }
   };
-
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => {
@@ -101,18 +138,25 @@ export default function FormUser() {
     // Reset all form values
     setFormValues({
       nama: "",
-      jenisKelamin: "",
+      email: "",
+      jenisKelamin: JenisKelamin.LakiLaki,
       noTelp: "",
-      role: "",
-      penempatan: "",
+      role: Jabatan.Marketing,
+      penempatan: {
+        id: 0,
+        nama: "",
+        alamatCabang: "",
+      },
       alamatCabang: "",
+      password: "",
+      confirmPassword: "",
     });
-
 
     // Clear any existing errors
     setFormErrors({});
   };
 
+  console.log("form values di User:", formValues);
   return (
     <>
       <Button
@@ -147,6 +191,82 @@ export default function FormUser() {
                 setFormValues({ ...formValues, nama: e.target.value })
               }
             />
+            <CustomTextField
+              fullWidth
+              label="Nomor Telepon"
+              name="noTelp"
+              value={formValues.noTelp}
+              error={!!formErrors.noTelp}
+              helperText={formErrors.noTelp}
+              onChange={(e: { target: { value: string } }) =>
+                setFormValues({ ...formValues, noTelp: e.target.value })
+              }
+            />
+            <CustomTextField
+              fullWidth
+              label="Email"
+              name="email"
+              value={formValues.email}
+              error={!!formErrors.email}
+              helperText={formErrors.email}
+              onChange={(e: { target: { value: string } }) =>
+                setFormValues({ ...formValues, email: e.target.value })
+              }
+            />
+            <CustomTextField
+              fullWidth
+              label="Password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              value={formValues.password}
+              error={!!formErrors.password}
+              helperText={formErrors.password}
+              onChange={(e: { target: { value: string } }) =>
+                setFormValues({ ...formValues, password: e.target.value })
+              }
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <CustomTextField
+              fullWidth
+              label="Konfirmasi Password"
+              name="confirmPassword"
+              type={showConfirmPassword ? "text" : "password"}
+              value={formValues.confirmPassword}
+              error={!!formErrors.confirmPassword}
+              helperText={formErrors.confirmPassword}
+              onChange={(e: { target: { value: string } }) =>
+                setFormValues({
+                  ...formValues,
+                  confirmPassword: e.target.value,
+                })
+              }
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      edge="end"
+                    >
+                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
 
             <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
               <FormLabel component="legend">Jenis Kelamin</FormLabel>
@@ -170,17 +290,6 @@ export default function FormUser() {
               </RadioGroup>
             </FormControl>
             <CustomTextField
-              fullWidth
-              label="Nomor Telepon"
-              name="noTelp"
-              value={formValues.noTelp}
-              error={!!formErrors.noTelp}
-              helperText={formErrors.noTelp}
-              onChange={(e: { target: { value: string } }) =>
-                setFormValues({ ...formValues, noTelp: e.target.value })
-              }
-            />
-            <CustomTextField
               select
               fullWidth
               label="Jabatan"
@@ -188,7 +297,6 @@ export default function FormUser() {
               onChange={(e: { target: { value: string } }) =>
                 handleInputChange("role", e.target.value)
               }
-              sx={{ marginBottom: 2 }}
             >
               <MenuItem value={Jabatan.Admin}>Admin</MenuItem>
               <MenuItem value={Jabatan.Superadmin}>Superadmin</MenuItem>
@@ -200,25 +308,44 @@ export default function FormUser() {
               </MenuItem>
               <MenuItem value={Jabatan.Marketing}>Marketing</MenuItem>
             </CustomTextField>
-            <CustomTextField
+            {/* Cabang */}
+            <Autocomplete
               fullWidth
-              label="Penempatan"
-              name="penempatan"
-              value={formValues.penempatan}
-              error={!!formErrors.penempatan}
-              helperText={formErrors.penempatan}
-              sx={{ marginBottom: 2 }}
-              onChange={(e: { target: { value: string } }) =>
-                setFormValues({ ...formValues, penempatan: e.target.value })
+              options={cabangData}
+              getOptionLabel={(option) => option.nama}
+              value={
+                cabangData.find(
+                  (cabang) => cabang.id === formValues.penempatan.id
+                ) || null
               }
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  setFormValues({
+                    ...formValues,
+                    penempatan: newValue || ({} as CabangInterface),
+                  });
+                } else {
+                  setFormValues({
+                    ...formValues,
+                    penempatan: {} as CabangInterface,
+                  });
+                }
+              }}
+              renderInput={(params) => (
+                <CustomTextField
+                  {...params}
+                  label="Cabang"
+                  variant="outlined"
+                  fullWidth
+                />
+              )}
             />
             <CustomTextField
               fullWidth
               label="Alamat Cabang"
               name="alamatCabang"
-              value={formValues.alamatCabang}
+              value={formValues.penempatan.alamatCabang}
               error={!!formErrors.alamatCabang}
-              helperText={formErrors.alamatCabang}
               onChange={(e: { target: { value: string } }) =>
                 setFormValues({ ...formValues, alamatCabang: e.target.value })
               }

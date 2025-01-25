@@ -11,6 +11,7 @@ import {
   flexRender,
   createColumnHelper,
   ColumnFiltersState,
+  Updater,
 } from "@tanstack/react-table";
 import {
   Box,
@@ -38,9 +39,9 @@ import styles from "../../../../styles/table.module.css";
 import { JenisDokumen } from "../../type";
 import FileUploaderSingle from "../uploader/FileUploaderSingle";
 import { createClient } from "@/libs/supabase/client";
-import PdfViewer from "./components/PdfViewer";
 import ActionButton from "./components/ActionButton";
 import { getFileUrl } from "@/app/(DashboardLayout)/jamaah/action";
+
 
 const fuzzyFilter = (
   row: { getValue: (arg0: any) => any },
@@ -218,6 +219,7 @@ const JamaahDetailTable = ({
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleOpenFileDialog = async (
     jamaahId: string,
     namaDokumen: string
@@ -314,7 +316,7 @@ const JamaahDetailTable = ({
         enableColumnFilter: false,
       }),
     ],
-    []
+    [columnHelper, fileUrl, handleOpenFileDialog]
   );
 
   const table = useReactTable({
@@ -381,7 +383,7 @@ const JamaahDetailTable = ({
         count={table.getFilteredRowModel().rows.length}
         rowsPerPage={table.getState().pagination.pageSize}
         page={table.getState().pagination.pageIndex}
-        onPageChange={(_, page) => {
+        onPageChange={(_: any, page: Updater<number>) => {
           table.setPageIndex(page);
         }}
       />
@@ -431,7 +433,12 @@ const JamaahDetailTable = ({
           {fileUrl ? (
             // Cek ekstensi file
             fileUrl.endsWith(".pdf") ? (
-              <PdfViewer fileUrl={fileUrl} />
+              <iframe
+                src={fileUrl}
+                width="100%"
+                height="500px"
+                style={{ border: "none" }}
+              />
             ) : (
               // Tampilkan gambar jika bukan PDF
               <Box

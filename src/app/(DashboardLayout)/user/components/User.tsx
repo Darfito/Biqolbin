@@ -5,15 +5,15 @@ import PageContainer from "../../components/container/PageContainer";
 
 import UserTable from "../../utilities/component/table/UserTable";
 import FormUser from "./FormUser";
-import { UserInterface } from "../../utilities/type";
+import { CabangInterface, UserInterface } from "../../utilities/type";
 
 
 export type UserPageProps = {
-  data: UserInterface[];
+  userData: UserInterface[];
+  cabangData: CabangInterface[];
 };
 
-const User = ({ data }: UserPageProps) => {
-
+const User = ({ userData, cabangData }: UserPageProps) => {
 
   return (
     <>
@@ -28,10 +28,10 @@ const User = ({ data }: UserPageProps) => {
       </Box>
       <PageContainer title="User">
         <Box sx={{ margin: "20px", display: "flex", justifyContent: "end" }}>
-          <FormUser />
+          <FormUser cabangData={cabangData} />
         </Box>
         <Card sx={{ mt: 3 }}>
-          <UserTable data={data} />
+          <UserTable data={userData} />
         </Card>
       </PageContainer>
     </>
