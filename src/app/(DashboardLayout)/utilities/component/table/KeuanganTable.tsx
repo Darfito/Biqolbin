@@ -124,7 +124,7 @@ const Filter = ({
 
   if (typeof firstValue === "number") {
     return (
-      <div className="flex gap-x-2">
+      <div className="flex">
         <CustomTextField
           variant="outlined"
           fullWidth

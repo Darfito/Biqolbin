@@ -14,7 +14,13 @@ import PageContainer from "../../../components/container/PageContainer";
 
 import { useRouter } from "next/navigation";
 import Breadcrumb from "@/app/(DashboardLayout)/utilities/component/breadcrumb/Breadcrumb";
-import { IconArrowLeft } from "@tabler/icons-react";
+import {
+  IconArrowLeft,
+  IconBuilding,
+  IconClipboard,
+  IconHotelService,
+  IconPlane,
+} from "@tabler/icons-react";
 import { Fragment, useEffect, useState } from "react";
 import FormCMS, { formSchema } from "../../component/FormCMS";
 import * as v from "valibot";
@@ -47,7 +53,6 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
   const handleBackClick = () => {
     router.push("/cms"); // Navigate to /keuangan page
   };
-
 
   return (
     <>
@@ -120,9 +125,12 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
                       width: "100%",
                     }}
                   >
-                    <Typography variant="h5" gutterBottom>
-                      Detail Paket Secara Umum
-                    </Typography>
+                    <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                      <IconClipboard size={"2rem"} />
+                      <Typography variant="h5">
+                        Detail Paket Secara Umum
+                      </Typography>
+                    </Box>
                     <Divider sx={{ my: 2 }} />
                     <Box>
                       <Box
@@ -134,14 +142,36 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
                       >
                         <ListItem>
                           <ListItemText
+                            primary={paketDetail.namaMuthawif}
+                            secondary={paketDetail.noTelpMuthawif}
+                            sx={{
+                              "& .MuiListItemText-primary": {
+                                fontSize: "1.2rem",
+                                fontWeight: 600,
+                                color: "#000",
+                                marginBottom: 1,
+                              },
+                              "& .MuiListItemText-secondary": {
+                                fontSize: "1rem",
+
+                                color: "#000",
+                              },
+                            }}
+                          />
+                        </ListItem>
+                        <ListItem>
+                          <ListItemText
                             primary="Jenis Paket"
                             secondary={paketDetail.jenis}
                             sx={{
                               "& .MuiListItemText-primary": {
-                                fontSize: "1.1rem",
+                                fontSize: "1rem",
+                                marginBottom: 1,
                               },
                               "& .MuiListItemText-secondary": {
-                                fontSize: "1rem",
+                                fontSize: "1.1rem",
+                                fontWeight: 600,
+                                color: "#000",
                               },
                             }}
                           />
@@ -152,15 +182,59 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
                             secondary={paketDetail.keretaCepat ? "Ya" : "Tidak"}
                             sx={{
                               "& .MuiListItemText-primary": {
-                                fontSize: "1.1rem",
+                                fontSize: "1rem",
+                                marginBottom: 1,
                               },
                               "& .MuiListItemText-secondary": {
-                                fontSize: "1rem",
+                                fontSize: "1.1rem",
+                                fontWeight: 600,
+                                color: "#000",
                               },
                             }}
                           />
                         </ListItem>
                       </Box>
+                    </Box>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <ListItem>
+                        <ListItemText
+                          primary="Tanggal Keberangkatan"
+                          secondary={paketDetail.tglKeberangkatan}
+                          sx={{
+                            "& .MuiListItemText-primary": {
+                              fontSize: "1rem",
+                              marginBottom: 1,
+                            },
+                            "& .MuiListItemText-secondary": {
+                              fontSize: "1.1rem",
+                              fontWeight: 600,
+                              color: "#000",
+                            },
+                          }}
+                        />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText
+                          primary="Tanggal Kepulangan"
+                          secondary={paketDetail.tglKepulangan}
+                          sx={{
+                            "& .MuiListItemText-primary": {
+                              fontSize: "1rem",
+                              marginBottom: 1,
+                            },
+                            "& .MuiListItemText-secondary": {
+                              fontSize: "1.1rem",
+                              fontWeight: 600,
+                              color: "#000",
+                            },
+                          }}
+                        />
+                      </ListItem>
                     </Box>
                   </Box>
                   <Box
@@ -171,9 +245,12 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
                       mt: 3,
                     }}
                   >
-                    <Typography variant="h5" gutterBottom>
-                      Detail Penerbangan
-                    </Typography>
+                    <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                      <IconPlane size={"2rem"} />
+                      <Typography variant="h5" gutterBottom>
+                        Detail Penerbangan
+                      </Typography>
+                    </Box>
                     <Divider sx={{ my: 2 }} />
                     <Box>
                       <Box
@@ -184,14 +261,34 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
                       >
                         <ListItem>
                           <ListItemText
+                            primary="Nomor Penerbangan"
+                            secondary={paketDetail.noPenerbangan || "Tidak Ada"}
+                            sx={{
+                              "& .MuiListItemText-primary": {
+                                fontSize: "1rem",
+                                marginBottom: 1,
+                              },
+                              "& .MuiListItemText-secondary": {
+                                fontSize: "1.1rem",
+                                fontWeight: 600,
+                                color: "#000",
+                              },
+                            }}
+                          />
+                        </ListItem>
+                        <ListItem>
+                          <ListItemText
                             primary="Jenis Penerbangan"
                             secondary={paketDetail.jenisPenerbangan}
                             sx={{
                               "& .MuiListItemText-primary": {
-                                fontSize: "1.1rem",
+                                fontSize: "1rem",
+                                marginBottom: 1,
                               },
                               "& .MuiListItemText-secondary": {
-                                fontSize: "1rem",
+                                fontSize: "1.1rem",
+                                fontWeight: 600,
+                                color: "#000",
                               },
                             }}
                           />
@@ -202,10 +299,13 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
                             secondary={paketDetail.maskapai}
                             sx={{
                               "& .MuiListItemText-primary": {
-                                fontSize: "1.1rem",
+                                fontSize: "1rem",
+                                marginBottom: 1,
                               },
                               "& .MuiListItemText-secondary": {
-                                fontSize: "1rem",
+                                fontSize: "1.1rem",
+                                fontWeight: 600,
+                                color: "#000",
                               },
                             }}
                           />
@@ -218,65 +318,19 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
                                 secondary={paketDetail.customMaskapai}
                                 sx={{
                                   "& .MuiListItemText-primary": {
-                                    fontSize: "1.1rem",
+                                    fontSize: "1rem",
+                                    marginBottom: 1,
                                   },
                                   "& .MuiListItemText-secondary": {
-                                    fontSize: "1rem",
+                                    fontSize: "1.1rem",
+                                    fontWeight: 600,
+                                    color: "#000",
                                   },
                                 }}
                               />
                             </ListItem>
                           </Grid>
                         )}
-                        <ListItem>
-                          <ListItemText
-                            primary="Nomor Penerbangan"
-                            secondary={paketDetail.noPenerbangan || "Tidak Ada"}
-                            sx={{
-                              "& .MuiListItemText-primary": {
-                                fontSize: "1.1rem",
-                              },
-                              "& .MuiListItemText-secondary": {
-                                fontSize: "1rem",
-                              },
-                            }}
-                          />
-                        </ListItem>
-                      </Box>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <ListItem>
-                          <ListItemText
-                            primary="Tanggal Keberangkatan"
-                            secondary={paketDetail.tglKeberangkatan}
-                            sx={{
-                              "& .MuiListItemText-primary": {
-                                fontSize: "1.1rem",
-                              },
-                              "& .MuiListItemText-secondary": {
-                                fontSize: "1rem",
-                              },
-                            }}
-                          />
-                        </ListItem>
-                        <ListItem>
-                          <ListItemText
-                            primary="Tanggal Kepulangan"
-                            secondary={paketDetail.tglKepulangan}
-                            sx={{
-                              "& .MuiListItemText-primary": {
-                                fontSize: "1.1rem",
-                              },
-                              "& .MuiListItemText-secondary": {
-                                fontSize: "1rem",
-                              },
-                            }}
-                          />
-                        </ListItem>
                       </Box>
                     </Box>
                   </Box>
@@ -289,127 +343,62 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
                       width: "100%",
                     }}
                   >
-                    <Typography variant="h5" gutterBottom>
-                      Detail Muthawif
-                    </Typography>
-                    <Divider sx={{ my: 2 }} />
-                    <Box>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "center",
-                          width: "100%",
-                        }}
-                      >
-                        <ListItem>
-                          <ListItemText
-                            primary="Nama Muthawif"
-                            secondary={paketDetail.namaMuthawif}
-                            sx={{
-                              "& .MuiListItemText-primary": {
-                                fontSize: "1.1rem",
-                              },
-                              "& .MuiListItemText-secondary": {
-                                fontSize: "1rem",
-                              },
-                            }}
-                          />
-                        </ListItem>
-                        <ListItem>
-                          <ListItemText
-                            primary="Nomor Telepon Muthawif"
-                            secondary={paketDetail.noTelpMuthawif}
-                            sx={{
-                              "& .MuiListItemText-primary": {
-                                fontSize: "1.1rem",
-                              },
-                              "& .MuiListItemText-secondary": {
-                                fontSize: "1rem",
-                              },
-                            }}
-                          />
-                        </ListItem>
-                      </Box>
+                    <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                      <IconBuilding size={"2rem"} />
+                      <Typography variant="h5" gutterBottom>
+                        Detail Hotel
+                      </Typography>
                     </Box>
-                  </Box>
-                  <Box
-                    sx={{
-                      mt: 3,
-                      display: "flex",
-                      justifyContent: "center",
-                      flexDirection: "column",
-                      width: "100%",
-                    }}
-                  >
-                    <Typography variant="h5" gutterBottom>
-                      Detail Hotel
-                    </Typography>
                     <Divider sx={{ my: 2 }} />
                     <Box>
                       {paketDetail.Hotel?.map((hotel, index) => (
                         <Fragment key={index}>
-                          <Box display="flex" flexDirection="row" mb={2}>
+                          <Box
+                            display="flex"
+                            flexDirection="row"
+                            mb={2}
+                            sx={{
+                              alignItems: "center",
+                            }}
+                          >
                             <Box flex={1} pr={2}>
                               <ListItem>
                                 <ListItemText
-                                  primary="Nama Hotel"
-                                  secondary={hotel.namaHotel}
+                                  primary={hotel.namaHotel}
+                                  secondary={`${hotel.ratingHotel} - Star Hotel`}
                                   sx={{
                                     "& .MuiListItemText-primary": {
                                       fontSize: "1.1rem",
+                                      fontWeight: 600,
+                                      color: "#000",
+                                      marginBottom: 1,
                                     },
                                     "& .MuiListItemText-secondary": {
-                                      fontSize: "1rem",
+                                      fontSize: "0.85rem",
+                                      color: "#000",
                                     },
                                   }}
                                 />
                               </ListItem>
                             </Box>
-
                             <Box flex={1} pr={2}>
-                              <ListItem>
-                                <ListItemText
-                                  primary="Alamat Hotel"
-                                  secondary={hotel.alamatHotel}
-                                  sx={{
-                                    "& .MuiListItemText-primary": {
-                                      fontSize: "1.1rem",
-                                    },
-                                    "& .MuiListItemText-secondary": {
-                                      fontSize: "1rem",
-                                    },
-                                  }}
-                                />
-                              </ListItem>
-                            </Box>
-
-                            <Box flex={1} pr={2}>
-                              <ListItem>
-                                <ListItemText
-                                  primary="Rating Hotel"
-                                  secondary={hotel.ratingHotel}
-                                  sx={{
-                                    "& .MuiListItemText-primary": {
-                                      fontSize: "1.1rem",
-                                    },
-                                    "& .MuiListItemText-secondary": {
-                                      fontSize: "1rem",
-                                    },
-                                  }}
-                                />
-                              </ListItem>
+                              <Typography
+                                variant="body1"
+                                sx={{ fontSize: "1rem" }}
+                              >
+                                {hotel.alamatHotel}
+                              </Typography>
                             </Box>
                           </Box>
-
                           <Box display="flex" flexDirection="row" mb={2}>
                             <Box flex={1} pr={2}>
                               <ListItem>
                                 <ListItemText
-                                  primary="Tanggal Check In Hotel"
+                                  primary="Check In Hotel"
                                   secondary={hotel.tanggalCheckIn}
                                   sx={{
                                     "& .MuiListItemText-primary": {
-                                      fontSize: "1.1rem",
+                                      fontSize: "1rem",
                                     },
                                     "& .MuiListItemText-secondary": {
                                       fontSize: "1rem",
@@ -422,11 +411,11 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
                             <Box flex={1} pr={2}>
                               <ListItem>
                                 <ListItemText
-                                  primary="Tanggal Check Out Hotel"
+                                  primary="Check Out Hotel"
                                   secondary={hotel.tanggalCheckOut}
                                   sx={{
                                     "& .MuiListItemText-primary": {
-                                      fontSize: "1.1rem",
+                                      fontSize: "1rem",
                                     },
                                     "& .MuiListItemText-secondary": {
                                       fontSize: "1rem",
@@ -457,301 +446,46 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
                       <Box
                         sx={{
                           display: "flex",
-                          justifyContent: "center",
+                          justifyContent: "start",
                           width: "100%",
                         }}
                       >
-                        <ListItem>
-                          <ListItemText
-                            primary="Fasilitas"
-                            secondary={
-                              <ul
-                                style={{
-                                  margin: 0,
-                                  paddingLeft: "20px",
-                                  fontSize: "1rem",
+                        <Box sx={{ paddingLeft: "20px" }}>
+                          {paketDetail.fasilitas.map(
+                            (fasilitas: string, index: number) => (
+                              <Box
+                                key={index}
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "flex-start",
+                                  marginBottom: "4px",
                                 }}
                               >
-                                {paketDetail.fasilitas.map(
-                                  (fasilitas: string, index: number) => (
-                                    <li
-                                      key={index}
-                                      style={{ marginBottom: "4px" }}
-                                    >
-                                      {index + 1}. {fasilitas}
-                                    </li>
-                                  )
-                                )}
-                              </ul>
-                            }
-                            sx={{
-                              "& .MuiListItemText-primary": {
-                                fontSize: "1.1rem",
-                              },
-                              "& .MuiListItemText-secondary": {
-                                fontSize: "1rem",
-                              },
-                            }}
-                          />
-                        </ListItem>
+                                <Typography
+                                  variant="body1"
+                                  sx={{
+                                    fontSize: "1rem",
+                                    marginRight: "8px",
+                                    fontWeight: "bold",
+                                  }}
+                                >
+                                  {index + 1}.
+                                </Typography>
+                                <Typography
+                                  variant="body1"
+                                  sx={{ fontSize: "1rem" }}
+                                >
+                                  {fasilitas}
+                                </Typography>
+                              </Box>
+                            )
+                          )}
+                        </Box>
                       </Box>
                     </Box>
                   </Box>
                 </Box>
               </Box>
-
-              {/* <Grid container spacing={2} sx={{ mt: 3 }}>
-                <Grid item xs={6}>
-                  <ListItem>
-                    <ListItemText
-                      primary="Harga"
-                      secondary={`Rp ${paketDetail.hargaDouble.toLocaleString(
-                        "id-ID"
-                      )}`}
-                      sx={{
-                        "& .MuiListItemText-primary": { fontSize: "1.1rem" },
-                        "& .MuiListItemText-secondary": { fontSize: "1rem" },
-                      }}
-                    />
-                  </ListItem>
-                </Grid>
-                <Grid item xs={6}>
-                  <ListItem>
-                    <ListItemText
-                      primary="Harga"
-                      secondary={`Rp ${paketDetail.hargaTriple.toLocaleString(
-                        "id-ID"
-                      )}`}
-                      sx={{
-                        "& .MuiListItemText-primary": { fontSize: "1.1rem" },
-                        "& .MuiListItemText-secondary": { fontSize: "1rem" },
-                      }}
-                    />
-                  </ListItem>
-                </Grid>
-                <Grid item xs={6}>
-                  <ListItem>
-                    <ListItemText
-                      primary="Harga"
-                      secondary={`Rp ${paketDetail.hargaQuad.toLocaleString(
-                        "id-ID"
-                      )}`}
-                      sx={{
-                        "& .MuiListItemText-primary": { fontSize: "1.1rem" },
-                        "& .MuiListItemText-secondary": { fontSize: "1rem" },
-                      }}
-                    />
-                  </ListItem>
-                </Grid>
-                <Grid item xs={6}>
-                  <ListItem>
-                    <ListItemText
-                      primary="Maskapai"
-                      secondary={paketDetail.maskapai}
-                      sx={{
-                        "& .MuiListItemText-primary": { fontSize: "1.1rem" },
-                        "& .MuiListItemText-secondary": { fontSize: "1rem" },
-                      }}
-                    />
-                  </ListItem>
-                </Grid>
-                {paketDetail.customMaskapai && (
-                  <Grid item xs={6}>
-                    <ListItem>
-                      <ListItemText
-                        primary="Custom Maskapai"
-                        secondary={paketDetail.customMaskapai}
-                        sx={{
-                          "& .MuiListItemText-primary": { fontSize: "1.1rem" },
-                          "& .MuiListItemText-secondary": { fontSize: "1rem" },
-                        }}
-                      />
-                    </ListItem>
-                  </Grid>
-                )}
-                <Grid item xs={6}>
-                  <ListItem>
-                    <ListItemText
-                      primary="Nomor Penerbangan"
-                      secondary={paketDetail.noPenerbangan || "Tidak Ada"}
-                      sx={{
-                        "& .MuiListItemText-primary": { fontSize: "1.1rem" },
-                        "& .MuiListItemText-secondary": { fontSize: "1rem" },
-                      }}
-                    />
-                  </ListItem>
-                </Grid>
-                <Grid item xs={6}>
-                  <ListItem>
-                    <ListItemText
-                      primary="Tanggal Keberangkatan"
-                      secondary={paketDetail.tglKeberangkatan}
-                      sx={{
-                        "& .MuiListItemText-primary": { fontSize: "1.1rem" },
-                        "& .MuiListItemText-secondary": { fontSize: "1rem" },
-                      }}
-                    />
-                  </ListItem>
-                </Grid>
-                <Grid item xs={6}>
-                  <ListItem>
-                    <ListItemText
-                      primary="Tanggal Kepulangan"
-                      secondary={paketDetail.tglKepulangan}
-                      sx={{
-                        "& .MuiListItemText-primary": { fontSize: "1.1rem" },
-                        "& .MuiListItemText-secondary": { fontSize: "1rem" },
-                      }}
-                    />
-                  </ListItem>
-                </Grid>
-                <Divider sx={{ my: 2 }} />
-                <Box sx={{ mt: 2, marginLeft: "32px" }}>
-                  <Typography variant="h3">Akomodasi</Typography>
-                </Box>
-                <Grid container spacing={2} sx={{ marginLeft: "2px" }}>
-                  <Grid item xs={6}>
-                    <ListItem>
-                      <ListItemText
-                        primary="Nama Muthawif"
-                        secondary={paketDetail.namaMuthawif}
-                        sx={{
-                          "& .MuiListItemText-primary": { fontSize: "1.1rem" },
-                          "& .MuiListItemText-secondary": { fontSize: "1rem" },
-                        }}
-                      />
-                    </ListItem>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <ListItem>
-                      <ListItemText
-                        primary="Nomor Telepon Muthawif"
-                        secondary={paketDetail.noTelpMuthawif}
-                        sx={{
-                          "& .MuiListItemText-primary": { fontSize: "1.1rem" },
-                          "& .MuiListItemText-secondary": { fontSize: "1rem" },
-                        }}
-                      />
-                    </ListItem>
-                  </Grid>
-                  {paketDetail.Hotel?.map((hotel, index) => (
-                    <Fragment key={index}>
-                      <Grid item xs={6}>
-                        <ListItem>
-                          <ListItemText
-                            primary="Nama Hotel"
-                            secondary={hotel.namaHotel}
-                            sx={{
-                              "& .MuiListItemText-primary": {
-                                fontSize: "1.1rem",
-                              },
-                              "& .MuiListItemText-secondary": {
-                                fontSize: "1rem",
-                              },
-                            }}
-                          />
-                        </ListItem>
-                      </Grid>
-
-                      <Grid item xs={6}>
-                        <ListItem>
-                          <ListItemText
-                            primary="Alamat Hotel"
-                            secondary={hotel.alamatHotel}
-                            sx={{
-                              "& .MuiListItemText-primary": {
-                                fontSize: "1.1rem",
-                              },
-                              "& .MuiListItemText-secondary": {
-                                fontSize: "1rem",
-                              },
-                            }}
-                          />
-                        </ListItem>
-                      </Grid>
-
-                      <Grid item xs={6}>
-                        <ListItem>
-                          <ListItemText
-                            primary="Rating Hotel"
-                            secondary={hotel.ratingHotel}
-                            sx={{
-                              "& .MuiListItemText-primary": {
-                                fontSize: "1.1rem",
-                              },
-                              "& .MuiListItemText-secondary": {
-                                fontSize: "1rem",
-                              },
-                            }}
-                          />
-                        </ListItem>
-                      </Grid>
-
-                      <Grid item xs={6}>
-                        <ListItem>
-                          <ListItemText
-                            primary="Tanggal Check In Hotel"
-                            secondary={hotel.tanggalCheckIn}
-                            sx={{
-                              "& .MuiListItemText-primary": {
-                                fontSize: "1.1rem",
-                              },
-                              "& .MuiListItemText-secondary": {
-                                fontSize: "1rem",
-                              },
-                            }}
-                          />
-                        </ListItem>
-                      </Grid>
-
-                      <Grid item xs={6}>
-                        <ListItem>
-                          <ListItemText
-                            primary="Tanggal Check Out Hotel"
-                            secondary={hotel.tanggalCheckOut}
-                            sx={{
-                              "& .MuiListItemText-primary": {
-                                fontSize: "1.1rem",
-                              },
-                              "& .MuiListItemText-secondary": {
-                                fontSize: "1rem",
-                              },
-                            }}
-                          />
-                        </ListItem>
-                      </Grid>
-                    </Fragment>
-                  ))}
-                </Grid>
-                <Grid item xs={6}>
-                  <ListItem>
-                    <ListItemText
-                      primary="Fasilitas"
-                      secondary={
-                        <ul
-                          style={{
-                            margin: 0,
-                            paddingLeft: "20px",
-                            fontSize: "1rem",
-                          }}
-                        >
-                          {paketDetail.fasilitas.map(
-                            (fasilitas: string, index: number) => (
-                              <li key={index} style={{ marginBottom: "4px" }}>
-                                {index + 1}. {fasilitas}
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      }
-                      sx={{
-                        "& .MuiListItemText-primary": { fontSize: "1.1rem" },
-                        "& .MuiListItemText-secondary": { fontSize: "1rem" },
-                      }}
-                    />
-                  </ListItem>
-                </Grid>
-              </Grid> */}
             </>
           ) : (
             <Typography variant="h6" color="error">

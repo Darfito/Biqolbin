@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import * as React from "react";
 import * as v from "valibot";
@@ -133,7 +133,6 @@ type FormJamaahProps = {
 export default function FormJamaah({ paketData }: FormJamaahProps) {
   const [open, setOpen] = useState(false);
 
-  
   const [formValues, setFormValues] = useState<FormType>({
     id: 0,
     nama: "",
@@ -180,13 +179,12 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
 
-  
   useEffect(() => {
     if (formValues.jenisPaket) {
       setFormValues((prev) => ({
         ...prev,
-        berangkat: formValues.jenisPaket.tglKeberangkatan || '',
-        selesai: formValues.jenisPaket.tglKepulangan || '',
+        berangkat: formValues.jenisPaket.tglKeberangkatan || "",
+        selesai: formValues.jenisPaket.tglKepulangan || "",
       }));
     }
   }, [formValues.jenisPaket]);
@@ -228,7 +226,6 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
     }
   };
 
-
   // Handle form submission
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -258,7 +255,6 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
     if (response.success) {
       toast.success("Jamaah berhasil ditambahkan!");
       handleClose(); // Tutup dialog setelah berhasil
-
     } else {
       toast.error(`Gagal menambahkan Jamaah: ${response.error}`);
     }
@@ -605,7 +601,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
 
               {/* Kontak Darurat */}
               <KontakDaruratSection
-              isEditing={true}
+                isEditing={true}
                 kontakDarurat={formValues.kontakDarurat}
                 handleContactChange={handleContactChange}
                 handleAddContact={handleAddContact}

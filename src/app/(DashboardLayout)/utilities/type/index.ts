@@ -1,4 +1,5 @@
 import React from "react";
+import { string } from "valibot";
 
 // ! GENERAL TYPE
 
@@ -140,15 +141,26 @@ export interface JamaahInterface {
 
 // ! INTERFACE USER
 export interface UserInterface {
-  id: number;
+  id?: string;
+  email: string;
   nama: string;
   jenisKelamin: JenisKelamin;
   noTelp: string;
   role: Jabatan;
-  penempatan: string;
+  penempatan: CabangInterface;
   alamatCabang: string;
+  password: string;
+  cabang_id?: number
+  confirmPassword?: string;
   action?: string;
 }
+
+export interface CabangInterface {
+  id?: number;
+  nama: string;
+  alamatCabang: string;
+}
+
 
 export enum Jabatan {
   DivisiGeneralAffair = "Divisi General Affair",
@@ -175,11 +187,6 @@ export type KontakDaruratType = {
   relasiLain?: string;
 };
 
-// export type StatusKepergian = {
-//   id: number;
-//   status: 'Berangkat' | 'Dijadwalkan' | 'Selesai';
-//   deskripsi?: string;
-// }
 export type StatusKepergian = "Berangkat" | "Dijadwalkan" | "Selesai";
 
 export enum KontakDaruratRelation {

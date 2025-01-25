@@ -19,14 +19,16 @@ import { useRouter } from "next/navigation";
 
 import { createClient } from "@/libs/supabase/client";
 import FormDetail from "./FormDetail";
-import { UserInterface } from "@/app/(DashboardLayout)/utilities/type";
+import { CabangInterface, UserInterface } from "@/app/(DashboardLayout)/utilities/type";
 
 interface UserDetailProps {
   id: string;
   breadcrumbLinks: { label: string; href?: string }[];
+  role: string;
+  cabangData: CabangInterface[];
 }
 
-const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
+const UserDetail = ({ id, breadcrumbLinks,role,cabangData }: UserDetailProps) => {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [currentData, setCurrentData] = useState<UserInterface | null>(null);
@@ -39,7 +41,7 @@ const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
       if (id && !currentData) {
         try {
           const { data, error } = await supabase
-            .from("User")
+            .from("Users")
             .select("*") // Get all necessary fields, not just 'id'
             .eq("id", id)
             .single(); // To get only one user based on the id
@@ -56,7 +58,7 @@ const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
     };
 
     fetchUserData();
-  }, [id, currentData]);
+  }, [id, currentData, supabase]);
 
   // Toggle the isEditing state
   const handleEditClick = () => {
@@ -82,6 +84,7 @@ const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
     router.push("/user"); // Navigate to the user list
   };
   
+  console.log("currentData:", currentData);
   return (
     <>
       <Typography variant="h2" component="h1">
@@ -121,7 +124,7 @@ const UserDetail = ({ id, breadcrumbLinks }: UserDetailProps) => {
         </Box>
 
         <Box sx={{ marginTop: "2rem" }}>
-          <FormDetail isEditing={isEditing} userData={currentData} />
+          <FormDetail isEditing={isEditing} userData={currentData} cabangData={cabangData} role={role} />
         </Box>
       </PageContainer>
 

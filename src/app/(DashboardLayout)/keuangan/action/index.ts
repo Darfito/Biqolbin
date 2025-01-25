@@ -1,14 +1,21 @@
 "use server";
 
 import { createClient } from "@/libs/supabase/server";
-import { CicilanType, KeuanganInterface, StatusType } from "../../utilities/type";
+import {
+  KeuanganInterface,
+  StatusType,
+} from "../../utilities/type";
 import { revalidatePath } from "next/cache";
+
+
+
 
 /**
  * Fetch all Keuangan data from the database.
  * If there is an error, return an empty array.
  * @returns {KeuanganInterface[]}
  */
+
 export const getKeuanganAction = async (): Promise<KeuanganInterface[]> => {
   const supabase = createClient();
   const { data, error } = await supabase.from("Keuangan").select(`
@@ -28,6 +35,54 @@ export const getKeuanganAction = async (): Promise<KeuanganInterface[]> => {
   }
 
   return data; // Kembalikan data langsung sebagai array
+};
+
+export const getKeuanganActionCabang = async (
+  cabangId: number
+): Promise<KeuanganInterface[]> => {
+  const supabase = createClient();
+
+  try {
+    // Ambil semua ID Jamaah yang terkait dengan cabang tertentu
+    const { data: jamaahIds, error: errorId } = await supabase
+      .from("Jamaah")
+      .select("id")
+      .eq("cabang_id", cabangId);
+
+    if (errorId) {
+      console.error("Error fetching Jamaah IDs:", errorId.message);
+      return [];
+    }
+
+    if (!jamaahIds || jamaahIds.length === 0) {
+      console.warn("No Jamaah found for the given cabang_id:", cabangId);
+      return [];
+    }
+
+    // Ambil semua keuangan berdasarkan jamaah_id yang ditemukan
+    const jamaahIdArray = jamaahIds.map((jamaah) => jamaah.id); // Array of IDs
+    const { data: keuanganData, error } = await supabase
+      .from("Keuangan")
+      .select(`*,
+      Jamaah (
+      id,
+      nama,
+      ayahKandung,
+      noTelp,
+      varianKamar
+    )
+      `)
+      .in("jamaah_id", jamaahIdArray);
+
+    if (error) {
+      console.error("Error fetching Keuangan data:", error.message);
+      return [];
+    }
+    return keuanganData ?? [];
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    return [];
+  }
 };
 
 /**
@@ -286,7 +341,6 @@ export const createCicilanAction = async (formValues: any) => {
   }
 };
 
-
 /**
  * Update an existing cicilan
  * @param {object} formValues - Object containing cicilan data to update
@@ -344,7 +398,7 @@ export const updateCicilanAction = async (formValues: any) => {
 
 /**
  * Deletes a cicilan record and updates the sisaTagihan field in Keuangan table.
- * 
+ *
  * @param {number} cicilanId - ID of the cicilan to delete
  * @param {number} keuanganId - ID of the keuangan related to the cicilan
  * @returns {Promise<{success: boolean, error?: string}>} - An object indicating success or failure,
@@ -361,7 +415,6 @@ export const deleteCicilanAndUpdateSisaTagihan = async (
     .from("Cicilan")
     .delete()
     .eq("id", cicilanId);
-
 
   if (deleteError) {
     console.error("Error deleting cicilan:", deleteError.message);
@@ -381,8 +434,6 @@ export const deleteCicilanAndUpdateSisaTagihan = async (
   revalidatePath(`/keuangan/${keuanganId}`);
   return { success: true };
 };
-
-
 
 /**
  * Update sisaTagihan field in Keuangan table based on the total of all cicilan
@@ -446,12 +497,12 @@ export const updateStatusLunas = async (keuanganId: number) => {
   const supabase = createClient();
   // Melakukan update status 'lunas' pada tabel Keuangan
   const { data, error } = await supabase
-    .from('Keuangan')
-    .update({ status: StatusType.LUNAS })  // Menggunakan enum StatusType.LUNAS
-    .eq('id', keuanganId); // Mencocokkan berdasarkan keuanganId yang diberikan
+    .from("Keuangan")
+    .update({ status: StatusType.LUNAS }) // Menggunakan enum StatusType.LUNAS
+    .eq("id", keuanganId); // Mencocokkan berdasarkan keuanganId yang diberikan
 
   if (error) {
-    console.error('Error updating status lunas:', error.message);
+    console.error("Error updating status lunas:", error.message);
     return { success: false, error: error.message };
   }
 
@@ -460,19 +511,19 @@ export const updateStatusLunas = async (keuanganId: number) => {
 
 export const getFileUrl = async (keuanganId: number, cicilanKe: number) => {
   const supabase = createClient();
-  const {data, error} = await supabase
-    .from('Cicilan')
-    .select('lampiran')
-    .eq('keuangan_id', keuanganId)
-    .eq('cicilanKe', cicilanKe)
+  const { data, error } = await supabase
+    .from("Cicilan")
+    .select("lampiran")
+    .eq("keuangan_id", keuanganId)
+    .eq("cicilanKe", cicilanKe)
     .single();
 
   if (error) {
-    console.error('Error fetching file URL:', error.message);
+    console.error("Error fetching file URL:", error.message);
     return { success: false, error: error.message };
   }
 
-  console.log('File URL:', data.lampiran);
+  console.log("File URL:", data.lampiran);
 
   return { success: true, data };
 };
