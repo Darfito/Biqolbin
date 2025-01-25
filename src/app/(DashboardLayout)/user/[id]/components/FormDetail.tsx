@@ -1,12 +1,14 @@
 import CustomTextField from "@/app/(DashboardLayout)/components/forms/theme-elements/CustomTextField";
 import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCard";
 import {
+  CabangInterface,
   Jabatan,
   JenisKelamin,
   UserInterface,
 } from "@/app/(DashboardLayout)/utilities/type";
 import * as v from "valibot";
 import {
+  Autocomplete,
   Box,
   Button,
   Dialog,
@@ -30,6 +32,8 @@ import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 interface FormDetailProps {
   isEditing: boolean; // Status edit mode
   userData?: UserInterface | null;
+  cabangData: CabangInterface[];
+  role: string;
 }
 
 interface FormErrors {
@@ -41,29 +45,50 @@ interface FormErrors {
   alamatCabang?: string;
 }
 
-export const formSchema = v.object({
+const formSchema = v.object({
   nama: v.pipe(v.string(), v.nonEmpty("Nama harus diisi")),
+  email: v.pipe(
+    v.string(),
+    v.email("Email tidak valid"),
+    v.nonEmpty("Email harus diisi")
+  ),
   jenisKelamin: v.pipe(v.string(), v.nonEmpty("Jenis Kelamin harus diisi")),
+  // umur: v.number("Umur harus berupa angka dan tidak boleh kosong"),
   noTelp: v.pipe(v.string(), v.nonEmpty("Nomor Telepon harus diisi")),
   role: v.pipe(v.string(), v.nonEmpty("Role harus diisi")),
   penempatan: v.pipe(v.string(), v.nonEmpty("Penempatan harus diisi")),
   alamatCabang: v.pipe(v.string(), v.nonEmpty("Alamat Cabang harus diisi")),
+  password: v.pipe(
+    v.string(),
+    v.minLength(8, "Password minimal 8 karakter"),
+    v.nonEmpty("Password harus diisi")
+  ),
 });
 
-const FormDetail = ({ isEditing, userData }: FormDetailProps) => {
+const FormDetail = ({
+  isEditing,
+  userData,
+  cabangData,
+  role,
+}: FormDetailProps) => {
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [formValues, setFormValues] = useState<UserInterface>(
     userData || {
       id: "",
       nama: "",
+      email: "",
       jenisKelamin: JenisKelamin.LakiLaki,
       noTelp: "",
       role: Jabatan.Marketing,
-      penempatan: "",
-      alamatCabang: "",
-      email: "",
+      penempatan: {
+        id: 0,
+        nama: "",
+        alamatCabang: "",
+      },
       password: "",
+      confirmPassword: "",
+      alamatCabang: "",
     }
   );
 
@@ -190,16 +215,38 @@ const FormDetail = ({ isEditing, userData }: FormDetailProps) => {
             </Grid>
 
             <Grid item xs={12} sm={6}>
-              <CustomTextField
+              <Autocomplete
                 fullWidth
-                label="Penempatan"
-                name="penempatan"
-                value={formValues.penempatan}
-                disabled={!isEditing}
-                sx={{ marginBottom: 2 }}
-                onChange={(e: { target: { value: string } }) =>
-                  setFormValues({ ...formValues, penempatan: e.target.value })
+                options={cabangData}
+                getOptionLabel={(option) => option.nama}
+                disabled={role !== "Superadmin" ? true : !isEditing} // Kondisi untuk disabled
+                value={
+                  cabangData.find(
+                    (cabang) => cabang.id === formValues.penempatan.id
+                  ) || null
                 }
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    setFormValues({
+                      ...formValues,
+                      penempatan: newValue || ({} as CabangInterface),
+                    });
+                  } else {
+                    setFormValues({
+                      ...formValues,
+                      penempatan: {} as CabangInterface,
+                    });
+                  }
+                }}
+                sx={{ marginBottom: 2 }}
+                renderInput={(params) => (
+                  <CustomTextField
+                    {...params}
+                    label="Cabang"
+                    variant="outlined"
+                    fullWidth
+                  />
+                )}
               />
               <CustomTextField
                 fullWidth
@@ -209,7 +256,7 @@ const FormDetail = ({ isEditing, userData }: FormDetailProps) => {
                 onChange={(e: { target: { value: string } }) =>
                   setFormValues({ ...formValues, alamatCabang: e.target.value })
                 }
-                disabled={!isEditing}
+                disabled={role !== "Superadmin" ? true : !isEditing} // Kondisi untuk disabled
                 multiline
                 rows={4}
               />

@@ -4,6 +4,7 @@ import User from "./components/User";
 import { getCabangAction, getUserAction, getUserCabangAction } from "./action";
 import { CabangInterface, UserInterface } from "../utilities/type";
 import { getLoggedInUser, getUserById } from "@/libs/sessions";
+import { redirect } from "next/navigation";
 
 export default async function UserPage() {
   let cabangData: CabangInterface[] = [];
@@ -37,6 +38,15 @@ export default async function UserPage() {
   } catch (error) {
     console.error("Error fetching data: ", error);
   }
+
+      // Daftar role yang diizinkan
+      const allowedRoles = ["Admin", "Superadmin"]
+
+
+      if (!allowedRoles.includes(roleUser)) {
+        redirect("/not-authorized"); // Ganti dengan halaman not-authorized Anda
+      }
+    
 
   const stableCabangData = cabangData || [];
   const stableUserData = userData || [];

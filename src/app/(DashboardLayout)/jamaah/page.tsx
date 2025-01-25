@@ -6,6 +6,7 @@ import { JamaahInterface } from "../utilities/type";
 
 import { getJamaahAction, getJamaahCabangAction } from "./action";
 import Jamaah from "./component/Jamaah";
+import { redirect } from "next/navigation";
 
 // Ini adalah React Server Component (RSC) yang dapat dipanggil di dalam aplikasi.
 export default async function JamaahPage() {
@@ -25,6 +26,15 @@ export default async function JamaahPage() {
       cabangUser = userDetails?.[0].cabang_id || 0;
       roleUser = userDetails?.[0].role || "";
     }
+
+    // Daftar role yang diizinkan
+  const allowedRoles = ["Admin", "Superadmin", "Divisi General Affair", "Finance & Accounting"]
+
+
+  if (!allowedRoles.includes(roleUser)) {
+    redirect("/not-authorized"); // Ganti dengan halaman not-authorized Anda
+  }
+
 
     paketData = await getCmsAction() ?? [];
     jamaahData = await getJamaahCabangAction(cabangUser);

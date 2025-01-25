@@ -37,7 +37,7 @@ const Menuitems = [
     title: "CMS",
     icon: IconPencil,
     href: "/cms",
-    role: ["Admin", "Superadmin", "Marketing"]
+    role: ["Admin", "Superadmin", "Marketing", "Divisi General Affair"]
   },
   {
     id: uniqueId(),

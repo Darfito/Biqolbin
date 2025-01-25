@@ -12,6 +12,7 @@ import {
 
 import Keuangan from "./component/Keuangan"; // Client Component
 import { getKeuanganAction, getKeuanganActionCabang } from "./action";
+import { redirect } from "next/navigation";
 
 export default async function KeuanganPage() {
   let paketData: PaketInterface[] = [];
@@ -46,6 +47,14 @@ export default async function KeuanganPage() {
     console.log("keungan data di page", keuanganData);
   } catch (error) {
     console.error("Error fetching data:", error);
+  }
+
+  // Daftar role yang diizinkan
+  const allowedRoles = ["Admin", "Superadmin", "Divisi General Affair", "Finance & Accounting"]
+
+
+  if (!allowedRoles.includes(roleUser)) {
+    redirect("/not-authorized"); // Ganti dengan halaman not-authorized Anda
   }
 
   // Gunakan data fallback jika ada error
