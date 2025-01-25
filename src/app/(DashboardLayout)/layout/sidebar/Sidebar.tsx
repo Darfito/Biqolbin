@@ -8,12 +8,18 @@ interface ItemType {
   isMobileSidebarOpen: boolean;
   onSidebarClose: (event: React.MouseEvent<HTMLElement>) => void;
   isSidebarOpen: boolean;
+  nama:string;
+  role: string;
+  loadingState:boolean
 }
 
 const MSidebar = ({
   isMobileSidebarOpen,
   onSidebarClose,
   isSidebarOpen,
+  nama,
+  role,
+  loadingState,
 }: ItemType) => {
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up("lg"));
 
@@ -78,8 +84,8 @@ const MSidebar = ({
                 {/* ------------------------------------------- */}
                 {/* Sidebar Items */}
                 {/* ------------------------------------------- */}
-                <SidebarItems />
-                <Logout />
+                <SidebarItems role={role} />
+                <Logout nama={nama} role={role} loadingState={loadingState} />
               </Box>
             </Sidebar >
           </Box>
@@ -122,7 +128,8 @@ const MSidebar = ({
           {/* ------------------------------------------- */}
           {/* Sidebar Items */}
           {/* ------------------------------------------- */}
-          <SidebarItems />
+          <SidebarItems role={role} />
+          <Logout nama={nama} role={role} loadingState={loadingState} />
           {/* <Upgrade /> */}
         </Sidebar>
       </Box>

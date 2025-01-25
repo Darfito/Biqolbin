@@ -4,32 +4,16 @@ import { IconLogout } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export const Logout = () => {
-  const [userData, setUserData] = useState<any>(null);
-  const [loading, setLoading] = useState<boolean>(true);  // Tambahkan loading state
+interface LogoutProps {
+  nama:string,
+  role: string,
+  loadingState: boolean
+}
+
+export const Logout = ({nama, role, loadingState} : LogoutProps) => {
+  const [loading, setLoading] = useState<boolean>(loadingState);  // Tambahkan loading state
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const loggedInUser = await getLoggedInUser();  // Mendapatkan data user login
-
-      if (loggedInUser) {
-        // Mengambil data user berdasarkan ID setelah login
-        const userDetails = await getUserById(loggedInUser.id);
-        setUserData(userDetails);
-        console.log("User details:", userDetails);  // Verifikasi data
-      }
-
-      setLoading(false);  // Set loading ke false setelah data selesai di-fetch
-    };
-
-    fetchUserData();
-  }, []);
-
-  console.log("User data:", userData);
-
-  console.log("ini nama",userData?.[0].nama); // Periksa apakah nama ada
-console.log("ini role ",userData?.[0].role); // Periksa apakah role ada
 
   // Fungsi untuk menangani sign-out
   const handleLogout = async () => {
@@ -71,14 +55,14 @@ console.log("ini role ",userData?.[0].role); // Periksa apakah role ada
       </Box>
       <Box sx={{ width: "33%" }}>
         {/* Menampilkan loading spinner saat data sedang dimuat */}
-        {loading ? (
+        {/* {loading ? (
           <CircularProgress />
         ) : (
-          <>
-            <Typography variant="h6">{userData?.[0].nama || "Nama tidak tersedia"}</Typography>
-            <Typography variant="subtitle1">{userData?.[0].role || "Role tidak tersedia"}</Typography>
-          </>
-        )}
+          <> */}
+            <Typography variant="h6">{nama || "Nama tidak tersedia"}</Typography>
+            <Typography variant="subtitle1">{role || "Role tidak tersedia"}</Typography>
+          {/* </> */}
+        {/* )} */}
       </Box>
       <Box sx={{ width: "10%" }}>
         <IconButton onClick={handleLogout}>

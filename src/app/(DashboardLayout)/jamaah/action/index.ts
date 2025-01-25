@@ -141,6 +141,60 @@ export const getJamaahAction = async (): Promise<JamaahInterface[]> => {
   return mapJamaahData(data);
 };
 
+export const getJamaahCabangAction = async (cabang:number): Promise<JamaahInterface[]> => {
+  const supabase = createClient();
+
+  // Mengambil data Jamaah beserta relasi Paket, hotel, dan Kontak Darurat
+  const { data, error } = await supabase.from("Jamaah").select(`
+    *,
+    KontakDarurat (
+      id,
+      nama,
+      no_telp,
+      hubungan,
+      relasi_lain
+    ),
+    Paket (
+      id,
+      nama,
+      maskapai,
+      customMaskapai,
+      noPenerbangan,
+      jenisPenerbangan,
+      keretaCepat,
+      hargaDouble,
+      hargaTriple,
+      hargaQuad,
+      tglKeberangkatan,
+      tglKepulangan,
+      fasilitas,
+      namaMuthawif,
+      noTelpMuthawif,
+      jenis,
+      Hotel (
+        id,
+        namaHotel,
+        alamatHotel,
+        ratingHotel,
+        tanggalCheckIn,
+        tanggalCheckOut
+      )
+    )
+  `).eq("cabang_id", cabang);
+
+  if (error) {
+    console.error("Error fetching Jamaah data:", error);
+    throw new Error(error.message);
+  }
+
+  if (!data) {
+    return [];
+  }
+
+  // Mapping data untuk mencocokkan dengan JamaahProps
+  return mapJamaahData(data);
+};
+
 
 
 export const createJamaahAction = async (formValues: JamaahInterface) => {

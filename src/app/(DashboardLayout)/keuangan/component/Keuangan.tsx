@@ -33,9 +33,6 @@ const Keuangan = ({
   keuanganData,
   scoreCardData,
 }: KeuanganProps) => {
-  console.log("jamaahData di keuangan:", jamaahData);
-
-  console.log("Keuangan data:", keuanganData);
   return (
     <>
       <Box

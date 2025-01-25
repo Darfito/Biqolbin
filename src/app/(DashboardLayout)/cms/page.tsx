@@ -5,7 +5,7 @@ import CMS from "./component/CMS";
 
 
 
-export default async function JamaahPage() {
+export default async function CMSPage() {
   const paketData = await getCmsAction();
   console.log("Paket data:", paketData);
   return (

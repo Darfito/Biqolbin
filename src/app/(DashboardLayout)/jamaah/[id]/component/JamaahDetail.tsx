@@ -6,7 +6,6 @@ import {
   Box,
   Button,
   Card,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -15,7 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import { IconArrowLeft } from "@tabler/icons-react";
-import React, { SetStateAction, useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import FormDetail from "./FormDetail";
 import { useRouter } from "next/navigation";
 
@@ -24,34 +23,23 @@ import {
   JamaahInterface,
   PaketInterface,
 } from "@/app/(DashboardLayout)/utilities/type";
-import { createClient } from "@/libs/supabase/client";
-import { getJamaahDataById } from "../../action";
 
 interface JamaahDetailProps {
   id: string;
   paketData: PaketInterface[];
+  jamaahData: JamaahInterface;
   breadcrumbLinks: { label: string; href?: string }[];
 }
 
 const JamaahDetail = ({
-  id,
   paketData,
+  jamaahData,
   breadcrumbLinks,
 }: JamaahDetailProps) => {
   const router = useRouter(); // Initialize useRouter
   const [isEditing, setIsEditing] = useState<boolean>(false); // State to toggle edit mode
-  const [currentData, setCurrentData] = useState<JamaahInterface | null>(null); // State untuk menyimpan data jamaah
+  const [currentData, setCurrentData] = useState<JamaahInterface | null>(jamaahData); // State untuk menyimpan data jamaah
   const [openDialog, setOpenDialog] = useState<boolean>(false);
-
-  // Ambil data berdasarkan ID
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await getJamaahDataById(id);
-      if (data) setCurrentData(data);
-    };
-
-    fetchData();
-  }, [id]);
 
   const memoizedJenisDokumen = useMemo(
     () => currentData?.jenisDokumen || [],

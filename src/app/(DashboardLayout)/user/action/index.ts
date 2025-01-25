@@ -2,12 +2,37 @@
 
 import { createClient } from "@/libs/supabase/server";
 import { revalidatePath } from "next/cache";
-import { UserInterface } from "../../utilities/type";
+import { JenisKelamin, UserInterface } from "../../utilities/type";
 
+
+
+export const getCabangAction = async () => {
+  const supabase = createClient();
+  const { data: Cabang, error} = await supabase.from("Cabang").select("*");
+
+  if (error) {
+    console.error("Error fetching cabang: ", error.message)
+    return null;
+  }
+
+  return Cabang
+}
 
 export const getUserAction = async () => {
   const supabase = createClient(); // Membuat instance Supabase client
   const { data: User, error } = await supabase.from("Users").select("*");
+
+  if (error) {
+    console.error("Error fetching users:", error.message);
+    return null;
+  }
+
+  return User; // Mengembalikan data pengguna
+};
+
+export const getUserCabangAction = async (cabang: number) => {
+  const supabase = createClient(); // Membuat instance Supabase client
+  const { data: User, error } = await supabase.from("Users").select("*").eq("cabang_id", cabang);
 
   if (error) {
     console.error("Error fetching users:", error.message);
@@ -41,8 +66,9 @@ export const createUserAction = async (formValues: UserInterface) => {
       jenisKelamin: formValues.jenisKelamin,
       noTelp: formValues.noTelp,
       role: formValues.role,
-      penempatan: formValues.penempatan,
-      alamatCabang: formValues.alamatCabang,
+      penempatan: formValues.penempatan.nama,
+      alamatCabang: formValues.penempatan.alamatCabang,
+      cabang_id: formValues.penempatan.id
     });
 
     if (insertError) {
@@ -66,7 +92,15 @@ export const updateUserAction = async (UserData: UserInterface) => {
   // Memasukkan data ke dalam tabel `User`
   const { data, error } = await supabase
     .from("User")
-    .update(UserData)
+    .update({
+      email: UserData.email,
+      nama: UserData.nama,
+      jenisKelamin: UserData.jenisKelamin,
+      noTelp: UserData.noTelp,
+      role: UserData.role,
+      penempatan: UserData.penempatan,
+      alamatCabang: UserData.alamatCabang
+    })
     .eq("id", UserData.id)
     .select();
 
