@@ -25,8 +25,6 @@ import {
   StatusType,
 } from "@/app/(DashboardLayout)/utilities/type";
 import {
-  getCicilanAction,
-  getKeuanganByIdAction,
   updateStatusLunas,
 } from "../../action";
 import KeuanganDetailTable from "@/app/(DashboardLayout)/utilities/component/table/KeuanganDetailTable";
@@ -58,7 +56,15 @@ const KeuanganDetail = ({
   // const [dataCicilan, setDataCicilan] = useState<CicilanType[]>([]);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openConfirmDialog, setOpenConfirmDialog] = useState<boolean>(false); // State untuk dialog konfirmasi
-  // const [statusLunasDialog, setStatusLunasDialog] = useState(false); // Untuk menandakan status lunas
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null; // Jangan render apa-apa sampai komponen dimuat di klien
+  }
   // Ambil data berdasarkan ID
 
   // Toggle the isEditing state
@@ -90,7 +96,7 @@ const KeuanganDetail = ({
 
   // Function to update status to Lunas
   const handleConfirmLunas = async () => {
-    if (currentData && currentData.id) {
+    if (currentData?.id) {
       // Memastikan currentData dan id tidak undefined
       const response = await updateStatusLunas(currentData.id); // Function to update status to Lunas
       if (response.success) {
@@ -114,7 +120,7 @@ const KeuanganDetail = ({
 
   return (
     <>
-      <Typography variant="h2" component="h1">
+      <Typography variant="h2">
         Detail
       </Typography>
       <Breadcrumb links={breadcrumbLinks} />
