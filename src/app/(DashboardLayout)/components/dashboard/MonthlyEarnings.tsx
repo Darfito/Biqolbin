@@ -54,19 +54,20 @@ const MonthlyEarnings = () => {
 
   return (
     <DashboardCard
-      title="Monthly Earnings"
-      action={
-        <Fab color="secondary" size="medium" sx={{color: '#ffffff'}}>
-          <IconCurrencyDollar width={24} />
-        </Fab>
-      }
+      title="Realisasi Pendapatan"
+      // action={
+      //   <Fab color="secondary" size="medium" sx={{color: '#ffffff'}}>
+      //     <IconCurrencyDollar width={24} />
+      //   </Fab>
+      // }
       footer={
         <Chart options={optionscolumnchart} series={seriescolumnchart} type="area" height={60} width={"100%"} />
       }
     >
       <>
-        <Typography variant="h3" fontWeight="700" mt="-20px">
-          $6,820
+        <Typography variant="h4" fontWeight="700" mt="-20px">
+          {/* Target pendapatan dapat dari total pendapatan */}
+          Rp. 4.500.000
         </Typography>
         <Stack direction="row" spacing={1} my={1} alignItems="center">
           <Avatar sx={{ bgcolor: errorlight, width: 27, height: 27 }}>

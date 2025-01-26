@@ -2,7 +2,7 @@
 
 import { createClient } from "@/libs/supabase/server";
 import { revalidatePath } from "next/cache";
-import { JenisKelamin, UserInterface } from "../../utilities/type";
+import { UserInterface } from "../../utilities/type";
 
 
 
