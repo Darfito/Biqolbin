@@ -48,7 +48,7 @@ const Login2 = () => {
                 <Logo />
               </Box>
               <AuthLogin/>
-              <Box sx={{ display: "flex", justifyContent: "center", gap: 1, marginTop: 3 }}>
+              {/* <Box sx={{ display: "flex", justifyContent: "center", gap: 1, marginTop: 3 }}>
               <Typography
                     color="textSecondary"
                     variant="h6"
@@ -67,7 +67,7 @@ const Login2 = () => {
                   >
                     Sign Up
                   </Typography>
-              </Box>
+              </Box> */}
             </Card>
           </Grid>
         </Grid>
