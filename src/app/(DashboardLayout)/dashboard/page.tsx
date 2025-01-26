@@ -1,45 +1,39 @@
-'use client'
-import { Grid, Box } from '@mui/material';
-import PageContainer from '@/app/(DashboardLayout)/components/container/PageContainer';
-// components
-import SalesOverview from '@/app/(DashboardLayout)/components/dashboard/SalesOverview';
-import YearlyBreakup from '@/app/(DashboardLayout)/components/dashboard/YearlyBreakup';
-import RecentTransactions from '@/app/(DashboardLayout)/components/dashboard/RecentTransactions';
-import ProductPerformance from '@/app/(DashboardLayout)/components/dashboard/ProductPerformance';
-import Blog from '@/app/(DashboardLayout)/components/dashboard/Blog';
-import MonthlyEarnings from '@/app/(DashboardLayout)/components/dashboard/MonthlyEarnings';
+'use server';
 
-const Dashboard = () => {
+import { redirect } from "next/navigation";
+import Dashboard from "./component/Dashboard";
+import { getLoggedInUser, getUserById } from "@/libs/sessions";
+
+
+export default async function DashboardPage() {
+  let cabangUser = 0;
+  let roleUser = "";
+
+  try {
+    // Ambil data user yang sedang login
+    const userLoginResponse = await getLoggedInUser();
+
+    if (userLoginResponse) {
+      // Ambil detail user berdasarkan ID
+      const userDetails = await getUserById(userLoginResponse.id);
+      // Ambil data penempatan cabang user
+      cabangUser = userDetails?.[0].cabang_id || 0;
+      roleUser = userDetails?.[0].role || "";
+    }
+
+    // Daftar role yang diizinkan
+  const allowedRoles = ["Admin", "Superadmin", "Divisi General Affair", "Finance & Accounting", "Marketing"]
+
+
+  if (!allowedRoles.includes(roleUser)) {
+    redirect("/not-authorized"); // Ganti dengan halaman not-authorized Anda
+  }
+
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+
   return (
-    <PageContainer title="Dashboard" description="this is Dashboard">
-      <Box>
-        <Grid container spacing={3}>
-          <Grid item xs={12} lg={8}>
-            <SalesOverview />
-          </Grid>
-          <Grid item xs={12} lg={4}>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <YearlyBreakup />
-              </Grid>
-              <Grid item xs={12}>
-                <MonthlyEarnings />
-              </Grid>
-            </Grid>
-          </Grid>
-          <Grid item xs={12} lg={4}>
-            <RecentTransactions />
-          </Grid>
-          <Grid item xs={12} lg={8}>
-            <ProductPerformance />
-          </Grid>
-          <Grid item xs={12}>
-            <Blog />
-          </Grid>
-        </Grid>
-      </Box>
-    </PageContainer>
+    <Dashboard/>
   )
 }
-
-export default Dashboard;

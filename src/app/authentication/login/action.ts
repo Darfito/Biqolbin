@@ -1,8 +1,6 @@
 'use server'
 
 import { createClient } from '@/libs/supabase/server'
-import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
 
 
@@ -14,8 +12,11 @@ export async function login(formData: FormData) {
     password: formData.get('password') as string,
   };
 
+  console.log("Response data:", data);
+  
   const { error } = await supabase.auth.signInWithPassword(data);
-
+  
+  console.log("Response error:", error);
   if (error) {
     return { success: false, error: error.message };
   }

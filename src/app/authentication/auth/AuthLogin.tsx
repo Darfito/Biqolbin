@@ -117,7 +117,7 @@ const AuthLogin = ({ title, subtitle, subtext }: loginType) => {
         </Stack>
 
         {/* Menampilkan pesan error jika login gagal */}
-        {error && <Typography color="error" variant="body2">{error}</Typography>}
+        {error && <Typography color="error" variant="body2">ini {error}</Typography>}
 
         <Box sx={{ my: 2 }}>
           <Button

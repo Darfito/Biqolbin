@@ -138,7 +138,6 @@ const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
   const [globalFilter, setGlobalFilter] = useState("");
   const [open, setOpen] = useState(false); // State untuk dialog
   const [selectedRow, setSelectedRow] = useState<JamaahInterface | null>(null); // Data yang dipilih
-  const [tableData, setTableData] = useState<JamaahInterface[]>(data); // Local state to manage table data
 
   const handleCloseDialog = () => {
     setOpen(false); // Tutup dialog
