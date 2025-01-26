@@ -96,6 +96,90 @@ interface FormDetailProps {
   jamaahData: JamaahInterface[];
 }
 
+const initialFormValues: FormType = {
+  Jamaah: {
+    id: 0,
+    nama: "",
+    ayahKandung: "",
+    noTelp: "",
+    kontakDarurat: [
+      {
+        id: 0,
+        nama: "",
+        no_telp: "",
+        hubungan: KontakDaruratRelation.Lainnya,
+      },
+    ],
+    email: "",
+    jenisKelamin: JenisKelamin.LakiLaki,
+    tempatLahir: "",
+    pernikahan: false,
+    alamat: "",
+    varianKamar: TipeKamar.DOUBLE,
+    kewarganegaraan: false,
+    pekerjaan: "",
+    kursiRoda: false,
+    riwayatPenyakit: "",
+    jenisDokumen: [],
+    jenisPaket: {
+      id: 0,
+      nama: "",
+      jenis: JenisPaket.REGULAR,
+      maskapai: Maskapai.SAUDIA_ARABIA,
+      customMaskapai: "",
+      jenisPenerbangan: JenisPenerbangan.DIRECT,
+      noPenerbangan: "",
+      keretaCepat: false,
+      tglKeberangkatan: "",
+      tglKepulangan: "",
+      fasilitas: [],
+      publish: false,
+      namaMuthawif: "",
+      noTelpMuthawif: "",
+      Hotel: [],
+      gambar_url: "",
+      hargaDouble: 0,
+      hargaTriple: 0,
+      hargaQuad: 0,
+    },
+    berangkat: "",
+    selesai: "",
+    status: "Dijadwalkan",
+  },
+  Paket: {
+    id: 0,
+    nama: "",
+    jenis: JenisPaket.REGULAR,
+    maskapai: Maskapai.SAUDIA_ARABIA,
+    customMaskapai: "",
+    jenisPenerbangan: JenisPenerbangan.DIRECT,
+    noPenerbangan: "",
+    keretaCepat: false,
+    tglKeberangkatan: "",
+    tglKepulangan: "",
+    fasilitas: [],
+    namaMuthawif: "",
+    noTelpMuthawif: "",
+    Hotel: [],
+    gambar_url: "",
+    hargaDouble: 0,
+    hargaTriple: 0,
+    hargaQuad: 0,
+  },
+  id: 0,
+  metodePembayaran: MetodePembayaranType.TUNAI,
+  jenisPaket: "",
+  sisaTagihan: 0,
+  tenggatPembayaran: "",
+  totalTagihan: 0,
+  uangMuka: 0,
+  banyaknyaCicilan: 0,
+  jumlahBiayaPerAngsuran: 0,
+  status: StatusType.BELUM_BAYAR,
+  paket_id: 0,
+  catatanPembayaran: "",
+};
+
 const FormDetail = ({
   isEditing,
   keuanganData,
@@ -108,93 +192,13 @@ const FormDetail = ({
   );
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
-  const [formValues, setFormValues] = useState<FormType>({
-    Jamaah: {
-      id: 0,
-      nama: "",
-      ayahKandung: "",
-      noTelp: "",
-      kontakDarurat: [
-        {
-          id: 0,
-          nama: "",
-          no_telp: "",
-          hubungan: KontakDaruratRelation.Lainnya,
-        },
-      ],
-      email: "",
-      jenisKelamin: JenisKelamin.LakiLaki,
-      tempatLahir: "",
-      pernikahan: false,
-      alamat: "",
-      varianKamar: TipeKamar.DOUBLE,
-      kewarganegaraan: false,
-      pekerjaan: "",
-      kursiRoda: false,
-      riwayatPenyakit: "",
-      jenisDokumen: [],
-      jenisPaket: {
-        id: 0,
-        nama: "",
-        jenis: JenisPaket.REGULAR,
-        maskapai: Maskapai.SAUDIA_ARABIA,
-        customMaskapai: "",
-        jenisPenerbangan: JenisPenerbangan.DIRECT,
-        noPenerbangan: "",
-        keretaCepat: false,
-        tglKeberangkatan: "",
-        tglKepulangan: "",
-        fasilitas: [],
-        publish: false,
-        namaMuthawif: "",
-        noTelpMuthawif: "",
-        Hotel: [],
-        gambar_url: "",
-        hargaDouble: 0,
-        hargaTriple: 0,
-        hargaQuad: 0,
-      },
-      berangkat: "",
-      selesai: "",
-      status: "Dijadwalkan",
-    },
-    Paket: {
-      id: 0,
-      nama: "",
-      jenis: JenisPaket.REGULAR,
-      maskapai: Maskapai.SAUDIA_ARABIA,
-      customMaskapai: "",
-      jenisPenerbangan: JenisPenerbangan.DIRECT,
-      noPenerbangan: "",
-      keretaCepat: false,
-      tglKeberangkatan: "",
-      tglKepulangan: "",
-      fasilitas: [],
-      namaMuthawif: "",
-      noTelpMuthawif: "",
-      Hotel: [],
-      gambar_url: "",
-      hargaDouble: 0,
-      hargaTriple: 0,
-      hargaQuad: 0,
-    },
-    id: 0,
-    metodePembayaran: MetodePembayaranType.TUNAI,
-    jenisPaket: "",
-    sisaTagihan: 0,
-    tenggatPembayaran: "",
-    totalTagihan: 0,
-    uangMuka: 0,
-    banyaknyaCicilan: 0,
-    jumlahBiayaPerAngsuran: 0,
-    status: StatusType.BELUM_BAYAR,
-    paket_id: 0,
-    catatanPembayaran: "",
-  });
+  const [formValues, setFormValues] = useState<FormType>(
+    keuanganData ? { ...initialFormValues, ...keuanganData } : initialFormValues
+  );
 
-  // Gunakan useEffect untuk memperbarui state ketika keuanganData berubah
+  // // Gunakan useEffect untuk memperbarui state ketika keuanganData berubah
   useEffect(() => {
-    if (keuanganData) {
+    if (keuanganData && keuanganData.id !== formValues.id) {
       setMetode(keuanganData.metodePembayaran || MetodePembayaranType.TUNAI);
       setFormValues({
         Jamaah: {
@@ -205,8 +209,7 @@ const FormDetail = ({
         },
         Paket: keuanganData.Paket,
         id: keuanganData.id || 0,
-        metodePembayaran:
-          keuanganData.metodePembayaran || MetodePembayaranType.TUNAI,
+        metodePembayaran: keuanganData.metodePembayaran || MetodePembayaranType.TUNAI,
         jenisPaket: keuanganData.jenisPaket || "",
         sisaTagihan: keuanganData.sisaTagihan || 0,
         tenggatPembayaran: keuanganData.tenggatPembayaran || "",
@@ -219,7 +222,9 @@ const FormDetail = ({
         catatanPembayaran: keuanganData.catatanPembayaran || "",
       });
     }
-  }, [keuanganData]);
+  }, [keuanganData, formValues.id]);
+  
+  
 
   // console.log("Keuangan data di detail:", keuanganData);
 
@@ -282,8 +287,14 @@ const FormDetail = ({
   };
 
   useEffect(() => {
-    calculateAngsuran();
-  }, [formValues.totalTagihan, formValues.uangMuka, formValues.banyaknyaCicilan, calculateAngsuran]);
+    const jumlahAngsuran =
+      (Number(formValues.totalTagihan) - Number(formValues.uangMuka)) /
+      Number(formValues.banyaknyaCicilan);
+  
+    if (formValues.jumlahBiayaPerAngsuran !== Math.round(jumlahAngsuran)) {
+      calculateAngsuran();
+    }
+  }, [formValues.totalTagihan, formValues.uangMuka, formValues.banyaknyaCicilan]);
 
   const handleOpenModal = () => {
     if (!openModal) {

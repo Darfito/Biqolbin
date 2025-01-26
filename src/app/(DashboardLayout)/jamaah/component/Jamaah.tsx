@@ -8,6 +8,7 @@ import JamaahTable from "../../utilities/component/table/JamaahTable";
 import FormJamaah from "./FormJamaah";
 import { CardStatsProps, JamaahInterface, PaketInterface } from "../../utilities/type";
 import { IconLuggage, IconPlaneArrival, IconUser } from "@tabler/icons-react";
+import { useState, useEffect } from "react";
 
 
 export type JamaahProps = {
@@ -24,6 +25,15 @@ const iconMap: Record<string, React.ElementType> = {
   IconPlaneArrival: IconPlaneArrival,
 };
 const Jamaah = ({ paketData, jamaahData, scoreCardData  }: JamaahProps) => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null; // Jangan render apa-apa sampai komponen dimuat di klien
+  }
   console.log("Paket data:", paketData);
   console.log("Jamaah data:", jamaahData);
 
@@ -35,7 +45,7 @@ const Jamaah = ({ paketData, jamaahData, scoreCardData  }: JamaahProps) => {
           width: "100%",
         }}
       >
-        <Typography variant="h2" component="h1" mb={3}>
+        <Typography variant="h2" mb={3}>
           Jamaah
         </Typography>
       </Box>

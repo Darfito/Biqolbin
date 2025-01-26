@@ -1,76 +1,72 @@
-
 import dynamic from "next/dynamic";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 import { useTheme } from '@mui/material/styles';
-import { Stack, Typography, Avatar, Fab } from '@mui/material';
-import { IconArrowDownRight, IconCurrencyDollar } from '@tabler/icons-react';
+import { Stack, Typography, Avatar } from '@mui/material';
+import { IconArrowDownRight } from '@tabler/icons-react';
 import DashboardCard from '@/app/(DashboardLayout)/components/shared/DashboardCard';
 
 const MonthlyEarnings = () => {
   // chart color
   const theme = useTheme();
-  const secondary = theme.palette.secondary.main;
-  const secondarylight = '#f5fcff';
-  const errorlight = '#fdede8';
+  const progressBarColor = '#f18B04'; // Warna progress bar
+  const trackColor = '#274371'; // Warna background/track
 
   // chart
-  const optionscolumnchart: any = {
+  const optionsRadialBar: any = {
     chart: {
-      type: 'area',
-      fontFamily: "'Plus Jakarta Sans', sans-serif;",
-      foreColor: '#adb0bb',
-      toolbar: {
-        show: false,
-      },
-      height: 60,
+      type: 'radialBar',
+      height: 200,
       sparkline: {
-        enabled: true,
+        enabled: true, // Menghilangkan elemen chart lainnya
       },
-      group: 'sparklines',
     },
-    stroke: {
-      curve: 'smooth',
-      width: 2,
+    plotOptions: {
+      radialBar: {
+        startAngle: -90,
+        endAngle: 90,
+        track: {
+          background: trackColor,
+          strokeWidth: '100%',
+        },
+        hollow: {
+          margin: 10,
+          size: '60%',
+        },
+        dataLabels: {
+          name: {
+            show: false, // Menyembunyikan label nama
+          },
+          value: {
+            fontSize: '18px',
+            fontWeight: '700',
+            color: theme.palette.text.primary,
+            offsetY: 5,
+            formatter: (val: number) => `${val}%`,
+          },
+        },
+      },
     },
     fill: {
-      colors: [secondarylight],
-      type: 'solid',
-      opacity: 0.05,
+      colors: [progressBarColor], // Warna progress bar
     },
-    markers: {
-      size: 0,
+    stroke: {
+      lineCap: 'round',
     },
-    tooltip: {
-      theme: theme.palette.mode === 'dark' ? 'dark' : 'light',
-    },
+    labels: ['Progress'], // Label untuk chart
   };
-  const seriescolumnchart: any = [
-    {
-      name: '',
-      color: secondary,
-      data: [25, 66, 20, 40, 12, 58, 20],
-    },
-  ];
+  
+  const seriesRadialBar: any = [75]; // Nilai progress (75%)
 
   return (
     <DashboardCard
       title="Realisasi Pendapatan"
-      // action={
-      //   <Fab color="secondary" size="medium" sx={{color: '#ffffff'}}>
-      //     <IconCurrencyDollar width={24} />
-      //   </Fab>
-      // }
-      footer={
-        <Chart options={optionscolumnchart} series={seriescolumnchart} type="area" height={60} width={"100%"} />
-      }
     >
       <>
         <Typography variant="h4" fontWeight="700" mt="-20px">
-          {/* Target pendapatan dapat dari total pendapatan */}
           Rp. 4.500.000
         </Typography>
         <Stack direction="row" spacing={1} my={1} alignItems="center">
-          <Avatar sx={{ bgcolor: errorlight, width: 27, height: 27 }}>
+          <Avatar sx={{ bgcolor: '#FDDFD9', width: 27, height: 27 }}>
             <IconArrowDownRight width={20} color="#FA896B" />
           </Avatar>
           <Typography variant="subtitle2" fontWeight="600">
@@ -80,6 +76,7 @@ const MonthlyEarnings = () => {
             last year
           </Typography>
         </Stack>
+        <Chart options={optionsRadialBar} series={seriesRadialBar} type="radialBar" height={200} width={"100%"} />
       </>
     </DashboardCard>
   );

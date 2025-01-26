@@ -14,7 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import { IconArrowLeft } from "@tabler/icons-react";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import FormDetail from "./FormDetail";
 import { useRouter } from "next/navigation";
 
@@ -40,7 +40,6 @@ const JamaahDetail = ({
   const [isEditing, setIsEditing] = useState<boolean>(false); // State to toggle edit mode
   const [currentData, setCurrentData] = useState<JamaahInterface | null>(jamaahData); // State untuk menyimpan data jamaah
   const [openDialog, setOpenDialog] = useState<boolean>(false);
-
   const memoizedJenisDokumen = useMemo(
     () => currentData?.jenisDokumen || [],
     [currentData]
@@ -49,6 +48,15 @@ const JamaahDetail = ({
     () => currentData?.pernikahan,
     [currentData]
   );
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null; // Jangan render apa-apa sampai komponen dimuat di klien
+  }
 
   // Toggle the isEditing state
   const handleEditClick = () => {
@@ -77,7 +85,7 @@ const JamaahDetail = ({
 
   return (
     <>
-      <Typography variant="h2" component="h1">
+      <Typography variant="h2">
         Jamaah Detail
       </Typography>
       <Breadcrumb links={breadcrumbLinks} />
