@@ -3,13 +3,14 @@
 import { redirect } from "next/navigation";
 import Dashboard from "./component/Dashboard";
 import { getLoggedInUser, getUserById } from "@/libs/sessions";
-import { KeuanganInterface } from "../utilities/type";
-import { getKeuanganAction, getKeuanganActionCabang } from "../keuangan/action";
+import { CabangInterface } from "../utilities/type";
+import { getCabangAction } from "../user/action";
 
 
 export default async function DashboardPage() {
   let cabangUser = 0;
   let roleUser = "";
+  let cabangData: CabangInterface[] = [];
 
   try {
     // Ambil data user yang sedang login
@@ -22,6 +23,7 @@ export default async function DashboardPage() {
       cabangUser = userDetails?.[0].cabang_id || 0;
       roleUser = userDetails?.[0].role || "";
     }
+    cabangData = (await getCabangAction()) ?? [];
 
     // Daftar role yang diizinkan
   } catch (error) {
@@ -34,9 +36,13 @@ export default async function DashboardPage() {
     redirect("/not-authorized"); // Ganti dengan halaman not-authorized Anda
   }
 
+  const stableCabangData = cabangData || [];
+
+
+
 
 
   return (
-    <Dashboard cabang={cabangUser} roleUser={roleUser}/>
+    <Dashboard cabang={cabangUser} roleUser={roleUser} cabangData={stableCabangData}/>
   )
 }

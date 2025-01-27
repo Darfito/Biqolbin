@@ -7,17 +7,19 @@ import YearlyBreakup from "@/app/(DashboardLayout)/components/dashboard/YearlyBr
 import MonthlyEarnings from "@/app/(DashboardLayout)/components/dashboard/MonthlyEarnings";
 import { useEffect, useState } from "react";
 import DashboardHeader from "./DashboardHeader";
-import { KeuanganInterface } from "../../utilities/type";
+import { CabangInterface, KeuanganInterface } from "../../utilities/type";
 import useSWR from "swr";
 import { getCabangAction } from "../../user/action";
 import { getKeuanganAction, getKeuanganActionCabang } from "../../keuangan/action";
+import Map from "./Maps";
 
 interface DashboardProps {
   roleUser: string
   cabang:number
+  cabangData: CabangInterface[];
 }
 
-const Dashboard = ({roleUser,cabang}: DashboardProps) => {
+const Dashboard = ({roleUser,cabang, cabangData}: DashboardProps) => {
   const [selectedFilter, setSelectedFilter] = useState<string>("Semua Cabang");
   const [dateRangeText, setDateRangeText] = useState('')
   const [mounted, setMounted] = useState(false);
@@ -67,6 +69,9 @@ const Dashboard = ({roleUser,cabang}: DashboardProps) => {
               </Grid>
             </Grid>
           </Grid>
+      <Box sx={{ width: "100%" }}>
+        <Map cabangData={cabangData} />
+      </Box>
         </Grid>
       </Box>
     </PageContainer>

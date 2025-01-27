@@ -95,7 +95,7 @@ const MonthlyEarnings = ({ keuanganData }: MonthlyEarningsProps) => {
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
           <Box sx={{ display: "flex", flexDirection: "column" }}>
             <Typography variant="subtitle2" color="textSecondary" >
-              Sisa yang harus dibayar
+              Pendapatan Aktual
             </Typography>
             <Typography variant="h6" fontWeight="700" sx={{ color: "#f18B04" }}>
               Rp. {sisaTagihan.toLocaleString()}

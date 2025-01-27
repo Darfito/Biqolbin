@@ -40,10 +40,10 @@ const YearlyBreakup = ({ keuanganData }: YearlyBreakupProps) => {
   const lastYear = currentYear - 1;
 
   const currentYearData = keuanganData.filter(
-    (item) => new Date(item.created_at).getFullYear() === currentYear
+    (item) => item.created_at && new Date(item.created_at).getFullYear() === currentYear
   );
   const lastYearData = keuanganData.filter(
-    (item) => new Date(item.created_at).getFullYear() === lastYear
+    (item) => item.created_at && new Date(item.created_at).getFullYear() === lastYear
   );
 
   const totalKeuntunganCurrentYear = calculateTotalKeuntungan(currentYearData);

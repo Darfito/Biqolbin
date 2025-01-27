@@ -48,6 +48,7 @@ interface FormErrors {
 
 type FormType = {
   id?: number;
+  
   Jamaah: JamaahInterface;
   Paket: PaketInterface;
   jenisPaket?: string;
