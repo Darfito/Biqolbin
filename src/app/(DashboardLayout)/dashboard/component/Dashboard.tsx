@@ -45,7 +45,7 @@ const Dashboard = ({keuanganData}: DashboardProps) => {
           <Grid item xs={12} lg={4}>
             <Grid container spacing={3}>
               <Grid item xs={12}>
-                <YearlyBreakup />
+                <YearlyBreakup keuanganData={keuanganData} />
               </Grid>
               <Grid item xs={12}>
                 <MonthlyEarnings />
