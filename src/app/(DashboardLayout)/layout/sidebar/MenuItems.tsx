@@ -1,6 +1,8 @@
 import {
   IconBook,
   IconLayoutDashboard,
+  IconMapPin2,
+  IconMarkdown,
   IconMoneybag,
   IconPencil,
   IconUser,
@@ -44,6 +46,13 @@ const Menuitems = [
     title: "User",
     icon: IconUser,
     href: "/user",
+    role: ["Admin", "Superadmin"]
+  },
+  {
+    id: uniqueId(),
+    title: "Cabang",
+    icon: IconMapPin2,
+    href: "/cabang",
     role: ["Admin", "Superadmin"]
   },
 ];

@@ -1,15 +1,21 @@
+"use client";
+
 import { Grid, Card, Box, Typography } from "@mui/material";
 import GlobalFilterDropdown from "./GlobalFilterDropdown";
+import { useState } from "react";
 
 interface DashboardHeaderProps {
+  filters: any[]
   selectedFilter: string;
   handleFilterChange: (filterName: string) => void;
 }
 
 const DashboardHeader = ({
+  filters,
   selectedFilter,
   handleFilterChange,
 }: DashboardHeaderProps) => {
+ 
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} sm={12} md={12} lg={12}>
@@ -36,12 +42,12 @@ const DashboardHeader = ({
                 }}
               >
                 {/* {dateRangeText} */}
-                Menampilkan Data Satu Tahun
+                Menampilkan Data Semua Cabang
               </Typography>
               <GlobalFilterDropdown
                 onSelectedFilter={handleFilterChange} // Fungsi callback
                 selectedFilterName={selectedFilter} // Filter saat ini
-              />
+                data={filters}              />
             </Box>
           </Box>
         </Card>

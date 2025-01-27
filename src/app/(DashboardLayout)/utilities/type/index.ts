@@ -20,6 +20,7 @@ export type CardStatsProps = {
 // ! KEUANGAN TYPE
 export interface KeuanganInterface {
   id?: number;
+  created_at?: string;
   Jamaah: JamaahInterface;
   Paket: PaketInterface;
   namaPaket?: string;
@@ -159,6 +160,9 @@ export interface CabangInterface {
   id?: number;
   nama: string;
   alamatCabang: string;
+  cabang_lat?: number;
+  cabang_long?: number;
+  action?:string;
 }
 
 

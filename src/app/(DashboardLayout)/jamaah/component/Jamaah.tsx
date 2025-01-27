@@ -7,7 +7,7 @@ import ScoreCard from "../../utilities/component/card/ScoreCard";
 import JamaahTable from "../../utilities/component/table/JamaahTable";
 import FormJamaah from "./FormJamaah";
 import { CardStatsProps, JamaahInterface, PaketInterface } from "../../utilities/type";
-import { IconLuggage, IconPlaneArrival, IconUser } from "@tabler/icons-react";
+import { IconLuggage, IconPlaneArrival, IconPlaneInflight, IconUser } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 
 
@@ -22,6 +22,7 @@ export type JamaahProps = {
 const iconMap: Record<string, React.ElementType> = {
   IconUser: IconUser,
   IconLuggage: IconLuggage,
+  IconPlaneInflight: IconPlaneInflight,
   IconPlaneArrival: IconPlaneArrival,
 };
 const Jamaah = ({ paketData, jamaahData, scoreCardData  }: JamaahProps) => {
@@ -36,7 +37,6 @@ const Jamaah = ({ paketData, jamaahData, scoreCardData  }: JamaahProps) => {
   }
   console.log("Paket data:", paketData);
   console.log("Jamaah data:", jamaahData);
-
 
   return (
     <>

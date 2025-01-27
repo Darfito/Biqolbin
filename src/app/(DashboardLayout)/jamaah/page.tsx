@@ -58,6 +58,9 @@ export default async function JamaahPage() {
   const belumBerangkat = jamaahData.filter(
     (jamaah) => jamaah.status === "Berangkat"
   ).length;
+  const berangkat = jamaahData.filter(
+    (jamaah) => jamaah.status === "Berangkat"
+  ).length
   const selesai = jamaahData.filter(
     (jamaah) => jamaah.status === "Selesai"
   ).length;
@@ -76,9 +79,15 @@ export default async function JamaahPage() {
       icon: "IconLuggage", // Kirim nama ikon sebagai string
     },
     {
+      title: "Berangkat",
+      total: berangkat,
+      color: "#ADD8E6",
+      icon: "IconPlaneInflight", // Kirim nama ikon sebagai string
+    },
+    {
       title: "Selesai",
       total: selesai,
-      color: "#F5BD4F",
+      color: "#4CAF50",
       icon: "IconPlaneArrival", // Kirim nama ikon sebagai string
     },
   ];
