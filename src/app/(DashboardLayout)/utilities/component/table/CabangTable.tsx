@@ -202,7 +202,7 @@ const CabangTable = ({ data }: TableProps<CabangInterface>) => {
             {/* Tombol Edit */}
             <ActionButton
               rowData={info.row.original}
-              actionPath={(rowData) => `/user/${rowData.id}`} // Path dinamis berdasarkan ID User
+              actionPath={(rowData) => `/cabang/${rowData.id}`} // Path dinamis berdasarkan ID User
             />
 
             {/* Tombol Delete */}

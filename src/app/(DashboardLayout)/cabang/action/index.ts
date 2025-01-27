@@ -35,6 +35,30 @@ export const createCabangAction = async (formValues: CabangInterface) => {
   }
 };
 
+export const updateCabangAction = async (formValues: CabangInterface) => {
+  const supabase = createClient(); // Membuat instance Supabase client
+
+  const { data, error } = await supabase
+    .from("Cabang")
+    .update({
+      nama: formValues.nama,
+      alamatCabang: formValues.alamatCabang,
+      cabang_lat: formValues.cabang_lat,
+      cabang_long: formValues.cabang_long,
+    })
+    .eq("id", formValues.id)
+    .select();
+
+  if (error) {
+    console.error("Error updating user data:", error.message);
+    return { success: false, error: error.message };
+  }
+
+  console.log("Cabang updated:", data);
+  revalidatePath("/cabang");
+  return { success: true, data };
+}
+
 export const deleteCabangAction = async (CabangId: number) => {
   const supabase = createClient();
 

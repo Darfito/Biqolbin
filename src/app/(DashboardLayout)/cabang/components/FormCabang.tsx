@@ -52,6 +52,22 @@ export default function FormCabang() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    const result = v.safeParse(formSchema, formValues);
+
+    if (!result.success) {
+      const errorMap: Record<string, string> = {};
+      result.issues.forEach((issue) => {
+        const path = issue.path?.[0]?.key as string | undefined;
+        if (path) {
+          errorMap[path] = issue.message;
+        }
+      });
+
+      setFormErrors(errorMap);
+      console.error("Validation errors:", errorMap);
+      return;
+    }
+
     const cabangInsertResponse = await createCabangAction(formValues);
 
     if (cabangInsertResponse.success) {
