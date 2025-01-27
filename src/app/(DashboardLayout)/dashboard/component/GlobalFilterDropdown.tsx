@@ -30,7 +30,7 @@ const GlobalFilterDropdown = ({
     useState<string>(selectedFilterName);
 
   // Dummy data for filters
-  const dummyData = ["Setahun", "6 Bulan", "1 Bulan"];
+  const dummyData = ["Semua", "Cabang A", "Cabang B"];
 
   // Responsive hook to detect if screen width is less than 768px
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -129,7 +129,7 @@ const GlobalFilterDropdown = ({
               sx={{
                 boxShadow: 3,
                 mt: 0.5,
-                width: isMobile ? "125px" : "140px",
+                width: isMobile ? "125px" : "190px",
               }}
             >
               <ClickAwayListener onClickAway={() => setOpen(false)}>

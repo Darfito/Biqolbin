@@ -3,9 +3,12 @@
 import { redirect } from "next/navigation";
 import Dashboard from "./component/Dashboard";
 import { getLoggedInUser, getUserById } from "@/libs/sessions";
+import { KeuanganInterface } from "../utilities/type";
+import { getKeuanganAction, getKeuanganActionCabang } from "../keuangan/action";
 
 
 export default async function DashboardPage() {
+  let keuanganData: KeuanganInterface[] = [];
   let cabangUser = 0;
   let roleUser = "";
 
@@ -21,7 +24,17 @@ export default async function DashboardPage() {
       roleUser = userDetails?.[0].role || "";
     }
 
+    if (roleUser === "Superadmin") {
+
+      keuanganData = (await getKeuanganAction()) ?? [];
+    } else {
+      keuanganData = await getKeuanganActionCabang(cabangUser);
+    }
+
     // Daftar role yang diizinkan
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
   const allowedRoles = ["Admin", "Superadmin", "Divisi General Affair", "Finance & Accounting", "Marketing"]
 
 
@@ -29,11 +42,10 @@ export default async function DashboardPage() {
     redirect("/not-authorized"); // Ganti dengan halaman not-authorized Anda
   }
 
-  } catch (error) {
-    console.error("Error fetching data:", error);
-  }
+  const stableKeuanganData = keuanganData || [];
+
 
   return (
-    <Dashboard/>
+    <Dashboard keuanganData={stableKeuanganData}/>
   )
 }

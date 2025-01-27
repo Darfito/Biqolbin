@@ -19,7 +19,9 @@ export type CardStatsProps = {
 
 // ! KEUANGAN TYPE
 export interface KeuanganInterface {
+  [x: string]: string | number | Date;
   id?: number;
+  create_at?: string;
   Jamaah: JamaahInterface;
   Paket: PaketInterface;
   namaPaket?: string;

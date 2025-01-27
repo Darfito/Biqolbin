@@ -7,9 +7,14 @@ import YearlyBreakup from "@/app/(DashboardLayout)/components/dashboard/YearlyBr
 import MonthlyEarnings from "@/app/(DashboardLayout)/components/dashboard/MonthlyEarnings";
 import { useEffect, useState } from "react";
 import DashboardHeader from "./DashboardHeader";
+import { KeuanganInterface } from "../../utilities/type";
 
-const Dashboard = () => {
-  const [selectedFilter, setSelectedFilter] = useState<string>("Setahun");
+interface DashboardProps {
+  keuanganData: KeuanganInterface[];
+}
+
+const Dashboard = ({keuanganData}: DashboardProps) => {
+  const [selectedFilter, setSelectedFilter] = useState<string>("Semua Cabang");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -24,6 +29,8 @@ const Dashboard = () => {
     setSelectedFilter(filterName);
   };
 
+  console.log("keuanganData di dashboard:", keuanganData);
+
   return (
     <PageContainer title="Dashboard" description="this is Dashboard">
       <DashboardHeader
@@ -33,7 +40,7 @@ const Dashboard = () => {
       <Box>
         <Grid container spacing={3}>
           <Grid item xs={12} lg={8}>
-            <SalesOverview />
+            <SalesOverview keuanganData={keuanganData} />
           </Grid>
           <Grid item xs={12} lg={4}>
             <Grid container spacing={3}>

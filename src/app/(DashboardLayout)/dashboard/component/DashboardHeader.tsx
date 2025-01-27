@@ -36,7 +36,7 @@ const DashboardHeader = ({
                 }}
               >
                 {/* {dateRangeText} */}
-                Menampilkan Data Satu Tahun
+                Menampilkan Data Semua Cabang
               </Typography>
               <GlobalFilterDropdown
                 onSelectedFilter={handleFilterChange} // Fungsi callback
