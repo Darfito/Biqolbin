@@ -162,6 +162,7 @@ export interface CabangInterface {
   alamatCabang: string;
   cabang_lat?: number;
   cabang_long?: number;
+  action?:string;
 }
 
 

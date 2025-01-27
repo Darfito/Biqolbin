@@ -69,10 +69,10 @@ const Dashboard = ({roleUser,cabang, cabangData}: DashboardProps) => {
               </Grid>
             </Grid>
           </Grid>
-      <Box sx={{ width: "100%" }}>
+        </Grid>
+      <Box sx={{ width: "100%", marginTop: "20px" }}>
         <Map cabangData={cabangData} />
       </Box>
-        </Grid>
       </Box>
     </PageContainer>
   );
