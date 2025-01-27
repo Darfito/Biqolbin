@@ -48,7 +48,7 @@ const Dashboard = ({keuanganData}: DashboardProps) => {
                 <YearlyBreakup keuanganData={keuanganData} />
               </Grid>
               <Grid item xs={12}>
-                <MonthlyEarnings />
+                <MonthlyEarnings keuanganData={keuanganData} />
               </Grid>
             </Grid>
           </Grid>
