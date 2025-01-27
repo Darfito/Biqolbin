@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState } from "react";
 import { Select, MenuItem } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
@@ -105,10 +107,14 @@ const SalesOverview = ({ keuanganData }: SalesOverviewProps) => {
       colors: ["transparent"],
     },
     dataLabels: {
-      enabled: false,
+      enabled: true,
+      formatter: (val: number) => {
+        // Format data label as Rupiah
+        return `Rp. ${val.toLocaleString("id-ID")}`;
+      },
     },
     legend: {
-      show: false,
+      show: true,
     },
     grid: {
       borderColor: "rgba(0,0,0,0.1)",
@@ -131,6 +137,12 @@ const SalesOverview = ({ keuanganData }: SalesOverviewProps) => {
     tooltip: {
       theme: "dark",
       fillSeriesColor: false,
+      y: {
+        formatter: (val: number) => {
+          // Format tooltip as Rupiah
+          return `Rp. ${val.toLocaleString("id-ID")}`;
+        },
+      },
     },
   };
 
