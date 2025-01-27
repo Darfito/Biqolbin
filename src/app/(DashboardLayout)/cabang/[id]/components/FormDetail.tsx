@@ -45,8 +45,6 @@ type FormType = {
 const formSchema = v.object({
   nama: v.pipe(v.string(), v.nonEmpty("Nama harus diisi")),
   alamatCabang: v.pipe(v.string(), v.nonEmpty("Alamat Cabang harus diisi")),
-  cabang_lat: v.number(),
-  cabang_long: v.number(),
 });
 
 const FormDetail = ({ isEditing, cabangData, role }: FormDetailProps) => {
@@ -150,7 +148,7 @@ const FormDetail = ({ isEditing, cabangData, role }: FormDetailProps) => {
                 label="Koordinat Latitude"
                 name="cabang_lat"
                 value={formValues.cabang_lat}
-                error={!!formErrors.cabang_lat}
+                required
                 sx={{ marginBottom: 2 }}
                 onChange={(e: { target: { value: number } }) =>
                   setFormValues({ ...formValues, cabang_lat: e.target.value })
@@ -162,6 +160,7 @@ const FormDetail = ({ isEditing, cabangData, role }: FormDetailProps) => {
                 name="cabang_long"
                 value={formValues.cabang_long}
                 error={!!formErrors.cabang_long}
+                required
                 onChange={(e: { target: { value: number } }) =>
                   setFormValues({ ...formValues, cabang_long: e.target.value })
                 }

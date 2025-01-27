@@ -125,6 +125,7 @@ export default function FormCabang() {
               value={formValues.nama}
               error={!!formErrors.nama}
               helperText={formErrors.nama}
+              required
               onChange={(e: { target: { value: string } }) =>
                 setFormValues({ ...formValues, nama: e.target.value })
               }
@@ -136,6 +137,7 @@ export default function FormCabang() {
               name="alamatCabang"
               value={formValues.alamatCabang}
               error={!!formErrors.alamatCabang}
+              required
               onChange={(e: { target: { value: string } }) =>
                 setFormValues({ ...formValues, alamatCabang: e.target.value })
               }
@@ -148,6 +150,7 @@ export default function FormCabang() {
               name="cabang_lat"
               value={formValues.cabang_lat}
               error={!!formErrors.cabang_lat}
+              required
               onChange={(e: { target: { value: number } }) =>
                 setFormValues({ ...formValues, cabang_lat: e.target.value })
               }
@@ -158,6 +161,7 @@ export default function FormCabang() {
               name="cabang_long"
               value={formValues.cabang_long}
               error={!!formErrors.cabang_long}
+              required
               onChange={(e: { target: { value: number } }) =>
                 setFormValues({ ...formValues, cabang_long: e.target.value })
               }
