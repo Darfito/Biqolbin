@@ -1,11 +1,14 @@
-
 import dynamic from "next/dynamic";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-import { useTheme } from '@mui/material/styles';
-import { Grid, Stack, Typography, Avatar } from '@mui/material';
-import { IconArrowUpLeft } from '@tabler/icons-react';
+import { useTheme } from "@mui/material/styles";
+import { Grid, Stack, Typography, Avatar } from "@mui/material";
+import {
+  IconArrowDownRight,
+  IconArrowUpRight,
+  IconEqual,
+} from "@tabler/icons-react";
 
-import DashboardCard from '@/app/(DashboardLayout)/components/shared/DashboardCard';
+import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCard";
 import { KeuanganInterface } from "../../utilities/type";
 
 interface YearlyBreakupProps {
@@ -15,57 +18,67 @@ interface YearlyBreakupProps {
 const YearlyBreakup = ({ keuanganData }: YearlyBreakupProps) => {
   // chart color
   const theme = useTheme();
-  const primary = theme.palette.primary.main;
-  const primarylight = '#ecf2ff';
+  const primary = theme.palette.primary.dark;
+  const primarylight = theme.palette.primary.main;
   const successlight = theme.palette.success.light;
 
   // Helper function to calculate total keuntungan
   const calculateTotalKeuntungan = (data: any[]) => {
-    return data.reduce((total: number, item: { totalTagihan: number; sisaTagihan: number; }) => {
-      const keuntungan = item.totalTagihan - item.sisaTagihan;
-      return total + keuntungan;
-    }, 0);
+    return data.reduce(
+      (total: number, item: { totalTagihan: number; sisaTagihan: number }) => {
+        const keuntungan = item.totalTagihan - item.sisaTagihan;
+        return total + keuntungan;
+      },
+      0
+    );
   };
 
   // Filter data by year
   const currentYear = new Date().getFullYear();
   const lastYear = currentYear - 1;
 
-  const currentYearData = keuanganData.filter(item => new Date(item.created_at).getFullYear() === currentYear);
-  const lastYearData = keuanganData.filter(item => new Date(item.created_at).getFullYear() === lastYear);
+  const currentYearData = keuanganData.filter(
+    (item) => new Date(item.created_at).getFullYear() === currentYear
+  );
+  const lastYearData = keuanganData.filter(
+    (item) => new Date(item.created_at).getFullYear() === lastYear
+  );
 
   const totalKeuntunganCurrentYear = calculateTotalKeuntungan(currentYearData);
   const totalKeuntunganLastYear = calculateTotalKeuntungan(lastYearData);
 
   // Calculate the percentage change
-  const percentageChange = totalKeuntunganLastYear > 0
-    ? ((totalKeuntunganCurrentYear - totalKeuntunganLastYear) / totalKeuntunganLastYear) * 100
-    : 0;
+  const percentageChange =
+    totalKeuntunganLastYear > 0
+      ? ((totalKeuntunganCurrentYear - totalKeuntunganLastYear) /
+          totalKeuntunganLastYear) *
+        100
+      : 0;
 
   // Chart data
   const optionscolumnchart: any = {
     chart: {
-      type: 'donut',
+      type: "donut",
       fontFamily: "'Plus Jakarta Sans', sans-serif;",
-      foreColor: '#adb0bb',
+      foreColor: "#adb0bb",
       toolbar: {
         show: false,
       },
       height: 155,
     },
-    colors: [primary, primarylight, '#F9F9FD'],
+    colors: [primary, primarylight],
     plotOptions: {
       pie: {
         startAngle: 0,
         endAngle: 360,
         donut: {
-          size: '75%',
-          background: 'transparent',
+          size: "75%",
+          background: "transparent",
         },
       },
     },
     tooltip: {
-      theme: theme.palette.mode === 'dark' ? 'dark' : 'light',
+      theme: theme.palette.mode === "dark" ? "dark" : "light",
       fillSeriesColor: false,
     },
     stroke: {
@@ -89,9 +102,8 @@ const YearlyBreakup = ({ keuanganData }: YearlyBreakupProps) => {
     ],
   };
   const seriescolumnchart: any = [
-    totalKeuntunganCurrentYear, 
-    totalKeuntunganLastYear, 
-    totalKeuntunganCurrentYear + totalKeuntunganLastYear
+    totalKeuntunganLastYear,
+    totalKeuntunganCurrentYear,
   ];
 
   return (
@@ -103,11 +115,33 @@ const YearlyBreakup = ({ keuanganData }: YearlyBreakupProps) => {
             Rp. {totalKeuntunganCurrentYear.toLocaleString()}
           </Typography>
           <Stack direction="row" spacing={1} mt={1} alignItems="center">
-            <Avatar sx={{ bgcolor: successlight, width: 27, height: 27 }}>
-              <IconArrowUpLeft width={20} color="#39B69A" />
+            <Avatar
+              sx={{
+                bgcolor:
+                  percentageChange > 0
+                    ? successlight
+                    : percentageChange < 0
+                    ? "#FDDFD9" // Warna merah muda jika turun
+                    : "#B0BEC5", // Warna abu-abu jika tidak ada perubahan
+                width: 27,
+                height: 27,
+              }}
+            >
+              {
+                // Ikon dinamis berdasarkan perubahan keuntungan
+                percentageChange > 0 ? (
+                  <IconArrowUpRight width={20} color="#39B69A" />
+                ) : percentageChange < 0 ? (
+                  <IconArrowDownRight width={20} color="#FA896B" />
+                ) : (
+                  <IconEqual width={20} color="#fff" /> // Ikon netral jika tidak ada perubahan
+                )
+              }
             </Avatar>
             <Typography variant="subtitle2" fontWeight="600">
-              {percentageChange > 0 ? `+${percentageChange.toFixed(2)}%` : `${percentageChange.toFixed(2)}%`}
+              {percentageChange > 0
+                ? `+${percentageChange.toFixed(2)}%`
+                : `${percentageChange.toFixed(2)}%`}
             </Typography>
             <Typography variant="subtitle2" color="textSecondary">
               compared to last year
@@ -116,7 +150,12 @@ const YearlyBreakup = ({ keuanganData }: YearlyBreakupProps) => {
           <Stack spacing={3} mt={5} direction="row">
             <Stack direction="row" spacing={1} alignItems="center">
               <Avatar
-                sx={{ width: 9, height: 9, bgcolor: primary, svg: { display: 'none' } }}
+                sx={{
+                  width: 9,
+                  height: 9,
+                  bgcolor: primary,
+                  svg: { display: "none" },
+                }}
               ></Avatar>
               <Typography variant="subtitle2" color="textSecondary">
                 {lastYear}
@@ -124,7 +163,12 @@ const YearlyBreakup = ({ keuanganData }: YearlyBreakupProps) => {
             </Stack>
             <Stack direction="row" spacing={1} alignItems="center">
               <Avatar
-                sx={{ width: 9, height: 9, bgcolor: primarylight, svg: { display: 'none' } }}
+                sx={{
+                  width: 9,
+                  height: 9,
+                  bgcolor: primarylight,
+                  svg: { display: "none" },
+                }}
               ></Avatar>
               <Typography variant="subtitle2" color="textSecondary">
                 {currentYear}
@@ -138,7 +182,8 @@ const YearlyBreakup = ({ keuanganData }: YearlyBreakupProps) => {
             options={optionscolumnchart}
             series={seriescolumnchart}
             type="donut"
-            height={150} width={"100%"}
+            height={150}
+            width={"100%"}
           />
         </Grid>
       </Grid>
