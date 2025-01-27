@@ -13,13 +13,16 @@ import MenuItem from "@mui/material/MenuItem";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
 import { IconChevronDown, IconFilter } from "@tabler/icons-react";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { CabangInterface } from "../../utilities/type";
 
 interface GlobalFilterDropdownProps {
+  data: CabangInterface[];
   onSelectedFilter: (selectedFilter: string) => void;
   selectedFilterName: string;
 }
 
 const GlobalFilterDropdown = ({
+  data,
   onSelectedFilter,
   selectedFilterName,
 }: GlobalFilterDropdownProps) => {
@@ -28,9 +31,6 @@ const GlobalFilterDropdown = ({
   const anchorRef = useRef<HTMLButtonElement | null>(null);
   const [selectedFilter, setSelectedFilter] =
     useState<string>(selectedFilterName);
-
-  // Dummy data for filters
-  const dummyData = ["Semua", "Cabang A", "Cabang B"];
 
   // Responsive hook to detect if screen width is less than 768px
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -145,14 +145,19 @@ const GlobalFilterDropdown = ({
                     fontSize: isMobile ? "0.75rem" : "0.875rem",
                   }}
                 >
-                  {dummyData.map((item, index) => (
-                    <MenuItem
-                      key={index}
-                      onClick={() => handleSelectFilter(item)}
-                    >
-                      {item}
-                    </MenuItem>
-                  ))}
+                  <MenuItem onClick={() => handleSelectFilter("Semua Cabang")}>
+                    Semua Cabang
+                  </MenuItem>
+                  {data
+                    ?.filter((item) => item.nama !== "Pusat") // Menambahkan filter untuk menghilangkan item dengan nama "Pusat"
+                    .map((item, index) => (
+                      <MenuItem
+                        key={index}
+                        onClick={() => handleSelectFilter(item.nama)}
+                      >
+                        {item.nama}
+                      </MenuItem>
+                    ))}
                 </MenuList>
               </ClickAwayListener>
             </Paper>
