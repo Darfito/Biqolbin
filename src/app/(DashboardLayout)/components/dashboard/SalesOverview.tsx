@@ -25,7 +25,7 @@ const SalesOverview = ({ keuanganData }: SalesOverviewProps) => {
     month === "all"
       ? keuanganData // Jika "all", tampilkan semua data
       : keuanganData.filter((item) => {
-          const createdAt = new Date(item.created_at);
+        const createdAt = new Date(item.created_at ?? "");
           return createdAt.getMonth() + 1 === parseInt(month); // Filter berdasarkan bulan
         });
 
@@ -33,7 +33,7 @@ const SalesOverview = ({ keuanganData }: SalesOverviewProps) => {
   const categories =
   month === "all"
     ? Array.from(new Set(filteredKeuanganData.map((item) => 
-        new Date(item.created_at).toLocaleString("default", { month: "long", year: "numeric" })
+      item.created_at &&  new Date(item.created_at).toLocaleString("default", { month: "long", year: "numeric" })
       ))) // Kategori: Bulan/Tahun
     : ["W1", "W2", "W3", "W4"]; // Kategori: Mingguan
 
@@ -43,12 +43,12 @@ const SalesOverview = ({ keuanganData }: SalesOverviewProps) => {
     if (month === "all") {
       const filteredByMonth = filteredKeuanganData.filter(
         (item) =>
-          new Date(item.created_at).getMonth() === index // Sesuai bulan dalam loop
+          item.created_at &&  new Date(item.created_at).getMonth() === index // Sesuai bulan dalam loop
       );
       return filteredByMonth.reduce((total, item) => total + item.totalTagihan, 0);
     } else {
       const filteredByWeek = filteredKeuanganData.filter((item) => {
-        const createdAt = new Date(item.created_at);
+        const createdAt = new Date(item.created_at ?? "");
         const weekNumber = Math.ceil(createdAt.getDate() / 7); // Tentukan minggu keberapa
         return weekNumber === index + 1; // Sesuaikan minggu dalam loop
       });
@@ -60,12 +60,12 @@ const SalesOverview = ({ keuanganData }: SalesOverviewProps) => {
     if (month === "all") {
       const filteredByMonth = filteredKeuanganData.filter(
         (item) =>
-          new Date(item.created_at).getMonth() === index // Sesuai bulan dalam loop
+          new Date(item.created_at ?? "").getMonth() === index // Sesuai bulan dalam loop
       );
       return filteredByMonth.reduce((total, item) => total + (item.sisaTagihan || 0), 0);
     } else {
       const filteredByWeek = filteredKeuanganData.filter((item) => {
-        const createdAt = new Date(item.created_at);
+        const createdAt = new Date(item.created_at ?? "");
         const weekNumber = Math.ceil(createdAt.getDate() / 7); // Tentukan minggu keberapa
         return weekNumber === index + 1; // Sesuaikan minggu dalam loop
       });
