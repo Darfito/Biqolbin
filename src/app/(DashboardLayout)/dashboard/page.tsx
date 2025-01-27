@@ -8,7 +8,6 @@ import { getKeuanganAction, getKeuanganActionCabang } from "../keuangan/action";
 
 
 export default async function DashboardPage() {
-  let keuanganData: KeuanganInterface[] = [];
   let cabangUser = 0;
   let roleUser = "";
 
@@ -24,13 +23,6 @@ export default async function DashboardPage() {
       roleUser = userDetails?.[0].role || "";
     }
 
-    if (roleUser === "Superadmin") {
-
-      keuanganData = (await getKeuanganAction()) ?? [];
-    } else {
-      keuanganData = await getKeuanganActionCabang(cabangUser);
-    }
-
     // Daftar role yang diizinkan
   } catch (error) {
     console.error("Error fetching data:", error);
@@ -42,10 +34,9 @@ export default async function DashboardPage() {
     redirect("/not-authorized"); // Ganti dengan halaman not-authorized Anda
   }
 
-  const stableKeuanganData = keuanganData || [];
 
 
   return (
-    <Dashboard keuanganData={stableKeuanganData}/>
+    <Dashboard cabang={cabangUser} roleUser={roleUser}/>
   )
 }

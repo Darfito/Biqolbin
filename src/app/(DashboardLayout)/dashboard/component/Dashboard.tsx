@@ -10,16 +10,25 @@ import DashboardHeader from "./DashboardHeader";
 import { KeuanganInterface } from "../../utilities/type";
 import useSWR from "swr";
 import { getCabangAction } from "../../user/action";
+import { getKeuanganAction, getKeuanganActionCabang } from "../../keuangan/action";
 
 interface DashboardProps {
-  keuanganData: KeuanganInterface[];
+  roleUser: string
+  cabang:number
 }
 
-const Dashboard = ({keuanganData}: DashboardProps) => {
+const Dashboard = ({roleUser,cabang}: DashboardProps) => {
   const [selectedFilter, setSelectedFilter] = useState<string>("Semua Cabang");
+  const [dateRangeText, setDateRangeText] = useState('')
   const [mounted, setMounted] = useState(false);
 
   const {data: cabangAll} = useSWR('Cabang', getCabangAction)
+
+  const { data: dataKeuangan } = useSWR(
+    'Keuangan',
+    () => (roleUser === 'Superadmin' ? getKeuanganAction() : getKeuanganActionCabang(cabang))
+  );
+  
 
   useEffect(() => {
     setMounted(true);
@@ -35,7 +44,7 @@ const Dashboard = ({keuanganData}: DashboardProps) => {
     setSelectedFilter(filterName);
   };
 
-  console.log("keuanganData di dashboard:", keuanganData);
+  console.log("keuanganData di dashboard:", dataKeuangan);
   console.log("cabangAll di dashboard:", cabangAll);
   
   return (
@@ -46,15 +55,15 @@ const Dashboard = ({keuanganData}: DashboardProps) => {
       <Box>
         <Grid container spacing={3}>
           <Grid item xs={12} lg={8}>
-            <SalesOverview keuanganData={keuanganData} />
+            <SalesOverview keuanganData={dataKeuangan || []} />
           </Grid>
           <Grid item xs={12} lg={4}>
             <Grid container spacing={3}>
               <Grid item xs={12}>
-                <YearlyBreakup keuanganData={keuanganData} />
+                <YearlyBreakup keuanganData={dataKeuangan || []} />
               </Grid>
               <Grid item xs={12}>
-                <MonthlyEarnings keuanganData={keuanganData} />
+                <MonthlyEarnings keuanganData={dataKeuangan || []} />
               </Grid>
             </Grid>
           </Grid>
