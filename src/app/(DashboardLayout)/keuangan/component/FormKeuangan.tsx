@@ -99,6 +99,7 @@ export default function FormKeuangan({
       nama: "",
       ayahKandung: "",
       noTelp: "",
+      tanggalLahir: new Date(),
       kontakDarurat: [
         {
           id: 0,
@@ -331,6 +332,7 @@ export default function FormKeuangan({
         nama: "",
         ayahKandung: "",
         noTelp: "",
+        tanggalLahir: new Date(),
         kontakDarurat: [
           {
             id: 0,

@@ -358,17 +358,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                   }
                   sx={{ marginBottom: 2 }}
                 />
-                  <CustomTextField
-                  fullWidth
-                  disabled
-                  label="Tanggal Lahir"
-                  type="date"
-                  value={formValues.tanggalLahir} // Sudah otomatis terisi dari jenisPaket
-                  InputLabelProps={{
-                    shrink: true, // Memastikan label tetap di atas
-                  }}
-                  sx={{ marginBottom: 2 }}
-                />
+
                 <CustomTextField
                   fullWidth
                   label="Nama Ayah Kandung"
@@ -414,7 +404,26 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                     />
                   </RadioGroup>
                 </FormControl>
-
+                <CustomTextField
+                  fullWidth
+                  label="Tanggal Lahir"
+                  type="date"
+                  value={
+                    formValues.tanggalLahir
+                      ? formValues.tanggalLahir.toISOString().split("T")[0]
+                      : ""
+                  } // Mengonversi ke format YYYY-MM-DD
+                  InputLabelProps={{
+                    shrink: true, // Memastikan label tetap di atas
+                  }}
+                  onChange={(e: { target: { value: string } }) =>
+                    setFormValues({
+                      ...formValues,
+                      tanggalLahir: new Date(e.target.value), // Mengonversi string kembali menjadi objek Date
+                    })
+                  }
+                  sx={{ marginBottom: 2 }}
+                />
                 <CustomTextField
                   fullWidth
                   label="Tempat Lahir"

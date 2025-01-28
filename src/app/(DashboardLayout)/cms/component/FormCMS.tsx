@@ -193,69 +193,42 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
     }));
   };
 
-  const uploadImageToSupabase = async (folderName: string, file: File) => {
-    const supabase = createClient();
+const uploadImageToSupabase = async (folderName: string, file: File) => {
+  const supabase = createClient();
+  
+  // Ambil ekstensi file asli
+  const fileExtension = file.name.split(".").pop();
+  const newFileName = `${folderName}.${fileExtension}`;
+  const filePath = `${folderName}/${newFileName}`;
 
-    // Ambil ekstensi file asli
-    const fileExtension = file.name.split(".").pop(); // Ambil bagian setelah titik terakhir
-    const newFileName = `${folderName}.${fileExtension}`; // Nama file baru dengan folderName + ekstensi
-    const filePath = `${folderName}/${newFileName}`; // Path lengkap file dalam bucket
+  const { data, error } = await supabase.storage.from("Paket").upload(filePath, file, { cacheControl: "3600", upsert: true });
+  
+  if (error) {
+    throw new Error(error.message);
+  }
 
-    // Hapus file lama (opsional)
-    const { error: removeError } = await supabase.storage
-      .from("Paket")
-      .remove([filePath]);
-    if (removeError) {
-      console.warn("Tidak bisa menghapus gambar lama:", removeError.message);
+  return data;
+};
+
+const handleUpload = async (file: File) => {
+  try {
+    const namaPaket = formValues.nama;
+    if (typeof namaPaket !== "string") {
+      throw new Error("Nama paket harus berupa string");
     }
 
-    // Upload gambar baru
-    const { data, error } = await supabase.storage
-      .from("Paket")
-      .upload(filePath, file, { cacheControl: "3600", upsert: true }); // Opsi `upsert` memastikan file di-overwrite
+    const folderName = namaPaket;
+    const result = await uploadImageToSupabase(folderName, file);
 
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return data;
-  };
-
-  const handleUpload = async (file: File) => {
-    try {
-      console.log("formValues.nama:", formValues.nama);
-
-      const namaPaket = formValues.nama;
-      if (typeof namaPaket !== "string") {
-        throw new Error("Nama paket harus berupa string");
-      }
-
-      const folderName = namaPaket;
-      console.log("Folder Name:", folderName);
-
-      // Upload file baru dan hapus file lama
-      const result = await uploadImageToSupabase(folderName, file);
-
-      // Buat URL publik
-      const publicUrl = `${
-        process.env.NEXT_PUBLIC_SUPABASE_URL
-      }/storage/v1/object/public/Paket/${
-        result.path
-      }?t=${new Date().getTime()}`;
-
-      // Simpan URL ke state
-      setFormValues((prevValues) => ({
-        ...prevValues,
-        gambar_url: publicUrl,
-      }));
-
-      console.log("File uploaded successfully:", result);
-
-    } catch (error) {
-      console.error("Upload failed:", error);
-      toast.error("Gagal mengunggah gambar!");
-    }
-  };
+    // Buat URL publik setelah upload
+    const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Paket/${result.path}?t=${new Date().getTime()}`;
+    
+    return publicUrl;
+  } catch (error) {
+    console.error("Upload failed:", error);
+    toast.error("Gagal mengunggah gambar!");
+  }
+};
 
   const serializeFormData = (
     values: PaketInterface,
@@ -298,42 +271,45 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // setIsLoading(true); // Mulai loading
-
-    // Jika ada file yang diunggah, lakukan proses upload
-    if (formValues.selectedFile) {
-      await handleUpload(formValues.selectedFile);
-    }
-
-    // Validate form data
-    const result = v.safeParse(formSchema, formValues);
-
-    if (!result.success) {
-      const errorMap: Record<string, string> = {};
-      result.issues.forEach((issue) => {
-        const path = issue.path?.[0]?.key as string | undefined;
-        if (path) {
-          errorMap[path] = issue.message;
-        }
-      });
-
-      setFormErrors(errorMap);
-      console.error("Validation errors:", errorMap);
-      return;
-    }
-
-    if (!formValues.gambar_url) {
-      toast.error("Harap unggah gambar sebelum mengirimkan form!");
-      return;
-    }
-
-    // Serialize form data before sending to server action
-    const serializedData = serializeFormData(formValues, mode, initialValues);
-    console.log("Serialized Data:", serializedData);
-
+    let publicUrl: string = "";
+  
     try {
+      // 1. Handle file upload first if there's a new file
+      if (formValues.selectedFile) {
+        publicUrl = await handleUpload(formValues.selectedFile) ?? "";
+        if (!publicUrl) {
+          toast.error("Gagal mengunggah gambar!");
+          return;
+        }
+      }
+  
+      // 2. Create the data to validate with the new URL if uploaded
+      const dataToSubmit = {
+        ...formValues,
+        gambar_url: publicUrl || formValues.gambar_url, // Use new URL if uploaded, otherwise keep existing
+      };
+  
+      // 3. Validate the complete data
+      const result = v.safeParse(formSchema, dataToSubmit);
+  
+      if (!result.success) {
+        const errorMap: Record<string, string> = {};
+        result.issues.forEach((issue) => {
+          const path = issue.path?.[0]?.key as string | undefined;
+          if (path) {
+            errorMap[path] = issue.message;
+          }
+        });
+        setFormErrors(errorMap);
+        console.error("Validation errors:", errorMap);
+        return;
+      }
+  
+      // 4. Serialize and submit the data
+      const serializedData = serializeFormData(dataToSubmit, mode, initialValues);
+  
       if (mode === "create") {
-        const { success, data, error } = await createCmsAction(serializedData);
+        const { success, error } = await createCmsAction(serializedData);
         if (success) {
           toast.success("Form berhasil disubmit!");
           handleClose();
@@ -341,19 +317,15 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
           toast.error(`Error: ${error}`);
         }
       } else if (mode === "edit") {
-        console.log("Submitting updateCmsAction with data:", serializedData);
-        const { success, data, error } = await updateCmsAction(serializedData);
+        const { success, error } = await updateCmsAction(serializedData);
         if (success) {
           toast.success("Form berhasil di Update!");
-          // setIsLoading(false); // Selesai loading
           handleClose();
         } else {
-          // setIsLoading(false); // Selesai loading
           toast.error(`Error: ${error}`);
         }
       }
     } catch (error) {
-      // setIsLoading(false); // Selesai loading
       console.error("Action error:", error);
       toast.error("Terjadi kesalahan saat memproses form");
     }
