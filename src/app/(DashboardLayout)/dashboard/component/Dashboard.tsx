@@ -10,27 +10,45 @@ import DashboardHeader from "./DashboardHeader";
 import { CabangInterface, KeuanganInterface } from "../../utilities/type";
 import useSWR from "swr";
 import { getCabangAction } from "../../user/action";
-import { getKeuanganAction, getKeuanganActionCabang } from "../../keuangan/action";
-import Map from "./Maps";
+import {
+  getKeuanganAction,
+  getKeuanganActionCabang,
+} from "../../keuangan/action";
+import dynamic from "next/dynamic";
+
+const Map = dynamic(() => import("./Maps"), { ssr: false });
 
 interface DashboardProps {
-  roleUser: string
-  cabang:number
+  roleUser: string;
+  cabang: number;
   cabangData: CabangInterface[];
 }
 
-const Dashboard = ({roleUser,cabang, cabangData}: DashboardProps) => {
+const Dashboard = ({ roleUser, cabang, cabangData }: DashboardProps) => {
   const [selectedFilter, setSelectedFilter] = useState<string>("Semua Cabang");
-  const [dateRangeText, setDateRangeText] = useState('')
+  const [cabangText, setCabangText] = useState<string>("Menampilkan Data Semua Cabang");
   const [mounted, setMounted] = useState(false);
 
-  const {data: cabangAll} = useSWR('Cabang', getCabangAction)
+  // Fetch semua cabang
+  const { data: cabangAll } = useSWR("Cabang", getCabangAction);
 
+  // Fetch data keuangan berdasarkan filter
   const { data: dataKeuangan } = useSWR(
-    'Keuangan',
-    () => (roleUser === 'Superadmin' ? getKeuanganAction() : getKeuanganActionCabang(cabang))
+    ["Keuangan", selectedFilter], // Key dinamis untuk SWR
+    () => {
+      if (selectedFilter === "Semua Cabang") {
+        return roleUser === "Superadmin"
+          ? getKeuanganAction() // Semua cabang
+          : getKeuanganActionCabang(cabang); // Cabang tertentu
+      } else {
+        // Filter berdasarkan cabang tertentu
+        const selectedCabang = cabangAll?.find(
+          (item: CabangInterface) => item.nama === selectedFilter
+        );
+        return getKeuanganActionCabang(selectedCabang?.id || 0); // ID cabang
+      }
+    }
   );
-  
 
   useEffect(() => {
     setMounted(true);
@@ -41,19 +59,24 @@ const Dashboard = ({roleUser,cabang, cabangData}: DashboardProps) => {
   }
 
 
-  const handleFilterChange = (filterName: string) => {
-    console.log("Filter yang dipilih:", filterName); // Debug log
+ const handleFilterChange = (filterName: string) => {
     setSelectedFilter(filterName);
+    setCabangText(
+      filterName === "Semua Cabang"
+        ? "Menampilkan Data Semua Cabang"
+        : `Menampilkan Data Cabang ${filterName}`
+    );
   };
 
   console.log("keuanganData di dashboard:", dataKeuangan);
   console.log("cabangAll di dashboard:", cabangAll);
-  
+
   return (
     <PageContainer title="Dashboard" description="this is Dashboard">
       <DashboardHeader
         selectedFilter={selectedFilter}
-        handleFilterChange={handleFilterChange} filters={cabangAll || []}      />
+        handleFilterChange={handleFilterChange}
+        filters={cabangAll || []} cabangText={cabangText}      />
       <Box>
         <Grid container spacing={3}>
           <Grid item xs={12} lg={8}>
@@ -70,9 +93,9 @@ const Dashboard = ({roleUser,cabang, cabangData}: DashboardProps) => {
             </Grid>
           </Grid>
         </Grid>
-      <Box sx={{ width: "100%", marginTop: "20px" }}>
-        <Map cabangData={cabangData} />
-      </Box>
+        <Box sx={{ width: "100%", marginTop: "20px" }}>
+          <Map cabangData={cabangData} />
+        </Box>
       </Box>
     </PageContainer>
   );

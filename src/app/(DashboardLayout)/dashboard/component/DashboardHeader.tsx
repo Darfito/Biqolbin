@@ -2,18 +2,19 @@
 
 import { Grid, Card, Box, Typography } from "@mui/material";
 import GlobalFilterDropdown from "./GlobalFilterDropdown";
-import { useState } from "react";
 
 interface DashboardHeaderProps {
   filters: any[]
   selectedFilter: string;
   handleFilterChange: (filterName: string) => void;
+  cabangText: string;
 }
 
 const DashboardHeader = ({
   filters,
   selectedFilter,
   handleFilterChange,
+  cabangText,
 }: DashboardHeaderProps) => {
  
   return (
@@ -41,8 +42,7 @@ const DashboardHeader = ({
                   fontSize: { xs: "12px", md: "16px" },
                 }}
               >
-                {/* {dateRangeText} */}
-                Menampilkan Data Semua Cabang
+                {cabangText}
               </Typography>
               <GlobalFilterDropdown
                 onSelectedFilter={handleFilterChange} // Fungsi callback
