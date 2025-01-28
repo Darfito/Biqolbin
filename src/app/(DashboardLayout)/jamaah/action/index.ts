@@ -474,3 +474,49 @@ export const getFileUrl = async (jamaahId: string, namaDokumen: string) => {
 
   return { success: true, data };
 };
+
+export const updateFileUrl = async (jamaahId: string, namaDokumen: string, fileUrl: string) => {
+  const supabase = createClient();
+  try {
+    // Update kolom `file` dengan URL baru
+    const { data, error } = await supabase
+    .from("jenis_dokumen")
+    .update({ file: fileUrl, action: "Diterima", lampiran: true }) // Update file URL dan status
+    .eq("jamaah_id", jamaahId)
+    .eq("nama_dokumen", namaDokumen);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+    
+    revalidatePath(`/jamaah/${jamaahId}`);
+    return { success: true, data };
+
+  } catch (error: any) {
+    console.error("Error in updateFileUrl:", error.message);
+    return { success: false, message: error.message, error };
+  }
+
+  }
+
+export const deleteFileUrl = async (jamaahId: string, namaDokumen: string) => {
+  const supabase = createClient();
+  try {
+    // Update kolom `file` menjadi null pada baris yang sesuai
+    const { data, error } = await supabase
+      .from("jenis_dokumen")
+      .update({ file: null, action: "Menunggu", lampiran: false }) // Set kolom `file` menjadi null
+      .eq("jamaah_id", jamaahId)
+      .eq("nama_dokumen", namaDokumen);
+
+    if (error) {
+      throw new Error(`Gagal menghapus data di kolom 'file': ${error.message}`);
+    }
+    revalidatePath(`/jamaah/${jamaahId}`);
+    return { success: true, message: "Kolom 'file' berhasil dikosongkan." };
+  } catch (error: any) {
+    console.error("Error in deleteFileUrl:", error.message);
+    return { success: false, message: error.message, error };
+  }
+};
+

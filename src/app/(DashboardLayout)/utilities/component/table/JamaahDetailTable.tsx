@@ -40,8 +40,11 @@ import { JenisDokumen } from "../../type";
 import FileUploaderSingle from "../uploader/FileUploaderSingle";
 import { createClient } from "@/libs/supabase/client";
 import ActionButton from "./components/ActionButton";
-import { getFileUrl } from "@/app/(DashboardLayout)/jamaah/action";
-
+import {
+  deleteFileUrl,
+  getFileUrl,
+  updateFileUrl,
+} from "@/app/(DashboardLayout)/jamaah/action";
 
 const fuzzyFilter = (
   row: { getValue: (arg0: any) => any },
@@ -83,7 +86,7 @@ const JamaahDetailTable = ({
     try {
       const path = `${jamaahId}/${namaDokumen}`;
       const { data, error } = await supabase.storage
-        .from("Dokumen") // Nama bucketini 
+        .from("Dokumen") // Nama bucketini
         .upload(path, file, {
           cacheControl: "3600",
           upsert: true, // Overwrite file jika sudah ada
@@ -124,55 +127,101 @@ const JamaahDetailTable = ({
 
   const handleFileUpload = async (file: File) => {
     if (!dialogRow) return; // Pastikan ada data baris yang sedang aktif
-  
-    const { jamaah_id: jamaahId, nama_dokumen: namaDokumen } = dialogRow;
-  
-    if (!jamaahId || !namaDokumen) {
+
+    const { jamaah_id: jamaahIdn, nama_dokumen: namaDokumen } = dialogRow;
+
+    if (!jamaahIdn || !namaDokumen) {
       toast.error("Data Jamaah atau nama dokumen tidak valid.");
       return;
     }
-  
+
     // Dapatkan ekstensi file dari nama file asli
     const fileExtension = file.name.split(".").pop();
-  
+
     if (!fileExtension) {
       toast.error("File tidak memiliki ekstensi.");
       return;
     }
-  
+
     // Pastikan ekstensi valid (opsional, untuk membatasi file tertentu)
     const allowedExtensions = ["jpg", "jpeg", "png", "pdf"];
     if (!allowedExtensions.includes(fileExtension.toLowerCase())) {
-      toast.error("Format file tidak didukung. Hanya JPG, PNG, dan PDF yang diizinkan.");
+      toast.error(
+        "Format file tidak didukung. Hanya JPG, PNG, dan PDF yang diizinkan."
+      );
       return;
     }
-  
+
     // Buat nama file dengan ekstensi
     const fileName = `${namaDokumen}.${fileExtension}`;
-    const publicUrl = await uploadFileToSupabase(file, jamaahId.toString(), fileName);
-  
+    let publicUrl = await uploadFileToSupabase(
+      file,
+      jamaahIdn.toString(),
+      fileName
+    );
+
+    // Tambahkan timestamp ke URL
+    if (publicUrl) {
+      publicUrl = `${publicUrl}?t=${new Date().getTime()}`;
+    }
+
+    console.log("URL file:", publicUrl);
     if (publicUrl) {
       // Jika upload berhasil, lakukan update pada tabel jenisDokumen dengan URL file
       try {
-        const { data, error } = await supabase
-          .from("jenis_dokumen")
-          .update({ file: publicUrl, action: "Diterima", lampiran: true }) // Update file URL dan status
-          .eq("jamaah_id", jamaahId)
-          .eq("nama_dokumen", namaDokumen);
+        const result = await updateFileUrl(jamaahIdn.toString(), namaDokumen, publicUrl);
   
-        if (error) {
-          throw new Error(error.message);
+        if (result.success) {
+          // Update state tableData
+          setTableData((prevData) =>
+            prevData.map((row) =>
+              row.jamaah_id === jamaahIdn && row.nama_dokumen === namaDokumen
+                ? { ...row, action: "Diterima", file: publicUrl, lampiran: true }
+                : row
+            )
+          );
+          toast.success("File berhasil diunggah dan data diperbarui!");
+        } else {
+          throw new Error(result.message);
         }
-  
-        toast.success("File berhasil diunggah dan data diperbarui!");
       } catch (error: any) {
         toast.error(`Gagal memperbarui data: ${error.message}`);
         console.error("Error updating jenisDokumen:", error);
       }
     }
-  
+
     handleDialogClose(); // Tutup dialog setelah upload selesai
   };
+
+  const deleteFileFromSupabase = async (jamaahId: string, namaDokumen: string) => {
+    try {
+      const path = `${jamaahId}/${namaDokumen}`;
+      const { error } = await supabase.storage.from("Dokumen").remove([path]);
+  
+      if (error) throw new Error(error.message);
+  
+      const result = await deleteFileUrl(jamaahId, namaDokumen);
+  
+      if (result.success) {
+        // Update state tableData
+        setTableData((prevData) =>
+          prevData.map((row) =>
+            row.jamaah_id?.toString() === jamaahId && row.nama_dokumen === namaDokumen
+              ? { ...row, action: "Menunggu", file: undefined, lampiran: false }
+              : row
+          )
+        );
+        toast.success("File berhasil dihapus!");
+        return true;
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error: any) {
+      toast.error(`Gagal menghapus file: ${error.message}`);
+      return false;
+    }
+  };
+  
   
 
   const getFile = async (jamaahId: string, namaDokumen: string) => {
@@ -197,27 +246,7 @@ const JamaahDetailTable = ({
     }
   };
 
-  const deleteFileFromSupabase = async (
-    jamaahId: string,
-    namaDokumen: string
-  ) => {
-    try {
-      const path = `${jamaahId}/${namaDokumen}`;
-      const { error } = await supabase.storage.from("Dokumen").remove([path]);
 
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      toast.success("File berhasil dihapus!");
-      setFileUrl(null);
-      return true;
-    } catch (error: any) {
-      toast.error(`Gagal menghapus file: ${error.message}`);
-      console.error("Error deleting file:", error);
-      return false;
-    }
-  };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleOpenFileDialog = async (
@@ -246,78 +275,58 @@ const JamaahDetailTable = ({
   const columnHelper = createColumnHelper<JenisDokumen>();
 
   // Definisi kolom tabel
-  const columns = useMemo(
-    () => [
-      columnHelper.accessor("nama_dokumen", {
-        id: "nama_dokumen",
-        cell: (info) => info.getValue(),
-        header: "Jenis Dokumen",
-        enableColumnFilter: false,
-      }),
-      columnHelper.accessor("action", {
-        id: "action",
-        cell: ({ row }) => {
-          const rowData = row.original;
-          console.log("file url di kolom action:", fileUrl);
-          return (
-            <Box sx={{ display: "flex", justifyContent: "start" }}>
-              {/* Tombol Upload */}
-              <IconButton onClick={() => handleDialogOpen(rowData)}>
-                <UploadFile />
-              </IconButton>
-              {/* Tombol Folder */}
-              <IconButton
-                onClick={() => {
-                  if (rowData.jamaah_id && rowData.nama_dokumen) {
-                    handleOpenFileDialog(
-                      rowData.jamaah_id.toString(),
-                      rowData.nama_dokumen
-                    );
-                  } else {
-                    toast.error("Data Jamaah atau dokumen tidak valid.");
-                  }
-                }}
-                sx={{
-                  color: rowData.action === "Diterima" ? "#F18B04" : "#B0B0B0",
-                }}
-              >
-                <Folder />
-              </IconButton>
-
-              {/* Tombol Delete */}
-              {/* <IconButton
-                color="error"
-                onClick={() => {
-                  if (rowData.jamaah_id && rowData.nama_dokumen) {
-                    handleOpenDeleteDialog(rowData);
-                  } else {
-                    toast.error("Data Jamaah atau dokumen tidak valid.");
-                  }
-                }}
-              >
-                <Delete />
-              </IconButton> */}
-
-              <ActionButton
-                rowData={row.original}
-                mode="delete"
-                onDelete={() => {
-                  if (rowData.jamaah_id && rowData.nama_dokumen) {
-                    handleOpenDeleteDialog(rowData);
-                  } else {
-                    toast.error("Data Jamaah atau dokumen tidak valid.");
-                  }
-                }} // Buka dialog konfirmasi
-              />
-            </Box>
-          );
-        },
-        header: "Action",
-        enableColumnFilter: false,
-      }),
-    ],
-    [columnHelper, fileUrl, handleOpenFileDialog]
-  );
+  const columns = useMemo(() => [
+    columnHelper.accessor("nama_dokumen", {
+      id: "nama_dokumen",
+      cell: (info) => info.getValue(),
+      header: "Jenis Dokumen",
+      enableColumnFilter: false,
+    }),
+    columnHelper.accessor("action", {
+      id: "action",
+      cell: ({ row }) => {
+        const rowData = row.original;
+        return (
+          <Box sx={{ display: "flex", justifyContent: "start" }}>
+            <IconButton onClick={() => handleDialogOpen(rowData)}>
+              <UploadFile />
+            </IconButton>
+            <IconButton
+              onClick={() => {
+                if (rowData.jamaah_id && rowData.nama_dokumen) {
+                  handleOpenFileDialog(
+                    rowData.jamaah_id.toString(),
+                    rowData.nama_dokumen
+                  );
+                } else {
+                  toast.error("Data Jamaah atau dokumen tidak valid.");
+                }
+              }}
+              sx={{
+                color: rowData.action === "Diterima" ? "#F18B04" : "#B0B0B0",
+              }}
+            >
+              <Folder />
+            </IconButton>
+            <ActionButton
+              rowData={row.original}
+              mode="delete"
+              onDelete={() => {
+                if (rowData.jamaah_id && rowData.nama_dokumen) {
+                  handleOpenDeleteDialog(rowData);
+                } else {
+                  toast.error("Data Jamaah atau dokumen tidak valid.");
+                }
+              }}
+            />
+          </Box>
+        );
+      },
+      header: "Action",
+      enableColumnFilter: false,
+    }),
+  ], [tableData]);
+  
 
   const table = useReactTable({
     data: filteredData,
@@ -392,34 +401,32 @@ const JamaahDetailTable = ({
         <Dialog open={!!dialogRow} onClose={handleDialogClose}>
           <DialogTitle>Upload File untuk {dialogRow.nama_dokumen}</DialogTitle>
           <DialogContent>
-          <FileUploaderSingle
-            onFileUpload={(file) => {
-            setUploadedFile(file); // Simpan file yang diunggah ke state
-            }}
-          />
+            <FileUploaderSingle
+              onFileUpload={(file) => {
+                setUploadedFile(file); // Simpan file yang diunggah ke state
+              }}
+            />
           </DialogContent>
           <DialogActions>
             <Button onClick={handleDialogClose} color="primary">
               Cancel
             </Button>
             <Button
-            onClick={async () => {
-              if (uploadedFile && dialogRow) {
-                await handleFileUpload(
-                  uploadedFile,
-                ); // Proses upload file
-                setUploadedFile(null); // Reset file setelah upload selesai
-                handleDialogClose(); // Tutup dialog setelah berhasil upload
-              } else {
-                toast.error("Silakan pilih file terlebih dahulu."); // Tampilkan pesan error jika file belum dipilih
-              }
-            }}
-            color="primary"
-            variant="contained"
-            sx={{ color: "white" }}
-          >
-            Simpan
-          </Button>
+              onClick={async () => {
+                if (uploadedFile && dialogRow) {
+                  await handleFileUpload(uploadedFile); // Proses upload file
+                  setUploadedFile(null); // Reset file setelah upload selesai
+                  handleDialogClose(); // Tutup dialog setelah berhasil upload
+                } else {
+                  toast.error("Silakan pilih file terlebih dahulu."); // Tampilkan pesan error jika file belum dipilih
+                }
+              }}
+              color="primary"
+              variant="contained"
+              sx={{ color: "white" }}
+            >
+              Simpan
+            </Button>
           </DialogActions>
         </Dialog>
       )}
@@ -431,8 +438,8 @@ const JamaahDetailTable = ({
         <DialogTitle>Preview File</DialogTitle>
         <DialogContent>
           {fileUrl ? (
-            // Cek ekstensi file
-            fileUrl.endsWith(".pdf") ? (
+            // Cek ekstensi file dengan memisahkan URL dari parameter query
+            fileUrl.split("?")[0].toLowerCase().endsWith(".pdf") ? (
               <iframe
                 src={fileUrl}
                 width="100%"

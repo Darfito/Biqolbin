@@ -62,16 +62,6 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
   }, [dataPaket]);
 
 
-  // useEffect(() => {
-  //   if (id) {
-  //     const fetchData = async () => {
-  //       const data = await getPaketDatabyID(id); // Panggil fungsi yang sudah dipisah
-  //       if (data) setPaketDetail(data);
-  //     };
-  //     fetchData();
-  //   }
-  // }, [id]);
-
   const updateImageToSupabase = async (folderName: string, file: File, id: number) => {
     const supabase = createClient();
   
