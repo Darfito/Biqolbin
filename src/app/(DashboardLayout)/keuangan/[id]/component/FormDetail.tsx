@@ -101,6 +101,7 @@ const initialFormValues: FormType = {
   Jamaah: {
     id: 0,
     nama: "",
+    tanggalLahir:new Date(),
     ayahKandung: "",
     noTelp: "",
     kontakDarurat: [

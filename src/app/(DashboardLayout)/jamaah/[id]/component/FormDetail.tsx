@@ -97,6 +97,7 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
       nama: "",
       ayahKandung: "",
       noTelp: "",
+      tanggalLahir: new Date(),
       kontakDarurat: [
         {
           id: 0,
