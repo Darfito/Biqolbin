@@ -42,7 +42,7 @@ import { createJamaahAction } from "../action";
 interface FormErrors {
   id?: string;
   nama?: string;
-  umur?:string;
+  tanggalLahir?: string;
   ayahKandung?: string;
   noTelp?: string;
   kontakDarurat?: string;
@@ -66,7 +66,7 @@ interface FormErrors {
 // Valibot Schema
 const formSchema = v.object({
   nama: v.pipe(v.string(), v.nonEmpty("Nama harus diisi")),
-  umur: v.number("Umur harus berupa angka dan tidak boleh kosong"),
+  tanggalLahir: v.date(),
   ayahKandung: v.pipe(v.string(), v.nonEmpty("Nama Ayah Kandung harus diisi")),
   noTelp: v.pipe(v.string(), v.nonEmpty("No Telp harus diisi")),
   kontakDarurat: v.array(
@@ -108,7 +108,7 @@ const formSchema = v.object({
 type FormType = {
   id: number;
   nama: string;
-  umur: number;
+  tanggalLahir: Date;
   ayahKandung: string;
   noTelp: string;
   kontakDarurat: KontakDaruratType[];
@@ -139,7 +139,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
   const [formValues, setFormValues] = useState<FormType>({
     id: 0,
     nama: "",
-    umur: 0,
+    tanggalLahir: new Date(),
     ayahKandung: "",
     noTelp: "",
     kontakDarurat: [
@@ -272,7 +272,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
     setFormValues({
       id: 0,
       nama: "",
-      umur: 0,
+      tanggalLahir: new Date(),
       ayahKandung: "",
       noTelp: "",
       kontakDarurat: [
@@ -358,16 +358,15 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                   }
                   sx={{ marginBottom: 2 }}
                 />
-                <CustomTextField
+                  <CustomTextField
                   fullWidth
-                  label="Umur Jamaah"
-                  value={formValues.umur}
-                  onChange={(e: { target: { value: number } }) =>
-                    setFormValues({
-                      ...formValues,
-                      umur: e.target.value,
-                    })
-                  }
+                  disabled
+                  label="Tanggal Lahir"
+                  type="date"
+                  value={formValues.tanggalLahir} // Sudah otomatis terisi dari jenisPaket
+                  InputLabelProps={{
+                    shrink: true, // Memastikan label tetap di atas
+                  }}
                   sx={{ marginBottom: 2 }}
                 />
                 <CustomTextField

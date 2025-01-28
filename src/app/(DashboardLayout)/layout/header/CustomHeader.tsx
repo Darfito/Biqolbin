@@ -1,23 +1,23 @@
 "use client";
 
 import { Grid, Card, Box, Typography } from "@mui/material";
-import GlobalFilterDropdown from "./GlobalFilterDropdown";
 
-interface DashboardHeaderProps {
+
+interface CustomHeaderProps {
+  titleModule:string;
   filters: any[];
   selectedFilter: string;
   handleFilterChange: (filterName: string) => void;
   cabangText: string;
-  roleUser: string;
 }
 
-const DashboardHeader = ({
+const CustomHeader = ({
+  titleModule,
   filters,
   selectedFilter,
   handleFilterChange,
   cabangText,
-  roleUser,
-}: DashboardHeaderProps) => {
+}: CustomHeaderProps) => {
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} sm={12} md={12} lg={12}>
@@ -30,12 +30,11 @@ const DashboardHeader = ({
             }}
           >
             <Typography
-              variant="h4"
-              sx={{ fontWeight: "600", fontSize: { xs: "16px", md: "24px" } }}
+              variant="h3"
+              sx={{ fontWeight: "600", fontSize: { xs: "24px", md: "32px" } }}
             >
-              Dashboard
+              {titleModule}
             </Typography>
-            {roleUser === "Superadmin" && (
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 <Typography
                   variant="subtitle1"
@@ -46,13 +45,12 @@ const DashboardHeader = ({
                 >
                   {cabangText}
                 </Typography>
-                <GlobalFilterDropdown
+                {/* <GlobalFilterDropdown
                   onSelectedFilter={handleFilterChange} // Fungsi callback
                   selectedFilterName={selectedFilter} // Filter saat ini
                   data={filters}
-                />
+                /> */}
               </Box>
-            )}
           </Box>
         </Card>
       </Grid>
@@ -60,4 +58,4 @@ const DashboardHeader = ({
   );
 };
 
-export default DashboardHeader;
+export default CustomHeader;

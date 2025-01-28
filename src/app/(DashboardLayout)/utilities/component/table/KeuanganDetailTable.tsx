@@ -92,7 +92,6 @@ const KeuanganDetailTable = ({
 
   const supabase = createClient();
 
-  const handleDialogOpen = () => setOpenDialog(true);
   const handleDialogClose = () => setOpenDialog(false);
 
   const handleFileUpload = async (

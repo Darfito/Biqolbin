@@ -13,6 +13,7 @@ import {
   PaketInterface,
 } from "../../utilities/type";
 import { IconUser, IconProgress, IconReceipt } from "@tabler/icons-react";
+import CustomHeader from "../../layout/header/CustomHeader";
 
 export type KeuanganProps = {
   paketData: PaketInterface[];
@@ -35,14 +36,20 @@ const Keuangan = ({
 }: KeuanganProps) => {
   return (
     <>
+      <CustomHeader
+        titleModule={"Keuangan"}
+        filters={[]}
+        selectedFilter={""}
+        handleFilterChange={function (filterName: string): void {
+          throw new Error("Function not implemented.");
+        }}
+        cabangText={""}
+      />
       <Box
         sx={{
           width: "100%",
         }}
       >
-        <Typography variant="h2" component="h1" mb={3}>
-          Keuangan
-        </Typography>
       </Box>
       <Grid
         sx={{

@@ -206,6 +206,7 @@ export const createJamaahAction = async (formValues: JamaahInterface) => {
       .from("Jamaah")
       .insert({
         nama: formValues.nama,
+        tanggalLahir: formValues.tanggalLahir,
         ayahKandung: formValues.ayahKandung,
         noTelp: formValues.noTelp,
         email: formValues.email,
@@ -296,6 +297,7 @@ export const updateJamaahAction = async (jamaahData: JamaahInterface) => {
       .update({
         nama: jamaahData.nama,
         ayahKandung: jamaahData.ayahKandung,
+        tanggalLahir: jamaahData.tanggalLahir,
         noTelp: jamaahData.noTelp,
         email: jamaahData.email,
         jenisKelamin: jamaahData.jenisKelamin,

@@ -4,6 +4,10 @@ import {
   Box,
   Button,
   Card,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
   Grid,
   ListItem,
@@ -18,15 +22,16 @@ import {
   IconArrowLeft,
   IconBuilding,
   IconClipboard,
-  IconHotelService,
   IconPlane,
 } from "@tabler/icons-react";
 import { Fragment, useEffect, useState } from "react";
-import FormCMS, { formSchema } from "../../component/FormCMS";
-import * as v from "valibot";
+import FormCMS from "../../component/FormCMS";
 import { toast } from "react-toastify";
 import { getPaketDatabyID } from "../../action";
-import { PaketInterface } from "@/app/(DashboardLayout)/utilities/type";
+import { JenisPaket, JenisPenerbangan, Maskapai, PaketInterface } from "@/app/(DashboardLayout)/utilities/type";
+import FileUploaderSingle from "@/app/(DashboardLayout)/utilities/component/uploader/FileUploaderSingle";
+import { createClient } from "@/libs/supabase/client";
+import useSWR from "swr";
 
 interface CMSDetailProps {
   id: string;
@@ -36,23 +41,151 @@ interface CMSDetailProps {
 const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
   const router = useRouter();
   const [paketDetail, setPaketDetail] = useState<PaketInterface>();
+  const [openDialog, setOpenDialog] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null); // State untuk menyimpan file yang diunggah
 
   console.log("id di detail:", id);
 
+  const handleDialogClose = () => setOpenDialog(false);
+  const handleDialogOpen = () => setOpenDialog(true);
+
+
+  const { data: dataPaket } = useSWR(
+    id ? ["Paket", id] : null, // Key dinamis
+    () => getPaketDatabyID(id) // Fetcher yang dieksekusi hanya jika `id` tersedia
+  );
+
   useEffect(() => {
-    if (id) {
-      const fetchData = async () => {
-        const data = await getPaketDatabyID(id); // Panggil fungsi yang sudah dipisah
-        if (data) setPaketDetail(data);
-      };
-      fetchData();
+    if (dataPaket) {
+      setPaketDetail(dataPaket);
     }
-  }, [id]);
+  }, [dataPaket]);
+
+
+  // useEffect(() => {
+  //   if (id) {
+  //     const fetchData = async () => {
+  //       const data = await getPaketDatabyID(id); // Panggil fungsi yang sudah dipisah
+  //       if (data) setPaketDetail(data);
+  //     };
+  //     fetchData();
+  //   }
+  // }, [id]);
+
+  const updateImageToSupabase = async (folderName: string, file: File, id: number) => {
+    const supabase = createClient();
+  
+    try {
+      // Ambil ekstensi file
+      const fileExtension = file.name.split(".").pop(); // Ekstensi file
+      const newFileName = `${folderName}.${fileExtension}`; // Nama file baru dengan folderName + ekstensi
+      const filePath = `${folderName}/${newFileName}`; // Path lengkap file dalam bucket
+  
+      // Hapus file lama (opsional)
+      const { error: removeError } = await supabase.storage.from("Paket").remove([filePath]);
+      if (removeError) {
+        console.warn("Tidak bisa menghapus gambar lama:", removeError.message);
+      }
+  
+      // Upload file baru
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("Paket")
+        .upload(filePath, file, { cacheControl: "3600", upsert: true });
+  
+      if (uploadError) {
+        throw new Error(`Gagal mengunggah gambar: ${uploadError.message}`);
+      }
+  
+      // Tambahkan query parameter unik untuk menghindari masalah cache
+      const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Paket/${uploadData.path}?t=${new Date().getTime()}`;
+  
+      // Perbarui URL gambar di tabel database
+      const { data: urlData, error: urlError } = await supabase
+        .from("Paket")
+        .update({ gambar_url: publicUrl })
+        .eq("id", id)
+        .select()
+        .single();
+  
+      if (urlError) {
+        throw new Error(`Gagal memperbarui URL gambar di database: ${urlError.message}`);
+      }
+  
+      toast.success("Gambar berhasil diperbarui!");
+      return { success: true, data: urlData };
+    } catch (error) {
+      console.error("Error updating Gambar:", error);
+      toast.error("Gagal memperbarui gambar!");
+      return { success: false, error: (error as Error).message };
+    }
+  };
+  
+
 
   console.log("paketDetail di detail:", paketDetail);
   const handleBackClick = () => {
     router.push("/cms"); // Navigate to /keuangan page
   };
+
+  const handleFileUpload = async (file: File, id: number) => {
+    try {
+      console.log("formValues.nama:", paketDetail?.nama);
+  
+      const namaPaket = paketDetail?.nama;
+      if (typeof namaPaket !== "string") {
+        throw new Error("Nama paket harus berupa string");
+      }
+  
+      const folderName = namaPaket;
+      console.log("Folder Name:", folderName);
+  
+      // Upload file baru dan hapus file lama
+      const result = await updateImageToSupabase(folderName, file, id);
+  
+      if (result.success) {
+        // Perbarui gambar_url di paketDetail secara langsung
+        setPaketDetail((prevDetail) => ({
+            ...prevDetail,
+  nama: prevDetail?.nama ?? "",
+  jenis: prevDetail?.jenis ?? JenisPaket.REGULAR,
+  maskapai: prevDetail?.maskapai ?? Maskapai.GARUDA_INDONESIA,
+  noPenerbangan: prevDetail?.noPenerbangan ?? "",
+  customMaskapai: prevDetail?.customMaskapai ?? "",
+  jenisPenerbangan: prevDetail?.jenisPenerbangan ?? JenisPenerbangan.DIRECT,
+  keretaCepat: prevDetail?.keretaCepat ?? false,
+  hargaDouble: prevDetail?.hargaDouble ?? 0,
+  hargaTriple: prevDetail?.hargaTriple ?? 0,
+  hargaQuad: prevDetail?.hargaQuad ?? 0,
+  tglKeberangkatan: prevDetail?.tglKeberangkatan ?? "",
+  tglKepulangan: prevDetail?.tglKepulangan ?? "",
+  namaMuthawif: prevDetail?.namaMuthawif ?? "",
+  noTelpMuthawif: prevDetail?.noTelpMuthawif ?? "",
+  selectedFile: prevDetail?.selectedFile ?? null,
+  Hotel: prevDetail?.Hotel ?? [
+    {
+      id: 0,
+      namaHotel: "",
+      alamatHotel: "",
+      ratingHotel: 0,
+      tanggalCheckIn: "",
+      tanggalCheckOut: "",
+    },
+  ],
+  fasilitas: prevDetail?.fasilitas ?? [] as string[],
+  publish: prevDetail?.publish ?? false,
+  gambar_url: prevDetail?.gambar_url ?? "",
+        }));
+      }
+  
+      console.log("File uploaded successfully:", result);
+    } catch (error) {
+      console.error("Upload failed:", error);
+      toast.error("Gagal mengunggah gambar!");
+    }
+  };
+  
+  
+  
 
   return (
     <>
@@ -89,16 +222,19 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
               </Typography>
               <Divider sx={{ my: 2 }} />
               <Box sx={{ display: "flex", justifyContent: "center" }}>
-                {paketDetail.gambar_url && (
-                  <Box
-                    sx={{
-                      width: "100%",
-                      display: "flex",
-                      justifyContent: "center",
-                    }}
-                  >
+                <Box
+                  sx={{
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "start",
+                    alignItems: "center",
+                    flexDirection: "column",
+                  }}
+                >
+                  {paketDetail.gambar_url ? (
                     <Box
                       component="img"
+                      key={paketDetail.gambar_url}
                       src={paketDetail.gambar_url}
                       alt="Gambar Paket"
                       sx={{
@@ -108,8 +244,24 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
                         borderRadius: 2,
                       }}
                     />
+                  ) : (
+                    <Box
+                      sx={{
+                        mt: 3,
+                        width: "400px",
+                        height: "600px",
+                        borderRadius: 2,
+                        backgroundColor: "#ccc",
+                      }}
+                    />
+                  )}
+
+                  <Box>
+                    <Button onClick={handleDialogOpen} variant="contained" sx={{ color: "#fff", marginTop: 2 }}>
+                      Unggah Gambar
+                    </Button>
                   </Box>
-                )}
+                </Box>
                 <Box
                   sx={{
                     width: "100%",
@@ -153,7 +305,6 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
                               },
                               "& .MuiListItemText-secondary": {
                                 fontSize: "1rem",
-
                                 color: "#000",
                               },
                             }}
@@ -493,6 +644,45 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
             </Typography>
           )}
         </Card>
+        <Dialog open={openDialog} onClose={handleDialogClose}>
+        <DialogTitle>Upload File</DialogTitle>
+        <DialogContent>
+          <FileUploaderSingle
+            onFileUpload={(file) => {
+            setUploadedFile(file); // Simpan file yang diunggah ke state
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={async () => {
+              if (uploadedFile) {
+                // Ensure `id` is a number
+                const numericId = typeof id === "string" ? parseInt(id, 10) : id;
+                await handleFileUpload(uploadedFile, numericId);
+              } else {
+                console.error("No file uploaded.");
+                // Optionally, show an error message to the user
+              }
+            
+              // Reset file after upload
+              setUploadedFile(null);
+            
+              // Close the dialog after the upload is complete
+              handleDialogClose();
+            }}
+            
+            color="primary"
+            variant="contained"
+            sx={{ color: "white" }}
+          >
+            Simpan
+          </Button>
+        </DialogActions>
+      </Dialog>
       </PageContainer>
     </>
   );

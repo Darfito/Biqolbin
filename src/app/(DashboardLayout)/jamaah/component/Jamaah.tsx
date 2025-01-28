@@ -9,6 +9,7 @@ import FormJamaah from "./FormJamaah";
 import { CardStatsProps, JamaahInterface, PaketInterface } from "../../utilities/type";
 import { IconLuggage, IconPlaneArrival, IconPlaneInflight, IconUser } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
+import CustomHeader from "../../layout/header/CustomHeader";
 
 
 export type JamaahProps = {
@@ -40,14 +41,20 @@ const Jamaah = ({ paketData, jamaahData, scoreCardData  }: JamaahProps) => {
 
   return (
     <>
+    <CustomHeader
+        titleModule={"Jamaah"}
+        filters={[]}
+        selectedFilter={""}
+        handleFilterChange={function (filterName: string): void {
+          throw new Error("Function not implemented.");
+        }}
+        cabangText={""}
+      />
       <Box
         sx={{
           width: "100%",
         }}
       >
-        <Typography variant="h2" mb={3}>
-          Jamaah
-        </Typography>
       </Box>
       <Grid
         sx={{

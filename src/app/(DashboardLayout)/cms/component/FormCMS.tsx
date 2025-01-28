@@ -28,6 +28,7 @@ import {
   Radio,
   RadioGroup,
   Divider,
+  CircularProgress,
 } from "@mui/material";
 import { Delete } from "@mui/icons-material";
 import FileUploaderSingle from "../../utilities/component/uploader/FileUploaderSingle";
@@ -72,9 +73,18 @@ export const formSchema = v.object({
   maskapai: v.pipe(v.string(), v.nonEmpty("Maskapai harus diisi")),
   jenisPenerbangan: v.pipe(v.string(), v.nonEmpty("Pilih Jenis Penerbangan")),
   keretaCepat: v.boolean(),
-  hargaDouble: v.pipe(v.number(), v.minValue(1, "Harga Kamar Double harus lebih dari 0")),
-  hargaTriple: v.pipe(v.number(), v.minValue(1, "Harga Kamar Triple harus lebih dari 0")),
-  hargaQuad: v.pipe(v.number(), v.minValue(1, "Harga Kamar Quad harus lebih dari 0")),
+  hargaDouble: v.pipe(
+    v.number(),
+    v.minValue(1, "Harga Kamar Double harus lebih dari 0")
+  ),
+  hargaTriple: v.pipe(
+    v.number(),
+    v.minValue(1, "Harga Kamar Triple harus lebih dari 0")
+  ),
+  hargaQuad: v.pipe(
+    v.number(),
+    v.minValue(1, "Harga Kamar Quad harus lebih dari 0")
+  ),
   tglKeberangkatan: v.pipe(
     v.string(),
     v.nonEmpty("Tanggal Keberangkatan harus diisi")
@@ -112,6 +122,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
   const [isCustomMaskapai, setIsCustomMaskapai] = useState(false); // Untuk melacak apakah pengguna memilih "Lainnya"
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [newFasilitas, setNewFasilitas] = useState<string>("");
+  // const [isUploading, setIsUploading] = useState(false);
   const [formValues, setFormValues] = useState<PaketInterface>(
     initialValues || {
       nama: "",
@@ -128,6 +139,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
       tglKepulangan: "",
       namaMuthawif: "",
       noTelpMuthawif: "",
+      selectedFile: null,
       Hotel: [
         {
           id: 0,
@@ -144,16 +156,18 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
     }
   );
 
-
   useEffect(() => {
     if (initialValues) {
       setFormValues(initialValues);
     }
   }, [initialValues]);
 
-  const handleChangeHarga = (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
+  const handleChangeHarga = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: string
+  ) => {
     const value = e.target.value.replace(/[^\d]/g, ""); // Menghapus non-numeric characters (selain angka)
-  
+
     setFormValues((prevValues) => ({
       ...prevValues,
       [type]: value === "" ? 0 : Number(value),
@@ -180,44 +194,54 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
   };
 
   const uploadImageToSupabase = async (folderName: string, file: File) => {
-    if (typeof folderName !== "string") {
-      throw new Error(`Invalid folderName: ${folderName}`);
+    const supabase = createClient();
+
+    // Ambil ekstensi file asli
+    const fileExtension = file.name.split(".").pop(); // Ambil bagian setelah titik terakhir
+    const newFileName = `${folderName}.${fileExtension}`; // Nama file baru dengan folderName + ekstensi
+    const filePath = `${folderName}/${newFileName}`; // Path lengkap file dalam bucket
+
+    // Hapus file lama (opsional)
+    const { error: removeError } = await supabase.storage
+      .from("Paket")
+      .remove([filePath]);
+    if (removeError) {
+      console.warn("Tidak bisa menghapus gambar lama:", removeError.message);
     }
 
-    const supabase = createClient();
+    // Upload gambar baru
     const { data, error } = await supabase.storage
-      .from("Paket") // Ganti dengan nama bucket Anda
-      .upload(`${folderName}/${file.name}`, file);
+      .from("Paket")
+      .upload(filePath, file, { cacheControl: "3600", upsert: true }); // Opsi `upsert` memastikan file di-overwrite
 
     if (error) {
       throw new Error(error.message);
     }
+
     return data;
   };
 
   const handleUpload = async (file: File) => {
     try {
-      // Log untuk memeriksa nilai formValues.nama
       console.log("formValues.nama:", formValues.nama);
 
-      // Pastikan formValues.nama adalah string
-      const namaPaket = await formValues.nama; // Jika formValues.nama adalah Promise, tunggu hasilnya
-
-      // Cek apakah nilai sudah valid
+      const namaPaket = formValues.nama;
       if (typeof namaPaket !== "string") {
         throw new Error("Nama paket harus berupa string");
       }
 
-      // Sanitize folder name
-      // const folderName = sanitizeFolderName(namaPaket);
       const folderName = namaPaket;
       console.log("Folder Name:", folderName);
 
-      // Upload file
+      // Upload file baru dan hapus file lama
       const result = await uploadImageToSupabase(folderName, file);
 
       // Buat URL publik
-      const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Paket/${result.path}`;
+      const publicUrl = `${
+        process.env.NEXT_PUBLIC_SUPABASE_URL
+      }/storage/v1/object/public/Paket/${
+        result.path
+      }?t=${new Date().getTime()}`;
 
       // Simpan URL ke state
       setFormValues((prevValues) => ({
@@ -226,6 +250,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
       }));
 
       console.log("File uploaded successfully:", result);
+
     } catch (error) {
       console.error("Upload failed:", error);
       toast.error("Gagal mengunggah gambar!");
@@ -240,7 +265,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
     if (mode === "edit" && initialValues?.id == null) {
       throw new Error("ID is required for edit mode");
     }
-  
+
     return {
       ...(mode === "edit" && initialValues?.id ? { id: initialValues.id } : {}),
       nama: values.nama,
@@ -262,23 +287,27 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
       Hotel: Array.isArray(values.Hotel) ? values.Hotel : [], // Tambahkan properti hotel
     };
   };
-  
-  
-  
-const formatRupiah = (angka: number): string => {
-  return angka.toLocaleString("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  });
-};
+
+  const formatRupiah = (angka: number): string => {
+    return angka.toLocaleString("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    });
+  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-  
+    // setIsLoading(true); // Mulai loading
+
+    // Jika ada file yang diunggah, lakukan proses upload
+    if (formValues.selectedFile) {
+      await handleUpload(formValues.selectedFile);
+    }
+
     // Validate form data
     const result = v.safeParse(formSchema, formValues);
-  
+
     if (!result.success) {
       const errorMap: Record<string, string> = {};
       result.issues.forEach((issue) => {
@@ -287,21 +316,21 @@ const formatRupiah = (angka: number): string => {
           errorMap[path] = issue.message;
         }
       });
-  
+
       setFormErrors(errorMap);
       console.error("Validation errors:", errorMap);
       return;
     }
-  
+
     if (!formValues.gambar_url) {
       toast.error("Harap unggah gambar sebelum mengirimkan form!");
       return;
     }
-  
+
     // Serialize form data before sending to server action
     const serializedData = serializeFormData(formValues, mode, initialValues);
     console.log("Serialized Data:", serializedData);
-  
+
     try {
       if (mode === "create") {
         const { success, data, error } = await createCmsAction(serializedData);
@@ -316,12 +345,15 @@ const formatRupiah = (angka: number): string => {
         const { success, data, error } = await updateCmsAction(serializedData);
         if (success) {
           toast.success("Form berhasil di Update!");
+          // setIsLoading(false); // Selesai loading
           handleClose();
         } else {
+          // setIsLoading(false); // Selesai loading
           toast.error(`Error: ${error}`);
         }
       }
     } catch (error) {
+      // setIsLoading(false); // Selesai loading
       console.error("Action error:", error);
       toast.error("Terjadi kesalahan saat memproses form");
     }
@@ -347,6 +379,7 @@ const formatRupiah = (angka: number): string => {
         tglKepulangan: "",
         namaMuthawif: "",
         noTelpMuthawif: "",
+        selectedFile: null, // Reset file
         Hotel: [
           {
             id: 0,
@@ -381,7 +414,7 @@ const formatRupiah = (angka: number): string => {
   };
 
   const handleAddHotel = () => {
-    console.log("add hotel tertekan")
+    console.log("add hotel tertekan");
     setFormValues((prev) => ({
       ...prev,
       Hotel: [
@@ -569,7 +602,7 @@ const formatRupiah = (angka: number): string => {
               label="Menggunakan Kereta Cepat?"
             />
 
-                        <CustomTextField
+            <CustomTextField
               fullWidth
               label="Tanggal Keberangkatan"
               name="tglKeberangkatan"
@@ -643,7 +676,9 @@ const formatRupiah = (angka: number): string => {
               value={formatRupiah(formValues.hargaDouble)} // Format harga
               error={!!formErrors.hargaDouble}
               helperText={formErrors.hargaDouble}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeHarga(e, "hargaDouble")}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                handleChangeHarga(e, "hargaDouble")
+              }
             />
             <CustomTextField
               fullWidth
@@ -652,7 +687,9 @@ const formatRupiah = (angka: number): string => {
               value={formatRupiah(formValues.hargaTriple)} // Format harga
               error={!!formErrors.hargaTriple}
               helperText={formErrors.hargaTriple}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeHarga(e, "hargaTriple")}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                handleChangeHarga(e, "hargaTriple")
+              }
             />
             <CustomTextField
               fullWidth
@@ -661,7 +698,9 @@ const formatRupiah = (angka: number): string => {
               value={formatRupiah(formValues.hargaQuad)} // Format harga
               error={!!formErrors.hargaQuad}
               helperText={formErrors.hargaQuad}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeHarga(e, "hargaQuad")} // Menangani perubahan input
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                handleChangeHarga(e, "hargaQuad")
+              } // Menangani perubahan input
             />
             <Divider />
             {/* Fasilitas */}
@@ -705,16 +744,21 @@ const formatRupiah = (angka: number): string => {
             </Box>
 
             {/* Gambar */}
-            <Box sx={{ width: "100%" }}>
-              <Typography variant="subtitle1">
-                Upload Gambar Poster Penawaran
-              </Typography>
-              <FileUploaderSingle
-                onFileUpload={async (file) => {
-                  await handleUpload(file); // Memanggil handleUpload yang sudah Anda buat
-                }}
-              />
-            </Box>
+            {mode === "create" && (
+              <Box sx={{ width: "100%" }}>
+                <Typography variant="subtitle1">
+                  Upload Gambar Poster Penawaran
+                </Typography>
+                <FileUploaderSingle
+                  onFileUpload={(file) => {
+                    setFormValues((prevValues) => ({
+                      ...prevValues,
+                      selectedFile: file, // Simpan file ke state
+                    }));
+                  }}
+                />
+              </Box>
+            )}
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose} variant="contained" color="error">

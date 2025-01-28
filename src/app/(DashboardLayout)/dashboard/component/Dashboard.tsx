@@ -26,7 +26,9 @@ interface DashboardProps {
 
 const Dashboard = ({ roleUser, cabang, cabangData }: DashboardProps) => {
   const [selectedFilter, setSelectedFilter] = useState<string>("Semua Cabang");
-  const [cabangText, setCabangText] = useState<string>("Menampilkan Data Semua Cabang");
+  const [cabangText, setCabangText] = useState<string>(
+    "Menampilkan Data Semua Cabang"
+  );
   const [mounted, setMounted] = useState(false);
 
   // Fetch semua cabang
@@ -58,8 +60,7 @@ const Dashboard = ({ roleUser, cabang, cabangData }: DashboardProps) => {
     return null; // Jangan render apa-apa sampai komponen dimuat di klien
   }
 
-
- const handleFilterChange = (filterName: string) => {
+  const handleFilterChange = (filterName: string) => {
     setSelectedFilter(filterName);
     setCabangText(
       filterName === "Semua Cabang"
@@ -76,7 +77,10 @@ const Dashboard = ({ roleUser, cabang, cabangData }: DashboardProps) => {
       <DashboardHeader
         selectedFilter={selectedFilter}
         handleFilterChange={handleFilterChange}
-        filters={cabangAll || []} cabangText={cabangText}      />
+        filters={cabangAll || []}
+        cabangText={cabangText}
+        roleUser={roleUser}
+      />
       <Box>
         <Grid container spacing={3}>
           <Grid item xs={12} lg={8}>

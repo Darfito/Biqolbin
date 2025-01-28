@@ -84,6 +84,7 @@ export interface PaketInterface {
   hargaQuad: number; // Harga untuk kamar quad
   gambar_url?: string;
   Hotel?: HotelType[];
+  selectedFile?: File | null;
 }
 
 // ! TYPE HOTEL
@@ -119,6 +120,7 @@ export enum JenisPenerbangan {
 export interface JamaahInterface {
   id?: number;
   nama: string;
+  tanggalLahir: Date;
   ayahKandung: string;
   noTelp: string;
   kontakDarurat?: KontakDaruratType[];
