@@ -48,26 +48,7 @@ const Login2 = () => {
                 <Logo />
               </Box>
               <AuthLogin/>
-              {/* <Box sx={{ display: "flex", justifyContent: "center", gap: 1, marginTop: 3 }}>
-              <Typography
-                    color="textSecondary"
-                    variant="h6"
-                    fontWeight="400"
-                  >
-                    Already have an Account?
-                  </Typography>
-                  <Typography
-                    component={Link}
-                    href="/authentication/register"
-                    fontWeight="500"
-                    sx={{
-                      textDecoration: "none",
-                      color: "primary.main",
-                    }}
-                  >
-                    Sign Up
-                  </Typography>
-              </Box> */}
+              
             </Card>
           </Grid>
         </Grid>

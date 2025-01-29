@@ -25,8 +25,6 @@ import {
   StatusType,
 } from "@/app/(DashboardLayout)/utilities/type";
 import {
-  getCicilanAction,
-  getKeuanganByIdAction,
   updateStatusLunas,
 } from "../../action";
 import KeuanganDetailTable from "@/app/(DashboardLayout)/utilities/component/table/KeuanganDetailTable";
@@ -58,7 +56,15 @@ const KeuanganDetail = ({
   // const [dataCicilan, setDataCicilan] = useState<CicilanType[]>([]);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openConfirmDialog, setOpenConfirmDialog] = useState<boolean>(false); // State untuk dialog konfirmasi
-  // const [statusLunasDialog, setStatusLunasDialog] = useState(false); // Untuk menandakan status lunas
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null; // Jangan render apa-apa sampai komponen dimuat di klien
+  }
   // Ambil data berdasarkan ID
 
   // Toggle the isEditing state
@@ -90,7 +96,7 @@ const KeuanganDetail = ({
 
   // Function to update status to Lunas
   const handleConfirmLunas = async () => {
-    if (currentData && currentData.id) {
+    if (currentData?.id) {
       // Memastikan currentData dan id tidak undefined
       const response = await updateStatusLunas(currentData.id); // Function to update status to Lunas
       if (response.success) {
@@ -114,7 +120,7 @@ const KeuanganDetail = ({
 
   return (
     <>
-      <Typography variant="h2" component="h1">
+      <Typography variant="h2">
         Detail
       </Typography>
       <Breadcrumb links={breadcrumbLinks} />
@@ -146,7 +152,7 @@ const KeuanganDetail = ({
             >
               {isEditing ? "Batal Menyunting" : "Sunting"}
             </Button>
-            {currentData?.status === "Lunas" ? (
+              {currentData?.status === "Lunas" ? ( 
               <Button
                 variant="contained"
                 disabled
@@ -158,7 +164,7 @@ const KeuanganDetail = ({
               >
                 Sudah Lunas
               </Button>
-            ) : (
+            ) : ( 
               <Button
                 variant="contained"
                 sx={{
@@ -166,11 +172,12 @@ const KeuanganDetail = ({
                   color: "white",
                   marginRight: "1rem",
                 }}
+                disabled={
+                  (currentData?.sisaTagihan ?? 0) > 0 // Jika sisa tagihan lebih dari 0, tombol nonaktif
+                }
                 onClick={handleLunasClick}
               >
-                {currentData?.status === "Sedang Menabung"
-                  ? "Tandai Lunas"
-                  : "Tandai Lunas"}
+                Tandai Lunas
               </Button>
             )}
             <Button variant="contained" disabled sx={{ color: "white" }}>
@@ -193,6 +200,7 @@ const KeuanganDetail = ({
             data={dataCicilan}
             cicilanKe={nextCicilanKe}
             keuanganId={id}
+            metode={currentData?.metodePembayaran}
           />
         </Box>
       </PageContainer>
@@ -218,7 +226,7 @@ const KeuanganDetail = ({
             onClick={handleCloseDialog}
             sx={{ color: "white" }}
             variant="contained"
-          >
+            >
             Tidak
           </Button>
           <Button
@@ -226,7 +234,7 @@ const KeuanganDetail = ({
             sx={{ color: "white" }}
             variant="contained"
             autoFocus
-          >
+            >
             Ya, Batalkan
           </Button>
         </DialogActions>
@@ -238,7 +246,7 @@ const KeuanganDetail = ({
         onClose={() => setOpenConfirmDialog(false)}
         aria-labelledby="cancel-edit-dialog-title"
         aria-describedby="cancel-edit-dialog-description"
-      >
+        >
         <DialogTitle id="cancel-edit-dialog-title">
           Konfirmasi Pembayaran Lunas
         </DialogTitle>
@@ -270,3 +278,7 @@ const KeuanganDetail = ({
 };
 
 export default KeuanganDetail;
+
+{/* {currentData?.status === "Sedang Menabung"
+  ? "Tandai Lunas"
+  : "Tandai Lunas"} */}

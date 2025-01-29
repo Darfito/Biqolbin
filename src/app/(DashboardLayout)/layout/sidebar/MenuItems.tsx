@@ -1,6 +1,8 @@
 import {
   IconBook,
   IconLayoutDashboard,
+  IconMapPin2,
+  IconMarkdown,
   IconMoneybag,
   IconPencil,
   IconUser,
@@ -20,16 +22,16 @@ const Menuitems = [
   },
   {
     id: uniqueId(),
-    title: "Keuangan",
-    icon: IconMoneybag,
-    href: "/keuangan",
+    title: "Jamaah",
+    icon: IconBook,
+    href: "/jamaah",
     role: ["Admin", "Superadmin", "Divisi General Affair", "Finance & Accounting"]
   },
   {
     id: uniqueId(),
-    title: "Jamaah",
-    icon: IconBook,
-    href: "/jamaah",
+    title: "Keuangan",
+    icon: IconMoneybag,
+    href: "/keuangan",
     role: ["Admin", "Superadmin", "Divisi General Affair", "Finance & Accounting"]
   },
   {
@@ -44,6 +46,13 @@ const Menuitems = [
     title: "User",
     icon: IconUser,
     href: "/user",
+    role: ["Admin", "Superadmin"]
+  },
+  {
+    id: uniqueId(),
+    title: "Cabang",
+    icon: IconMapPin2,
+    href: "/cabang",
     role: ["Admin", "Superadmin"]
   },
 ];

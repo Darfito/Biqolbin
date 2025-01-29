@@ -27,6 +27,8 @@ export default async function JamaahPage() {
       roleUser = userDetails?.[0].role || "";
     }
 
+    console.log("cabangUser", cabangUser);
+
     // Daftar role yang diizinkan
   const allowedRoles = ["Admin", "Superadmin", "Divisi General Affair", "Finance & Accounting"]
 
@@ -44,6 +46,7 @@ export default async function JamaahPage() {
       jamaahData = (await getJamaahAction()) ?? [];
     } else {
       jamaahData = (await getJamaahCabangAction(cabangUser)) ?? [];
+      console.log("jamaahData per cabang", jamaahData);
     }
   } catch (error) {
     console.error("Error fetching data:", error);
@@ -53,40 +56,10 @@ export default async function JamaahPage() {
   const stablePaketData = paketData || [];
   const stableJamaahData = jamaahData || [];
 
-  // Hitung statistik
-  const totalJamaah = jamaahData.length;
-  const belumBerangkat = jamaahData.filter(
-    (jamaah) => jamaah.status === "Berangkat"
-  ).length;
-  const selesai = jamaahData.filter(
-    (jamaah) => jamaah.status === "Selesai"
-  ).length;
-
-  const dynamicScoreCardJamaah = [
-    {
-      title: "Total Jamaah",
-      total: totalJamaah,
-      color: "#3E74FF",
-      icon: "IconUser", // Kirim nama ikon sebagai string
-    },
-    {
-      title: "Belum Berangkat",
-      total: belumBerangkat,
-      color: "#F54F63",
-      icon: "IconLuggage", // Kirim nama ikon sebagai string
-    },
-    {
-      title: "Selesai",
-      total: selesai,
-      color: "#F5BD4F",
-      icon: "IconPlaneArrival", // Kirim nama ikon sebagai string
-    },
-  ];
-
 
   return (
     <>
-      <Jamaah paketData={stablePaketData} jamaahData={stableJamaahData}  scoreCardData={dynamicScoreCardJamaah}  />
+      <Jamaah paketData={stablePaketData} jamaahData={stableJamaahData} cabang_id={cabangUser} />
     </>
   );
 }

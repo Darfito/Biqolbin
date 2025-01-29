@@ -50,6 +50,7 @@ export const KontakDaruratSection = ({
             fullWidth
             label={`Nama Kontak Darurat ${index + 1}`}
             value={contact.nama}
+            required
             disabled={!isEditing}
             onChange={(e: { target: { value: string } }) =>
               handleContactChange(index, "nama", e.target.value)
@@ -60,6 +61,7 @@ export const KontakDaruratSection = ({
             fullWidth
             label={`No Telepon Kontak Darurat ${index + 1}`}
             value={contact.no_telp}
+            required
             disabled={!isEditing}
             onChange={(e: { target: { value: string } }) =>
               handleContactChange(index, "no_telp", e.target.value)
@@ -71,6 +73,7 @@ export const KontakDaruratSection = ({
             fullWidth
             label={`Hubungan Kontak Darurat ${index + 1}`}
             value={contact.hubungan}
+            required
             disabled={!isEditing}
             onChange={(e: { target: { value: string } }) =>
               handleContactChange(index, "hubungan", e.target.value)

@@ -4,8 +4,6 @@
 import { useState } from "react";
 
 import TablePagination from "@mui/material/TablePagination";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 
 // Third-party Imports
 import classnames from "classnames";
@@ -39,11 +37,17 @@ import styles from "../../../../styles/table.module.css";
 import TablePaginationComponent from "../pagination/TablePaginationComponent";
 import CustomTextField from "../textField/TextField";
 import { ChevronRight } from "@mui/icons-material";
-import { Box, Chip, Link } from "@mui/material";
-import { JamaahInterface } from "../../type";
+import {
+  Box,
+} from "@mui/material";
+
 import ActionButton from "./components/ActionButton";
-import { deleteJamaahAction } from "@/app/(DashboardLayout)/jamaah/action";
+import { deleteUserAction } from "@/app/(DashboardLayout)/user/action";
 import ConfirmDialog from "../dialog/ConfirmDialog";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Import toast styles
+import { CabangInterface } from "../../type";
+import { deleteCabangAction } from "@/app/(DashboardLayout)/cabang/action";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -129,18 +133,19 @@ const Filter = ({
 
 // Mendeklarasikan interface dengan tipe generik T
 interface TableProps<T> {
-  data: T[]; // Data dinamis sesuai tipe T
+  data: T[];
 }
 
-const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
+const CabangTable = ({ data }: TableProps<CabangInterface>) => {
   // States
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [open, setOpen] = useState(false); // State untuk dialog
-  const [selectedRow, setSelectedRow] = useState<JamaahInterface | null>(null); // Data yang dipilih
+  const [selectedRow, setSelectedRow] = useState<CabangInterface | null>(null); // Data yang dipilih
+  const [tableData, setTableData] = useState<CabangInterface[]>(data); // Local state to manage table data
 
+  const columnHelper = createColumnHelper<CabangInterface>();
 
-  console.log("Data di JamaahTable:", data);
   const handleCloseDialog = () => {
     setOpen(false); // Tutup dialog
     setSelectedRow(null); // Reset data
@@ -148,7 +153,7 @@ const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
 
   const handleDelete = async () => {
     if (selectedRow) {
-      const result = await deleteJamaahAction(selectedRow.id ?? 0); // Eksekusi delete
+      const result = await deleteCabangAction(selectedRow?.id!); // Eksekusi delete
       if (result.success) {
         toast.success(`User with ID ${selectedRow.id} has been deleted.`);
       } else {
@@ -158,121 +163,46 @@ const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
     }
   };
 
-  const columnHelper = createColumnHelper<JamaahInterface>();
-
   const columns = [
-    // Kolom Nama
     columnHelper.accessor("nama", {
       id: "nama",
       cell: (info) => info.getValue(),
-      header: "NAMA",
+      header: "Nama",
+      enableColumnFilter: false,
     }),
-
-    // Kolom Paket
-    columnHelper.accessor("jenisPaket.nama", {
-      id: "jenisPaket",
+    columnHelper.accessor("alamatCabang", {
+      id: "alamatCabang",
       cell: (info) => info.getValue(),
-      header: "PAKET",
+      header: "Alamat Cabang",
+      enableColumnFilter: false,
     }),
-
-    // Kolom No Telp
-
-    columnHelper.accessor("noTelp", {
-      id: "noTelp",
-      cell: (info) => {
-        const phoneNumber = info.getValue(); // Dapatkan nomor telepon dari data
-        const formattedNumber = phoneNumber.replace(/^0/, "62"); // Ubah awalan "0" ke "62"
-        const waLink = `https://wa.me/${formattedNumber}`; // Buat tautan WhatsApp
-
-        return (
-          <Link
-            href={waLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            sx={{
-              textDecoration: "none",
-              color: "#f18b04", // Warna khas WhatsApp
-              fontWeight: "bold",
-              "&:hover": {
-                textDecoration: "underline",
-                color: "#f18b04", // Warna lebih gelap saat hover
-              },
-            }}
-          >
-            {phoneNumber}
-          </Link>
-        );
-      },
-      header: "NO TELP",
-    }),
-
-    // Kolom Email
-    columnHelper.accessor("email", {
-      id: "email",
+    columnHelper.accessor("cabang_lat", {
+      id: "cabang_lat",
       cell: (info) => info.getValue(),
-      header: "EMAIL",
+      header: "Latitude",
+      enableColumnFilter: false,
     }),
-
-    // Kolom Jenis Kelamin
-    columnHelper.accessor("jenisKelamin", {
-      id: "jenisKelamin",
+    columnHelper.accessor("cabang_long", {
+      id: "cabang_long",
       cell: (info) => info.getValue(),
-      header: "JENIS KELAMIN",
+      header: "Longitude",
+      enableColumnFilter: false,
     }),
-
-    // Kolom Status (Berangkat dan Selesai)
-    columnHelper.accessor("status", {
-      id: "status",
+   
+    columnHelper.accessor("action", {
       cell: (info) => {
-        const status = info.getValue();
-        let chipColor = "";
-
-        switch (status) {
-          case "Berangkat":
-            chipColor = "lightblue"; // Biru muda
-            break;
-          case "Selesai":
-            chipColor = "green"; // Hijau
-            break;
-          default:
-            chipColor = "#F18B04"; // Warna khusus untuk Dijadwalkan
-            break;
-        }
-
-        return (
-          <Chip
-            label={
-              status === "Berangkat" || status === "Selesai"
-                ? status
-                : "Dijadwalkan"
-            }
-            sx={{
-              backgroundColor: chipColor,
-              color: "white", // Warna teks putih agar kontras
-              fontWeight: "bold",
-            }}
-          />
-        );
-      },
-      header: "Status",
-    }),
-
-    // Kolom Aksi
-    columnHelper.display({
-      id: "action",
-      header: "Detail",
-      cell: (info) => {
-        const handleOpenDialog = (rowData: JamaahInterface) => {
+        const handleOpenDialog = (rowData: CabangInterface) => {
           setSelectedRow(rowData); // Set data pengguna
           setOpen(true); // Buka dialog
         };
+
 
         return (
           <Box sx={{ display: "flex", justifyContent: "start" }}>
             {/* Tombol Edit */}
             <ActionButton
               rowData={info.row.original}
-              actionPath={(rowData) => `/jamaah/${rowData.id}`} // Path dinamis berdasarkan ID User
+              actionPath={(rowData) => `/cabang/${rowData.id}`} // Path dinamis berdasarkan ID User
             />
 
             {/* Tombol Delete */}
@@ -284,12 +214,13 @@ const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
           </Box>
         );
       },
+      header: "Aksi",
       enableColumnFilter: false,
     }),
   ];
 
   const table = useReactTable({
-    data: data || [], // Pastikan data selalu berupa array.
+    data: tableData || [], // Pastikan data selalu berupa array.
     columns,
     filterFns: {
       fuzzy: fuzzyFilter,
@@ -376,7 +307,7 @@ const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
               {table.getRowModel().rows.map((row) => (
                 <tr key={row.id}>
                   {row.getVisibleCells().map((cell) => (
-                    <td style={{ paddingRight: "1rem" }} key={cell.id}>
+                    <td key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -411,10 +342,10 @@ const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
         onClose={handleCloseDialog}
         onConfirm={handleDelete}
         title="Konfirmasi Penghapusan"
-        description={`Apakah Anda yakin ingin menghapus jamaah "${selectedRow?.nama}"?`}
+        description={`Apakah Anda yakin ingin menghapus pengguna "${selectedRow?.nama}"?`}
       />
     </Box>
   );
 };
 
-export default JamaahTable;
+export default CabangTable;

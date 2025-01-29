@@ -1,87 +1,144 @@
-
 import dynamic from "next/dynamic";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
-import { useTheme } from '@mui/material/styles';
-import { Stack, Typography, Avatar, Fab } from '@mui/material';
-import { IconArrowDownRight, IconCurrencyDollar } from '@tabler/icons-react';
-import DashboardCard from '@/app/(DashboardLayout)/components/shared/DashboardCard';
+import { useTheme } from "@mui/material/styles";
+import { Box, Typography } from "@mui/material";
+import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCard";
+import { KeuanganInterface } from "../../utilities/type";
 
-const MonthlyEarnings = () => {
+interface MonthlyEarningsProps {
+  keuanganData: KeuanganInterface[];
+}
+
+const MonthlyEarnings = ({ keuanganData }: MonthlyEarningsProps) => {
   // chart color
   const theme = useTheme();
-  const secondary = theme.palette.secondary.main;
-  const secondarylight = '#f5fcff';
-  const errorlight = '#fdede8';
+  const progressBarColor = "#f18B04"; // Warna progress bar
+  const trackColor = "#274371"; // Warna background/track
 
-  // chart
-  const optionscolumnchart: any = {
+  console.log("di radial bar",keuanganData);
+
+  // Helper function to calculate the percentage of remaining payment
+  const calculateRemainingPaymentPercentage = (data: KeuanganInterface[]) => {
+    const totalTagihan = data.reduce(
+      (total, item) => total + item.totalTagihan,
+      0
+    );
+    const sisaTagihan = data.reduce(
+      (total, item) => total + (item.sisaTagihan || 0),
+      0
+    );
+    const alreadyPaid = totalTagihan - sisaTagihan;
+    const paymentPercentage = (alreadyPaid / totalTagihan) * 100;
+    // const remainingPercentage = 100 - paymentPercentage;
+    return [paymentPercentage,alreadyPaid]; // Return remaining percentage
+  };
+
+  // Calculate the remaining payment percentage
+  const [paymentPercentage, alreadyPaid] = calculateRemainingPaymentPercentage(keuanganData);
+
+  console.log("alreadyPaid",alreadyPaid);
+
+  // Calculate the total tagihan and sisa tagihan
+  const totalTagihan = keuanganData.reduce(
+    (total, item) => total + item.totalTagihan,
+    0
+  );
+  const sisaTagihan = keuanganData.reduce(
+    (total, item) => total + (item.sisaTagihan || 0),
+    0
+  );
+
+  // chart options
+  const optionsRadialBar: any = {
     chart: {
-      type: 'area',
-      fontFamily: "'Plus Jakarta Sans', sans-serif;",
-      foreColor: '#adb0bb',
-      toolbar: {
-        show: false,
-      },
-      height: 60,
+      type: "radialBar",
+      height: 200,
       sparkline: {
-        enabled: true,
+        enabled: true, // Menghilangkan elemen chart lainnya
       },
-      group: 'sparklines',
     },
-    stroke: {
-      curve: 'smooth',
-      width: 2,
+    plotOptions: {
+      radialBar: {
+        startAngle: -90,
+        endAngle: 90,
+        track: {
+          background: trackColor,
+          strokeWidth: "100%",
+        },
+        hollow: {
+          margin: 10,
+          size: "60%",
+        },
+        dataLabels: {
+          name: {
+            show: false, // Menyembunyikan label nama
+          },
+          value: {
+            fontSize: "18px",
+            fontWeight: "700",
+            color: theme.palette.text.primary,
+            offsetY: 5,
+            formatter: (val: number) => `${val.toFixed(2)}%`, // Format to show percentage
+          },
+        },
+      },
     },
     fill: {
-      colors: [secondarylight],
-      type: 'solid',
-      opacity: 0.05,
+      colors: [progressBarColor], // Warna progress bar
     },
-    markers: {
-      size: 0,
+    stroke: {
+      lineCap: "round",
     },
-    tooltip: {
-      theme: theme.palette.mode === 'dark' ? 'dark' : 'light',
-    },
+    labels: ["Remaining Payment"], // Label untuk chart
   };
-  const seriescolumnchart: any = [
-    {
-      name: '',
-      color: secondary,
-      data: [25, 66, 20, 40, 12, 58, 20],
-    },
-  ];
+
+  const seriesRadialBar: any = [paymentPercentage]; // Nilai sisa pembayaran dalam persen
 
   return (
-    <DashboardCard
-      title="Monthly Earnings"
-      action={
-        <Fab color="secondary" size="medium" sx={{color: '#ffffff'}}>
-          <IconCurrencyDollar width={24} />
-        </Fab>
-      }
-      footer={
-        <Chart options={optionscolumnchart} series={seriescolumnchart} type="area" height={60} width={"100%"} />
-      }
-    >
+    <DashboardCard title="Realisasi Pendapatan">
       <>
-        <Typography variant="h3" fontWeight="700" mt="-20px">
-          $6,820
-        </Typography>
-        <Stack direction="row" spacing={1} my={1} alignItems="center">
-          <Avatar sx={{ bgcolor: errorlight, width: 27, height: 27 }}>
-            <IconArrowDownRight width={20} color="#FA896B" />
-          </Avatar>
-          <Typography variant="subtitle2" fontWeight="600">
-            +9%
-          </Typography>
-          <Typography variant="subtitle2" color="textSecondary">
-            last year
-          </Typography>
-        </Stack>
+        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Box sx={{ display: "flex", flexDirection: "column" }}>
+            <Typography variant="subtitle2" color="textSecondary" >
+              Pendapatan Aktual
+            </Typography>
+            <Typography variant="h6" fontWeight="700" sx={{ color: "#f18B04" }}>
+              Rp. {alreadyPaid.toLocaleString()}
+            </Typography>
+          </Box>
+          <Box sx={{ display: "flex", flexDirection: "column" }}>
+            <Typography variant="subtitle2" color="textSecondary">
+              Target Total Tagihan
+            </Typography>
+            <Typography variant="h6" fontWeight="700" sx={{ color: "#274371" }}>
+              Rp. {totalTagihan.toLocaleString()}
+            </Typography>
+          </Box>
+        </Box>
+        <Chart
+          options={optionsRadialBar}
+          series={seriesRadialBar}
+          type="radialBar"
+          height={200}
+          width={"100%"}
+        />
       </>
     </DashboardCard>
   );
 };
 
 export default MonthlyEarnings;
+
+{
+  /* <Stack direction="row" spacing={1} my={1} alignItems="center">
+  <Avatar sx={{ bgcolor: '#FDDFD9', width: 27, height: 27 }}>
+    <IconArrowDownRight width={20} color="#FA896B" />
+  </Avatar>
+  <Typography variant="subtitle2" fontWeight="600">
+    +9%
+  </Typography>
+  <Typography variant="subtitle2" color="textSecondary">
+    last year
+  </Typography>
+</Stack> */
+}

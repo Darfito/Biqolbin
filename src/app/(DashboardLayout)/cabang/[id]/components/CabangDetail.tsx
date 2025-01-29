@@ -5,7 +5,7 @@ import Breadcrumb from "@/app/(DashboardLayout)/utilities/component/breadcrumb/B
 import {
   Box,
   Button,
-  Card,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -14,49 +14,51 @@ import {
   Typography,
 } from "@mui/material";
 import { IconArrowLeft } from "@tabler/icons-react";
-import React, { useEffect, useMemo, useState } from "react";
-import FormDetail from "./FormDetail";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import JamaahDetailTable from "@/app/(DashboardLayout)/utilities/component/table/JamaahDetailTable";
-import {
-  JamaahInterface,
-  PaketInterface,
-} from "@/app/(DashboardLayout)/utilities/type";
+import { createClient } from "@/libs/supabase/client";
 
-interface JamaahDetailProps {
+import { CabangInterface, UserInterface } from "@/app/(DashboardLayout)/utilities/type";
+import FormDetail from "./FormDetail";
+
+interface cabangDetailProps {
   id: string;
-  paketData: PaketInterface[];
-  jamaahData: JamaahInterface;
   breadcrumbLinks: { label: string; href?: string }[];
+  role: string;
 }
 
-const JamaahDetail = ({
-  paketData,
-  jamaahData,
-  breadcrumbLinks,
-}: JamaahDetailProps) => {
-  const router = useRouter(); // Initialize useRouter
-  const [isEditing, setIsEditing] = useState<boolean>(false); // State to toggle edit mode
-  const [currentData, setCurrentData] = useState<JamaahInterface | null>(jamaahData); // State untuk menyimpan data jamaah
+const CabangDetail = ({ id, breadcrumbLinks,role }: cabangDetailProps) => {
+  const router = useRouter();
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [currentData, setCurrentData] = useState<CabangInterface | null>(null);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
-  const memoizedJenisDokumen = useMemo(
-    () => currentData?.jenisDokumen || [],
-    [currentData]
-  );
-  const memoizedPernikahan = useMemo(
-    () => currentData?.pernikahan,
-    [currentData]
-  );
-  const [mounted, setMounted] = useState(false);
+  const supabase = createClient();
 
+  // Fetch user data
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    const fetchUserData = async () => {
+      if (id && !currentData) {
+        try {
+          const { data, error } = await supabase
+            .from("Cabang")
+            .select("*") // Get all necessary fields, not just 'id'
+            .eq("id", id)
+            .single(); // To get only one user based on the id
 
-  if (!mounted) {
-    return null; // Jangan render apa-apa sampai komponen dimuat di klien
-  }
+          if (error) {
+            console.error("Error fetching user:", error);
+          } else {
+            setCurrentData(data); // Set fetched user data
+          }
+        } catch (err) {
+          console.error("Error fetching data:", err);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, [id, currentData, supabase]);
 
   // Toggle the isEditing state
   const handleEditClick = () => {
@@ -67,7 +69,8 @@ const JamaahDetail = ({
     }
   };
 
-  const handleCancelEdit = () => {
+   // Handle dialog actions
+   const handleCancelEdit = () => {
     setIsEditing(false); // Exit edit mode
     setOpenDialog(false); // Close dialog
   };
@@ -76,20 +79,19 @@ const JamaahDetail = ({
     setOpenDialog(false); // Close dialog without changes
   };
 
-  // Function to handle the "Kembali ke Daftar" button click
+  // Function to handle the "Back to List" button click
   const handleBackClick = () => {
-    router.push("/jamaah"); // Navigate to /keuangan page
+    router.push("/cabang"); // Navigate to the user list
   };
-
-  console.log("data jamaah detail ", currentData);
-
+  
+  console.log("currentData:", currentData);
   return (
     <>
-      <Typography variant="h2">
-        Jamaah Detail
+      <Typography variant="h2" component="h1">
+        Cabang Detail
       </Typography>
       <Breadcrumb links={breadcrumbLinks} />
-      <PageContainer title="Jamaah Detail">
+      <PageContainer title="User Detail">
         <Box
           sx={{
             marginTop: 3,
@@ -111,7 +113,7 @@ const JamaahDetail = ({
           </Box>
 
           <Box>
-            <Button
+          <Button
               variant="contained"
               sx={{ color: "white", marginRight: "1rem", minWidth: "150px" }}
               onClick={handleEditClick}
@@ -122,51 +124,27 @@ const JamaahDetail = ({
         </Box>
 
         <Box sx={{ marginTop: "2rem" }}>
-          <FormDetail
-            isEditing={isEditing}
-            jamaahData={currentData}
-            paketData={paketData}
-          />
-        </Box>
-
-        <Box sx={{ marginTop: "2rem", backgroundColor: "#fff" }}>
-          <Card sx={{ backgroundColor: "#fff" }}>
-            <JamaahDetailTable
-              data={memoizedJenisDokumen}
-              perkawinan={memoizedPernikahan}
-            />
-          </Card>
+          <FormDetail isEditing={isEditing} cabangData={currentData} role={role} />
         </Box>
       </PageContainer>
+
       <Dialog
         open={openDialog}
         onClose={handleCloseDialog}
         aria-labelledby="cancel-edit-dialog-title"
         aria-describedby="cancel-edit-dialog-description"
       >
-        <DialogTitle id="cancel-edit-dialog-title">
-          Batalkan Penyuntingan
-        </DialogTitle>
+        <DialogTitle id="cancel-edit-dialog-title">Batalkan Penyuntingan</DialogTitle>
         <DialogContent>
           <DialogContentText id="cancel-edit-dialog-description">
-            Apakah Anda yakin ingin membatalkan mode penyuntingan? Perubahan
-            yang belum disimpan akan hilang.
+            Apakah Anda yakin ingin membatalkan mode penyuntingan? Perubahan yang belum disimpan akan hilang.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={handleCloseDialog}
-            sx={{ color: "white" }}
-            variant="contained"
-          >
+          <Button onClick={handleCloseDialog} sx={{ color: "white" }} variant="contained">
             Tidak
           </Button>
-          <Button
-            onClick={handleCancelEdit}
-            sx={{ color: "white" }}
-            variant="contained"
-            autoFocus
-          >
+          <Button onClick={handleCancelEdit} sx={{ color: "white" }} variant="contained" autoFocus>
             Ya, Batalkan
           </Button>
         </DialogActions>
@@ -175,4 +153,4 @@ const JamaahDetail = ({
   );
 };
 
-export default JamaahDetail;
+export default CabangDetail;
