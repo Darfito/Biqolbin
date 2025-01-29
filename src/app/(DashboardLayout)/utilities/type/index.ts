@@ -14,7 +14,7 @@ export type CardStatsProps = {
   title: string;
   total: number;
   color?: string;
-  icon: string;
+  icon: React.ElementType; // Ganti dari string menjadi React.ElementType
 };
 
 // ! KEUANGAN TYPE
@@ -120,6 +120,7 @@ export enum JenisPenerbangan {
 export interface JamaahInterface {
   id?: number;
   nama: string;
+  created_at?: string;
   tanggalLahir: Date;
   ayahKandung: string;
   noTelp: string;

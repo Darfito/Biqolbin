@@ -53,49 +53,10 @@ export default async function JamaahPage() {
   const stablePaketData = paketData || [];
   const stableJamaahData = jamaahData || [];
 
-  // Hitung statistik
-  const totalJamaah = jamaahData.length;
-  const belumBerangkat = jamaahData.filter(
-    (jamaah) => jamaah.status === "Berangkat"
-  ).length;
-  const berangkat = jamaahData.filter(
-    (jamaah) => jamaah.status === "Berangkat"
-  ).length
-  const selesai = jamaahData.filter(
-    (jamaah) => jamaah.status === "Selesai"
-  ).length;
-
-  const dynamicScoreCardJamaah = [
-    {
-      title: "Total Jamaah",
-      total: totalJamaah,
-      color: "#3E74FF",
-      icon: "IconUser", // Kirim nama ikon sebagai string
-    },
-    {
-      title: "Belum Berangkat",
-      total: belumBerangkat,
-      color: "#F54F63",
-      icon: "IconLuggage", // Kirim nama ikon sebagai string
-    },
-    {
-      title: "Berangkat",
-      total: berangkat,
-      color: "#ADD8E6",
-      icon: "IconPlaneInflight", // Kirim nama ikon sebagai string
-    },
-    {
-      title: "Selesai",
-      total: selesai,
-      color: "#4CAF50",
-      icon: "IconPlaneArrival", // Kirim nama ikon sebagai string
-    },
-  ];
-
 
   return (
     <>
-      <Jamaah paketData={stablePaketData} jamaahData={stableJamaahData}  scoreCardData={dynamicScoreCardJamaah}  />
+      <Jamaah paketData={stablePaketData} jamaahData={stableJamaahData} />
     </>
   );
 }

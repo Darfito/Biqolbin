@@ -194,6 +194,7 @@ const FormCicilan = ({
               value={formValues.cicilanKe}
               error={!!formErrors.cicilanKe}
               helperText={formErrors.cicilanKe}
+              required
               onChange={(e: { target: { value: number } }) => {
                 setFormValues({
                   ...formValues,
@@ -210,6 +211,7 @@ const FormCicilan = ({
               value={formValues.tanggalPembayaran}
               error={!!formErrors.tanggalPembayaran}
               helperText={formErrors.tanggalPembayaran}
+              required
               onChange={(e: { target: { value: string } }) =>
                 setFormValues({
                   ...formValues,
@@ -228,6 +230,7 @@ const FormCicilan = ({
               value={formatRupiah(formValues.nominalCicilan)}
               error={!!formErrors.nominalCicilan}
               helperText={formErrors.nominalCicilan}
+              required
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 handleChangeHarga(e, "nominalCicilan");
               }}

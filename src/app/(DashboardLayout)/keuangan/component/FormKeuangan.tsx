@@ -319,7 +319,7 @@ export default function FormKeuangan({
 
   useEffect(() => {
     calculateAngsuran();
-  }, [formValues.totalTagihan, formValues.uangMuka, formValues.banyaknyaCicilan, calculateAngsuran]);
+  }, [formValues.totalTagihan, formValues.uangMuka, formValues.banyaknyaCicilan]);
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => {
@@ -472,6 +472,7 @@ export default function FormKeuangan({
                   label="Pilih Jamaah"
                   variant="outlined"
                   fullWidth
+                  required
                 />
               )}
             />
@@ -503,6 +504,7 @@ export default function FormKeuangan({
                   label="Jenis Paket"
                   variant="outlined"
                   fullWidth
+                  required
                 />
               )}
             />
@@ -515,6 +517,7 @@ export default function FormKeuangan({
               onChange={handleMetodeChange}
               error={!!formErrors.metodePembayaran}
               helperText={formErrors.metodePembayaran}
+              required
             >
               <MenuItem value="Tunai">Tunai</MenuItem>
               <MenuItem value="Tabungan">Tabungan</MenuItem>
@@ -532,6 +535,7 @@ export default function FormKeuangan({
               value={formValues.tenggatPembayaran}
               error={!!formErrors.tenggatPembayaran}
               helperText={formErrors.tenggatPembayaran}
+              required
               onChange={(e: { target: { value: any } }) =>
                 setFormValues({
                   ...formValues,
@@ -547,6 +551,7 @@ export default function FormKeuangan({
               value={formatRupiah(formValues.totalTagihan)}
               error={!!formErrors.totalTagihan}
               helperText={formErrors.totalTagihan}
+              required
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 handleChangeHarga(e, "totalTagihan")
               }
@@ -559,6 +564,7 @@ export default function FormKeuangan({
               value={formatRupiah(formValues.uangMuka ?? 0)}
               error={!!formErrors.uangMuka}
               helperText={formErrors.uangMuka}
+              required
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 handleChangeHarga(e, "uangMuka")
               }
@@ -573,6 +579,7 @@ export default function FormKeuangan({
                   value={formValues.banyaknyaCicilan}
                   error={!!formErrors.banyaknyaCicilan}
                   helperText={formErrors.banyaknyaCicilan}
+                  required
                   onChange={(e: { target: { value: any } }) =>
                     setFormValues({
                       ...formValues,
@@ -586,6 +593,7 @@ export default function FormKeuangan({
                   name="jumlahBiayaPerAngsuran"
                   value={formatRupiah(formValues.jumlahBiayaPerAngsuran ?? 0)}
                   error={!!formErrors.jumlahBiayaPerAngsuran}
+                  required
                   helperText={formErrors.jumlahBiayaPerAngsuran}
                   disabled
                 />

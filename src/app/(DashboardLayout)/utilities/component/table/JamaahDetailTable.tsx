@@ -474,6 +474,7 @@ const JamaahDetailTable = ({
         </DialogActions>
       </Dialog>
 
+{/* Dialog Delete */}
       <Dialog
         open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}

@@ -1,23 +1,21 @@
 "use client";
 
-import { Grid, Card, Box, Typography } from "@mui/material";
-
+import { useState, useEffect } from "react";
+import { Grid, Card, Box, Typography, Skeleton } from "@mui/material";
+import YearDropdown from "./YearDropdown";
 
 interface CustomHeaderProps {
-  titleModule:string;
-  filters: any[];
+  titleModule: string;
   selectedFilter: string;
   handleFilterChange: (filterName: string) => void;
-  cabangText: string;
 }
 
 const CustomHeader = ({
   titleModule,
-  filters,
   selectedFilter,
   handleFilterChange,
-  cabangText,
 }: CustomHeaderProps) => {
+
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} sm={12} md={12} lg={12}>
@@ -35,7 +33,9 @@ const CustomHeader = ({
             >
               {titleModule}
             </Typography>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              {/* Menampilkan Skeleton saat year belum siap */}
+              {selectedFilter ? (
                 <Typography
                   variant="subtitle1"
                   sx={{
@@ -43,14 +43,18 @@ const CustomHeader = ({
                     fontSize: { xs: "12px", md: "16px" },
                   }}
                 >
-                  {cabangText}
+                  {`Menampilkan data Tahun ${selectedFilter}`}
                 </Typography>
-                {/* <GlobalFilterDropdown
-                  onSelectedFilter={handleFilterChange} // Fungsi callback
-                  selectedFilterName={selectedFilter} // Filter saat ini
-                  data={filters}
-                /> */}
-              </Box>
+              ) : (
+                <Skeleton variant="text" width={120} height={25} />
+              )}
+              {selectedFilter ? (
+                <YearDropdown selectedYear={selectedFilter} onYearChange={handleFilterChange} />
+                
+              ): (
+                <Skeleton variant="text" width={120} height={25} />
+              )}
+            </Box>
           </Box>
         </Card>
       </Grid>

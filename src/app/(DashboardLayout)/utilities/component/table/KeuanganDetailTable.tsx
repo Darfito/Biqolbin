@@ -65,16 +65,13 @@ interface KeuanganDetailProps<T> {
   data: T[];
   cicilanKe: number;
   keuanganId: number;
+  metode?: string;
 }
-
-interface EditCicilanFormProps {
-  onClose: () => void;
-}
-
 const KeuanganDetailTable = ({
   keuanganId,
   data,
   cicilanKe,
+  metode
 }: KeuanganDetailProps<CicilanType>) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -89,6 +86,8 @@ const KeuanganDetailTable = ({
   const [editData, setEditData] = useState<CicilanType | null>(null); // Data cicilan yang sedang diedit
   const [uploadedFile, setUploadedFile] = useState<File | null>(null); // State untuk menyimpan file yang diunggah
   const [fileUrl, setFileUrl] = useState<string | null>(null); // Menyimpan URL file yang diambil
+
+  console.log("metode yang dipakai ", metode);
 
   const supabase = createClient();
 
@@ -123,7 +122,7 @@ const KeuanganDetailTable = ({
       // Upload file ke Supabase storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("Cicilan")
-        .upload(fileName, file);
+        .upload(fileName, file, { cacheControl: "3600", upsert: true });
 
       if (uploadError) {
         console.error("Error uploading file:", uploadError.message);
@@ -256,7 +255,7 @@ const KeuanganDetailTable = ({
     columnHelper.accessor("cicilanKe", {
       id: "cicilanKe",
       cell: (info) => info.getValue(),
-      header: "Cicilan Ke",
+      header: metode === "Tunai" ? "Pembayaran Ke" : "Cicilan Ke",
       enableColumnFilter: false,
       sortingFn: "basic",
     }),
@@ -269,7 +268,7 @@ const KeuanganDetailTable = ({
     columnHelper.accessor("nominalCicilan", {
       id: "nominalCicilan",
       cell: (info) => `Rp ${info.getValue().toLocaleString()}`,
-      header: "Cicilan Yang Dibayar",
+      header: metode === "Tunai" ? "Tagihan Yang Dibayar" : "Cicilan Yang Dibayar",
       enableColumnFilter: false,
     }),
     columnHelper.accessor("lampiran", {

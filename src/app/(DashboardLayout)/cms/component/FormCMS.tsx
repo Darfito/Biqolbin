@@ -439,6 +439,7 @@ const handleUpload = async (file: File) => {
               fullWidth
               label="Nama Paket"
               name="nama"
+              required
               value={formValues.nama}
               error={!!formErrors.nama}
               helperText={formErrors.nama}
@@ -475,6 +476,7 @@ const handleUpload = async (file: File) => {
             <CustomTextField
               select
               fullWidth
+              required
               label="Nama Maskapai"
               name="maskapai"
               value={formValues.maskapai}
@@ -579,6 +581,7 @@ const handleUpload = async (file: File) => {
               label="Tanggal Keberangkatan"
               name="tglKeberangkatan"
               type="date"
+              required
               value={formValues.tglKeberangkatan}
               error={!!formErrors.tglKeberangkatan}
               helperText={formErrors.tglKeberangkatan}
@@ -597,6 +600,7 @@ const handleUpload = async (file: File) => {
               label="Tanggal Kepulangan"
               name="tglKepulangan"
               type="date"
+              required
               value={formValues.tglKepulangan}
               error={!!formErrors.tglKepulangan}
               helperText={formErrors.tglKepulangan}
@@ -614,6 +618,7 @@ const handleUpload = async (file: File) => {
               fullWidth
               label="Nama Muthawif"
               name="namaMuthawif"
+              required
               value={formValues.namaMuthawif}
               error={!!formErrors.namaMuthawif}
               helperText={formErrors.namaMuthawif}
@@ -625,6 +630,7 @@ const handleUpload = async (file: File) => {
               fullWidth
               label="Nomor Telpon Muthawif"
               name="noTelpMuthawif"
+              required
               value={formValues.noTelpMuthawif}
               error={!!formErrors.noTelpMuthawif}
               helperText={formErrors.noTelpMuthawif}
@@ -645,6 +651,7 @@ const handleUpload = async (file: File) => {
               fullWidth
               label="Tipe Kamar Double"
               name="hargaDouble"
+              required
               value={formatRupiah(formValues.hargaDouble)} // Format harga
               error={!!formErrors.hargaDouble}
               helperText={formErrors.hargaDouble}
@@ -656,6 +663,7 @@ const handleUpload = async (file: File) => {
               fullWidth
               label="Tipe Kamar Triple"
               name="hargaTriple"
+              required
               value={formatRupiah(formValues.hargaTriple)} // Format harga
               error={!!formErrors.hargaTriple}
               helperText={formErrors.hargaTriple}
@@ -667,6 +675,7 @@ const handleUpload = async (file: File) => {
               fullWidth
               label="Tipe Kamar Quad"
               name="hargaQuad"
+              required
               value={formatRupiah(formValues.hargaQuad)} // Format harga
               error={!!formErrors.hargaQuad}
               helperText={formErrors.hargaQuad}

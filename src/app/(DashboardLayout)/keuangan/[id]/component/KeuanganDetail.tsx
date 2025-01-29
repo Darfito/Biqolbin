@@ -152,7 +152,7 @@ const KeuanganDetail = ({
             >
               {isEditing ? "Batal Menyunting" : "Sunting"}
             </Button>
-            {currentData?.status === "Lunas" ? (
+              {currentData?.status === "Lunas" ? ( 
               <Button
                 variant="contained"
                 disabled
@@ -164,7 +164,7 @@ const KeuanganDetail = ({
               >
                 Sudah Lunas
               </Button>
-            ) : (
+            ) : ( 
               <Button
                 variant="contained"
                 sx={{
@@ -172,11 +172,12 @@ const KeuanganDetail = ({
                   color: "white",
                   marginRight: "1rem",
                 }}
+                disabled={
+                  (currentData?.sisaTagihan ?? 0) > 0 // Jika sisa tagihan lebih dari 0, tombol nonaktif
+                }
                 onClick={handleLunasClick}
               >
-                {currentData?.status === "Sedang Menabung"
-                  ? "Tandai Lunas"
-                  : "Tandai Lunas"}
+                Tandai Lunas
               </Button>
             )}
             <Button variant="contained" disabled sx={{ color: "white" }}>
@@ -199,6 +200,7 @@ const KeuanganDetail = ({
             data={dataCicilan}
             cicilanKe={nextCicilanKe}
             keuanganId={id}
+            metode={currentData?.metodePembayaran}
           />
         </Box>
       </PageContainer>
@@ -224,7 +226,7 @@ const KeuanganDetail = ({
             onClick={handleCloseDialog}
             sx={{ color: "white" }}
             variant="contained"
-          >
+            >
             Tidak
           </Button>
           <Button
@@ -232,7 +234,7 @@ const KeuanganDetail = ({
             sx={{ color: "white" }}
             variant="contained"
             autoFocus
-          >
+            >
             Ya, Batalkan
           </Button>
         </DialogActions>
@@ -244,7 +246,7 @@ const KeuanganDetail = ({
         onClose={() => setOpenConfirmDialog(false)}
         aria-labelledby="cancel-edit-dialog-title"
         aria-describedby="cancel-edit-dialog-description"
-      >
+        >
         <DialogTitle id="cancel-edit-dialog-title">
           Konfirmasi Pembayaran Lunas
         </DialogTitle>
@@ -276,3 +278,7 @@ const KeuanganDetail = ({
 };
 
 export default KeuanganDetail;
+
+{/* {currentData?.status === "Sedang Menabung"
+  ? "Tandai Lunas"
+  : "Tandai Lunas"} */}

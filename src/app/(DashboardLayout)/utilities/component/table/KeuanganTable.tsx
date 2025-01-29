@@ -40,7 +40,7 @@ import styles from "../../../../styles/table.module.css";
 import TablePaginationComponent from "../pagination/TablePaginationComponent";
 import CustomTextField from "../textField/TextField";
 import { ChevronRight } from "@mui/icons-material";
-import { Autocomplete, Box, FormControl } from "@mui/material";
+import { Autocomplete, Box, Chip, FormControl } from "@mui/material";
 import { KeuanganInterface } from "../../type";
 import ActionButton from "./components/ActionButton";
 import { deleteKeuanganAction } from "@/app/(DashboardLayout)/keuangan/action";
@@ -204,6 +204,29 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
       cell: (info) => info.getValue(),
       header: "Metode Pembayaran",
     }),
+    columnHelper.accessor("status", {
+      id: "status",
+      cell: (info) => {
+        const status = info.getValue();
+        let chipColor = "";
+        if (status === "Lunas") {
+          chipColor = "#4CAF50";
+        } else{
+          chipColor = "#FF9800";
+        }
+
+        return (
+          <Chip
+            label={status}
+            sx={{
+              backgroundColor: chipColor,
+              color: "white", // Warna teks putih agar kontras
+              fontWeight: "bold",
+            }}
+            />
+        )
+      }
+    }),
     columnHelper.accessor("totalTagihan", {
       cell: (info) => `Rp ${info.getValue().toLocaleString()}`,
       header: "Total Tagihan",
@@ -215,10 +238,6 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
     columnHelper.accessor("tenggatPembayaran", {
       cell: (info) => new Date(info.getValue()).toLocaleDateString("id-ID"),
       header: "Tenggat Pembayaran",
-    }),
-    columnHelper.accessor("status", {
-      cell: (info) => info.getValue(),
-      header: "Status",
     }),
     columnHelper.display({
       id: "action",
