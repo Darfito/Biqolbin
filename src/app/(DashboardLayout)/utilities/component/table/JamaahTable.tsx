@@ -139,6 +139,8 @@ const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
   const [open, setOpen] = useState(false); // State untuk dialog
   const [selectedRow, setSelectedRow] = useState<JamaahInterface | null>(null); // Data yang dipilih
 
+
+  console.log("Data di JamaahTable:", data);
   const handleCloseDialog = () => {
     setOpen(false); // Tutup dialog
     setSelectedRow(null); // Reset data

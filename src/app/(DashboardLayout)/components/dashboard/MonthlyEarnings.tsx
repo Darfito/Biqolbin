@@ -15,6 +15,8 @@ const MonthlyEarnings = ({ keuanganData }: MonthlyEarningsProps) => {
   const progressBarColor = "#f18B04"; // Warna progress bar
   const trackColor = "#274371"; // Warna background/track
 
+  console.log("di radial bar",keuanganData);
+
   // Helper function to calculate the percentage of remaining payment
   const calculateRemainingPaymentPercentage = (data: KeuanganInterface[]) => {
     const totalTagihan = data.reduce(
@@ -27,11 +29,14 @@ const MonthlyEarnings = ({ keuanganData }: MonthlyEarningsProps) => {
     );
     const alreadyPaid = totalTagihan - sisaTagihan;
     const paymentPercentage = (alreadyPaid / totalTagihan) * 100;
-    return 100 - paymentPercentage; // Return remaining percentage
+    // const remainingPercentage = 100 - paymentPercentage;
+    return [paymentPercentage,alreadyPaid]; // Return remaining percentage
   };
 
   // Calculate the remaining payment percentage
-  const remainingPercentage = calculateRemainingPaymentPercentage(keuanganData);
+  const [paymentPercentage, alreadyPaid] = calculateRemainingPaymentPercentage(keuanganData);
+
+  console.log("alreadyPaid",alreadyPaid);
 
   // Calculate the total tagihan and sisa tagihan
   const totalTagihan = keuanganData.reduce(
@@ -87,7 +92,7 @@ const MonthlyEarnings = ({ keuanganData }: MonthlyEarningsProps) => {
     labels: ["Remaining Payment"], // Label untuk chart
   };
 
-  const seriesRadialBar: any = [remainingPercentage]; // Nilai sisa pembayaran dalam persen
+  const seriesRadialBar: any = [paymentPercentage]; // Nilai sisa pembayaran dalam persen
 
   return (
     <DashboardCard title="Realisasi Pendapatan">
@@ -98,7 +103,7 @@ const MonthlyEarnings = ({ keuanganData }: MonthlyEarningsProps) => {
               Pendapatan Aktual
             </Typography>
             <Typography variant="h6" fontWeight="700" sx={{ color: "#f18B04" }}>
-              Rp. {sisaTagihan.toLocaleString()}
+              Rp. {alreadyPaid.toLocaleString()}
             </Typography>
           </Box>
           <Box sx={{ display: "flex", flexDirection: "column" }}>

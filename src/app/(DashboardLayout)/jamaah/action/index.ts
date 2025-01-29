@@ -12,6 +12,7 @@ export const mapJamaahData = (data: any): JamaahInterface[] => {
   return data.map((item: any) => ({
     id: item.id,
     nama: item.nama,
+    created_at: item.created_at,
     ayahKandung: item.ayahKandung,
     noTelp: item.noTelp,
     kontakDarurat: item.KontakDarurat.map((contact: any) => ({
@@ -142,6 +143,7 @@ export const getJamaahAction = async (): Promise<JamaahInterface[]> => {
 };
 
 export const getJamaahCabangAction = async (cabang:number): Promise<JamaahInterface[]> => {
+  console.log("tersekusi pada cabang", cabang);
   const supabase = createClient();
 
   // Mengambil data Jamaah beserta relasi Paket, hotel, dan Kontak Darurat
@@ -183,7 +185,7 @@ export const getJamaahCabangAction = async (cabang:number): Promise<JamaahInterf
   `).eq("cabang_id", cabang);
 
   if (error) {
-    console.error("Error fetching Jamaah data:", error);
+    console.error("Error fetching Jamaah data cabang:", error);
     throw new Error(error.message);
   }
 
@@ -206,6 +208,7 @@ export const createJamaahAction = async (formValues: JamaahInterface) => {
       .from("Jamaah")
       .insert({
         nama: formValues.nama,
+        tanggalLahir: formValues.tanggalLahir,
         ayahKandung: formValues.ayahKandung,
         noTelp: formValues.noTelp,
         email: formValues.email,
@@ -222,6 +225,7 @@ export const createJamaahAction = async (formValues: JamaahInterface) => {
         varianKamar: formValues.varianKamar,
         berangkat: formValues.berangkat,
         selesai: formValues.selesai,
+        cabang_id: formValues.cabang_id,
       })
       .select("id") // Ambil ID Jamaah yang baru dibuat
       .single();
@@ -296,6 +300,7 @@ export const updateJamaahAction = async (jamaahData: JamaahInterface) => {
       .update({
         nama: jamaahData.nama,
         ayahKandung: jamaahData.ayahKandung,
+        tanggalLahir: jamaahData.tanggalLahir,
         noTelp: jamaahData.noTelp,
         email: jamaahData.email,
         jenisKelamin: jamaahData.jenisKelamin,
@@ -472,3 +477,49 @@ export const getFileUrl = async (jamaahId: string, namaDokumen: string) => {
 
   return { success: true, data };
 };
+
+export const updateFileUrl = async (jamaahId: string, namaDokumen: string, fileUrl: string) => {
+  const supabase = createClient();
+  try {
+    // Update kolom `file` dengan URL baru
+    const { data, error } = await supabase
+    .from("jenis_dokumen")
+    .update({ file: fileUrl, action: "Diterima", lampiran: true }) // Update file URL dan status
+    .eq("jamaah_id", jamaahId)
+    .eq("nama_dokumen", namaDokumen);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+    
+    revalidatePath(`/jamaah/${jamaahId}`);
+    return { success: true, data };
+
+  } catch (error: any) {
+    console.error("Error in updateFileUrl:", error.message);
+    return { success: false, message: error.message, error };
+  }
+
+  }
+
+export const deleteFileUrl = async (jamaahId: string, namaDokumen: string) => {
+  const supabase = createClient();
+  try {
+    // Update kolom `file` menjadi null pada baris yang sesuai
+    const { data, error } = await supabase
+      .from("jenis_dokumen")
+      .update({ file: null, action: "Menunggu", lampiran: false }) // Set kolom `file` menjadi null
+      .eq("jamaah_id", jamaahId)
+      .eq("nama_dokumen", namaDokumen);
+
+    if (error) {
+      throw new Error(`Gagal menghapus data di kolom 'file': ${error.message}`);
+    }
+    revalidatePath(`/jamaah/${jamaahId}`);
+    return { success: true, message: "Kolom 'file' berhasil dikosongkan." };
+  } catch (error: any) {
+    console.error("Error in deleteFileUrl:", error.message);
+    return { success: false, message: error.message, error };
+  }
+};
+

@@ -137,7 +137,7 @@ export const updateCmsAction = async (paketData: PaketInterface) => {
         namaMuthawif: paketData.namaMuthawif,
         noTelpMuthawif: paketData.noTelpMuthawif,
         fasilitas: paketData.fasilitas,
-        gambar_url: paketData.gambar_url,
+        // gambar_url: paketData.gambar_url,
       })
       .eq("id", paketData.id)
       .select();

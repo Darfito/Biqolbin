@@ -42,7 +42,7 @@ import { createJamaahAction } from "../action";
 interface FormErrors {
   id?: string;
   nama?: string;
-  umur?:string;
+  tanggalLahir?: string;
   ayahKandung?: string;
   noTelp?: string;
   kontakDarurat?: string;
@@ -66,7 +66,7 @@ interface FormErrors {
 // Valibot Schema
 const formSchema = v.object({
   nama: v.pipe(v.string(), v.nonEmpty("Nama harus diisi")),
-  umur: v.number("Umur harus berupa angka dan tidak boleh kosong"),
+  tanggalLahir: v.date(),
   ayahKandung: v.pipe(v.string(), v.nonEmpty("Nama Ayah Kandung harus diisi")),
   noTelp: v.pipe(v.string(), v.nonEmpty("No Telp harus diisi")),
   kontakDarurat: v.array(
@@ -108,7 +108,7 @@ const formSchema = v.object({
 type FormType = {
   id: number;
   nama: string;
-  umur: number;
+  tanggalLahir: Date;
   ayahKandung: string;
   noTelp: string;
   kontakDarurat: KontakDaruratType[];
@@ -127,19 +127,21 @@ type FormType = {
   berangkat: string;
   selesai: string;
   status: StatusKepergian;
+  cabang_id: number
 };
 
 type FormJamaahProps = {
   paketData: PaketInterface[];
+  cabang_id: number;
 };
 
-export default function FormJamaah({ paketData }: FormJamaahProps) {
+export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
   const [open, setOpen] = useState(false);
 
   const [formValues, setFormValues] = useState<FormType>({
     id: 0,
     nama: "",
-    umur: 0,
+    tanggalLahir: new Date(),
     ayahKandung: "",
     noTelp: "",
     kontakDarurat: [
@@ -180,6 +182,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
     berangkat: "",
     selesai: "",
     status: "Dijadwalkan",
+    cabang_id: cabang_id || 0
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
 
@@ -272,7 +275,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
     setFormValues({
       id: 0,
       nama: "",
-      umur: 0,
+      tanggalLahir: new Date(),
       ayahKandung: "",
       noTelp: "",
       kontakDarurat: [
@@ -318,6 +321,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
       berangkat: "",
       selesai: "",
       status: "Dijadwalkan",
+      cabang_id: cabang_id || 0
     });
   };
 
@@ -353,27 +357,18 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                   fullWidth
                   label="Nama Jamaah"
                   value={formValues.nama}
+                  required
                   onChange={(e: { target: { value: string } }) =>
                     setFormValues({ ...formValues, nama: e.target.value })
                   }
                   sx={{ marginBottom: 2 }}
                 />
-                <CustomTextField
-                  fullWidth
-                  label="Umur Jamaah"
-                  value={formValues.umur}
-                  onChange={(e: { target: { value: number } }) =>
-                    setFormValues({
-                      ...formValues,
-                      umur: e.target.value,
-                    })
-                  }
-                  sx={{ marginBottom: 2 }}
-                />
+
                 <CustomTextField
                   fullWidth
                   label="Nama Ayah Kandung"
                   value={formValues.ayahKandung}
+                  required
                   onChange={(e: { target: { value: string } }) =>
                     setFormValues({
                       ...formValues,
@@ -386,6 +381,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                   fullWidth
                   label="No Telepon"
                   value={formValues.noTelp}
+                  required
                   onChange={(e: { target: { value: string } }) =>
                     setFormValues({ ...formValues, noTelp: e.target.value })
                   }
@@ -415,10 +411,31 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                     />
                   </RadioGroup>
                 </FormControl>
-
+                <CustomTextField
+                  fullWidth
+                  label="Tanggal Lahir"
+                  type="date"
+                  required
+                  value={
+                    formValues.tanggalLahir
+                      ? formValues.tanggalLahir.toISOString().split("T")[0]
+                      : ""
+                  } // Mengonversi ke format YYYY-MM-DD
+                  InputLabelProps={{
+                    shrink: true, // Memastikan label tetap di atas
+                  }}
+                  onChange={(e: { target: { value: string } }) =>
+                    setFormValues({
+                      ...formValues,
+                      tanggalLahir: new Date(e.target.value), // Mengonversi string kembali menjadi objek Date
+                    })
+                  }
+                  sx={{ marginBottom: 2 }}
+                />
                 <CustomTextField
                   fullWidth
                   label="Tempat Lahir"
+                  required
                   value={formValues.tempatLahir}
                   onChange={(e: { target: { value: string } }) =>
                     setFormValues({
@@ -432,6 +449,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                   fullWidth
                   label="Email"
                   value={formValues.email}
+                  required
                   onChange={(e: { target: { value: string } }) =>
                     setFormValues({ ...formValues, email: e.target.value })
                   }
@@ -443,6 +461,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                   rows={4}
                   fullWidth
                   label="Alamat"
+                  required
                   value={formValues.alamat}
                   onChange={(e: { target: { value: string } }) =>
                     setFormValues({ ...formValues, alamat: e.target.value })
@@ -476,7 +495,6 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                   </RadioGroup>
                 </FormControl>
               </Grid>
-
               {/* Kolom Kanan */}
               <Grid item xs={12} sm={6}>
                 <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
@@ -507,6 +525,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                 <CustomTextField
                   fullWidth
                   label="Pekerjaan"
+                  required
                   value={formValues.pekerjaan}
                   onChange={(e: { target: { value: string } }) =>
                     setFormValues({ ...formValues, pekerjaan: e.target.value })
@@ -531,6 +550,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                 <CustomTextField
                   fullWidth
                   label="Riwayat Penyakit"
+                  required
                   value={formValues.riwayatPenyakit}
                   onChange={(e: { target: { value: string } }) =>
                     setFormValues({
@@ -568,6 +588,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                       {...params}
                       label="Jenis Paket"
                       variant="outlined"
+                      required
                       fullWidth
                       sx={{ marginBottom: 2 }}
                     />
@@ -577,6 +598,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                   select
                   fullWidth
                   label="Varian Kamar"
+                  required
                   value={formValues.varianKamar}
                   onChange={(e: { target: { value: string } }) =>
                     setFormValues({
@@ -596,6 +618,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                   disabled
                   label="Tanggal Berangkat"
                   type="date"
+                  required
                   value={formValues.jenisPaket.tglKeberangkatan} // Sudah otomatis terisi dari jenisPaket
                   InputLabelProps={{
                     shrink: true, // Memastikan label tetap di atas
@@ -608,6 +631,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
                   disabled
                   label="Tanggal Selesai"
                   type="date"
+                  required
                   value={formValues.jenisPaket.tglKepulangan} // Sudah otomatis terisi dari jenisPaket
                   InputLabelProps={{
                     shrink: true, // Memastikan label tetap di atas

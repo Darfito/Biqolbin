@@ -28,6 +28,7 @@ import {
   Radio,
   RadioGroup,
   Divider,
+  CircularProgress,
 } from "@mui/material";
 import { Delete } from "@mui/icons-material";
 import FileUploaderSingle from "../../utilities/component/uploader/FileUploaderSingle";
@@ -72,9 +73,18 @@ export const formSchema = v.object({
   maskapai: v.pipe(v.string(), v.nonEmpty("Maskapai harus diisi")),
   jenisPenerbangan: v.pipe(v.string(), v.nonEmpty("Pilih Jenis Penerbangan")),
   keretaCepat: v.boolean(),
-  hargaDouble: v.pipe(v.number(), v.minValue(1, "Harga Kamar Double harus lebih dari 0")),
-  hargaTriple: v.pipe(v.number(), v.minValue(1, "Harga Kamar Triple harus lebih dari 0")),
-  hargaQuad: v.pipe(v.number(), v.minValue(1, "Harga Kamar Quad harus lebih dari 0")),
+  hargaDouble: v.pipe(
+    v.number(),
+    v.minValue(1, "Harga Kamar Double harus lebih dari 0")
+  ),
+  hargaTriple: v.pipe(
+    v.number(),
+    v.minValue(1, "Harga Kamar Triple harus lebih dari 0")
+  ),
+  hargaQuad: v.pipe(
+    v.number(),
+    v.minValue(1, "Harga Kamar Quad harus lebih dari 0")
+  ),
   tglKeberangkatan: v.pipe(
     v.string(),
     v.nonEmpty("Tanggal Keberangkatan harus diisi")
@@ -112,6 +122,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
   const [isCustomMaskapai, setIsCustomMaskapai] = useState(false); // Untuk melacak apakah pengguna memilih "Lainnya"
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [newFasilitas, setNewFasilitas] = useState<string>("");
+  // const [isUploading, setIsUploading] = useState(false);
   const [formValues, setFormValues] = useState<PaketInterface>(
     initialValues || {
       nama: "",
@@ -128,6 +139,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
       tglKepulangan: "",
       namaMuthawif: "",
       noTelpMuthawif: "",
+      selectedFile: null,
       Hotel: [
         {
           id: 0,
@@ -144,16 +156,18 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
     }
   );
 
-
   useEffect(() => {
     if (initialValues) {
       setFormValues(initialValues);
     }
   }, [initialValues]);
 
-  const handleChangeHarga = (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
+  const handleChangeHarga = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: string
+  ) => {
     const value = e.target.value.replace(/[^\d]/g, ""); // Menghapus non-numeric characters (selain angka)
-  
+
     setFormValues((prevValues) => ({
       ...prevValues,
       [type]: value === "" ? 0 : Number(value),
@@ -179,58 +193,42 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
     }));
   };
 
-  const uploadImageToSupabase = async (folderName: string, file: File) => {
-    if (typeof folderName !== "string") {
-      throw new Error(`Invalid folderName: ${folderName}`);
+const uploadImageToSupabase = async (folderName: string, file: File) => {
+  const supabase = createClient();
+  
+  // Ambil ekstensi file asli
+  const fileExtension = file.name.split(".").pop();
+  const newFileName = `${folderName}.${fileExtension}`;
+  const filePath = `${folderName}/${newFileName}`;
+
+  const { data, error } = await supabase.storage.from("Paket").upload(filePath, file, { cacheControl: "3600", upsert: true });
+  
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+};
+
+const handleUpload = async (file: File) => {
+  try {
+    const namaPaket = formValues.nama;
+    if (typeof namaPaket !== "string") {
+      throw new Error("Nama paket harus berupa string");
     }
 
-    const supabase = createClient();
-    const { data, error } = await supabase.storage
-      .from("Paket") // Ganti dengan nama bucket Anda
-      .upload(`${folderName}/${file.name}`, file);
+    const folderName = namaPaket;
+    const result = await uploadImageToSupabase(folderName, file);
 
-    if (error) {
-      throw new Error(error.message);
-    }
-    return data;
-  };
-
-  const handleUpload = async (file: File) => {
-    try {
-      // Log untuk memeriksa nilai formValues.nama
-      console.log("formValues.nama:", formValues.nama);
-
-      // Pastikan formValues.nama adalah string
-      const namaPaket = await formValues.nama; // Jika formValues.nama adalah Promise, tunggu hasilnya
-
-      // Cek apakah nilai sudah valid
-      if (typeof namaPaket !== "string") {
-        throw new Error("Nama paket harus berupa string");
-      }
-
-      // Sanitize folder name
-      // const folderName = sanitizeFolderName(namaPaket);
-      const folderName = namaPaket;
-      console.log("Folder Name:", folderName);
-
-      // Upload file
-      const result = await uploadImageToSupabase(folderName, file);
-
-      // Buat URL publik
-      const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Paket/${result.path}`;
-
-      // Simpan URL ke state
-      setFormValues((prevValues) => ({
-        ...prevValues,
-        gambar_url: publicUrl,
-      }));
-
-      console.log("File uploaded successfully:", result);
-    } catch (error) {
-      console.error("Upload failed:", error);
-      toast.error("Gagal mengunggah gambar!");
-    }
-  };
+    // Buat URL publik setelah upload
+    const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Paket/${result.path}?t=${new Date().getTime()}`;
+    
+    return publicUrl;
+  } catch (error) {
+    console.error("Upload failed:", error);
+    toast.error("Gagal mengunggah gambar!");
+  }
+};
 
   const serializeFormData = (
     values: PaketInterface,
@@ -240,7 +238,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
     if (mode === "edit" && initialValues?.id == null) {
       throw new Error("ID is required for edit mode");
     }
-  
+
     return {
       ...(mode === "edit" && initialValues?.id ? { id: initialValues.id } : {}),
       nama: values.nama,
@@ -262,49 +260,56 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
       Hotel: Array.isArray(values.Hotel) ? values.Hotel : [], // Tambahkan properti hotel
     };
   };
-  
-  
-  
-const formatRupiah = (angka: number): string => {
-  return angka.toLocaleString("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  });
-};
+
+  const formatRupiah = (angka: number): string => {
+    return angka.toLocaleString("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    });
+  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-  
-    // Validate form data
-    const result = v.safeParse(formSchema, formValues);
-  
-    if (!result.success) {
-      const errorMap: Record<string, string> = {};
-      result.issues.forEach((issue) => {
-        const path = issue.path?.[0]?.key as string | undefined;
-        if (path) {
-          errorMap[path] = issue.message;
-        }
-      });
-  
-      setFormErrors(errorMap);
-      console.error("Validation errors:", errorMap);
-      return;
-    }
-  
-    if (!formValues.gambar_url) {
-      toast.error("Harap unggah gambar sebelum mengirimkan form!");
-      return;
-    }
-  
-    // Serialize form data before sending to server action
-    const serializedData = serializeFormData(formValues, mode, initialValues);
-    console.log("Serialized Data:", serializedData);
+    let publicUrl: string = "";
   
     try {
+      // 1. Handle file upload first if there's a new file
+      if (formValues.selectedFile) {
+        publicUrl = await handleUpload(formValues.selectedFile) ?? "";
+        if (!publicUrl) {
+          toast.error("Gagal mengunggah gambar!");
+          return;
+        }
+      }
+  
+      // 2. Create the data to validate with the new URL if uploaded
+      const dataToSubmit = {
+        ...formValues,
+        gambar_url: publicUrl || formValues.gambar_url, // Use new URL if uploaded, otherwise keep existing
+      };
+  
+      // 3. Validate the complete data
+      const result = v.safeParse(formSchema, dataToSubmit);
+  
+      if (!result.success) {
+        const errorMap: Record<string, string> = {};
+        result.issues.forEach((issue) => {
+          const path = issue.path?.[0]?.key as string | undefined;
+          if (path) {
+            errorMap[path] = issue.message;
+          }
+        });
+        setFormErrors(errorMap);
+        console.error("Validation errors:", errorMap);
+        return;
+      }
+  
+      // 4. Serialize and submit the data
+      const serializedData = serializeFormData(dataToSubmit, mode, initialValues);
+  
       if (mode === "create") {
-        const { success, data, error } = await createCmsAction(serializedData);
+        const { success, error } = await createCmsAction(serializedData);
         if (success) {
           toast.success("Form berhasil disubmit!");
           handleClose();
@@ -312,8 +317,7 @@ const formatRupiah = (angka: number): string => {
           toast.error(`Error: ${error}`);
         }
       } else if (mode === "edit") {
-        console.log("Submitting updateCmsAction with data:", serializedData);
-        const { success, data, error } = await updateCmsAction(serializedData);
+        const { success, error } = await updateCmsAction(serializedData);
         if (success) {
           toast.success("Form berhasil di Update!");
           handleClose();
@@ -347,6 +351,7 @@ const formatRupiah = (angka: number): string => {
         tglKepulangan: "",
         namaMuthawif: "",
         noTelpMuthawif: "",
+        selectedFile: null, // Reset file
         Hotel: [
           {
             id: 0,
@@ -381,7 +386,7 @@ const formatRupiah = (angka: number): string => {
   };
 
   const handleAddHotel = () => {
-    console.log("add hotel tertekan")
+    console.log("add hotel tertekan");
     setFormValues((prev) => ({
       ...prev,
       Hotel: [
@@ -434,6 +439,7 @@ const formatRupiah = (angka: number): string => {
               fullWidth
               label="Nama Paket"
               name="nama"
+              required
               value={formValues.nama}
               error={!!formErrors.nama}
               helperText={formErrors.nama}
@@ -470,6 +476,7 @@ const formatRupiah = (angka: number): string => {
             <CustomTextField
               select
               fullWidth
+              required
               label="Nama Maskapai"
               name="maskapai"
               value={formValues.maskapai}
@@ -569,11 +576,12 @@ const formatRupiah = (angka: number): string => {
               label="Menggunakan Kereta Cepat?"
             />
 
-                        <CustomTextField
+            <CustomTextField
               fullWidth
               label="Tanggal Keberangkatan"
               name="tglKeberangkatan"
               type="date"
+              required
               value={formValues.tglKeberangkatan}
               error={!!formErrors.tglKeberangkatan}
               helperText={formErrors.tglKeberangkatan}
@@ -592,6 +600,7 @@ const formatRupiah = (angka: number): string => {
               label="Tanggal Kepulangan"
               name="tglKepulangan"
               type="date"
+              required
               value={formValues.tglKepulangan}
               error={!!formErrors.tglKepulangan}
               helperText={formErrors.tglKepulangan}
@@ -609,6 +618,7 @@ const formatRupiah = (angka: number): string => {
               fullWidth
               label="Nama Muthawif"
               name="namaMuthawif"
+              required
               value={formValues.namaMuthawif}
               error={!!formErrors.namaMuthawif}
               helperText={formErrors.namaMuthawif}
@@ -620,6 +630,7 @@ const formatRupiah = (angka: number): string => {
               fullWidth
               label="Nomor Telpon Muthawif"
               name="noTelpMuthawif"
+              required
               value={formValues.noTelpMuthawif}
               error={!!formErrors.noTelpMuthawif}
               helperText={formErrors.noTelpMuthawif}
@@ -640,28 +651,37 @@ const formatRupiah = (angka: number): string => {
               fullWidth
               label="Tipe Kamar Double"
               name="hargaDouble"
+              required
               value={formatRupiah(formValues.hargaDouble)} // Format harga
               error={!!formErrors.hargaDouble}
               helperText={formErrors.hargaDouble}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeHarga(e, "hargaDouble")}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                handleChangeHarga(e, "hargaDouble")
+              }
             />
             <CustomTextField
               fullWidth
               label="Tipe Kamar Triple"
               name="hargaTriple"
+              required
               value={formatRupiah(formValues.hargaTriple)} // Format harga
               error={!!formErrors.hargaTriple}
               helperText={formErrors.hargaTriple}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeHarga(e, "hargaTriple")}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                handleChangeHarga(e, "hargaTriple")
+              }
             />
             <CustomTextField
               fullWidth
               label="Tipe Kamar Quad"
               name="hargaQuad"
+              required
               value={formatRupiah(formValues.hargaQuad)} // Format harga
               error={!!formErrors.hargaQuad}
               helperText={formErrors.hargaQuad}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChangeHarga(e, "hargaQuad")} // Menangani perubahan input
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                handleChangeHarga(e, "hargaQuad")
+              } // Menangani perubahan input
             />
             <Divider />
             {/* Fasilitas */}
@@ -705,16 +725,21 @@ const formatRupiah = (angka: number): string => {
             </Box>
 
             {/* Gambar */}
-            <Box sx={{ width: "100%" }}>
-              <Typography variant="subtitle1">
-                Upload Gambar Poster Penawaran
-              </Typography>
-              <FileUploaderSingle
-                onFileUpload={async (file) => {
-                  await handleUpload(file); // Memanggil handleUpload yang sudah Anda buat
-                }}
-              />
-            </Box>
+            {mode === "create" && (
+              <Box sx={{ width: "100%" }}>
+                <Typography variant="subtitle1">
+                  Upload Gambar Poster Penawaran
+                </Typography>
+                <FileUploaderSingle
+                  onFileUpload={(file) => {
+                    setFormValues((prevValues) => ({
+                      ...prevValues,
+                      selectedFile: file, // Simpan file ke state
+                    }));
+                  }}
+                />
+              </Box>
+            )}
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose} variant="contained" color="error">

@@ -22,16 +22,16 @@ const Menuitems = [
   },
   {
     id: uniqueId(),
-    title: "Keuangan",
-    icon: IconMoneybag,
-    href: "/keuangan",
+    title: "Jamaah",
+    icon: IconBook,
+    href: "/jamaah",
     role: ["Admin", "Superadmin", "Divisi General Affair", "Finance & Accounting"]
   },
   {
     id: uniqueId(),
-    title: "Jamaah",
-    icon: IconBook,
-    href: "/jamaah",
+    title: "Keuangan",
+    icon: IconMoneybag,
+    href: "/keuangan",
     role: ["Admin", "Superadmin", "Divisi General Affair", "Finance & Accounting"]
   },
   {

@@ -14,7 +14,7 @@ export type CardStatsProps = {
   title: string;
   total: number;
   color?: string;
-  icon: string;
+  icon: React.ElementType; // Ganti dari string menjadi React.ElementType
 };
 
 // ! KEUANGAN TYPE
@@ -84,6 +84,7 @@ export interface PaketInterface {
   hargaQuad: number; // Harga untuk kamar quad
   gambar_url?: string;
   Hotel?: HotelType[];
+  selectedFile?: File | null;
 }
 
 // ! TYPE HOTEL
@@ -119,6 +120,9 @@ export enum JenisPenerbangan {
 export interface JamaahInterface {
   id?: number;
   nama: string;
+  cabang_id?: number;
+  created_at?: string;
+  tanggalLahir: Date;
   ayahKandung: string;
   noTelp: string;
   kontakDarurat?: KontakDaruratType[];
@@ -177,9 +181,10 @@ export enum Jabatan {
 export type JenisDokumen = {
   id: number;
   nama_dokumen: string;
-  file?: string;
+  file?: string | null;
   lampiran: boolean;
   action?: string;
+  actionEvent?: string;
   jamaah_id?: number;
 };
 

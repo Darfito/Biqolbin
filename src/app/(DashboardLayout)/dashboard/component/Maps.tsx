@@ -69,7 +69,7 @@ const Map = ({ cabangData }: MapProps) => {
           >
             <Popup>
               {cabang.nama} - {cabang.alamatCabang} <br />
-              Latitude: {cabang.cabang_lat}, Longitude: {cabang.cabang_long}
+              Latitude: {cabang.cabang_lat},<br /> Longitude: {cabang.cabang_long}
             </Popup>
           </Marker>
         ))}

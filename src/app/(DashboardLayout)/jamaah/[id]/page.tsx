@@ -14,6 +14,7 @@ export default async function DetailJamaah({
   let paketData = [];
   let jamaahData: JamaahInterface = {
     nama: "",
+    tanggalLahir: new Date(),
     ayahKandung: "",
     noTelp: "",
     email: "",
