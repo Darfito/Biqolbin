@@ -15,6 +15,7 @@ import {
   getKeuanganActionCabang,
 } from "../../keuangan/action";
 import dynamic from "next/dynamic";
+import UmurCategoryChart from "../../components/dashboard/UmurChart";
 
 const Map = dynamic(() => import("./Maps"), { ssr: false });
 
@@ -97,9 +98,18 @@ const Dashboard = ({ roleUser, cabang, cabangData }: DashboardProps) => {
             </Grid>
           </Grid>
         </Grid>
-        <Box sx={{ width: "100%", marginTop: "20px" }}>
-          <Map cabangData={cabangData} />
-        </Box>
+        <Grid sx={{ marginTop: "20px" }} container spacing={3}>
+          <Grid item xs={6} lg={6}>
+            <UmurCategoryChart/>
+          </Grid>
+        </Grid>
+        <Grid container spacing={3}>
+          <Grid item xs={12} lg={12}>
+            <Box sx={{ width: "100%", marginTop: "20px" }}>
+              <Map cabangData={cabangData} />
+            </Box>
+          </Grid>
+        </Grid>
       </Box>
     </PageContainer>
   );

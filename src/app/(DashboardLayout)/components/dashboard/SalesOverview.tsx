@@ -20,6 +20,18 @@ const SalesOverview = ({ keuanganData }: SalesOverviewProps) => {
     setMonth(event.target.value);
   };
 
+  const getWeekOfMonth = (date: Date) => {
+    const dayOfMonth = date.getDate(); // Tanggal hari ini
+    const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1).getDay(); // Hari pertama bulan
+    const adjustedDate = dayOfMonth + firstDayOfMonth; // Penyesuaian dengan hari pertama bulan
+    const weekNumber = Math.ceil(adjustedDate / 7); // Hitung minggu keberapa
+  
+    // Batasi minggu ke-5 menjadi minggu ke-4
+    return weekNumber > 4 ? 4 : weekNumber;
+  };
+  
+  
+
   // Filter data keuangan berdasarkan bulan (jika bulan tertentu dipilih)
   const filteredKeuanganData =
     month === "all"
@@ -28,6 +40,8 @@ const SalesOverview = ({ keuanganData }: SalesOverviewProps) => {
         const createdAt = new Date(item.created_at ?? "");
           return createdAt.getMonth() + 1 === parseInt(month); // Filter berdasarkan bulan
         });
+        console.log("Month selected:", month);
+        console.log("Filtered Keuangan Data:", filteredKeuanganData);
 
   // Kategori untuk chart
   const categories =
@@ -38,40 +52,43 @@ const SalesOverview = ({ keuanganData }: SalesOverviewProps) => {
     : ["W1", "W2", "W3", "W4"]; // Kategori: Mingguan
 
 
-  // Hitung total tagihan dan sisa tagihan
-  const totalEarnings = categories.map((_, index) => {
-    if (month === "all") {
-      const filteredByMonth = filteredKeuanganData.filter(
-        (item) =>
-          item.created_at &&  new Date(item.created_at).getMonth() === index // Sesuai bulan dalam loop
-      );
-      return filteredByMonth.reduce((total, item) => total + item.totalTagihan, 0);
-    } else {
-      const filteredByWeek = filteredKeuanganData.filter((item) => {
-        const createdAt = new Date(item.created_at ?? "");
-        const weekNumber = Math.ceil(createdAt.getDate() / 7); // Tentukan minggu keberapa
-        return weekNumber === index + 1; // Sesuaikan minggu dalam loop
-      });
-      return filteredByWeek.reduce((total, item) => total + item.totalTagihan, 0);
-    }
-  });
+// Perhitungan Total Earnings (Total Tagihan)
+const totalEarnings = categories.map((_, index) => {
+  if (month === "all") {
+    const filteredByMonth = filteredKeuanganData.filter(
+      (item) =>
+        item.created_at && new Date(item.created_at).getMonth() === index // Filter berdasarkan bulan
+    );
+    return filteredByMonth.reduce((total, item) => total + item.totalTagihan, 0);
+  } else {
+    const filteredByWeek = filteredKeuanganData.filter((item) => {
+      const createdAt = new Date(item.created_at ?? "");
+      const weekNumber = getWeekOfMonth(createdAt); // Gunakan logika baru untuk menghitung minggu
+      console.log("Total Tagihan Created At:", createdAt, "| Week Number:", weekNumber); // Periksa minggu yang dihitung
+      return weekNumber === index + 1; // Sesuaikan minggu dalam loop
+    });
+    return filteredByWeek.reduce((total, item) => total + item.totalTagihan, 0);
+  }
+});
 
-  const totalExpenses = categories.map((_, index) => {
-    if (month === "all") {
-      const filteredByMonth = filteredKeuanganData.filter(
-        (item) =>
-          new Date(item.created_at ?? "").getMonth() === index // Sesuai bulan dalam loop
-      );
-      return filteredByMonth.reduce((total, item) => total + (item.sisaTagihan || 0), 0);
-    } else {
-      const filteredByWeek = filteredKeuanganData.filter((item) => {
-        const createdAt = new Date(item.created_at ?? "");
-        const weekNumber = Math.ceil(createdAt.getDate() / 7); // Tentukan minggu keberapa
-        return weekNumber === index + 1; // Sesuaikan minggu dalam loop
-      });
-      return filteredByWeek.reduce((total, item) => total + (item.sisaTagihan || 0), 0);
-    }
-  });
+const totalExpenses = categories.map((_, index) => {
+  if (month === "all") {
+    const filteredByMonth = filteredKeuanganData.filter(
+      (item) =>
+        new Date(item.created_at ?? "").getMonth() === index // Filter berdasarkan bulan
+    );
+    return filteredByMonth.reduce((total, item) => total + (item.sisaTagihan || 0), 0);
+  } else {
+    const filteredByWeek = filteredKeuanganData.filter((item) => {
+      const createdAt = new Date(item.created_at ?? "");
+      const weekNumber = getWeekOfMonth(createdAt); // Gunakan logika baru untuk menghitung minggu
+      console.log("Sisa Tagihan Created At:", createdAt, "| Week Number:", weekNumber); // Periksa minggu yang dihitung
+      return weekNumber === index + 1; // Sesuaikan minggu dalam loop
+    });
+    return filteredByWeek.reduce((total, item) => total + (item.sisaTagihan || 0), 0);
+  }
+});
+
 
   // Chart color
   const theme = useTheme();
@@ -188,7 +205,7 @@ const SalesOverview = ({ keuanganData }: SalesOverviewProps) => {
         options={optionscolumnchart}
         series={seriescolumnchart}
         type="bar"
-        height={370}
+        height={390}
         width={"100%"}
       />
     </DashboardCard>
