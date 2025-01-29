@@ -19,7 +19,9 @@ import PageContainer from "../../../components/container/PageContainer";
 import { useRouter } from "next/navigation";
 import Breadcrumb from "@/app/(DashboardLayout)/utilities/component/breadcrumb/Breadcrumb";
 import {
+  IconAlignBoxLeftMiddle,
   IconArrowLeft,
+  IconBed,
   IconBuilding,
   IconClipboard,
   IconPlane,
@@ -28,7 +30,12 @@ import { Fragment, useEffect, useState } from "react";
 import FormCMS from "../../component/FormCMS";
 import { toast } from "react-toastify";
 import { getPaketDatabyID } from "../../action";
-import { JenisPaket, JenisPenerbangan, Maskapai, PaketInterface } from "@/app/(DashboardLayout)/utilities/type";
+import {
+  JenisPaket,
+  JenisPenerbangan,
+  Maskapai,
+  PaketInterface,
+} from "@/app/(DashboardLayout)/utilities/type";
 import FileUploaderSingle from "@/app/(DashboardLayout)/utilities/component/uploader/FileUploaderSingle";
 import { createClient } from "@/libs/supabase/client";
 import useSWR from "swr";
@@ -49,7 +56,6 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
   const handleDialogClose = () => setOpenDialog(false);
   const handleDialogOpen = () => setOpenDialog(true);
 
-
   const { data: dataPaket } = useSWR(
     id ? ["Paket", id] : null, // Key dinamis
     () => getPaketDatabyID(id) // Fetcher yang dieksekusi hanya jika `id` tersedia
@@ -61,34 +67,43 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
     }
   }, [dataPaket]);
 
-
-  const updateImageToSupabase = async (folderName: string, file: File, id: number) => {
+  const updateImageToSupabase = async (
+    folderName: string,
+    file: File,
+    id: number
+  ) => {
     const supabase = createClient();
-  
+
     try {
       // Ambil ekstensi file
       const fileExtension = file.name.split(".").pop(); // Ekstensi file
       const newFileName = `${folderName}.${fileExtension}`; // Nama file baru dengan folderName + ekstensi
       const filePath = `${folderName}/${newFileName}`; // Path lengkap file dalam bucket
-  
+
       // Hapus file lama (opsional)
-      const { error: removeError } = await supabase.storage.from("Paket").remove([filePath]);
+      const { error: removeError } = await supabase.storage
+        .from("Paket")
+        .remove([filePath]);
       if (removeError) {
         console.warn("Tidak bisa menghapus gambar lama:", removeError.message);
       }
-  
+
       // Upload file baru
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("Paket")
         .upload(filePath, file, { cacheControl: "3600", upsert: true });
-  
+
       if (uploadError) {
         throw new Error(`Gagal mengunggah gambar: ${uploadError.message}`);
       }
-  
+
       // Tambahkan query parameter unik untuk menghindari masalah cache
-      const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Paket/${uploadData.path}?t=${new Date().getTime()}`;
-  
+      const publicUrl = `${
+        process.env.NEXT_PUBLIC_SUPABASE_URL
+      }/storage/v1/object/public/Paket/${
+        uploadData.path
+      }?t=${new Date().getTime()}`;
+
       // Perbarui URL gambar di tabel database
       const { data: urlData, error: urlError } = await supabase
         .from("Paket")
@@ -96,11 +111,13 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
         .eq("id", id)
         .select()
         .single();
-  
+
       if (urlError) {
-        throw new Error(`Gagal memperbarui URL gambar di database: ${urlError.message}`);
+        throw new Error(
+          `Gagal memperbarui URL gambar di database: ${urlError.message}`
+        );
       }
-  
+
       toast.success("Gambar berhasil diperbarui!");
       return { success: true, data: urlData };
     } catch (error) {
@@ -109,8 +126,6 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
       return { success: false, error: (error as Error).message };
     }
   };
-  
-
 
   console.log("paketDetail di detail:", paketDetail);
   const handleBackClick = () => {
@@ -120,62 +135,60 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
   const handleFileUpload = async (file: File, id: number) => {
     try {
       console.log("formValues.nama:", paketDetail?.nama);
-  
+
       const namaPaket = paketDetail?.nama;
       if (typeof namaPaket !== "string") {
         throw new Error("Nama paket harus berupa string");
       }
-  
+
       const folderName = namaPaket;
       console.log("Folder Name:", folderName);
-  
+
       // Upload file baru dan hapus file lama
       const result = await updateImageToSupabase(folderName, file, id);
-  
+
       if (result.success) {
         // Perbarui gambar_url di paketDetail secara langsung
         setPaketDetail((prevDetail) => ({
-            ...prevDetail,
-  nama: prevDetail?.nama ?? "",
-  jenis: prevDetail?.jenis ?? JenisPaket.REGULAR,
-  maskapai: prevDetail?.maskapai ?? Maskapai.GARUDA_INDONESIA,
-  noPenerbangan: prevDetail?.noPenerbangan ?? "",
-  customMaskapai: prevDetail?.customMaskapai ?? "",
-  jenisPenerbangan: prevDetail?.jenisPenerbangan ?? JenisPenerbangan.DIRECT,
-  keretaCepat: prevDetail?.keretaCepat ?? false,
-  hargaDouble: prevDetail?.hargaDouble ?? 0,
-  hargaTriple: prevDetail?.hargaTriple ?? 0,
-  hargaQuad: prevDetail?.hargaQuad ?? 0,
-  tglKeberangkatan: prevDetail?.tglKeberangkatan ?? "",
-  tglKepulangan: prevDetail?.tglKepulangan ?? "",
-  namaMuthawif: prevDetail?.namaMuthawif ?? "",
-  noTelpMuthawif: prevDetail?.noTelpMuthawif ?? "",
-  selectedFile: prevDetail?.selectedFile ?? null,
-  Hotel: prevDetail?.Hotel ?? [
-    {
-      id: 0,
-      namaHotel: "",
-      alamatHotel: "",
-      ratingHotel: 0,
-      tanggalCheckIn: "",
-      tanggalCheckOut: "",
-    },
-  ],
-  fasilitas: prevDetail?.fasilitas ?? [] as string[],
-  publish: prevDetail?.publish ?? false,
-  gambar_url: prevDetail?.gambar_url ?? "",
+          ...prevDetail,
+          nama: prevDetail?.nama ?? "",
+          jenis: prevDetail?.jenis ?? JenisPaket.REGULAR,
+          maskapai: prevDetail?.maskapai ?? Maskapai.GARUDA_INDONESIA,
+          noPenerbangan: prevDetail?.noPenerbangan ?? "",
+          customMaskapai: prevDetail?.customMaskapai ?? "",
+          jenisPenerbangan:
+            prevDetail?.jenisPenerbangan ?? JenisPenerbangan.DIRECT,
+          keretaCepat: prevDetail?.keretaCepat ?? false,
+          hargaDouble: prevDetail?.hargaDouble ?? 0,
+          hargaTriple: prevDetail?.hargaTriple ?? 0,
+          hargaQuad: prevDetail?.hargaQuad ?? 0,
+          tglKeberangkatan: prevDetail?.tglKeberangkatan ?? "",
+          tglKepulangan: prevDetail?.tglKepulangan ?? "",
+          namaMuthawif: prevDetail?.namaMuthawif ?? "",
+          noTelpMuthawif: prevDetail?.noTelpMuthawif ?? "",
+          selectedFile: prevDetail?.selectedFile ?? null,
+          Hotel: prevDetail?.Hotel ?? [
+            {
+              id: 0,
+              namaHotel: "",
+              alamatHotel: "",
+              ratingHotel: 0,
+              tanggalCheckIn: "",
+              tanggalCheckOut: "",
+            },
+          ],
+          fasilitas: prevDetail?.fasilitas ?? ([] as string[]),
+          publish: prevDetail?.publish ?? false,
+          gambar_url: prevDetail?.gambar_url ?? "",
         }));
       }
-  
+
       console.log("File uploaded successfully:", result);
     } catch (error) {
       console.error("Upload failed:", error);
       toast.error("Gagal mengunggah gambar!");
     }
   };
-  
-  
-  
 
   return (
     <>
@@ -247,7 +260,11 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
                   )}
 
                   <Box>
-                    <Button onClick={handleDialogOpen} variant="contained" sx={{ color: "#fff", marginTop: 2 }}>
+                    <Button
+                      onClick={handleDialogOpen}
+                      variant="contained"
+                      sx={{ color: "#fff", marginTop: 2 }}
+                    >
                       Unggah Gambar
                     </Button>
                   </Box>
@@ -548,7 +565,6 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
                                 />
                               </ListItem>
                             </Box>
-
                             <Box flex={1} pr={2}>
                               <ListItem>
                                 <ListItemText
@@ -579,9 +595,86 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
                       width: "100%",
                     }}
                   >
-                    <Typography variant="h5" gutterBottom>
-                      Detail Fasilitas
-                    </Typography>
+                    <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                      <IconBed size={"2rem"} />
+                      <Typography variant="h5" gutterBottom>
+                        Detail Harga Tipe Kamar
+                      </Typography>
+                    </Box>
+                    <Divider sx={{ my: 2 }} />
+                    <Box>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "start",
+                          width: "100%",
+                          gap: 2, // Memberikan jarak antar elemen
+                        }}
+                      >
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                        >
+                          {" "}
+                          {/* Menyesuaikan jarak */}
+                          <Typography variant="h6">
+                            Tipe Kamar Double:
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                            {new Intl.NumberFormat("id-ID", {
+                              style: "currency",
+                              currency: "IDR",
+                            }).format(paketDetail.hargaDouble)}
+                          </Typography>
+                        </Box>
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                        >
+                          {" "}
+                          {/* Menyesuaikan jarak */}
+                          <Typography variant="h6">
+                            Tipe Kamar Triple:
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                            {new Intl.NumberFormat("id-ID", {
+                              style: "currency",
+                              currency: "IDR",
+                            }).format(paketDetail.hargaTriple)}
+                          </Typography>
+                        </Box>
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                        >
+                          {" "}
+                          {/* Menyesuaikan jarak */}
+                          <Typography variant="h6">
+                            Tipe Kamar Quad:
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                            {new Intl.NumberFormat("id-ID", {
+                              style: "currency",
+                              currency: "IDR",
+                            }).format(paketDetail.hargaQuad)}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Box
+                    sx={{
+                      mt: 3,
+                      display: "flex",
+                      justifyContent: "center",
+                      flexDirection: "column",
+                      width: "100%",
+                    }}
+                  >
+                    <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                      <IconAlignBoxLeftMiddle size={"2rem"} />
+                      <Typography variant="h5" gutterBottom>
+                        Detail Fasilitas
+                      </Typography>
+                    </Box>
                     <Divider sx={{ my: 2 }} />
                     <Box>
                       <Box
@@ -635,44 +728,44 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
           )}
         </Card>
         <Dialog open={openDialog} onClose={handleDialogClose}>
-        <DialogTitle>Upload File</DialogTitle>
-        <DialogContent>
-          <FileUploaderSingle
-            onFileUpload={(file) => {
-            setUploadedFile(file); // Simpan file yang diunggah ke state
-            }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDialogClose} color="primary">
-            Cancel
-          </Button>
-          <Button
-            onClick={async () => {
-              if (uploadedFile) {
-                // Ensure `id` is a number
-                const numericId = typeof id === "string" ? parseInt(id, 10) : id;
-                await handleFileUpload(uploadedFile, numericId);
-              } else {
-                console.error("No file uploaded.");
-                // Optionally, show an error message to the user
-              }
-            
-              // Reset file after upload
-              setUploadedFile(null);
-            
-              // Close the dialog after the upload is complete
-              handleDialogClose();
-            }}
-            
-            color="primary"
-            variant="contained"
-            sx={{ color: "white" }}
-          >
-            Simpan
-          </Button>
-        </DialogActions>
-      </Dialog>
+          <DialogTitle>Upload File</DialogTitle>
+          <DialogContent>
+            <FileUploaderSingle
+              onFileUpload={(file) => {
+                setUploadedFile(file); // Simpan file yang diunggah ke state
+              }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDialogClose} color="primary">
+              Cancel
+            </Button>
+            <Button
+              onClick={async () => {
+                if (uploadedFile) {
+                  // Ensure `id` is a number
+                  const numericId =
+                    typeof id === "string" ? parseInt(id, 10) : id;
+                  await handleFileUpload(uploadedFile, numericId);
+                } else {
+                  console.error("No file uploaded.");
+                  // Optionally, show an error message to the user
+                }
+
+                // Reset file after upload
+                setUploadedFile(null);
+
+                // Close the dialog after the upload is complete
+                handleDialogClose();
+              }}
+              color="primary"
+              variant="contained"
+              sx={{ color: "white" }}
+            >
+              Simpan
+            </Button>
+          </DialogActions>
+        </Dialog>
       </PageContainer>
     </>
   );
