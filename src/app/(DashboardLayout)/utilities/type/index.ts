@@ -181,9 +181,10 @@ export enum Jabatan {
 export type JenisDokumen = {
   id: number;
   nama_dokumen: string;
-  file?: string;
+  file?: string | null;
   lampiran: boolean;
   action?: string;
+  actionEvent?: string;
   jamaah_id?: number;
 };
 

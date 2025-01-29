@@ -282,8 +282,8 @@ const JamaahDetailTable = ({
       header: "Jenis Dokumen",
       enableColumnFilter: false,
     }),
-    columnHelper.accessor("action", {
-      id: "action",
+    columnHelper.accessor("actionEvent", {
+      id: "actionEvent",
       cell: ({ row }) => {
         const rowData = row.original;
         return (
