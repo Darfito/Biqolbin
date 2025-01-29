@@ -143,6 +143,7 @@ export const getJamaahAction = async (): Promise<JamaahInterface[]> => {
 };
 
 export const getJamaahCabangAction = async (cabang:number): Promise<JamaahInterface[]> => {
+  console.log("tersekusi pada cabang", cabang);
   const supabase = createClient();
 
   // Mengambil data Jamaah beserta relasi Paket, hotel, dan Kontak Darurat
@@ -184,7 +185,7 @@ export const getJamaahCabangAction = async (cabang:number): Promise<JamaahInterf
   `).eq("cabang_id", cabang);
 
   if (error) {
-    console.error("Error fetching Jamaah data:", error);
+    console.error("Error fetching Jamaah data cabang:", error);
     throw new Error(error.message);
   }
 
@@ -224,6 +225,7 @@ export const createJamaahAction = async (formValues: JamaahInterface) => {
         varianKamar: formValues.varianKamar,
         berangkat: formValues.berangkat,
         selesai: formValues.selesai,
+        cabang_id: formValues.cabang_id,
       })
       .select("id") // Ambil ID Jamaah yang baru dibuat
       .single();

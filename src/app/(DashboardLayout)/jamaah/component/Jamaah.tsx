@@ -23,10 +23,11 @@ import CustomHeader from "../../layout/header/CustomHeader";
 export type JamaahProps = {
   paketData: PaketInterface[];
   jamaahData: JamaahInterface[];
+  cabang_id: number;
 };
 
 
-const Jamaah = ({ paketData, jamaahData }: JamaahProps) => {
+const Jamaah = ({ paketData, jamaahData, cabang_id }: JamaahProps) => {
   const [selectedYear, setSelectedYear] = useState<string | null>(
     new Date().getFullYear().toString()
   );
@@ -129,7 +130,7 @@ const Jamaah = ({ paketData, jamaahData }: JamaahProps) => {
       </Grid>
       <PageContainer title="Jamaah">
         <Box sx={{ margin: "20px", display: "flex", justifyContent: "end" }}>
-          <FormJamaah paketData={paketData || []} />
+          <FormJamaah paketData={paketData || []} cabang_id={cabang_id} />
         </Box>
         <Card sx={{ mt: 2 }}>
           <JamaahTable data={filteredJamaahData} />

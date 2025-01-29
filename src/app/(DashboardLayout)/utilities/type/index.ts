@@ -120,6 +120,7 @@ export enum JenisPenerbangan {
 export interface JamaahInterface {
   id?: number;
   nama: string;
+  cabang_id?: number;
   created_at?: string;
   tanggalLahir: Date;
   ayahKandung: string;

@@ -127,13 +127,15 @@ type FormType = {
   berangkat: string;
   selesai: string;
   status: StatusKepergian;
+  cabang_id: number
 };
 
 type FormJamaahProps = {
   paketData: PaketInterface[];
+  cabang_id: number;
 };
 
-export default function FormJamaah({ paketData }: FormJamaahProps) {
+export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
   const [open, setOpen] = useState(false);
 
   const [formValues, setFormValues] = useState<FormType>({
@@ -180,6 +182,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
     berangkat: "",
     selesai: "",
     status: "Dijadwalkan",
+    cabang_id: cabang_id || 0
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
 
@@ -318,6 +321,7 @@ export default function FormJamaah({ paketData }: FormJamaahProps) {
       berangkat: "",
       selesai: "",
       status: "Dijadwalkan",
+      cabang_id: cabang_id || 0
     });
   };
 

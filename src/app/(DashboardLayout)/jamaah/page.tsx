@@ -27,6 +27,8 @@ export default async function JamaahPage() {
       roleUser = userDetails?.[0].role || "";
     }
 
+    console.log("cabangUser", cabangUser);
+
     // Daftar role yang diizinkan
   const allowedRoles = ["Admin", "Superadmin", "Divisi General Affair", "Finance & Accounting"]
 
@@ -44,6 +46,7 @@ export default async function JamaahPage() {
       jamaahData = (await getJamaahAction()) ?? [];
     } else {
       jamaahData = (await getJamaahCabangAction(cabangUser)) ?? [];
+      console.log("jamaahData per cabang", jamaahData);
     }
   } catch (error) {
     console.error("Error fetching data:", error);
@@ -56,7 +59,7 @@ export default async function JamaahPage() {
 
   return (
     <>
-      <Jamaah paketData={stablePaketData} jamaahData={stableJamaahData} />
+      <Jamaah paketData={stablePaketData} jamaahData={stableJamaahData} cabang_id={cabangUser} />
     </>
   );
 }
