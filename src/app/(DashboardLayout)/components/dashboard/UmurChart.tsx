@@ -4,39 +4,48 @@ import React, { useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCard";
 import dynamic from "next/dynamic";
-
-// Menambahkan data dummy untuk jamaah
-const dummyJamaahData = [
-  { age: 22 },
-  { age: 30 },
-  { age: 28 },
-  { age: 45 },
-  { age: 23 },
-  { age: 35 },
-  { age: 50 },
-  { age: 20 },
-  { age: 38 },
-  { age: 55 },
-];
-
+import { JamaahInterface } from "../../utilities/type";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-const UmurCategoryChart = () => {
+interface UmurCategoryChartProps {
+  filteredJamaahData: JamaahInterface[]; // Data jamaah dari luar
+}
+
+const UmurCategoryChart = ({filteredJamaahData}: UmurCategoryChartProps) => {
+  const formatTanggalLahir = (tanggalLahir: string | Date): string => {
+    return typeof tanggalLahir === "string"
+      ? tanggalLahir // Jika sudah string, langsung gunakan
+      : tanggalLahir.toISOString().split("T")[0]; // Jika Date, konversi ke YYYY-MM-DD
+  };
+
+  // Fungsi untuk menghitung umur dari tanggal lahir
+  const hitungUmur = (tanggalLahir: string | Date): number => {
+    const birthDate = new Date(formatTanggalLahir(tanggalLahir));
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--; // Jika belum melewati hari ulang tahun tahun ini, kurangi 1
+    }
+    return age;
+  };
+
   // Kategorikan umur jamaah
   const categorizeAge = (age: number) => {
-    if (age < 25) return "Under 25";
+    if (age < 25) return "Dibawah 25";
     if (age >= 25 && age <= 40) return "25-40";
-    return "Above 40";
+    return "Diatas 40";
   };
 
   // Hitung jumlah jamaah berdasarkan kategori umur
-  const ageCategories = ["Under 25", "25-40", "Above 40"];
+  const ageCategories = ["Dibawah 25", "25-40", "Diatas 40"];
 
   const ageCounts = ageCategories.map((category) => {
-    return dummyJamaahData.filter(
-      (item) => categorizeAge(item.age) === category
+    return filteredJamaahData.filter(
+      (item) => categorizeAge(hitungUmur(item.tanggalLahir)) === category
     ).length;
   });
+
 
   // Chart color
   const theme = useTheme();
@@ -59,7 +68,7 @@ const UmurCategoryChart = () => {
       bar: {
         horizontal: false,
         barHeight: "60%",
-        columnWidth: "42%",
+        columnWidth: "50%",
         borderRadius: [6],
         borderRadiusApplication: "end",
         borderRadiusWhenStacked: "all",
@@ -122,7 +131,7 @@ const UmurCategoryChart = () => {
         options={optionsBarChart}
         series={seriesBarChart}
         type="bar"
-        height={370}
+        height={386}
         width={"100%"}
       />
     </DashboardCard>

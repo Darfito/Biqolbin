@@ -49,6 +49,7 @@ interface FormErrors {
   id?: string;
   nama?: string;
   ayahKandung?: string;
+  tanggalLahir?: string;
   noTelp?: string;
   // kontakDarurat?: string[];
   email?: string;
@@ -69,6 +70,7 @@ interface FormErrors {
 const formSchema = v.object({
   nama: v.pipe(v.string(), v.nonEmpty("Nama harus diisi")),
   ayahKandung: v.pipe(v.string(), v.nonEmpty("Nama Ayah Kandung harus diisi")),
+  tanggalLahir: v.date(),
   noTelp: v.pipe(v.string(), v.nonEmpty("No Telp harus diisi")),
   email: v.pipe(v.string(), v.nonEmpty("Email harus diisi")),
   jenisKelamin: v.pipe(v.string(), v.nonEmpty("Jenis Kelamin harus diisi")),
@@ -290,7 +292,28 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
                   />
                 </RadioGroup>
               </FormControl>
-
+              <CustomTextField
+                fullWidth
+                label="Tanggal Lahir"
+                type="date"
+                required
+                disabled={!isEditing}
+                value={
+                  formValues.tanggalLahir instanceof Date
+                    ? formValues.tanggalLahir.toISOString().split("T")[0]
+                    : formValues.tanggalLahir || "" // Jika sudah string, langsung pakai
+                }
+                InputLabelProps={{
+                  shrink: true, // Memastikan label tetap di atas
+                }}
+                onChange={(e: { target: { value: string } }) =>
+                  setFormValues({
+                    ...formValues,
+                    tanggalLahir: new Date(e.target.value),
+                  })
+                }
+                sx={{ marginBottom: 2 }}
+              />
               <CustomTextField
                 fullWidth
                 label="Tempat Lahir"

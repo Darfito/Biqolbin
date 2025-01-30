@@ -53,7 +53,7 @@ const Menuitems = [
     title: "Cabang",
     icon: IconMapPin2,
     href: "/cabang",
-    role: ["Admin", "Superadmin"]
+    role: ["Superadmin"]
   },
 ];
 

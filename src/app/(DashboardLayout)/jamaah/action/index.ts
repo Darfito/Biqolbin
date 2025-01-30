@@ -14,6 +14,7 @@ export const mapJamaahData = (data: any): JamaahInterface[] => {
     nama: item.nama,
     created_at: item.created_at,
     ayahKandung: item.ayahKandung,
+    tanggalLahir: item.tanggalLahir,
     noTelp: item.noTelp,
     kontakDarurat: item.KontakDarurat.map((contact: any) => ({
       id: contact.id,
