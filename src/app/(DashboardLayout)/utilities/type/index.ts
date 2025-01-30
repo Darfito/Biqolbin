@@ -154,7 +154,7 @@ export interface UserInterface {
   role: Jabatan;
   penempatan: CabangInterface;
   alamatCabang: string;
-  password: string;
+  password?: string;
   cabang_id?: number
   confirmPassword?: string;
   action?: string;
