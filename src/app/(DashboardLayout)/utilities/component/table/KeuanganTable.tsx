@@ -190,12 +190,12 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
       cell: (info) => info.getValue(),
       header: "Nama",
     }),
-    columnHelper.accessor("namaPaket", {
+    columnHelper.accessor("Paket.nama", {
       cell: (info) => info.getValue(),
       header: "Nama Paket",
       enableColumnFilter: true,
     }),
-    columnHelper.accessor("jenisPaket", {
+    columnHelper.accessor("Paket.jenis", {
       cell: (info) => info.getValue(),
       header: "Jenis Paket",
       enableColumnFilter: true,

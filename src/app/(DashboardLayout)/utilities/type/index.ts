@@ -23,8 +23,8 @@ export interface KeuanganInterface {
   created_at?: string;
   Jamaah: JamaahInterface;
   Paket: PaketInterface;
-  namaPaket?: string;
-  jenisPaket?: string;
+  // namaPaket?: string;
+  // jenisPaket?: string;
   metodePembayaran: MetodePembayaranType;
   uangMuka?: number;
   totalTagihan: number;
@@ -37,6 +37,10 @@ export interface KeuanganInterface {
   action?: string; // Optional field for action
   Cicilan?: CicilanType[];
   paket_id?: number;
+  statusPenjadwalan: StatusKepergian;
+  visa?: string;
+  statusAktif?: boolean;
+  varianKamar: TipeKamar;
 }
 
 export type CicilanType = {
@@ -131,18 +135,19 @@ export interface JamaahInterface {
   jenisKelamin: JenisKelamin;
   tempatLahir: string;
   pernikahan: boolean;
+  provinsi: string;
   alamat: string;
   kewarganegaraan: boolean;
   pekerjaan: string;
   // kursiRoda: boolean;
   riwayatPenyakit: string;
   jenisDokumen: JenisDokumen[];
-  jenisPaket?: PaketInterface;
+  // jenisPaket?: PaketInterface;
   // varianKamar: TipeKamar;
   // berangkat: string; // tanggal berangkat dari paket
   // selesai: string; // tanggal pulang dari paket
   // status: StatusKepergian;
-  paket_id?: number;
+  // paket_id?: number;
 }
 
 // ! INTERFACE USER
@@ -197,7 +202,7 @@ export type KontakDaruratType = {
   relasiLain?: string;
 };
 
-export type StatusKepergian = "Berangkat" | "Dijadwalkan" | "Selesai";
+export type StatusKepergian = "Belum Dijadwalkan" | "Berangkat" | "Dijadwalkan" | "Selesai";
 
 export enum KontakDaruratRelation {
   Ayah = "Ayah",
@@ -222,4 +227,17 @@ export enum TipeKamar {
   QUAD = "QUAD",
   TRIPLE = "TRIPLE",
   DOUBLE = "DOUBLE",
+  PILIHVARIANKAMAR = "PILIH VARIAN KAMAR",
 }
+
+
+export const provinces = [
+  "Aceh", "Sumatera Utara", "Sumatera Barat", "Riau", "Kepulauan Riau", "Jambi", 
+  "Sumatera Selatan", "Bangka Belitung", "Bengkulu", "Lampung",
+  "DKI Jakarta", "Banten", "Jawa Barat", "Jawa Tengah", "DI Yogyakarta", "Jawa Timur",
+  "Kalimantan Barat", "Kalimantan Tengah", "Kalimantan Selatan", "Kalimantan Timur", "Kalimantan Utara",
+  "Sulawesi Utara", "Gorontalo", "Sulawesi Tengah", "Sulawesi Barat", "Sulawesi Selatan", "Sulawesi Tenggara",
+  "Bali", "Nusa Tenggara Barat", "Nusa Tenggara Timur",
+  "Maluku", "Maluku Utara", "Papua", "Papua Barat", "Papua Tengah", 
+  "Papua Pegunungan", "Papua Selatan", "Papua Barat Daya"
+];

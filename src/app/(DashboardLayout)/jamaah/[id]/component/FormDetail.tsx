@@ -31,6 +31,7 @@ import {
   KontakDaruratType,
   Maskapai,
   PaketInterface,
+  provinces,
   StatusKepergian,
   TipeKamar,
 } from "@/app/(DashboardLayout)/utilities/type";
@@ -60,6 +61,7 @@ interface FormErrors {
   // varianKamar?: string;
   kewarganegaraan?: string;
   pekerjaan?: string;
+  provinsi?: string;
   // kursiRoda?: string;
   riwayatPenyakit?: string;
   // berangkat?: string;
@@ -71,7 +73,7 @@ const formSchema = v.object({
   NIK: v.pipe(v.number()),
   nama: v.pipe(v.string(), v.nonEmpty("Nama harus diisi")),
   ayahKandung: v.pipe(v.string(), v.nonEmpty("Nama Ayah Kandung harus diisi")),
-  tanggalLahir: v.date(),
+  // tanggalLahir: v.date(),
   noTelp: v.pipe(v.string(), v.nonEmpty("No Telp harus diisi")),
   email: v.pipe(v.string(), v.nonEmpty("Email harus diisi")),
   jenisKelamin: v.pipe(v.string(), v.nonEmpty("Jenis Kelamin harus diisi")),
@@ -92,7 +94,7 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
   const [formValues, setFormValues] = useState<JamaahInterface>(
     jamaahData || {
       id: 0,
-      NIK:0,
+      NIK: 0,
       nama: "",
       ayahKandung: "",
       noTelp: "",
@@ -109,6 +111,7 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
       jenisKelamin: JenisKelamin.LakiLaki,
       tempatLahir: "",
       pernikahan: false,
+      provinsi: "",
       alamat: "",
       // varianKamar: TipeKamar.DOUBLE,
       kewarganegaraan: true,
@@ -236,17 +239,17 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
           <Grid container spacing={3}>
             {/* Kolom Kiri */}
             <Grid item xs={12} sm={6}>
-            <CustomTextField
-                  fullWidth
-                  label="Nomor Induk Kependudukan"
-                  value={formValues.NIK}
-                  required
-                  disabled={!isEditing}
-                  onChange={(e: { target: { value: number } }) =>
-                    setFormValues({ ...formValues, NIK: e.target.value })
-                  }
-                  sx={{ marginBottom: 2 }}
-                />
+              <CustomTextField
+                fullWidth
+                label="Nomor Induk Kependudukan"
+                value={formValues.NIK}
+                required
+                disabled={!isEditing}
+                onChange={(e: { target: { value: number } }) =>
+                  setFormValues({ ...formValues, NIK: e.target.value })
+                }
+                sx={{ marginBottom: 2 }}
+              />
               <CustomTextField
                 fullWidth
                 label="Nama Jamaah"
@@ -309,19 +312,26 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
                 value={
                   formValues.tanggalLahir instanceof Date
                     ? formValues.tanggalLahir.toISOString().split("T")[0]
-                    : formValues.tanggalLahir || "" // Jika sudah string, langsung pakai
+                    : formValues.tanggalLahir
+                    ? new Date(formValues.tanggalLahir)
+                        .toISOString()
+                        .split("T")[0] // Pastikan dalam format yang benar
+                    : ""
                 }
                 InputLabelProps={{
-                  shrink: true, // Memastikan label tetap di atas
+                  shrink: true,
                 }}
-                onChange={(e: { target: { value: string } }) =>
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setFormValues({
                     ...formValues,
-                    tanggalLahir: new Date(e.target.value),
+                    tanggalLahir: e.target.value
+                      ? new Date(e.target.value)
+                      : new Date(), // Pastikan selalu Date
                   })
                 }
                 sx={{ marginBottom: 2 }}
               />
+
               <CustomTextField
                 fullWidth
                 label="Tempat Lahir"
@@ -346,6 +356,24 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
 
             {/* Kolom Kanan */}
             <Grid item xs={12} sm={6}>
+              <Autocomplete
+                fullWidth
+                options={provinces}
+                disabled={!isEditing}
+                value={formValues.provinsi || ""}
+                onChange={(event, newValue) =>
+                  setFormValues({ ...formValues, provinsi: newValue || "" })
+                }
+                renderInput={(params) => (
+                  <CustomTextField
+                    {...params}
+                    value={formValues.provinsi}
+                    label="Provinsi Asal"
+                    required
+                    sx={{ marginBottom: 2 }}
+                  />
+                )}
+              />
               <CustomTextField
                 fullWidth
                 multiline
@@ -358,34 +386,34 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
                 disabled={!isEditing}
                 sx={{ marginBottom: 2 }}
               />
-                <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
-                  <FormLabel component="legend">Status Menikah</FormLabel>
-                  <RadioGroup
-                    value={
-                      formValues.pernikahan ? "Sudah Menikah" : "Belum Menikah"
-                    }
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      handleInputChange(
-                        "pernikahan",
-                        e.target.value === "Sudah Menikah"
-                      )
-                    }
-                    row
-                  >
-                    <FormControlLabel
-                      value="Sudah Menikah"
-                      control={<Radio />}
-                      label="Sudah Menikah"
-                      disabled={!isEditing}
-                    />
-                    <FormControlLabel
-                      value="Belum Menikah"
-                      control={<Radio />}
-                      label="Belum Menikah"
-                      disabled={!isEditing}
-                    />
-                  </RadioGroup>
-                </FormControl>
+              <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
+                <FormLabel component="legend">Status Menikah</FormLabel>
+                <RadioGroup
+                  value={
+                    formValues.pernikahan ? "Sudah Menikah" : "Belum Menikah"
+                  }
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    handleInputChange(
+                      "pernikahan",
+                      e.target.value === "Sudah Menikah"
+                    )
+                  }
+                  row
+                >
+                  <FormControlLabel
+                    value="Sudah Menikah"
+                    control={<Radio />}
+                    label="Sudah Menikah"
+                    disabled={!isEditing}
+                  />
+                  <FormControlLabel
+                    value="Belum Menikah"
+                    control={<Radio />}
+                    label="Belum Menikah"
+                    disabled={!isEditing}
+                  />
+                </RadioGroup>
+              </FormControl>
               <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
                 <FormLabel component="legend">Status Bernegara</FormLabel>
                 <RadioGroup
@@ -452,7 +480,7 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
                 disabled={!isEditing}
               />
               {/* Jenis Paket */}
-              <Autocomplete
+              {/* <Autocomplete
                 fullWidth
                 options={paketData}
                 disabled={!isEditing}
@@ -483,7 +511,7 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
                     sx={{ marginBottom: 2 }}
                   />
                 )}
-              />
+              /> */}
               {/* <CustomTextField
                 select
                 fullWidth

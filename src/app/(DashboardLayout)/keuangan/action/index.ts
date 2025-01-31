@@ -21,11 +21,10 @@ export const getKeuanganAction = async (): Promise<KeuanganInterface[]> => {
   const { data, error } = await supabase.from("Keuangan").select(`
     *,
     Jamaah (
-      id,
-      nama,
-      ayahKandung,
-      noTelp,
-      varianKamar
+      *
+    ),
+    Paket (
+      *
     )
   `);
 
@@ -65,13 +64,12 @@ export const getKeuanganActionCabang = async (
       .from("Keuangan")
       .select(`*,
       Jamaah (
-      id,
-      nama,
-      ayahKandung,
-      noTelp,
-      varianKamar
-    )
-      `)
+        *
+      ),
+      Paket (
+        *
+      )
+    `)
       .in("jamaah_id", jamaahIdArray);
 
     if (error) {
@@ -84,6 +82,7 @@ export const getKeuanganActionCabang = async (
     return [];
   }
 };
+
 
 /**
  * Fetch a Keuangan by ID with relasi Jamaah, Paket, Hotel, and Cicilan.
@@ -104,8 +103,7 @@ export const getKeuanganByIdAction = async (id: number) => {
         id,
         nama,
         ayahKandung,
-        noTelp,
-        varianKamar
+        noTelp
       ),
       Paket (
         id,
@@ -179,9 +177,8 @@ export const createKeuaganAction = async (formValues: KeuanganInterface) => {
     .from("Keuangan")
     .insert({
       jamaah_id: formValues.Jamaah.id, // Relasi ke Jamaah
+      varianKamar: formValues.varianKamar,
       metodePembayaran: formValues.metodePembayaran,
-      namaPaket: nama, // Mengirimkan namaPaket
-      jenisPaket: jenis, // Mengirimkan jenisPaket
       paket_id: formValues.Paket.id, // Relasi ke Paket
       uangMuka: formValues.uangMuka,
       totalTagihan: formValues.totalTagihan,
@@ -191,6 +188,7 @@ export const createKeuaganAction = async (formValues: KeuanganInterface) => {
       banyaknyaCicilan: formValues.banyaknyaCicilan,
       catatanPembayaran: formValues.catatanPembayaran,
       status: formValues.status,
+      statusPenjadwalan: formValues.statusPenjadwalan,
     })
     .select("id") // Ambil ID Keuangan yang baru dibuat
     .single();
@@ -223,8 +221,6 @@ export const updateKeuanganAction = async (formValues: KeuanganInterface) => {
     .from("Keuangan")
     .update({
       metodePembayaran: formValues.metodePembayaran,
-      namaPaket: formValues.namaPaket,
-      jenisPaket: formValues.jenisPaket,
       uangMuka: formValues.uangMuka ?? 0,
       totalTagihan: formValues.totalTagihan ?? 0,
       sisaTagihan: formValues.sisaTagihan ?? 0,

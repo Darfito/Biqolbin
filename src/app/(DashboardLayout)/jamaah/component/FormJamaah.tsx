@@ -21,6 +21,7 @@ import {
   KontakDaruratType,
   Maskapai,
   PaketInterface,
+  provinces,
   StatusKepergian,
   TipeKamar,
 } from "../../utilities/type";
@@ -84,6 +85,7 @@ const formSchema = v.object({
   jenisKelamin: v.pipe(v.string(), v.nonEmpty("Jenis Kelamin harus diisi")),
   tempatLahir: v.pipe(v.string(), v.nonEmpty("Tempat Lahir harus diisi")),
   pernikahan: v.boolean(),
+  provinsi: v.pipe(v.string(), v.nonEmpty("Provinsi harus diisi")),
   alamat: v.pipe(v.string(), v.nonEmpty("Alamat harus diisi")),
   // varianKamar: v.pipe(v.string(), v.nonEmpty("Varian Kamar harus diisi")),
   kewarganegaraan: v.boolean(),
@@ -119,6 +121,7 @@ type FormType = {
   jenisKelamin: JenisKelamin;
   tempatLahir: string;
   pernikahan: boolean;
+  provinsi: string;
   alamat: string;
   // varianKamar: TipeKamar;
   kewarganegaraan: boolean;
@@ -130,7 +133,7 @@ type FormType = {
   // berangkat: string;
   // selesai: string;
   // status: StatusKepergian;
-  cabang_id: number
+  cabang_id: number;
 };
 
 type FormJamaahProps = {
@@ -155,6 +158,7 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
     jenisKelamin: JenisKelamin.LakiLaki,
     tempatLahir: "",
     pernikahan: false,
+    provinsi: "",
     alamat: "",
     // varianKamar: TipeKamar.DOUBLE,
     kewarganegaraan: true,
@@ -183,7 +187,7 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
     //   hargaTriple: 0,
     //   hargaQuad: 0,
     // },
-    cabang_id: cabang_id || 0
+    cabang_id: cabang_id || 0,
   });
   // const [formErrors, setFormErrors] = useState<FormErrors>({});
 
@@ -292,6 +296,7 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
       jenisKelamin: JenisKelamin.LakiLaki,
       tempatLahir: "",
       pernikahan: false,
+      provinsi: "",
       alamat: "",
       // varianKamar: TipeKamar.DOUBLE,
       kewarganegaraan: true,
@@ -320,7 +325,7 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
       //   hargaTriple: 0,
       //   hargaQuad: 0,
       // },
-      cabang_id: cabang_id || 0
+      cabang_id: cabang_id || 0,
     });
   };
 
@@ -467,6 +472,22 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
               </Grid>
               {/* Kolom Kanan */}
               <Grid item xs={12} sm={6}>
+                <Autocomplete
+                  fullWidth
+                  options={provinces}
+                  value={formValues.provinsi || ""}
+                  onChange={(event, newValue) =>
+                    setFormValues({ ...formValues, provinsi: newValue || "" })
+                  }
+                  renderInput={(params) => (
+                    <CustomTextField
+                      {...params}
+                      label="Provinsi Asal"
+                      required
+                      sx={{ marginBottom: 2 }}
+                    />
+                  )}
+                />
                 <CustomTextField
                   multiline
                   rows={4}

@@ -53,7 +53,7 @@ const Keuangan = ({ paketData, jamaahData, keuanganData }: KeuanganProps) => {
   });
 
   // Statistik berdasarkan data keuangan yang difilter
-  const totalJamaah = filteredKeuanganData.length;
+  const totalTransaksi = filteredKeuanganData.length;
   const belumLunas = filteredKeuanganData.filter(
     (keuangan) => keuangan.status !== StatusType.LUNAS
   ).length;
@@ -64,8 +64,8 @@ const Keuangan = ({ paketData, jamaahData, keuanganData }: KeuanganProps) => {
   // Konfigurasi score card
   const dynamicScoreCardKeuangan: CardStatsProps[] = [
     {
-      title: "Total Jamaah",
-      total: totalJamaah,
+      title: "Total Transaksi",
+      total: totalTransaksi,
       color: "#3E74FF",
       icon: IconUser,
     },
@@ -83,10 +83,12 @@ const Keuangan = ({ paketData, jamaahData, keuanganData }: KeuanganProps) => {
     },
   ];
 
+  console.log("filteredKeuanganData", filteredKeuanganData);
+
   return (
     <>
       <CustomHeader
-        titleModule={"Keuangan"}
+        titleModule={"Daftar Umroh & Keuangan"}
         selectedFilter={selectedYear || ""}
         handleFilterChange={(year: string) => setSelectedYear(year)} // Fungsi untuk mengubah tahun
       />
