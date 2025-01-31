@@ -149,7 +149,7 @@ const Dashboard = ({ roleUser, cabang, cabangData }: DashboardProps) => {
         <Grid container spacing={3}>
           <Grid item xs={12} lg={12}>
             <Box sx={{ width: "100%", marginTop: "20px" }}>
-              <GapKeberangkatan keuanganData={[]} />
+              <GapKeberangkatan jamaahData={filteredJamaahData || []} />
             </Box>
           </Grid>
         </Grid>

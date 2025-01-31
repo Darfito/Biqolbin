@@ -29,7 +29,7 @@ const Menuitems = [
   },
   {
     id: uniqueId(),
-    title: "Keuangan",
+    title: "Daftar Umroh & Keuangan",
     icon: IconMoneybag,
     href: "/keuangan",
     role: ["Admin", "Superadmin", "Divisi General Affair", "Finance & Accounting"]

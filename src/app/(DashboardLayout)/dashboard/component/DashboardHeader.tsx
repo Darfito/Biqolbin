@@ -42,7 +42,7 @@ const DashboardHeader = ({
             </Typography>
             {roleUser === "Superadmin" && (
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <Typography
+                {/* <Typography
                   variant="subtitle1"
                   sx={{
                     color: "secondary.main",
@@ -50,7 +50,7 @@ const DashboardHeader = ({
                   }}
                 >
                   {cabangText}
-                </Typography>
+                </Typography> */}
                 <GlobalFilterDropdown
                   onSelectedFilter={handleFilterChange} // Fungsi callback
                   selectedFilterName={selectedFilter} // Filter saat ini

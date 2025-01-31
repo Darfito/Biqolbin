@@ -526,7 +526,7 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
               <CustomTextField
                 select
                 fullWidth
-                label="Varian Kamar"
+                label="Status Perjalanan"
                 value={formValues.status}
                 onChange={(e: { target: { value: string } }) =>
                   setFormValues({
