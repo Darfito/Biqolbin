@@ -50,7 +50,7 @@ export const createUserAction = async (formValues: UserInterface) => {
     // Signup ke Supabase Auth
     const { data: authData, error: signupError } = await supabase.auth.signUp({
       email: formValues.email,
-      password: formValues.password,
+      password: formValues.password || "",
     });
 
     if (signupError) {
