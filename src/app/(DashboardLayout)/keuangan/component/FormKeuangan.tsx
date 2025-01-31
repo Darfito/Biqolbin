@@ -428,7 +428,7 @@ export default function FormKeuangan({
       </Button>
       <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
         <form onSubmit={handleSubmit}>
-          <DialogTitle>Tambah Item Pembayaran</DialogTitle>
+          <DialogTitle>Tambah Item Umroh</DialogTitle>
           <DialogContent
             sx={{
               display: "flex",
@@ -438,7 +438,7 @@ export default function FormKeuangan({
               gap: "1rem",
             }}
           >
-            <DialogContentText>Masukkan detail pembayaran.</DialogContentText>
+            <DialogContentText>Masukkan detail Umroh.</DialogContentText>
 
             <Autocomplete
               fullWidth

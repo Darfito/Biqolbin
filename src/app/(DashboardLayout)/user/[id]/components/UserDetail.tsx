@@ -42,23 +42,44 @@ const UserDetail = ({ id, breadcrumbLinks,role,cabangData }: UserDetailProps) =>
         try {
           const { data, error } = await supabase
             .from("Users")
-            .select("*") // Get all necessary fields, not just 'id'
+            .select(`
+              id,
+              email,
+              nama,
+              jenisKelamin,
+              noTelp,
+              role,
+              alamatCabang,
+              cabang_id,
+              Cabang (
+                id,
+                nama,
+                alamatCabang,
+                cabang_lat,
+                cabang_long
+              )
+            `)
             .eq("id", id)
-            .single(); // To get only one user based on the id
-
+            .single(); // Memastikan hanya satu pengguna
+  
           if (error) {
-            console.error("Error fetching user:", error);
+            console.error("Error fetching user:", error.message);
           } else {
-            setCurrentData(data); // Set fetched user data
+            setCurrentData({
+              ...data,
+              // Ambil objek tunggal dari array (jika array) atau langsung assign
+              penempatan: Array.isArray(data?.Cabang) ? data?.Cabang[0] || null : data?.Cabang || null,
+            });
           }
         } catch (err) {
           console.error("Error fetching data:", err);
         }
       }
     };
-
+  
     fetchUserData();
   }, [id, currentData, supabase]);
+  
 
   // Toggle the isEditing state
   const handleEditClick = () => {
@@ -70,7 +91,7 @@ const UserDetail = ({ id, breadcrumbLinks,role,cabangData }: UserDetailProps) =>
   };
 
    // Handle dialog actions
-   const handleCancelEdit = () => {
+  const handleCancelEdit = () => {
     setIsEditing(false); // Exit edit mode
     setOpenDialog(false); // Close dialog
   };

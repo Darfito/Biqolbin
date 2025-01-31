@@ -2,10 +2,13 @@
 
 import { Grid, Card, Box, Typography } from "@mui/material";
 import GlobalFilterDropdown from "./GlobalFilterDropdown";
+import YearDropdown from "../../layout/header/YearDropdown";
 
 interface DashboardHeaderProps {
   filters: any[];
   selectedFilter: string;
+  selectedYear: string;
+  handleFilterYearChange: (filterName: string) => void;
   handleFilterChange: (filterName: string) => void;
   cabangText: string;
   roleUser: string;
@@ -14,6 +17,8 @@ interface DashboardHeaderProps {
 const DashboardHeader = ({
   filters,
   selectedFilter,
+  selectedYear,
+  handleFilterYearChange,
   handleFilterChange,
   cabangText,
   roleUser,
@@ -37,7 +42,7 @@ const DashboardHeader = ({
             </Typography>
             {roleUser === "Superadmin" && (
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <Typography
+                {/* <Typography
                   variant="subtitle1"
                   sx={{
                     color: "secondary.main",
@@ -45,12 +50,13 @@ const DashboardHeader = ({
                   }}
                 >
                   {cabangText}
-                </Typography>
+                </Typography> */}
                 <GlobalFilterDropdown
                   onSelectedFilter={handleFilterChange} // Fungsi callback
                   selectedFilterName={selectedFilter} // Filter saat ini
                   data={filters}
                 />
+                <YearDropdown selectedYear={selectedYear} onYearChange={handleFilterYearChange} />
               </Box>
             )}
           </Box>
