@@ -11,6 +11,7 @@ import { JamaahInterface } from "../../utilities/type";
 export const mapJamaahData = (data: any): JamaahInterface[] => {
   return data.map((item: any) => ({
     id: item.id,
+    NIK: item.NIK,
     nama: item.nama,
     created_at: item.created_at,
     ayahKandung: item.ayahKandung,
@@ -28,42 +29,10 @@ export const mapJamaahData = (data: any): JamaahInterface[] => {
     tempatLahir: item.tempatLahir,
     pernikahan: item.pernikahan,
     alamat: item.alamat,
-    varianKamar: item.varianKamar,
     kewarganegaraan: item.kewarganegaraan,
     pekerjaan: item.pekerjaan,
-    kursiRoda: item.kursiRoda,
     riwayatPenyakit: item.riwayatPenyakit,
     jenisDokumen: item.jenisDokumen || [],
-    jenisPaket: {
-      id: item.Paket.id,
-      nama: item.Paket.nama,
-      jenis: item.Paket.jenis,
-      maskapai: item.Paket.maskapai,
-      customMaskapai: item.Paket.customMaskapai || undefined,
-      noPenerbangan: item.Paket.noPenerbangan || undefined,
-      jenisPenerbangan: item.Paket.jenisPenerbangan,
-      keretaCepat: item.Paket.keretaCepat,
-      tglKeberangkatan: item.Paket.tglKeberangkatan,
-      tglKepulangan: item.Paket.tglKepulangan,
-      fasilitas: item.Paket.fasilitas || [],
-      namaMuthawif: item.Paket.namaMuthawif,
-      noTelpMuthawif: item.Paket.noTelpMuthawif,
-      hargaDouble: item.Paket.hargaDouble,
-      hargaTriple: item.Paket.hargaTriple,
-      hargaQuad: item.Paket.hargaQuad,
-      gambar_url: item.Paket.gambar_url || undefined,
-      Hotel: item.Paket.Hotel.map((hotel: any) => ({
-        id: hotel.id,
-        namaHotel: hotel.namaHotel,
-        alamatHotel: hotel.alamatHotel,
-        ratingHotel: hotel.ratingHotel,
-        tanggalCheckIn: hotel.tanggalCheckIn,
-        tanggalCheckOut: hotel.tanggalCheckOut,
-      })),
-    },
-    berangkat: item.Paket.tglKeberangkatan,
-    selesai: item.Paket.tglKepulangan,
-    status: item.status,
   }));
 };
 
@@ -101,32 +70,6 @@ export const getJamaahAction = async (): Promise<JamaahInterface[]> => {
       no_telp,
       hubungan,
       relasi_lain
-    ),
-    Paket (
-      id,
-      nama,
-      maskapai,
-      customMaskapai,
-      noPenerbangan,
-      jenisPenerbangan,
-      keretaCepat,
-      hargaDouble,
-      hargaTriple,
-      hargaQuad,
-      tglKeberangkatan,
-      tglKepulangan,
-      fasilitas,
-      namaMuthawif,
-      noTelpMuthawif,
-      jenis,
-      Hotel (
-        id,
-        namaHotel,
-        alamatHotel,
-        ratingHotel,
-        tanggalCheckIn,
-        tanggalCheckOut
-      )
     )
   `);
 
@@ -147,7 +90,7 @@ export const getJamaahCabangAction = async (cabang:number): Promise<JamaahInterf
   console.log("tersekusi pada cabang", cabang);
   const supabase = createClient();
 
-  // Mengambil data Jamaah beserta relasi Paket, hotel, dan Kontak Darurat
+  // Mengambil data Jamaah beserta relasi dan Kontak Darurat
   const { data, error } = await supabase.from("Jamaah").select(`
     *,
     KontakDarurat (
@@ -156,32 +99,6 @@ export const getJamaahCabangAction = async (cabang:number): Promise<JamaahInterf
       no_telp,
       hubungan,
       relasi_lain
-    ),
-    Paket (
-      id,
-      nama,
-      maskapai,
-      customMaskapai,
-      noPenerbangan,
-      jenisPenerbangan,
-      keretaCepat,
-      hargaDouble,
-      hargaTriple,
-      hargaQuad,
-      tglKeberangkatan,
-      tglKepulangan,
-      fasilitas,
-      namaMuthawif,
-      noTelpMuthawif,
-      jenis,
-      Hotel (
-        id,
-        namaHotel,
-        alamatHotel,
-        ratingHotel,
-        tanggalCheckIn,
-        tanggalCheckOut
-      )
     )
   `).eq("cabang_id", cabang);
 
@@ -199,6 +116,32 @@ export const getJamaahCabangAction = async (cabang:number): Promise<JamaahInterf
 };
 
 
+// Paket (
+//   id,
+//   nama,
+//   maskapai,
+//   customMaskapai,
+//   noPenerbangan,
+//   jenisPenerbangan,
+//   keretaCepat,
+//   hargaDouble,
+//   hargaTriple,
+//   hargaQuad,
+//   tglKeberangkatan,
+//   tglKepulangan,
+//   fasilitas,
+//   namaMuthawif,
+//   noTelpMuthawif,
+//   jenis,
+//   Hotel (
+//     id,
+//     namaHotel,
+//     alamatHotel,
+//     ratingHotel,
+//     tanggalCheckIn,
+//     tanggalCheckOut
+//   )
+
 
 export const createJamaahAction = async (formValues: JamaahInterface) => {
   console.log("Form Values di create:", formValues);
@@ -208,6 +151,7 @@ export const createJamaahAction = async (formValues: JamaahInterface) => {
     const { data: jamaahData, error: jamaahError } = await supabase
       .from("Jamaah")
       .insert({
+        NIK:formValues.NIK,
         nama: formValues.nama,
         tanggalLahir: formValues.tanggalLahir,
         ayahKandung: formValues.ayahKandung,
@@ -216,22 +160,25 @@ export const createJamaahAction = async (formValues: JamaahInterface) => {
         jenisKelamin: formValues.jenisKelamin,
         tempatLahir: formValues.tempatLahir,
         pernikahan: formValues.pernikahan,
-        paket_id: formValues.jenisPaket.id, // Relasi ke Paket
         alamat: formValues.alamat,
         kewarganegaraan: formValues.kewarganegaraan,
         pekerjaan: formValues.pekerjaan,
-        kursiRoda: formValues.kursiRoda,
         riwayatPenyakit: formValues.riwayatPenyakit,
-        status: formValues.status,
-        varianKamar: formValues.varianKamar,
-        berangkat: formValues.berangkat,
-        selesai: formValues.selesai,
+        // paket_id: formValues.jenisPaket.id, // Relasi ke Paket
+        // kursiRoda: formValues.kursiRoda,
+        // status: formValues.status,
+        // varianKamar: formValues.varianKamar,
+        // berangkat: formValues.berangkat,
+        // selesai: formValues.selesai,
         cabang_id: formValues.cabang_id,
       })
       .select("id") // Ambil ID Jamaah yang baru dibuat
       .single();
 
-    if (jamaahError) throw jamaahError;
+      
+      if (jamaahError) {
+        console.log("kena error di jamaah create")
+      throw jamaahError;}
 
     const jamaahId = jamaahData.id;
 
@@ -255,8 +202,8 @@ export const createJamaahAction = async (formValues: JamaahInterface) => {
     // Step 3: Insert Jenis Dokumen
     const dokumenList =
       formValues.pernikahan === true
-        ? ["KTP", "Paspor", "Buku Nikah", "Kartu Keluarga", "Visa", "Pas Foto"]
-        : ["KTP", "Paspor", "Kartu Keluarga", "Visa", "Pas Foto"];
+        ? ["KTP", "Paspor", "Buku Nikah", "Kartu Keluarga", "Pas Foto"]
+        : ["KTP", "Paspor", "Kartu Keluarga", "Pas Foto"];
 
     const dokumenEntries = dokumenList.map((dokumen) => ({
       jamaah_id: jamaahId,
@@ -299,6 +246,7 @@ export const updateJamaahAction = async (jamaahData: JamaahInterface) => {
     const { data: jamaahDataUpdated, error: jamaahError } = await supabase
       .from("Jamaah")
       .update({
+        NIK: jamaahData.NIK,
         nama: jamaahData.nama,
         ayahKandung: jamaahData.ayahKandung,
         tanggalLahir: jamaahData.tanggalLahir,
@@ -310,12 +258,12 @@ export const updateJamaahAction = async (jamaahData: JamaahInterface) => {
         alamat: jamaahData.alamat,
         kewarganegaraan: jamaahData.kewarganegaraan,
         pekerjaan: jamaahData.pekerjaan,
-        kursiRoda: jamaahData.kursiRoda,
+        // kursiRoda: jamaahData.kursiRoda,
         riwayatPenyakit: jamaahData.riwayatPenyakit,
-        status: jamaahData.status,
-        varianKamar: jamaahData.varianKamar,
-        berangkat: jamaahData.berangkat,
-        selesai: jamaahData.selesai,
+        // status: jamaahData.status,
+        // varianKamar: jamaahData.varianKamar,
+        // berangkat: jamaahData.berangkat,
+        // selesai: jamaahData.selesai,
       })
       .eq("id", jamaahData.id)
       .select()
@@ -358,7 +306,7 @@ export const updateJamaahAction = async (jamaahData: JamaahInterface) => {
         
 
         if (checkError || !existingKontakDarurat) {
-          console.log("Hotel ID not found, inserting as new hotel:", contact);
+          console.log("Kontak Darurat ID not found, inserting as new Kontak Darurat:", contact);
         // Insert new Kontak Darurat
         const { error: kontakInsertError } = await supabase
           .from("KontakDarurat")

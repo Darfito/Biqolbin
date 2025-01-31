@@ -56,6 +56,8 @@ export default async function JamaahPage() {
   const stablePaketData = paketData || [];
   const stableJamaahData = jamaahData || [];
 
+  console.log('stableJamaahData', stableJamaahData);
+
 
   return (
     <>

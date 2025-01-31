@@ -41,7 +41,7 @@ const Jamaah = ({ paketData, jamaahData, cabang_id }: JamaahProps) => {
     return null; // Jangan render apa-apa sampai komponen dimuat di klien
   }
 
-  console.log("jamaah data", jamaahData);
+  console.log("jamaah data ", jamaahData);
 
   const filteredJamaahData = jamaahData.filter((jamaah) => {
     if (!jamaah.created_at) return false;
@@ -50,45 +50,45 @@ const Jamaah = ({ paketData, jamaahData, cabang_id }: JamaahProps) => {
     return year === selectedYear;
   });
 
-  console.log("jamaah terfilter", filteredJamaahData);
+  console.log("jamaah terfilter di page jamaah", filteredJamaahData);
 
-  const totalJamaah = jamaahData.length;
-  const belumBerangkat = jamaahData.filter(
-    (jamaah) => jamaah.status === "Berangkat"
-  ).length;
-  const berangkat = jamaahData.filter(
-    (jamaah) => jamaah.status === "Berangkat"
-  ).length;
-  const selesai = jamaahData.filter(
-    (jamaah) => jamaah.status === "Selesai"
-  ).length;
+  // const totalJamaah = jamaahData.length;
+  // const belumBerangkat = jamaahData.filter(
+  //   (jamaah) => jamaah.status === "Berangkat"
+  // ).length;
+  // const berangkat = jamaahData.filter(
+  //   (jamaah) => jamaah.status === "Berangkat"
+  // ).length;
+  // const selesai = jamaahData.filter(
+  //   (jamaah) => jamaah.status === "Selesai"
+  // ).length;
 
-  const dynamicScoreCardJamaah = [
-    {
-      title: "Total Jamaah",
-      total: totalJamaah,
-      color: "#3E74FF",
-      icon: IconUser,
-    },
-    {
-      title: "Belum Berangkat",
-      total: belumBerangkat,
-      color: "#F54F63",
-      icon: IconLuggage,
-    },
-    {
-      title: "Berangkat",
-      total: berangkat,
-      color: "#ADD8E6",
-      icon: IconPlaneInflight,
-    },
-    {
-      title: "Selesai",
-      total: selesai,
-      color: "#4CAF50",
-      icon: IconPlaneArrival,
-    },
-  ];
+  // const dynamicScoreCardJamaah = [
+  //   {
+  //     title: "Total Jamaah",
+  //     total: totalJamaah,
+  //     color: "#3E74FF",
+  //     icon: IconUser,
+  //   },
+  //   {
+  //     title: "Belum Berangkat",
+  //     total: belumBerangkat,
+  //     color: "#F54F63",
+  //     icon: IconLuggage,
+  //   },
+  //   {
+  //     title: "Berangkat",
+  //     total: berangkat,
+  //     color: "#ADD8E6",
+  //     icon: IconPlaneInflight,
+  //   },
+  //   {
+  //     title: "Selesai",
+  //     total: selesai,
+  //     color: "#4CAF50",
+  //     icon: IconPlaneArrival,
+  //   },
+  // ];
 
   console.log("Paket data:", paketData);
   console.log("Jamaah data:", jamaahData);
@@ -114,7 +114,7 @@ const Jamaah = ({ paketData, jamaahData, cabang_id }: JamaahProps) => {
         container
         spacing={3}
       >
-        {dynamicScoreCardJamaah.map((data, index) => {
+        {/* {dynamicScoreCardJamaah.map((data, index) => {
           const IconComponent = data.icon; // Ambil komponen icon langsung
           return (
             <Grid item sm={12} md={5} lg={3} key={index}>
@@ -126,7 +126,7 @@ const Jamaah = ({ paketData, jamaahData, cabang_id }: JamaahProps) => {
               />
             </Grid>
           );
-        })}
+        })} */}
       </Grid>
       <PageContainer title="Jamaah">
         <Box sx={{ margin: "20px", display: "flex", justifyContent: "end" }}>

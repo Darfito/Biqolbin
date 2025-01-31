@@ -119,6 +119,7 @@ export enum JenisPenerbangan {
 // ! JAMAAH TYPE
 export interface JamaahInterface {
   id?: number;
+  NIK: number;
   nama: string;
   cabang_id?: number;
   created_at?: string;
@@ -131,16 +132,16 @@ export interface JamaahInterface {
   tempatLahir: string;
   pernikahan: boolean;
   alamat: string;
-  varianKamar: TipeKamar;
   kewarganegaraan: boolean;
   pekerjaan: string;
-  kursiRoda: boolean;
+  // kursiRoda: boolean;
   riwayatPenyakit: string;
   jenisDokumen: JenisDokumen[];
-  jenisPaket: PaketInterface;
-  berangkat: string; // tanggal berangkat dari paket
-  selesai: string; // tanggal pulang dari paket
-  status: StatusKepergian;
+  jenisPaket?: PaketInterface;
+  // varianKamar: TipeKamar;
+  // berangkat: string; // tanggal berangkat dari paket
+  // selesai: string; // tanggal pulang dari paket
+  // status: StatusKepergian;
   paket_id?: number;
 }
 

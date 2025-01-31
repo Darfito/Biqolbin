@@ -44,6 +44,7 @@ import { JamaahInterface } from "../../type";
 import ActionButton from "./components/ActionButton";
 import { deleteJamaahAction } from "@/app/(DashboardLayout)/jamaah/action";
 import ConfirmDialog from "../dialog/ConfirmDialog";
+import dayjs from "dayjs";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -167,25 +168,30 @@ const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
       cell: (info) => info.getValue(),
       header: "NAMA",
     }),
-
-    // Kolom Paket
-    columnHelper.accessor("jenisPaket.nama", {
-      id: "jenisPaket",
+    
+    columnHelper.accessor("NIK", {
+      id: "NIK",
       cell: (info) => info.getValue(),
-      header: "PAKET",
+      header: "NIK",
     }),
-
-    // Kolom No Telp
-
-    columnHelper.accessor("noTelp", {
-      id: "noTelp",
-      cell: (info) => {
-        const phoneNumber = info.getValue(); // Dapatkan nomor telepon dari data
-        const formattedNumber = phoneNumber.replace(/^0/, "62"); // Ubah awalan "0" ke "62"
-        const waLink = `https://wa.me/${formattedNumber}`; // Buat tautan WhatsApp
-
-        return (
-          <Link
+    // // Kolom Paket
+    // columnHelper.accessor("jenisPaket.nama", {
+      //   id: "jenisPaket",
+      //   cell: (info) => info.getValue(),
+      //   header: "PAKET",
+      // }),
+      
+      // Kolom No Telp
+      
+      columnHelper.accessor("noTelp", {
+        id: "noTelp",
+        cell: (info) => {
+          const phoneNumber = info.getValue(); // Dapatkan nomor telepon dari data
+          const formattedNumber = phoneNumber.replace(/^0/, "62"); // Ubah awalan "0" ke "62"
+          const waLink = `https://wa.me/${formattedNumber}`; // Buat tautan WhatsApp
+          
+          return (
+            <Link
             href={waLink}
             target="_blank"
             rel="noopener noreferrer"
@@ -198,68 +204,73 @@ const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
                 color: "#f18b04", // Warna lebih gelap saat hover
               },
             }}
-          >
+            >
             {phoneNumber}
           </Link>
         );
       },
       header: "NO TELP",
     }),
-
+    
     // Kolom Email
     columnHelper.accessor("email", {
       id: "email",
       cell: (info) => info.getValue(),
       header: "EMAIL",
     }),
-
+    
     // Kolom Jenis Kelamin
     columnHelper.accessor("jenisKelamin", {
       id: "jenisKelamin",
       cell: (info) => info.getValue(),
       header: "JENIS KELAMIN",
     }),
-
+    
     // Kolom Status (Berangkat dan Selesai)
-    columnHelper.accessor("status", {
-      id: "status",
-      cell: (info) => {
-        const status = info.getValue();
-        let chipColor = "";
-
-        switch (status) {
-          case "Berangkat":
-            chipColor = "lightblue"; // Biru muda
-            break;
-          case "Selesai":
-            chipColor = "green"; // Hijau
-            break;
-          default:
-            chipColor = "#F18B04"; // Warna khusus untuk Dijadwalkan
-            break;
-        }
-
-        return (
-          <Chip
-            label={
-              status === "Berangkat" || status === "Selesai"
-                ? status
-                : "Dijadwalkan"
-            }
-            sx={{
-              backgroundColor: chipColor,
-              color: "white", // Warna teks putih agar kontras
-              fontWeight: "bold",
-            }}
-          />
-        );
-      },
-      header: "Status",
-    }),
-
-    // Kolom Aksi
-    columnHelper.display({
-      id: "action",
+    // columnHelper.accessor("status", {
+      //   id: "status",
+      //   cell: (info) => {
+        //     const status = info.getValue();
+        //     let chipColor = "";
+        
+        //     switch (status) {
+          //       case "Berangkat":
+          //         chipColor = "lightblue"; // Biru muda
+          //         break;
+          //       case "Selesai":
+          //         chipColor = "green"; // Hijau
+          //         break;
+          //       default:
+          //         chipColor = "#F18B04"; // Warna khusus untuk Dijadwalkan
+          //         break;
+          //     }
+          
+          //     return (
+            //       <Chip
+            //         label={
+              //           status === "Berangkat" || status === "Selesai"
+              //             ? status
+              //             : "Dijadwalkan"
+              //         }
+              //         sx={{
+                //           backgroundColor: chipColor,
+                //           color: "white", // Warna teks putih agar kontras
+                //           fontWeight: "bold",
+                //         }}
+                //       />
+                //     );
+                //   },
+                //   header: "Status",
+                // }),
+                
+                columnHelper.accessor("created_at", {
+                  id: "created_at",
+                  cell: (info) => dayjs(info.getValue()).format("YYYY-MM-DD"),
+                  header: "Tanggal Daftar",
+                }),
+                // Kolom Aksi
+                columnHelper.display({
+                  id: "action",
       header: "Detail",
       cell: (info) => {
         const handleOpenDialog = (rowData: JamaahInterface) => {

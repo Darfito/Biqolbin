@@ -57,17 +57,18 @@ interface FormErrors {
   tempatLahir?: string;
   pernikahan?: string;
   alamat?: string;
-  varianKamar?: string;
+  // varianKamar?: string;
   kewarganegaraan?: string;
   pekerjaan?: string;
-  kursiRoda?: string;
+  // kursiRoda?: string;
   riwayatPenyakit?: string;
-  berangkat?: string;
-  selesai?: string;
-  status?: string;
+  // berangkat?: string;
+  // selesai?: string;
+  // status?: string;
 }
 
 const formSchema = v.object({
+  NIK: v.pipe(v.number()),
   nama: v.pipe(v.string(), v.nonEmpty("Nama harus diisi")),
   ayahKandung: v.pipe(v.string(), v.nonEmpty("Nama Ayah Kandung harus diisi")),
   tanggalLahir: v.date(),
@@ -77,17 +78,12 @@ const formSchema = v.object({
   tempatLahir: v.pipe(v.string(), v.nonEmpty("Tempat Lahir harus diisi")),
   pernikahan: v.boolean(),
   alamat: v.pipe(v.string(), v.nonEmpty("Alamat harus diisi")),
-  varianKamar: v.pipe(v.string(), v.nonEmpty("Varian Kamar harus diisi")),
   kewarganegaraan: v.boolean(),
   pekerjaan: v.pipe(v.string(), v.nonEmpty("Pekerjaan harus diisi")),
-  kursiRoda: v.boolean(),
   riwayatPenyakit: v.pipe(
     v.string(),
     v.nonEmpty("Riwayat Penyakit harus diisi")
   ),
-  berangkat: v.string(),
-  selesai: v.string(),
-  status: v.string(),
 });
 
 const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
@@ -96,6 +92,7 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
   const [formValues, setFormValues] = useState<JamaahInterface>(
     jamaahData || {
       id: 0,
+      NIK:0,
       nama: "",
       ayahKandung: "",
       noTelp: "",
@@ -113,36 +110,36 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
       tempatLahir: "",
       pernikahan: false,
       alamat: "",
-      varianKamar: TipeKamar.DOUBLE,
+      // varianKamar: TipeKamar.DOUBLE,
       kewarganegaraan: true,
       pekerjaan: "",
-      kursiRoda: false,
+      // kursiRoda: false,
       riwayatPenyakit: "",
       jenisDokumen: [],
-      jenisPaket: {
-        id: 0, // Mengambil hanya properti yang relevan
-        nama: "",
-        jenis: JenisPaket.REGULAR,
-        maskapai: Maskapai.SAUDIA_ARABIA,
-        customMaskapai: "",
-        jenisPenerbangan: JenisPenerbangan.DIRECT,
-        noPenerbangan: "",
-        keretaCepat: false,
-        tglKeberangkatan: "",
-        tglKepulangan: "",
-        fasilitas: [],
-        publish: false,
-        namaMuthawif: "",
-        noTelpMuthawif: "",
-        Hotel: [],
-        gambar_url: "",
-        hargaDouble: 0,
-        hargaTriple: 0,
-        hargaQuad: 0,
-      },
-      berangkat: "",
-      selesai: "",
-      status: "Dijadwalkan",
+      // jenisPaket: {
+      //   id: 0, // Mengambil hanya properti yang relevan
+      //   nama: "",
+      //   jenis: JenisPaket.REGULAR,
+      //   maskapai: Maskapai.SAUDIA_ARABIA,
+      //   customMaskapai: "",
+      //   jenisPenerbangan: JenisPenerbangan.DIRECT,
+      //   noPenerbangan: "",
+      //   keretaCepat: false,
+      //   tglKeberangkatan: "",
+      //   tglKepulangan: "",
+      //   fasilitas: [],
+      //   publish: false,
+      //   namaMuthawif: "",
+      //   noTelpMuthawif: "",
+      //   Hotel: [],
+      //   gambar_url: "",
+      //   hargaDouble: 0,
+      //   hargaTriple: 0,
+      //   hargaQuad: 0,
+      // },
+      // berangkat: "",
+      // selesai: "",
+      // status: "Dijadwalkan",
     }
   );
 
@@ -239,6 +236,17 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
           <Grid container spacing={3}>
             {/* Kolom Kiri */}
             <Grid item xs={12} sm={6}>
+            <CustomTextField
+                  fullWidth
+                  label="Nomor Induk Kependudukan"
+                  value={formValues.NIK}
+                  required
+                  disabled={!isEditing}
+                  onChange={(e: { target: { value: number } }) =>
+                    setFormValues({ ...formValues, NIK: e.target.value })
+                  }
+                  sx={{ marginBottom: 2 }}
+                />
               <CustomTextField
                 fullWidth
                 label="Nama Jamaah"
@@ -334,7 +342,10 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
                 disabled={!isEditing}
                 sx={{ marginBottom: 2 }}
               />
+            </Grid>
 
+            {/* Kolom Kanan */}
+            <Grid item xs={12} sm={6}>
               <CustomTextField
                 fullWidth
                 multiline
@@ -347,9 +358,8 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
                 disabled={!isEditing}
                 sx={{ marginBottom: 2 }}
               />
-              <Box>
                 <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
-                  <FormLabel component="legend">Status Perkawinan</FormLabel>
+                  <FormLabel component="legend">Status Menikah</FormLabel>
                   <RadioGroup
                     value={
                       formValues.pernikahan ? "Sudah Menikah" : "Belum Menikah"
@@ -376,11 +386,6 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
                     />
                   </RadioGroup>
                 </FormControl>
-              </Box>
-            </Grid>
-
-            {/* Kolom Kanan */}
-            <Grid item xs={12} sm={6}>
               <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
                 <FormLabel component="legend">Status Bernegara</FormLabel>
                 <RadioGroup
@@ -417,7 +422,7 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
                 sx={{ marginBottom: 2 }}
                 disabled={!isEditing}
               />
-              <FormControlLabel
+              {/* <FormControlLabel
                 control={
                   <Checkbox
                     checked={formValues.kursiRoda}
@@ -432,7 +437,7 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
                 }
                 label="Butuh Kursi Roda"
                 sx={{ marginBottom: 2 }}
-              />
+              /> */}
               <CustomTextField
                 fullWidth
                 label="Riwayat Penyakit"
@@ -479,7 +484,7 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
                   />
                 )}
               />
-              <CustomTextField
+              {/* <CustomTextField
                 select
                 fullWidth
                 label="Varian Kamar"
@@ -496,10 +501,10 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
                 <MenuItem value={TipeKamar.QUAD}>QUAD</MenuItem>
                 <MenuItem value={TipeKamar.TRIPLE}>TRIPLE</MenuItem>
                 <MenuItem value={TipeKamar.DOUBLE}>DOUBLE</MenuItem>
-              </CustomTextField>
+              </CustomTextField> */}
 
               {/* Tanggal Berangkat */}
-              <CustomTextField
+              {/* <CustomTextField
                 fullWidth
                 disabled
                 label="Tanggal Berangkat"
@@ -509,9 +514,9 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
                   shrink: true, // Memastikan label tetap di atas
                 }}
                 sx={{ marginBottom: 2 }}
-              />
+              /> */}
               {/* Tanggal Selesai */}
-              <CustomTextField
+              {/* <CustomTextField
                 fullWidth
                 disabled
                 label="Tanggal Selesai"
@@ -521,9 +526,9 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
                   shrink: true, // Memastikan label tetap di atas
                 }}
                 sx={{ marginBottom: 2 }}
-              />
+              /> */}
 
-              <CustomTextField
+              {/* <CustomTextField
                 select
                 fullWidth
                 label="Status Perjalanan"
@@ -540,7 +545,7 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
                 <MenuItem value="Dijadwalkan">Dijadwalkan</MenuItem>
                 <MenuItem value="Berangkat">Berangkat</MenuItem>
                 <MenuItem value="Selesai">Selesai</MenuItem>
-              </CustomTextField>
+              </CustomTextField> */}
             </Grid>
 
             {/* Kontak Darurat */}
