@@ -70,6 +70,7 @@ type FormType = {
   kursiRoda: boolean;
   visa?: string;
   statusPenjadwalan: StatusKepergian;
+  statusAktif: boolean;
 };
 
 // Valibot Schema
@@ -131,6 +132,7 @@ const initialFormValues: FormType = {
     pekerjaan: "",
     riwayatPenyakit: "",
     jenisDokumen: [],
+    statusAktif: true,
   },
   Paket: {
     id: 0,
@@ -167,6 +169,7 @@ const initialFormValues: FormType = {
   kursiRoda: false,
   statusPenjadwalan: "Belum Dijadwalkan",
   varianKamar: TipeKamar.PILIHVARIANKAMAR,
+  statusAktif: true,
 };
 
 const FormDetail = ({
@@ -215,6 +218,7 @@ const FormDetail = ({
         statusPenjadwalan:
           keuanganData.statusPenjadwalan || "Belum Dijadwalkan",
         varianKamar: keuanganData.varianKamar || TipeKamar.PILIHVARIANKAMAR,
+        statusAktif: keuanganData.statusAktif || false,
       });
     }
   }, [keuanganData, formValues.id]);

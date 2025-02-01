@@ -14,13 +14,6 @@ export const columnsJamaah: ColumnDef<JamaahInterface, any>[] = [
     header: "NAMA",
   }),
 
-  // Kolom Paket
-  columnHelper.accessor("jenisPaket.nama", {
-    id: "jenisPaket",
-    cell: (info) => info.getValue(),
-    header: "PAKET",
-  }),
-
   // Kolom No Telp
   columnHelper.accessor("noTelp", {
     id: "noTelp",
@@ -43,37 +36,37 @@ export const columnsJamaah: ColumnDef<JamaahInterface, any>[] = [
   }),
 
   // Kolom Status (Berangkat dan Selesai)
-  columnHelper.accessor("status", {
-    id: "status",
-    cell: (info) => {
-      const status = info.getValue();
-      let chipColor = "";
+  // columnHelper.accessor("status", {
+  //   id: "status",
+  //   cell: (info) => {
+  //     const status = info.getValue();
+  //     let chipColor = "";
   
-      switch (status) {
-        case "Berangkat":
-          chipColor = "lightblue"; // Biru muda
-          break;
-        case "Selesai":
-          chipColor = "green"; // Hijau
-          break;
-        default:
-          chipColor = "#F18B04"; // Warna khusus untuk Dijadwalkan
-          break;
-      }
+  //     switch (status) {
+  //       case "Berangkat":
+  //         chipColor = "lightblue"; // Biru muda
+  //         break;
+  //       case "Selesai":
+  //         chipColor = "green"; // Hijau
+  //         break;
+  //       default:
+  //         chipColor = "#F18B04"; // Warna khusus untuk Dijadwalkan
+  //         break;
+  //     }
   
-      return (
-        <Chip
-          label={status === "Berangkat" || status === "Selesai" ? status : "Dijadwalkan"}
-          sx={{
-            backgroundColor: chipColor,
-            color: "white", // Warna teks putih agar kontras
-            fontWeight: "bold",
-          }}
-        />
-      );
-    },
-    header: "Status",
-  }),
+  //     return (
+  //       <Chip
+  //         label={status === "Berangkat" || status === "Selesai" ? status : "Dijadwalkan"}
+  //         sx={{
+  //           backgroundColor: chipColor,
+  //           color: "white", // Warna teks putih agar kontras
+  //           fontWeight: "bold",
+  //         }}
+  //       />
+  //     );
+  //   },
+  //   header: "Status",
+  // }),
   
 
   // Kolom Aksi

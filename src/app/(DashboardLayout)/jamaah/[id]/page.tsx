@@ -27,7 +27,8 @@ export default async function DetailJamaah({
     riwayatPenyakit: "",
     jenisDokumen: [],
     NIK: 0,
-    provinsi: ""
+    provinsi: "",
+    statusAktif: true,
   };
 
   try {
