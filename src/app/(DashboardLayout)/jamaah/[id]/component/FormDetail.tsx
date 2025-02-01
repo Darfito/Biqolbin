@@ -93,7 +93,7 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [formValues, setFormValues] = useState<JamaahInterface>(
     jamaahData || {
-      id: 0,
+      id:"",
       NIK: 0,
       nama: "",
       ayahKandung: "",

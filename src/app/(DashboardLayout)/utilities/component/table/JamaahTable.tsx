@@ -149,7 +149,7 @@ const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
 
   const handleDelete = async () => {
     if (selectedRow) {
-      const result = await deleteJamaahAction(selectedRow.id ?? 0); // Eksekusi delete
+      const result = await deleteJamaahAction(Number(selectedRow.id ?? 0)); // Eksekusi delete
       if (result.success) {
         toast.success(`User with ID ${selectedRow.id} has been deleted.`);
       } else {

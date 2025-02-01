@@ -189,6 +189,7 @@ export const createKeuaganAction = async (formValues: KeuanganInterface) => {
       catatanPembayaran: formValues.catatanPembayaran,
       status: formValues.status,
       statusPenjadwalan: formValues.statusPenjadwalan,
+      kursiRoda: formValues.kursiRoda
     })
     .select("id") // Ambil ID Keuangan yang baru dibuat
     .single();
@@ -522,4 +523,22 @@ export const getFileUrl = async (keuanganId: number, cicilanKe: number) => {
   console.log("File URL:", data.lampiran);
 
   return { success: true, data };
+};
+
+
+export const getVisaUrl = async (jamaah_id: string): Promise<string | null> => {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("jenis_dokumen")
+    .select("file")
+    .eq("jamaah_id", jamaah_id)
+    .eq("nama_dokumen", "Visa")
+    .single();
+
+  if (error) {
+    console.error("Error fetching visa URL:", error);
+    return null; // Pastikan mengembalikan null jika ada error
+  }
+
+  return data?.file || null; // Mengembalikan URL atau null jika tidak ada data
 };

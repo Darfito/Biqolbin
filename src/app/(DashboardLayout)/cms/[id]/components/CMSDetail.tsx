@@ -738,7 +738,7 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
           </DialogContent>
           <DialogActions>
             <Button onClick={handleDialogClose} color="primary">
-              Cancel
+              Ya, Batalkan
             </Button>
             <Button
               onClick={async () => {

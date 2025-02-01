@@ -50,6 +50,7 @@ type FormType = {
   status: StatusType;
   varianKamar: TipeKamar;
   statusPenjadwalan: StatusKepergian;
+  kursiRoda: boolean;
 };
 
 // Valibot Schema
@@ -98,7 +99,7 @@ export default function FormKeuangan({
   const [jenisPaket, setJenisPaket] = useState<string>("");
   const [formValues, setFormValues] = useState<FormType>({
     Jamaah: {
-      id: 0,
+      id: "",
       NIK: 0,
       nama: "",
       ayahKandung: "",
@@ -153,6 +154,7 @@ export default function FormKeuangan({
     status: StatusType.BELUM_BAYAR,
     varianKamar: TipeKamar.PILIHVARIANKAMAR,
     statusPenjadwalan: "Belum Dijadwalkan",
+    kursiRoda: false
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
 
@@ -335,7 +337,7 @@ export default function FormKeuangan({
     // Reset all form values
     setFormValues({
       Jamaah: {
-        id: 0,
+        id: "",
         nama: "",
         ayahKandung: "",
         noTelp: "",
@@ -390,6 +392,7 @@ export default function FormKeuangan({
       status: StatusType.BELUM_BAYAR,
       varianKamar: TipeKamar.PILIHVARIANKAMAR,
       statusPenjadwalan: "Belum Dijadwalkan",
+      kursiRoda: false,
     });
 
     // Reset method selection

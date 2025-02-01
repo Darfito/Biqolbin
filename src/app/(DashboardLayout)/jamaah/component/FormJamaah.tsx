@@ -110,7 +110,7 @@ const formSchema = v.object({
 });
 
 type FormType = {
-  id: number;
+  id: string;
   NIK: number;
   nama: string;
   tanggalLahir: Date;
@@ -145,7 +145,7 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
   const [open, setOpen] = useState(false);
 
   const [formValues, setFormValues] = useState<FormType>({
-    id: 0,
+    id: "",
     NIK: 0,
     nama: "",
     tanggalLahir: new Date(),
@@ -278,7 +278,7 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
 
     // Reset all form values
     setFormValues({
-      id: 0,
+      id: "",
       NIK: 0,
       nama: "",
       tanggalLahir: new Date(),

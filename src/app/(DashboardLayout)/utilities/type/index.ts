@@ -38,9 +38,9 @@ export interface KeuanganInterface {
   Cicilan?: CicilanType[];
   paket_id?: number;
   statusPenjadwalan: StatusKepergian;
-  visa?: string;
   statusAktif?: boolean;
   varianKamar: TipeKamar;
+  kursiRoda: boolean;
 }
 
 export type CicilanType = {
@@ -69,6 +69,7 @@ export enum StatusType {
 // ! PAKET TYPE
 export interface PaketInterface {
   id?: number;
+  created_at?: string;
   nama: string;
   jenis: JenisPaket;
   maskapai: Maskapai; // Menggunakan enum Maskapai
@@ -89,6 +90,7 @@ export interface PaketInterface {
   gambar_url?: string;
   Hotel?: HotelType[];
   selectedFile?: File | null;
+  statusAktif?: boolean;
 }
 
 // ! TYPE HOTEL
@@ -122,7 +124,7 @@ export enum JenisPenerbangan {
 
 // ! JAMAAH TYPE
 export interface JamaahInterface {
-  id?: number;
+  id?: string;
   NIK: number;
   nama: string;
   cabang_id?: number;
