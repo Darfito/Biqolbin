@@ -442,7 +442,7 @@ const KeuanganDetailTable = ({
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDialogClose} color="primary">
-            Cancel
+            Ya, Batalkan
           </Button>
           <Button
             onClick={async () => {

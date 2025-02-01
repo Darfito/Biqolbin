@@ -14,41 +14,37 @@ import ClickAwayListener from "@mui/material/ClickAwayListener";
 import { IconChevronDown } from "@tabler/icons-react";
 import useMediaQuery from "@mui/material/useMediaQuery";
 
-interface YearDropdownProps {
-  selectedYear: string;
-  onYearChange: (year: string) => void;
+interface StatusDropdownProps {
+  selectedStatus: boolean;
+  onStatusChange: (status: boolean) => void;
 }
 
-const YearDropdown = ({ selectedYear, onYearChange }: YearDropdownProps) => {
-  // State tahun yang aman saat pertama kali render
+const StatusDropdown = ({ selectedStatus, onStatusChange }: StatusDropdownProps) => {
   const [open, setOpen] = useState<boolean>(false);
   const anchorRef = useRef<HTMLButtonElement | null>(null);
 
   // Responsive hook untuk layar kecil (mobile)
   const isMobile = useMediaQuery("(max-width: 768px)");
 
-
-  const years = Array.from({ length: 30 }, (_, index) => {
-    const currentYear = new Date().getFullYear();
-    return currentYear - index; // Daftar 30 tahun terakhir
-  });
+  const statusOptions = [
+    { label: "Aktif", value: true },
+    { label: "Tidak Aktif", value: false },
+  ];
 
   // Toggle dropdown
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
   };
 
-  const handleSelectYear = (year: number) => {
-    onYearChange(year.toString()); // Mengubah tahun yang dipilih
+  const handleSelectStatus = (status: boolean) => {
+    onStatusChange(status);
     setOpen(false);
   };
 
   // Handle keyboard navigation
   const handleListKeyDown = (event: KeyboardEvent) => {
-    if (event.key === "Tab") {
+    if (event.key === "Tab" || event.key === "Escape") {
       event.preventDefault();
-      setOpen(false);
-    } else if (event.key === "Escape") {
       setOpen(false);
     }
   };
@@ -57,7 +53,7 @@ const YearDropdown = ({ selectedYear, onYearChange }: YearDropdownProps) => {
   const prevOpen = useRef(open);
   useEffect(() => {
     if (prevOpen.current === true && open === false) {
-      anchorRef.current!.focus();
+      anchorRef.current?.focus();
     }
     prevOpen.current = open;
   }, [open]);
@@ -71,13 +67,13 @@ const YearDropdown = ({ selectedYear, onYearChange }: YearDropdownProps) => {
         aria-haspopup="true"
         onClick={handleToggle}
         sx={{
-          fontSize: isMobile ? "0.7rem" : "1rem",
+          fontSize: isMobile ? "0.8rem" : "1rem",
           padding: isMobile ? "8px 14px" : "6px 16px",
-          minWidth: isMobile ? "125px" : "auto",
+          minWidth: "125px",
           color: "white",
         }}
       >
-      {selectedYear || "Memuat tahun..."}
+        {selectedStatus ? "Aktif" : "Tidak Aktif"}
       </Button>
 
       <Popper
@@ -92,35 +88,25 @@ const YearDropdown = ({ selectedYear, onYearChange }: YearDropdownProps) => {
           <Fade
             {...TransitionProps}
             style={{
-              transformOrigin:
-                placement === "bottom-start" ? "left top" : "left bottom",
+              transformOrigin: placement === "bottom-start" ? "left top" : "left bottom",
             }}
           >
             <Paper
               sx={{
                 boxShadow: 3,
                 mt: 0.5,
-                width: isMobile ? "125px" : "125px",
-                backgroundColor: "white", // Non-tembus pandang
+                width: "150px",
+                backgroundColor: "white",
               }}
             >
               <ClickAwayListener onClickAway={() => setOpen(false)}>
-                <MenuList
-                  autoFocusItem={open}
-                  onKeyDown={handleListKeyDown}
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 1,
-                    paddingInlineStart: 2,
-                    fontSize: isMobile ? "0.7rem" : "0.75rem", // Ukuran font lebih kecil
-                    maxHeight: "150px", // Menambahkan batas tinggi agar bisa scroll
-                    overflowY: "auto", // Membuat list dapat digulir
-                  }}
-                >
-                  {years.map((year) => (
-                    <MenuItem key={year} onClick={() => handleSelectYear(year)}>
-                      {year}
+                <MenuList autoFocusItem={open} onKeyDown={handleListKeyDown}>
+                  {statusOptions.map((option) => (
+                    <MenuItem
+                      key={option.value.toString()}
+                      onClick={() => handleSelectStatus(option.value)}
+                    >
+                      {option.label}
                     </MenuItem>
                   ))}
                 </MenuList>
@@ -133,4 +119,4 @@ const YearDropdown = ({ selectedYear, onYearChange }: YearDropdownProps) => {
   );
 };
 
-export default YearDropdown;
+export default StatusDropdown;

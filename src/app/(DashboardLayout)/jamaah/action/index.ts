@@ -11,6 +11,7 @@ import { JamaahInterface } from "../../utilities/type";
 export const mapJamaahData = (data: any): JamaahInterface[] => {
   return data.map((item: any) => ({
     id: item.id,
+    NIK: item.NIK,
     nama: item.nama,
     created_at: item.created_at,
     ayahKandung: item.ayahKandung,
@@ -27,43 +28,13 @@ export const mapJamaahData = (data: any): JamaahInterface[] => {
     jenisKelamin: item.jenisKelamin,
     tempatLahir: item.tempatLahir,
     pernikahan: item.pernikahan,
+    provinsi: item.provinsi,
     alamat: item.alamat,
-    varianKamar: item.varianKamar,
     kewarganegaraan: item.kewarganegaraan,
     pekerjaan: item.pekerjaan,
-    kursiRoda: item.kursiRoda,
     riwayatPenyakit: item.riwayatPenyakit,
     jenisDokumen: item.jenisDokumen || [],
-    jenisPaket: {
-      id: item.Paket.id,
-      nama: item.Paket.nama,
-      jenis: item.Paket.jenis,
-      maskapai: item.Paket.maskapai,
-      customMaskapai: item.Paket.customMaskapai || undefined,
-      noPenerbangan: item.Paket.noPenerbangan || undefined,
-      jenisPenerbangan: item.Paket.jenisPenerbangan,
-      keretaCepat: item.Paket.keretaCepat,
-      tglKeberangkatan: item.Paket.tglKeberangkatan,
-      tglKepulangan: item.Paket.tglKepulangan,
-      fasilitas: item.Paket.fasilitas || [],
-      namaMuthawif: item.Paket.namaMuthawif,
-      noTelpMuthawif: item.Paket.noTelpMuthawif,
-      hargaDouble: item.Paket.hargaDouble,
-      hargaTriple: item.Paket.hargaTriple,
-      hargaQuad: item.Paket.hargaQuad,
-      gambar_url: item.Paket.gambar_url || undefined,
-      Hotel: item.Paket.Hotel.map((hotel: any) => ({
-        id: hotel.id,
-        namaHotel: hotel.namaHotel,
-        alamatHotel: hotel.alamatHotel,
-        ratingHotel: hotel.ratingHotel,
-        tanggalCheckIn: hotel.tanggalCheckIn,
-        tanggalCheckOut: hotel.tanggalCheckOut,
-      })),
-    },
-    berangkat: item.Paket.tglKeberangkatan,
-    selesai: item.Paket.tglKepulangan,
-    status: item.status,
+    statusAktif: item.statusAktif,
   }));
 };
 
@@ -101,32 +72,6 @@ export const getJamaahAction = async (): Promise<JamaahInterface[]> => {
       no_telp,
       hubungan,
       relasi_lain
-    ),
-    Paket (
-      id,
-      nama,
-      maskapai,
-      customMaskapai,
-      noPenerbangan,
-      jenisPenerbangan,
-      keretaCepat,
-      hargaDouble,
-      hargaTriple,
-      hargaQuad,
-      tglKeberangkatan,
-      tglKepulangan,
-      fasilitas,
-      namaMuthawif,
-      noTelpMuthawif,
-      jenis,
-      Hotel (
-        id,
-        namaHotel,
-        alamatHotel,
-        ratingHotel,
-        tanggalCheckIn,
-        tanggalCheckOut
-      )
     )
   `);
 
@@ -147,7 +92,7 @@ export const getJamaahCabangAction = async (cabang:number): Promise<JamaahInterf
   console.log("tersekusi pada cabang", cabang);
   const supabase = createClient();
 
-  // Mengambil data Jamaah beserta relasi Paket, hotel, dan Kontak Darurat
+  // Mengambil data Jamaah beserta relasi dan Kontak Darurat
   const { data, error } = await supabase.from("Jamaah").select(`
     *,
     KontakDarurat (
@@ -156,32 +101,6 @@ export const getJamaahCabangAction = async (cabang:number): Promise<JamaahInterf
       no_telp,
       hubungan,
       relasi_lain
-    ),
-    Paket (
-      id,
-      nama,
-      maskapai,
-      customMaskapai,
-      noPenerbangan,
-      jenisPenerbangan,
-      keretaCepat,
-      hargaDouble,
-      hargaTriple,
-      hargaQuad,
-      tglKeberangkatan,
-      tglKepulangan,
-      fasilitas,
-      namaMuthawif,
-      noTelpMuthawif,
-      jenis,
-      Hotel (
-        id,
-        namaHotel,
-        alamatHotel,
-        ratingHotel,
-        tanggalCheckIn,
-        tanggalCheckOut
-      )
     )
   `).eq("cabang_id", cabang);
 
@@ -200,6 +119,7 @@ export const getJamaahCabangAction = async (cabang:number): Promise<JamaahInterf
 
 
 
+
 export const createJamaahAction = async (formValues: JamaahInterface) => {
   console.log("Form Values di create:", formValues);
   const supabase = createClient();
@@ -208,6 +128,7 @@ export const createJamaahAction = async (formValues: JamaahInterface) => {
     const { data: jamaahData, error: jamaahError } = await supabase
       .from("Jamaah")
       .insert({
+        NIK:formValues.NIK,
         nama: formValues.nama,
         tanggalLahir: formValues.tanggalLahir,
         ayahKandung: formValues.ayahKandung,
@@ -216,22 +137,21 @@ export const createJamaahAction = async (formValues: JamaahInterface) => {
         jenisKelamin: formValues.jenisKelamin,
         tempatLahir: formValues.tempatLahir,
         pernikahan: formValues.pernikahan,
-        paket_id: formValues.jenisPaket.id, // Relasi ke Paket
+        provinsi: formValues.provinsi,
         alamat: formValues.alamat,
         kewarganegaraan: formValues.kewarganegaraan,
         pekerjaan: formValues.pekerjaan,
-        kursiRoda: formValues.kursiRoda,
         riwayatPenyakit: formValues.riwayatPenyakit,
-        status: formValues.status,
-        varianKamar: formValues.varianKamar,
-        berangkat: formValues.berangkat,
-        selesai: formValues.selesai,
+        statusAktif: formValues.statusAktif,
         cabang_id: formValues.cabang_id,
       })
       .select("id") // Ambil ID Jamaah yang baru dibuat
       .single();
 
-    if (jamaahError) throw jamaahError;
+      
+      if (jamaahError) {
+        console.log("kena error di jamaah create")
+      throw jamaahError;}
 
     const jamaahId = jamaahData.id;
 
@@ -255,8 +175,8 @@ export const createJamaahAction = async (formValues: JamaahInterface) => {
     // Step 3: Insert Jenis Dokumen
     const dokumenList =
       formValues.pernikahan === true
-        ? ["KTP", "Paspor", "Buku Nikah", "Kartu Keluarga", "Visa", "Pas Foto"]
-        : ["KTP", "Paspor", "Kartu Keluarga", "Visa", "Pas Foto"];
+        ? ["KTP", "Paspor", "Buku Nikah", "Kartu Keluarga", "Pas Foto"]
+        : ["KTP", "Paspor", "Kartu Keluarga", "Pas Foto"];
 
     const dokumenEntries = dokumenList.map((dokumen) => ({
       jamaah_id: jamaahId,
@@ -299,6 +219,7 @@ export const updateJamaahAction = async (jamaahData: JamaahInterface) => {
     const { data: jamaahDataUpdated, error: jamaahError } = await supabase
       .from("Jamaah")
       .update({
+        NIK: jamaahData.NIK,
         nama: jamaahData.nama,
         ayahKandung: jamaahData.ayahKandung,
         tanggalLahir: jamaahData.tanggalLahir,
@@ -307,15 +228,11 @@ export const updateJamaahAction = async (jamaahData: JamaahInterface) => {
         jenisKelamin: jamaahData.jenisKelamin,
         tempatLahir: jamaahData.tempatLahir,
         pernikahan: jamaahData.pernikahan,
+        provinsi: jamaahData.provinsi,
         alamat: jamaahData.alamat,
         kewarganegaraan: jamaahData.kewarganegaraan,
         pekerjaan: jamaahData.pekerjaan,
-        kursiRoda: jamaahData.kursiRoda,
         riwayatPenyakit: jamaahData.riwayatPenyakit,
-        status: jamaahData.status,
-        varianKamar: jamaahData.varianKamar,
-        berangkat: jamaahData.berangkat,
-        selesai: jamaahData.selesai,
       })
       .eq("id", jamaahData.id)
       .select()
@@ -358,7 +275,7 @@ export const updateJamaahAction = async (jamaahData: JamaahInterface) => {
         
 
         if (checkError || !existingKontakDarurat) {
-          console.log("Hotel ID not found, inserting as new hotel:", contact);
+          console.log("Kontak Darurat ID not found, inserting as new Kontak Darurat:", contact);
         // Insert new Kontak Darurat
         const { error: kontakInsertError } = await supabase
           .from("KontakDarurat")
@@ -459,6 +376,40 @@ export const deleteJamaahAction = async (jamaahId: number) => {
   return { success: true };
 };
 
+export const deleteStatusAktifAction = async (jamaahId: string) => {
+  const supabase = createClient();
+
+  // Update statusAktif di tabel Jamaah
+  const { error: jamaahError } = await supabase
+    .from("Jamaah")
+    .update({ statusAktif: false })
+    .eq("id", jamaahId);
+
+  if (jamaahError) {
+    console.error("Error updating Jamaah statusAktif:", jamaahError.message);
+    return { success: false, error: jamaahError.message };
+  }
+
+  // Update statusAktif di tabel Keuangan untuk row yang memiliki jamaah_id yang sama
+  const { error: keuanganError } = await supabase
+    .from("Keuangan")
+    .update({ statusAktif: false })
+    .eq("jamaah_id", jamaahId);
+
+  if (keuanganError) {
+    console.error("Error updating Keuangan statusAktif:", keuanganError.message);
+    return { success: false, error: keuanganError.message };
+  }
+
+  console.log(`Jamaah and related Keuangan records updated successfully for ID ${jamaahId}`);
+
+  // Revalidate halaman /jamaah setelah perubahan data
+  revalidatePath("/jamaah");
+
+  return { success: true };
+};
+
+
 
 export const getFileUrl = async (jamaahId: string, namaDokumen: string) => {
   const supabase = createClient();
@@ -524,3 +475,28 @@ export const deleteFileUrl = async (jamaahId: string, namaDokumen: string) => {
   }
 };
 
+// Paket (
+//   id,
+//   nama,
+//   maskapai,
+//   customMaskapai,
+//   noPenerbangan,
+//   jenisPenerbangan,
+//   keretaCepat,
+//   hargaDouble,
+//   hargaTriple,
+//   hargaQuad,
+//   tglKeberangkatan,
+//   tglKepulangan,
+//   fasilitas,
+//   namaMuthawif,
+//   noTelpMuthawif,
+//   jenis,
+//   Hotel (
+//     id,
+//     namaHotel,
+//     alamatHotel,
+//     ratingHotel,
+//     tanggalCheckIn,
+//     tanggalCheckOut
+//   )

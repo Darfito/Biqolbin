@@ -21,6 +21,7 @@ import {
   KontakDaruratType,
   Maskapai,
   PaketInterface,
+  provinces,
   StatusKepergian,
   TipeKamar,
 } from "../../utilities/type";
@@ -39,32 +40,10 @@ import { KontakDaruratSection } from "./KontakDaruratHandler";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { createJamaahAction } from "../action";
 
-interface FormErrors {
-  id?: string;
-  nama?: string;
-  tanggalLahir?: string;
-  ayahKandung?: string;
-  noTelp?: string;
-  kontakDarurat?: string;
-  email?: string;
-  jenisKelamin?: string;
-  tempatLahir?: string;
-  pernikahan?: string;
-  alamat?: string;
-  varianKamar?: string;
-  kewarganegaraan?: string;
-  pekerjaan?: string;
-  kursiRoda?: string;
-  riwayatPenyakit?: string;
-  jenisDokumen?: string[];
-  jenisPaket?: string;
-  berangkat?: string;
-  selesai?: string;
-  status?: string;
-}
 
 // Valibot Schema
 const formSchema = v.object({
+  NIK: v.pipe(v.number()),
   nama: v.pipe(v.string(), v.nonEmpty("Nama harus diisi")),
   tanggalLahir: v.date(),
   ayahKandung: v.pipe(v.string(), v.nonEmpty("Nama Ayah Kandung harus diisi")),
@@ -82,31 +61,33 @@ const formSchema = v.object({
   jenisKelamin: v.pipe(v.string(), v.nonEmpty("Jenis Kelamin harus diisi")),
   tempatLahir: v.pipe(v.string(), v.nonEmpty("Tempat Lahir harus diisi")),
   pernikahan: v.boolean(),
+  provinsi: v.pipe(v.string(), v.nonEmpty("Provinsi harus diisi")),
   alamat: v.pipe(v.string(), v.nonEmpty("Alamat harus diisi")),
-  varianKamar: v.pipe(v.string(), v.nonEmpty("Varian Kamar harus diisi")),
+  // varianKamar: v.pipe(v.string(), v.nonEmpty("Varian Kamar harus diisi")),
   kewarganegaraan: v.boolean(),
   pekerjaan: v.pipe(v.string(), v.nonEmpty("Pekerjaan harus diisi")),
-  kursiRoda: v.boolean(),
+  // kursiRoda: v.boolean(),
   riwayatPenyakit: v.pipe(
     v.string(),
     v.nonEmpty("Riwayat Penyakit harus diisi")
   ),
-  jenisDokumen: v.array(v.string()),
-  jenisPaket: v.object({
-    id: v.number(),
-    nama: v.string(),
-    harga: v.number(),
-    berangkat: v.date(),
-    selesai: v.date(),
-    status: v.string(),
-  }),
-  berangkat: v.date(),
-  selesai: v.date(),
-  status: v.string(),
+  // jenisDokumen: v.array(v.string()),
+  // jenisPaket: v.object({
+  //   id: v.number(),
+  //   nama: v.string(),
+  //   harga: v.number(),
+  //   berangkat: v.date(),
+  //   selesai: v.date(),
+  //   status: v.string(),
+  // }),
+  // berangkat: v.date(),
+  // selesai: v.date(),
+  // status: v.string(),
 });
 
 type FormType = {
-  id: number;
+  id: string;
+  NIK: number;
   nama: string;
   tanggalLahir: Date;
   ayahKandung: string;
@@ -116,18 +97,14 @@ type FormType = {
   jenisKelamin: JenisKelamin;
   tempatLahir: string;
   pernikahan: boolean;
+  provinsi: string;
   alamat: string;
-  varianKamar: TipeKamar;
   kewarganegaraan: boolean;
   pekerjaan: string;
-  kursiRoda: boolean;
   riwayatPenyakit: string;
   jenisDokumen: JenisDokumen[];
-  jenisPaket: PaketInterface;
-  berangkat: string;
-  selesai: string;
-  status: StatusKepergian;
-  cabang_id: number
+  cabang_id: number;
+  statusAktif: boolean
 };
 
 type FormJamaahProps = {
@@ -135,11 +112,12 @@ type FormJamaahProps = {
   cabang_id: number;
 };
 
-export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
+export default function FormJamaah({ cabang_id }: FormJamaahProps) {
   const [open, setOpen] = useState(false);
 
   const [formValues, setFormValues] = useState<FormType>({
-    id: 0,
+    id: "",
+    NIK: 0,
     nama: "",
     tanggalLahir: new Date(),
     ayahKandung: "",
@@ -151,50 +129,15 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
     jenisKelamin: JenisKelamin.LakiLaki,
     tempatLahir: "",
     pernikahan: false,
+    provinsi: "",
     alamat: "",
-    varianKamar: TipeKamar.DOUBLE,
     kewarganegaraan: true,
     pekerjaan: "",
-    kursiRoda: false,
     riwayatPenyakit: "",
     jenisDokumen: [],
-    jenisPaket: {
-      id: 0, // Mengambil hanya properti yang relevan
-      nama: "",
-      jenis: JenisPaket.REGULAR,
-      maskapai: Maskapai.SAUDIA_ARABIA,
-      customMaskapai: "",
-      jenisPenerbangan: JenisPenerbangan.DIRECT,
-      noPenerbangan: "",
-      keretaCepat: false,
-      tglKeberangkatan: "",
-      tglKepulangan: "",
-      fasilitas: [],
-      publish: false,
-      namaMuthawif: "",
-      noTelpMuthawif: "",
-      Hotel: [],
-      gambar_url: "",
-      hargaDouble: 0,
-      hargaTriple: 0,
-      hargaQuad: 0,
-    },
-    berangkat: "",
-    selesai: "",
-    status: "Dijadwalkan",
-    cabang_id: cabang_id || 0
+    cabang_id: cabang_id || 0,
+    statusAktif: true
   });
-  const [formErrors, setFormErrors] = useState<FormErrors>({});
-
-  useEffect(() => {
-    if (formValues.jenisPaket) {
-      setFormValues((prev) => ({
-        ...prev,
-        berangkat: formValues.jenisPaket.tglKeberangkatan || "",
-        selesai: formValues.jenisPaket.tglKepulangan || "",
-      }));
-    }
-  }, [formValues.jenisPaket]);
 
   const handleContactChange = (
     index: number,
@@ -236,7 +179,7 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
   // Handle form submission
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setFormErrors({}); // Clear previous errors
+    // setFormErrors({}); // Clear previous errors
 
     console.log("Form submitting with values:", formValues);
 
@@ -273,7 +216,8 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
 
     // Reset all form values
     setFormValues({
-      id: 0,
+      id: "",
+      NIK: 0,
       nama: "",
       tanggalLahir: new Date(),
       ayahKandung: "",
@@ -290,38 +234,14 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
       jenisKelamin: JenisKelamin.LakiLaki,
       tempatLahir: "",
       pernikahan: false,
+      provinsi: "",
       alamat: "",
-      varianKamar: TipeKamar.DOUBLE,
       kewarganegaraan: true,
       pekerjaan: "",
-      kursiRoda: false,
       riwayatPenyakit: "",
       jenisDokumen: [],
-      jenisPaket: {
-        id: 0, // Mengambil hanya properti yang relevan
-        nama: "",
-        jenis: JenisPaket.REGULAR,
-        maskapai: Maskapai.SAUDIA_ARABIA,
-        customMaskapai: "",
-        jenisPenerbangan: JenisPenerbangan.DIRECT,
-        noPenerbangan: "",
-        keretaCepat: false,
-        tglKeberangkatan: "",
-        tglKepulangan: "",
-        fasilitas: [],
-        publish: false,
-        namaMuthawif: "",
-        noTelpMuthawif: "",
-        Hotel: [],
-        gambar_url: "",
-        hargaDouble: 0,
-        hargaTriple: 0,
-        hargaQuad: 0,
-      },
-      berangkat: "",
-      selesai: "",
-      status: "Dijadwalkan",
-      cabang_id: cabang_id || 0
+      cabang_id: cabang_id || 0,
+      statusAktif: true
     });
   };
 
@@ -353,6 +273,16 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
             <Grid container spacing={3}>
               {/* Kolom Kiri */}
               <Grid item xs={12} sm={6}>
+                <CustomTextField
+                  fullWidth
+                  label="Nomor Induk Kependudukan"
+                  value={formValues.NIK}
+                  required
+                  onChange={(e: { target: { value: number } }) =>
+                    setFormValues({ ...formValues, NIK: e.target.value })
+                  }
+                  sx={{ marginBottom: 2 }}
+                />
                 <CustomTextField
                   fullWidth
                   label="Nama Jamaah"
@@ -455,7 +385,25 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
                   }
                   sx={{ marginBottom: 2 }}
                 />
-
+              </Grid>
+              {/* Kolom Kanan */}
+              <Grid item xs={12} sm={6}>
+                <Autocomplete
+                  fullWidth
+                  options={provinces}
+                  value={formValues.provinsi || ""}
+                  onChange={(event, newValue) =>
+                    setFormValues({ ...formValues, provinsi: newValue || "" })
+                  }
+                  renderInput={(params) => (
+                    <CustomTextField
+                      {...params}
+                      label="Provinsi Asal"
+                      required
+                      sx={{ marginBottom: 2 }}
+                    />
+                  )}
+                />
                 <CustomTextField
                   multiline
                   rows={4}
@@ -494,9 +442,6 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
                     />
                   </RadioGroup>
                 </FormControl>
-              </Grid>
-              {/* Kolom Kanan */}
-              <Grid item xs={12} sm={6}>
                 <FormControl component="fieldset" sx={{ marginBottom: 2 }}>
                   <FormLabel component="legend">Status Bernegara</FormLabel>
                   <RadioGroup
@@ -532,7 +477,7 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
                   }
                   sx={{ marginBottom: 2 }}
                 />
-                <FormControlLabel
+                {/* <FormControlLabel
                   control={
                     <Checkbox
                       checked={formValues.kursiRoda}
@@ -546,7 +491,7 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
                   }
                   label="Butuh Kursi Roda"
                   sx={{ marginBottom: 2 }}
-                />
+                /> */}
                 <CustomTextField
                   fullWidth
                   label="Riwayat Penyakit"
@@ -561,7 +506,7 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
                   sx={{ marginBottom: 2 }}
                 />
                 {/* Jenis Paket */}
-                <Autocomplete
+                {/* <Autocomplete
                   fullWidth
                   options={paketData}
                   getOptionLabel={(option) => option.nama} // Menampilkan nama paket
@@ -593,8 +538,8 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
                       sx={{ marginBottom: 2 }}
                     />
                   )}
-                />
-                <CustomTextField
+                /> */}
+                {/* <CustomTextField
                   select
                   fullWidth
                   label="Varian Kamar"
@@ -611,9 +556,9 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
                   <MenuItem value={TipeKamar.QUAD}>QUAD</MenuItem>
                   <MenuItem value={TipeKamar.TRIPLE}>TRIPLE</MenuItem>
                   <MenuItem value={TipeKamar.DOUBLE}>DOUBLE</MenuItem>
-                </CustomTextField>
+                </CustomTextField> */}
                 {/* Tanggal Berangkat */}
-                <CustomTextField
+                {/* <CustomTextField
                   fullWidth
                   disabled
                   label="Tanggal Berangkat"
@@ -624,9 +569,9 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
                     shrink: true, // Memastikan label tetap di atas
                   }}
                   sx={{ marginBottom: 2 }}
-                />
+                /> */}
                 {/* Tanggal Selesai */}
-                <CustomTextField
+                {/* <CustomTextField
                   fullWidth
                   disabled
                   label="Tanggal Selesai"
@@ -637,7 +582,7 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
                     shrink: true, // Memastikan label tetap di atas
                   }}
                   sx={{ marginBottom: 2 }}
-                />
+                /> */}
               </Grid>
 
               {/* Kontak Darurat */}

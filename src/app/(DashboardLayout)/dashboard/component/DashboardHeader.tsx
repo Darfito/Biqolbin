@@ -40,25 +40,28 @@ const DashboardHeader = ({
             >
               Dashboard
             </Typography>
-            {roleUser === "Superadmin" && (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                {/* <Typography
-                  variant="subtitle1"
-                  sx={{
-                    color: "secondary.main",
-                    fontSize: { xs: "12px", md: "16px" },
-                  }}
-                >
-                  {cabangText}
-                </Typography> */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: "secondary.main",
+                  fontSize: { xs: "12px", md: "16px" },
+                }}
+              >
+                Menampilkan Data Tahun {selectedYear}
+              </Typography>
+              {roleUser === "Superadmin" && (
                 <GlobalFilterDropdown
                   onSelectedFilter={handleFilterChange} // Fungsi callback
                   selectedFilterName={selectedFilter} // Filter saat ini
                   data={filters}
                 />
-                <YearDropdown selectedYear={selectedYear} onYearChange={handleFilterYearChange} />
-              </Box>
-            )}
+              )}
+              <YearDropdown
+                selectedYear={selectedYear}
+                onYearChange={handleFilterYearChange}
+              />
+            </Box>
           </Box>
         </Card>
       </Grid>

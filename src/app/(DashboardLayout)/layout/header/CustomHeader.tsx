@@ -3,19 +3,23 @@
 import { useState, useEffect } from "react";
 import { Grid, Card, Box, Typography, Skeleton } from "@mui/material";
 import YearDropdown from "./YearDropdown";
+import StatusDropdown from "./StatusDropdown";
 
 interface CustomHeaderProps {
   titleModule: string;
   selectedFilter: string;
+  selectedStatus: boolean;
   handleFilterChange: (filterName: string) => void;
+  handleStatusChange: (status: boolean) => void;
 }
 
 const CustomHeader = ({
   titleModule,
   selectedFilter,
+  selectedStatus,
   handleFilterChange,
+  handleStatusChange
 }: CustomHeaderProps) => {
-
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} sm={12} md={12} lg={12}>
@@ -49,9 +53,17 @@ const CustomHeader = ({
                 <Skeleton variant="text" width={120} height={25} />
               )}
               {selectedFilter ? (
-                <YearDropdown selectedYear={selectedFilter} onYearChange={handleFilterChange} />
-                
-              ): (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  <YearDropdown
+                    selectedYear={selectedFilter}
+                    onYearChange={handleFilterChange}
+                  />
+                  <StatusDropdown
+                    selectedStatus={selectedStatus}
+                    onStatusChange={handleStatusChange}
+                  />
+                </Box>
+              ) : (
                 <Skeleton variant="text" width={120} height={25} />
               )}
             </Box>

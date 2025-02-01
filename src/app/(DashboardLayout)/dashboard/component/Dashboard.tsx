@@ -138,7 +138,7 @@ const Dashboard = ({ roleUser, cabang, cabangData }: DashboardProps) => {
             <UmurCategoryChart filteredJamaahData={filteredJamaahData || []} />
           </Grid>
           <Grid item xs={4} lg={4}>
-            <PaketPieChart filteredJamaahData={filteredJamaahData || []} />
+            <PaketPieChart filteredKeuanganData={filteredKeuanganData || []} />
           </Grid>
         </Grid>
         <Grid container spacing={3}>
@@ -149,7 +149,7 @@ const Dashboard = ({ roleUser, cabang, cabangData }: DashboardProps) => {
         <Grid container spacing={3}>
           <Grid item xs={12} lg={12}>
             <Box sx={{ width: "100%", marginTop: "20px" }}>
-              <GapKeberangkatan jamaahData={filteredJamaahData || []} />
+              <GapKeberangkatan keuanganData={filteredKeuanganData || []} />
             </Box>
           </Grid>
         </Grid>

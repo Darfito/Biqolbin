@@ -15,6 +15,8 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import {
   JamaahInterface,
@@ -26,12 +28,15 @@ import {
   Maskapai,
   MetodePembayaranType,
   PaketInterface,
+  StatusKepergian,
   StatusType,
   TipeKamar,
 } from "@/app/(DashboardLayout)/utilities/type";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
-import { updateKeuanganAction } from "../../action";
+import { getVisaUrl, updateKeuanganAction } from "../../action";
+import FileUploaderSingle from "@/app/(DashboardLayout)/utilities/component/uploader/FileUploaderSingle";
+import { createClient } from "@/libs/supabase/client";
 
 interface FormErrors {
   nama?: string;
@@ -48,7 +53,6 @@ interface FormErrors {
 
 type FormType = {
   id?: number;
-  
   Jamaah: JamaahInterface;
   Paket: PaketInterface;
   jenisPaket?: string;
@@ -62,6 +66,11 @@ type FormType = {
   status: StatusType;
   catatanPembayaran?: string;
   paket_id?: number;
+  varianKamar: TipeKamar;
+  kursiRoda: boolean;
+  visa?: string;
+  statusPenjadwalan: StatusKepergian;
+  statusAktif: boolean;
 };
 
 // Valibot Schema
@@ -99,9 +108,10 @@ interface FormDetailProps {
 
 const initialFormValues: FormType = {
   Jamaah: {
-    id: 0,
+    NIK: 0,
+    id: "",
     nama: "",
-    tanggalLahir:new Date(),
+    tanggalLahir: new Date(),
     ayahKandung: "",
     noTelp: "",
     kontakDarurat: [
@@ -117,36 +127,12 @@ const initialFormValues: FormType = {
     tempatLahir: "",
     pernikahan: false,
     alamat: "",
-    varianKamar: TipeKamar.DOUBLE,
+    provinsi: "",
     kewarganegaraan: false,
     pekerjaan: "",
-    kursiRoda: false,
     riwayatPenyakit: "",
     jenisDokumen: [],
-    jenisPaket: {
-      id: 0,
-      nama: "",
-      jenis: JenisPaket.REGULAR,
-      maskapai: Maskapai.SAUDIA_ARABIA,
-      customMaskapai: "",
-      jenisPenerbangan: JenisPenerbangan.DIRECT,
-      noPenerbangan: "",
-      keretaCepat: false,
-      tglKeberangkatan: "",
-      tglKepulangan: "",
-      fasilitas: [],
-      publish: false,
-      namaMuthawif: "",
-      noTelpMuthawif: "",
-      Hotel: [],
-      gambar_url: "",
-      hargaDouble: 0,
-      hargaTriple: 0,
-      hargaQuad: 0,
-    },
-    berangkat: "",
-    selesai: "",
-    status: "Dijadwalkan",
+    statusAktif: true,
   },
   Paket: {
     id: 0,
@@ -180,6 +166,10 @@ const initialFormValues: FormType = {
   status: StatusType.BELUM_BAYAR,
   paket_id: 0,
   catatanPembayaran: "",
+  kursiRoda: false,
+  statusPenjadwalan: "Belum Dijadwalkan",
+  varianKamar: TipeKamar.PILIHVARIANKAMAR,
+  statusAktif: true,
 };
 
 const FormDetail = ({
@@ -193,26 +183,28 @@ const FormDetail = ({
     keuanganData?.metodePembayaran || ""
   );
   const [openModal, setOpenModal] = useState<boolean>(false);
+  const [openViewModal, setOpenViewModal] = useState<boolean>(false);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
+  const [openDialog, setOpenDialog] = useState(false);
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null); // State untuk menyimpan file yang diunggah
   const [formValues, setFormValues] = useState<FormType>(
     keuanganData ? { ...initialFormValues, ...keuanganData } : initialFormValues
   );
-
-  // // Gunakan useEffect untuk memperbarui state ketika keuanganData berubah
+  const handleDialogClose = () => setOpenDialog(false);
+  const handleDialogOpen = () => setOpenDialog(true);
+  // Gunakan useEffect untuk memperbarui state ketika keuanganData berubah
   useEffect(() => {
     if (keuanganData && keuanganData.id !== formValues.id) {
       setMetode(keuanganData.metodePembayaran || MetodePembayaranType.TUNAI);
       setFormValues({
         Jamaah: {
           ...keuanganData.Jamaah,
-          jenisPaket: {
-            ...keuanganData.Paket,
-          },
         },
         Paket: keuanganData.Paket,
         id: keuanganData.id || 0,
-        metodePembayaran: keuanganData.metodePembayaran || MetodePembayaranType.TUNAI,
-        jenisPaket: keuanganData.jenisPaket || "",
+        metodePembayaran:
+          keuanganData.metodePembayaran || MetodePembayaranType.TUNAI,
         sisaTagihan: keuanganData.sisaTagihan || 0,
         tenggatPembayaran: keuanganData.tenggatPembayaran || "",
         totalTagihan: keuanganData.totalTagihan || 0,
@@ -222,11 +214,14 @@ const FormDetail = ({
         status: keuanganData.status || StatusType.BELUM_BAYAR,
         paket_id: keuanganData.paket_id || 0,
         catatanPembayaran: keuanganData.catatanPembayaran || "",
+        kursiRoda: keuanganData.kursiRoda || false,
+        statusPenjadwalan:
+          keuanganData.statusPenjadwalan || "Belum Dijadwalkan",
+        varianKamar: keuanganData.varianKamar || TipeKamar.PILIHVARIANKAMAR,
+        statusAktif: keuanganData.statusAktif || false,
       });
     }
   }, [keuanganData, formValues.id]);
-  
-  
 
   // console.log("Keuangan data di detail:", keuanganData);
 
@@ -267,6 +262,102 @@ const FormDetail = ({
     }));
   };
 
+  const updateVisaToSupabase = async (foldername: string, file: File) => {
+    const supabase = createClient();
+  
+    try {
+      const fileExtension = file.name.split(".").pop();
+      const newFileName = `Visa.${fileExtension}`;
+      const filePath = `${foldername}/${newFileName}`;
+  
+      // Hapus file lama (opsional)
+      const { error: removeError } = await supabase.storage
+        .from("Dokumen")
+        .remove([filePath]);
+      if (removeError) {
+        console.warn("Tidak bisa menghapus gambar lama:", removeError.message);
+      }
+  
+      // Upload file baru
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("Dokumen")
+        .upload(filePath, file, { cacheControl: "3600", upsert: true });
+  
+      if (uploadError) {
+        throw new Error(`Gagal mengunggah gambar: ${uploadError.message}`);
+      }
+  
+      const publicUrl = `${
+        process.env.NEXT_PUBLIC_SUPABASE_URL
+      }/storage/v1/object/public/Dokumen/${
+        uploadData.path
+      }?t=${new Date().getTime()}`;
+  
+      // Cek apakah ada row dengan jamaah_id dan nama_dokumen = "Visa"
+      const { data: existingData, error: fetchError } = await supabase
+        .from("jenis_dokumen")
+        .select("id")
+        .eq("jamaah_id", foldername)
+        .eq("nama_dokumen", "Visa");
+  
+      if (fetchError) {
+        console.error("Gagal memeriksa data di jenis_dokumen:", fetchError.message);
+        throw new Error(`Gagal memeriksa data: ${fetchError.message}`);
+      }
+  
+      if (!existingData || existingData.length === 0) {
+        // Jika tidak ada data dengan jamaah_id dan nama_dokumen = "Visa", buat entri baru
+        const { error: insertError } = await supabase
+          .from("jenis_dokumen")
+          .insert([
+            {
+              jamaah_id: foldername,
+              nama_dokumen: "Visa",
+              lampiran: true,
+              action: "Diterima",
+              file: publicUrl,
+            },
+          ]);
+  
+        if (insertError) {
+          throw new Error(`Gagal menyimpan URL gambar: ${insertError.message}`);
+        }
+      } else {
+        // Jika sudah ada, update semua baris yang sesuai dengan jamaah_id dan nama_dokumen = "Visa"
+        const { error: updateError } = await supabase
+          .from("jenis_dokumen")
+          .update({ file: publicUrl })
+          .eq("jamaah_id", foldername)
+          .eq("nama_dokumen", "Visa");
+  
+        if (updateError) {
+          throw new Error(
+            `Gagal memperbarui URL gambar: ${updateError.message}`
+          );
+        }
+      }
+  
+      toast.success("Visa berhasil diupload");
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      toast.error("Gagal mengupload Visa");
+    }
+  };
+  
+  
+
+  const handleFileUpload = async (file: File, jamaah_id: string) => {
+    try {
+      console.log("jamaah_id untuk di upload:", jamaah_id);
+
+      const foldername = jamaah_id;
+
+      await updateVisaToSupabase(foldername, file);
+    } catch (error) {
+      console.error("Error uploading file:", error);
+    }
+  };
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const calculateAngsuran = () => {
     if (
@@ -292,11 +383,15 @@ const FormDetail = ({
     const jumlahAngsuran =
       (Number(formValues.totalTagihan) - Number(formValues.uangMuka)) /
       Number(formValues.banyaknyaCicilan);
-  
+
     if (formValues.jumlahBiayaPerAngsuran !== Math.round(jumlahAngsuran)) {
       calculateAngsuran();
     }
-  }, [formValues.totalTagihan, formValues.uangMuka, formValues.banyaknyaCicilan]);
+  }, [
+    formValues.totalTagihan,
+    formValues.uangMuka,
+    formValues.banyaknyaCicilan,
+  ]);
 
   const handleOpenModal = () => {
     if (!openModal) {
@@ -307,7 +402,20 @@ const FormDetail = ({
   const handleCloseModal = () => {
     if (openModal) {
       setOpenModal(false); // Close the modal if it's open
-      
+    }
+  };
+
+  const handleOpenViewModal = async (jamaah_id: string) => {
+    const url = await getVisaUrl(jamaah_id);
+    if (url) {
+      setFileUrl(url);
+      setOpenViewModal(true);
+    }
+  };
+
+  const handleCloseViewModal = () => {
+    if (openViewModal) {
+      setOpenViewModal(false); // Close the modal if it's open
     }
   };
 
@@ -358,6 +466,11 @@ const FormDetail = ({
         setFormErrors(errorMap);
       toast.error("Validation errors:", errorMap);
       return;
+    }
+
+    // Upload Visa sebelum update data
+    if (uploadedFile) {
+      await handleFileUpload(uploadedFile, formValues.Jamaah.id as string);
     }
 
     const response = await updateKeuanganAction(formValues);
@@ -444,7 +557,6 @@ const FormDetail = ({
                 <MenuItem value="Tabungan">Tabungan</MenuItem>
                 <MenuItem value="Cicilan">Cicilan</MenuItem>
               </CustomTextField>
-
               <CustomTextField
                 fullWidth
                 label="Total Tagihan"
@@ -461,7 +573,6 @@ const FormDetail = ({
                   })
                 }
               />
-
               <CustomTextField
                 fullWidth
                 label="Tenggat Pembayaran"
@@ -481,10 +592,6 @@ const FormDetail = ({
                 }
                 disabled={!isEditing} // Disable if not editing
               />
-            </Grid>
-
-            <Grid item xs={12} sm={6} md={6} lg={6}>
-              {/* Right Column Fields */}
               <CustomTextField
                 fullWidth
                 label="Uang Muka"
@@ -498,7 +605,9 @@ const FormDetail = ({
                   handleChangeHarga(e, "uangMuka")
                 }
               />
-
+            </Grid>
+            <Grid item xs={12} sm={6} md={6} lg={6}>
+              {/* Right Column Fields */}
               {metode === "Cicilan" && (
                 <>
                   <CustomTextField
@@ -530,7 +639,6 @@ const FormDetail = ({
                   />
                 </>
               )}
-
               <CustomTextField
                 fullWidth
                 label="Sisa Tagihan"
@@ -543,6 +651,22 @@ const FormDetail = ({
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   handleChangeHarga(e, "sisaTagihan")
                 }
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formValues.kursiRoda}
+                    disabled={!isEditing}
+                    onChange={(e) =>
+                      setFormValues({
+                        ...formValues,
+                        kursiRoda: e.target.checked,
+                      })
+                    }
+                  />
+                }
+                label="Butuh Kursi Roda"
+                sx={{ marginBottom: 2 }}
               />
               <CustomTextField
                 fullWidth
@@ -559,6 +683,30 @@ const FormDetail = ({
                 }
                 disabled={!isEditing} // Disable if not editing
               />
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <Button
+                  disabled={!isEditing} // Disable if not editing
+                  onClick={handleDialogOpen}
+                  variant="contained"
+                  sx={{ color: "#fff", marginTop: 2 }}
+                >
+                  Unggah Visa
+                </Button>
+                <Button
+                  disabled={!isEditing} // Disable if not editing
+                  onClick={() => {
+                    if(formValues.Jamaah.id) {
+                      handleOpenViewModal(formValues.Jamaah.id);
+                    } else{
+                      toast.error("Data visa tidak ditemukan")
+                    }
+                  }}
+                  variant="contained"
+                  sx={{ color: "#fff", marginTop: 2 }}
+                >
+                  Lihat Visa
+                </Button>
+              </Box>
             </Grid>
           </Grid>
         </Box>
@@ -578,6 +726,91 @@ const FormDetail = ({
             </Button>
           </Box>
         )}
+        {/* Dialog upload */}
+        <Dialog open={openDialog} onClose={handleDialogClose}>
+          <DialogTitle>Upload File</DialogTitle>
+          <DialogContent>
+            <FileUploaderSingle
+              onFileUpload={(file) => {
+                setUploadedFile(file); // Simpan file yang diunggah ke state
+              }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDialogClose} color="primary">
+              Ya, Batalkan
+            </Button>
+            <Button
+              onClick={async () => {
+                if (uploadedFile) {
+                  // Ensure `id` is a number
+                  await handleFileUpload(
+                    uploadedFile,
+                    formValues.Jamaah.id as string
+                  );
+                } else {
+                  console.error("No file uploaded.");
+                  // Optionally, show an error message to the user
+                }
+
+                // Reset file after upload
+                setUploadedFile(null);
+
+                // Close the dialog after the upload is complete
+                handleDialogClose();
+              }}
+              color="primary"
+              variant="contained"
+              sx={{ color: "white" }}
+            >
+              Simpan
+            </Button>
+          </DialogActions>
+        </Dialog>
+        {/* Dialog Melihat File */}
+        <Dialog
+          open={openViewModal}
+          onClose={handleCloseViewModal}
+          sx={{ padding: "1rem" }}
+        >
+          <DialogTitle>Melihat File</DialogTitle>
+          <DialogContent>
+            {fileUrl ? (
+              // Cek ekstensi file dengan memisahkan URL dari parameter query
+              fileUrl.split("?")[0].toLowerCase().endsWith(".pdf") ? (
+                <iframe
+                  src={fileUrl}
+                  width="100%"
+                  height="500px"
+                  style={{ border: "none" }}
+                />
+              ) : (
+                // Tampilkan gambar jika bukan PDF
+                <Box
+                  component="img"
+                  src={fileUrl}
+                  alt="Lampiran"
+                  sx={{
+                    maxWidth: "400px",
+                    objectFit: "contain",
+                  }}
+                />
+              )
+            ) : (
+              <Typography>File tidak tersedia.</Typography>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={handleCloseViewModal}
+              sx={{ color: "white" }}
+              variant="contained"
+              color="error"
+            >
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
         {/* Confirmation Modal */}
         <Dialog open={openModal} onClose={handleCloseModal}>
           <DialogTitle>Konfirmasi Perubahan</DialogTitle>

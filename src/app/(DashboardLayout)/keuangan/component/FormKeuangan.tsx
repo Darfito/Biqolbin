@@ -20,6 +20,7 @@ import {
   Maskapai,
   MetodePembayaranType,
   PaketInterface,
+  StatusKepergian,
   StatusType,
   TipeKamar,
 } from "../../utilities/type";
@@ -47,6 +48,10 @@ type FormType = {
   banyaknyaCicilan?: number;
   jumlahBiayaPerAngsuran?: number;
   status: StatusType;
+  varianKamar: TipeKamar;
+  statusPenjadwalan: StatusKepergian;
+  kursiRoda: boolean;
+  statusAktif: boolean;
 };
 
 // Valibot Schema
@@ -95,7 +100,8 @@ export default function FormKeuangan({
   const [jenisPaket, setJenisPaket] = useState<string>("");
   const [formValues, setFormValues] = useState<FormType>({
     Jamaah: {
-      id: 0,
+      id: "",
+      NIK: 0,
       nama: "",
       ayahKandung: "",
       noTelp: "",
@@ -113,36 +119,12 @@ export default function FormKeuangan({
       tempatLahir: "",
       pernikahan: false,
       alamat: "",
-      varianKamar: TipeKamar.DOUBLE,
       kewarganegaraan: true,
       pekerjaan: "",
-      kursiRoda: false,
       riwayatPenyakit: "",
       jenisDokumen: [],
-      jenisPaket: {
-        id: 0, // Mengambil hanya properti yang relevan
-        nama: "",
-        jenis: JenisPaket.REGULAR,
-        maskapai: Maskapai.SAUDIA_ARABIA,
-        customMaskapai: "",
-        jenisPenerbangan: JenisPenerbangan.DIRECT,
-        noPenerbangan: "",
-        keretaCepat: false,
-        tglKeberangkatan: "",
-        tglKepulangan: "",
-        fasilitas: [],
-        publish: false,
-        namaMuthawif: "",
-        noTelpMuthawif: "",
-        Hotel: [],
-        gambar_url: "",
-        hargaDouble: 0,
-        hargaTriple: 0,
-        hargaQuad: 0,
-      },
-      berangkat: "",
-      selesai: "",
-      status: "Dijadwalkan",
+      provinsi: "",
+      statusAktif: true
     },
     Paket: {
       id: 0, // Mengambil hanya properti yang relevan
@@ -172,8 +154,14 @@ export default function FormKeuangan({
     banyaknyaCicilan: 0,
     jumlahBiayaPerAngsuran: 0,
     status: StatusType.BELUM_BAYAR,
+    varianKamar: TipeKamar.PILIHVARIANKAMAR,
+    statusPenjadwalan: "Belum Dijadwalkan",
+    kursiRoda: false,
+    statusAktif: true,
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
+
+  console.log("Paket Data di form keuangan", paketData);
 
   // Handle metode pembayaran selection
   const handleMetodeChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -295,6 +283,26 @@ export default function FormKeuangan({
     }));
   };
 
+  const calculateTotalTagihan = (
+    paket: PaketInterface,
+    varianKamar: TipeKamar
+  ) => {
+    let harga = 0;
+
+    // Cek varian kamar dan sesuaikan harga berdasarkan paket
+    if (paket) {
+      if (varianKamar === TipeKamar.QUAD) {
+        harga = paket.hargaQuad || 0;
+      } else if (varianKamar === TipeKamar.TRIPLE) {
+        harga = paket.hargaTriple || 0;
+      } else if (varianKamar === TipeKamar.DOUBLE) {
+        harga = paket.hargaDouble || 0;
+      }
+    }
+
+    return harga;
+  };
+
   // Calculate installment (angsuran) if "Cicilan" is selected
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const calculateAngsuran = () => {
@@ -319,7 +327,11 @@ export default function FormKeuangan({
 
   useEffect(() => {
     calculateAngsuran();
-  }, [formValues.totalTagihan, formValues.uangMuka, formValues.banyaknyaCicilan]);
+  }, [
+    formValues.totalTagihan,
+    formValues.uangMuka,
+    formValues.banyaknyaCicilan,
+  ]);
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => {
@@ -328,7 +340,7 @@ export default function FormKeuangan({
     // Reset all form values
     setFormValues({
       Jamaah: {
-        id: 0,
+        id: "",
         nama: "",
         ayahKandung: "",
         noTelp: "",
@@ -346,36 +358,13 @@ export default function FormKeuangan({
         tempatLahir: "",
         pernikahan: false,
         alamat: "",
-        varianKamar: TipeKamar.DOUBLE,
         kewarganegaraan: true,
         pekerjaan: "",
-        kursiRoda: false,
         riwayatPenyakit: "",
         jenisDokumen: [],
-        jenisPaket: {
-          id: 0, // Mengambil hanya properti yang relevan
-          nama: "",
-          jenis: JenisPaket.REGULAR,
-          maskapai: Maskapai.SAUDIA_ARABIA,
-          customMaskapai: "",
-          jenisPenerbangan: JenisPenerbangan.DIRECT,
-          noPenerbangan: "",
-          keretaCepat: false,
-          tglKeberangkatan: "",
-          tglKepulangan: "",
-          fasilitas: [],
-          publish: false,
-          namaMuthawif: "",
-          noTelpMuthawif: "",
-          Hotel: [],
-          gambar_url: "",
-          hargaDouble: 0,
-          hargaTriple: 0,
-          hargaQuad: 0,
-        },
-        berangkat: "",
-        selesai: "",
-        status: "Dijadwalkan",
+        NIK: 0,
+        provinsi: "",
+        statusAktif: true
       },
       Paket: {
         id: 0, // Mengambil hanya properti yang relevan
@@ -405,6 +394,10 @@ export default function FormKeuangan({
       banyaknyaCicilan: 0,
       jumlahBiayaPerAngsuran: 0,
       status: StatusType.BELUM_BAYAR,
+      varianKamar: TipeKamar.PILIHVARIANKAMAR,
+      statusPenjadwalan: "Belum Dijadwalkan",
+      kursiRoda: false,
+      statusAktif: true,
     });
 
     // Reset method selection
@@ -439,11 +432,10 @@ export default function FormKeuangan({
             }}
           >
             <DialogContentText>Masukkan detail Umroh.</DialogContentText>
-
             <Autocomplete
               fullWidth
               options={jamaahData}
-              getOptionLabel={(option) => option.nama} // Menampilkan nama Jamaah
+              getOptionLabel={(option) => `${option.nama} / ${option.NIK}`} // Menampilkan nama dan NIK
               value={
                 jamaahData.find(
                   (jamaah) => jamaah.id === formValues.Jamaah.id
@@ -454,15 +446,11 @@ export default function FormKeuangan({
                   setFormValues({
                     ...formValues,
                     Jamaah: newValue || ({} as JamaahInterface),
-                    Paket: newValue.jenisPaket || ({} as PaketInterface), // Mengatur paket otomatis
-                    totalTagihan: newValue.jenisPaket?.hargaDouble || 0, // Mengatur harga totalTagihan berdasarkan paket
                   });
                 } else {
                   setFormValues({
                     ...formValues,
                     Jamaah: {} as JamaahInterface,
-                    Paket: {} as PaketInterface,
-                    totalTagihan: 0, // Reset totalTagihan jika Jamaah dihapus
                   });
                 }
               }}
@@ -490,11 +478,16 @@ export default function FormKeuangan({
                   setFormValues({
                     ...formValues,
                     Paket: newValue || ({} as PaketInterface),
+                    totalTagihan: calculateTotalTagihan(
+                      newValue,
+                      formValues.varianKamar
+                    ),
                   });
                 } else {
                   setFormValues({
                     ...formValues,
                     Paket: {} as PaketInterface,
+                    totalTagihan: 0,
                   });
                 }
               }}
@@ -509,6 +502,53 @@ export default function FormKeuangan({
               )}
             />
 
+            <CustomTextField
+              select
+              fullWidth
+              label="Varian Kamar"
+              required
+              value={formValues.varianKamar}
+              onChange={(e: { target: { value: string } }) => {
+                const varianKamar = e.target.value;
+                setFormValues({
+                  ...formValues,
+                  varianKamar: e.target.value as TipeKamar,
+                  totalTagihan: calculateTotalTagihan(
+                    formValues.Paket,
+                    varianKamar as TipeKamar
+                  ),
+                });
+              }}
+            >
+              <MenuItem value={TipeKamar.PILIHVARIANKAMAR}>Pilih Varian Kamar</MenuItem>
+              <MenuItem value={TipeKamar.QUAD}>QUAD</MenuItem>
+              <MenuItem value={TipeKamar.TRIPLE}>TRIPLE</MenuItem>
+              <MenuItem value={TipeKamar.DOUBLE}>DOUBLE</MenuItem>
+            </CustomTextField>
+            {/* Tanggal Berangkat */}
+            <CustomTextField
+              fullWidth
+              disabled
+              label="Tanggal Berangkat"
+              type="date"
+              required
+              value={formValues.Paket.tglKeberangkatan} // Sudah otomatis terisi dari jenisPaket
+              InputLabelProps={{
+                shrink: true, // Memastikan label tetap di atas
+              }}
+            />
+            {/* Tanggal Selesai */}
+            <CustomTextField
+              fullWidth
+              disabled
+              label="Tanggal Selesai"
+              type="date"
+              required
+              value={formValues.Paket.tglKepulangan} // Sudah otomatis terisi dari jenisPaket
+              InputLabelProps={{
+                shrink: true, // Memastikan label tetap di atas
+              }}
+            />
             <CustomTextField
               select
               fullWidth

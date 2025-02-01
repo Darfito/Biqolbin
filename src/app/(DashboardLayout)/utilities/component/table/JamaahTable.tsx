@@ -42,8 +42,12 @@ import { ChevronRight } from "@mui/icons-material";
 import { Box, Chip, Link } from "@mui/material";
 import { JamaahInterface } from "../../type";
 import ActionButton from "./components/ActionButton";
-import { deleteJamaahAction } from "@/app/(DashboardLayout)/jamaah/action";
+import {
+  deleteJamaahAction,
+  deleteStatusAktifAction,
+} from "@/app/(DashboardLayout)/jamaah/action";
 import ConfirmDialog from "../dialog/ConfirmDialog";
+import dayjs from "dayjs";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -139,7 +143,6 @@ const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
   const [open, setOpen] = useState(false); // State untuk dialog
   const [selectedRow, setSelectedRow] = useState<JamaahInterface | null>(null); // Data yang dipilih
 
-
   console.log("Data di JamaahTable:", data);
   const handleCloseDialog = () => {
     setOpen(false); // Tutup dialog
@@ -148,7 +151,7 @@ const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
 
   const handleDelete = async () => {
     if (selectedRow) {
-      const result = await deleteJamaahAction(selectedRow.id ?? 0); // Eksekusi delete
+      const result = await deleteStatusAktifAction(selectedRow.id ?? ""); // Eksekusi delete
       if (result.success) {
         toast.success(`User with ID ${selectedRow.id} has been deleted.`);
       } else {
@@ -168,12 +171,17 @@ const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
       header: "NAMA",
     }),
 
-    // Kolom Paket
-    columnHelper.accessor("jenisPaket.nama", {
-      id: "jenisPaket",
+    columnHelper.accessor("NIK", {
+      id: "NIK",
       cell: (info) => info.getValue(),
-      header: "PAKET",
+      header: "NIK",
     }),
+    // // Kolom Paket
+    // columnHelper.accessor("jenisPaket.nama", {
+    //   id: "jenisPaket",
+    //   cell: (info) => info.getValue(),
+    //   header: "PAKET",
+    // }),
 
     // Kolom No Telp
 
@@ -220,43 +228,11 @@ const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
       header: "JENIS KELAMIN",
     }),
 
-    // Kolom Status (Berangkat dan Selesai)
-    columnHelper.accessor("status", {
-      id: "status",
-      cell: (info) => {
-        const status = info.getValue();
-        let chipColor = "";
-
-        switch (status) {
-          case "Berangkat":
-            chipColor = "lightblue"; // Biru muda
-            break;
-          case "Selesai":
-            chipColor = "green"; // Hijau
-            break;
-          default:
-            chipColor = "#F18B04"; // Warna khusus untuk Dijadwalkan
-            break;
-        }
-
-        return (
-          <Chip
-            label={
-              status === "Berangkat" || status === "Selesai"
-                ? status
-                : "Dijadwalkan"
-            }
-            sx={{
-              backgroundColor: chipColor,
-              color: "white", // Warna teks putih agar kontras
-              fontWeight: "bold",
-            }}
-          />
-        );
-      },
-      header: "Status",
+    columnHelper.accessor("created_at", {
+      id: "created_at",
+      cell: (info) => dayjs(info.getValue()).format("YYYY-MM-DD"),
+      header: "Tanggal Daftar",
     }),
-
     // Kolom Aksi
     columnHelper.display({
       id: "action",
@@ -418,3 +394,41 @@ const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
 };
 
 export default JamaahTable;
+
+
+// Kolom Status (Berangkat dan Selesai)
+    // columnHelper.accessor("status", {
+      //   id: "status",
+      //   cell: (info) => {
+        //     const status = info.getValue();
+        //     let chipColor = "";
+        
+        //     switch (status) {
+          //       case "Berangkat":
+          //         chipColor = "lightblue"; // Biru muda
+          //         break;
+          //       case "Selesai":
+          //         chipColor = "green"; // Hijau
+          //         break;
+          //       default:
+          //         chipColor = "#F18B04"; // Warna khusus untuk Dijadwalkan
+          //         break;
+          //     }
+          
+          //     return (
+            //       <Chip
+            //         label={
+              //           status === "Berangkat" || status === "Selesai"
+              //             ? status
+              //             : "Dijadwalkan"
+              //         }
+              //         sx={{
+                //           backgroundColor: chipColor,
+                //           color: "white", // Warna teks putih agar kontras
+                //           fontWeight: "bold",
+                //         }}
+                //       />
+                //     );
+                //   },
+                //   header: "Status",
+                // }),

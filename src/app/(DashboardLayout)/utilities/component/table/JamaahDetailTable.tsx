@@ -409,7 +409,7 @@ const JamaahDetailTable = ({
           </DialogContent>
           <DialogActions>
             <Button onClick={handleDialogClose} color="primary">
-              Cancel
+              Ya, Batalkan
             </Button>
             <Button
               onClick={async () => {
@@ -430,12 +430,13 @@ const JamaahDetailTable = ({
           </DialogActions>
         </Dialog>
       )}
+        {/* Dialog Melihat File */}
       <Dialog
         open={openFileDialog}
         onClose={handleCloseFileDialog}
         sx={{ padding: "1rem" }}
       >
-        <DialogTitle>Preview File</DialogTitle>
+        <DialogTitle>Melihat File</DialogTitle>
         <DialogContent>
           {fileUrl ? (
             // Cek ekstensi file dengan memisahkan URL dari parameter query

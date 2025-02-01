@@ -4,18 +4,18 @@ import React from "react";
 import dynamic from "next/dynamic";
 import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCard";
 import { ApexOptions } from "apexcharts";
-import { JamaahInterface } from "../../utilities/type";
+import { JamaahInterface, KeuanganInterface } from "../../utilities/type";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 interface PaketPieChartProps {
-  filteredJamaahData: JamaahInterface[];
+  filteredKeuanganData: KeuanganInterface[];
 }
 
-const PaketPieChart = ({ filteredJamaahData }: PaketPieChartProps) => {
+const PaketPieChart = ({ filteredKeuanganData }: PaketPieChartProps) => {
   // Hitung jumlah jamaah berdasarkan jenis paket
-  const paketCounts: Record<string, number> = filteredJamaahData.reduce(
+  const paketCounts: Record<string, number> = filteredKeuanganData.reduce(
     (counts, jamaah) => {
-      counts[jamaah.jenisPaket.nama] = (counts[jamaah.jenisPaket.nama] || 0) + 1;
+      counts[jamaah.Paket.nama] = (counts[jamaah.Paket.nama] || 0) + 1;
       return counts;
     },
     {} as Record<string, number>

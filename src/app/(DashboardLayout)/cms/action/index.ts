@@ -165,7 +165,9 @@ export const updateCmsAction = async (paketData: PaketInterface) => {
         console.error("Error deleting hotels:", deleteError);
         throw deleteError;
       } else {
-        console.log("Hotels not in the current list have been deleted successfully.");
+        console.log(
+          "Hotels not in the current list have been deleted successfully."
+        );
       }
 
       // Process remaining hotels for update or insert
@@ -268,6 +270,65 @@ export const updateCmsAction = async (paketData: PaketInterface) => {
   }
 };
 
+export const publishCMSAction = async (
+  id: number,
+  currentStatus: boolean
+): Promise<boolean> => {
+  const supabase = createClient();
+
+  try {
+    const { data, error } = await supabase
+      .from("Paket")
+      .update({ publish: !currentStatus }) // Toggle the publish status
+      .eq("id", id); // Match the row by its id
+
+    if (error) {
+      console.error("Error updating publish status:", error);
+      return false; // Return false if there's an error
+    }
+
+    console.log("Publish status updated successfully:", data);
+    revalidatePath("/cms"); // Refresh halaman setelah update
+
+    return true; // Return true if update is successful
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    return false; // Return false in case of an unexpected error
+  }
+};
+
+export const deleteStatusAktifPaketAction = async (id: number): Promise<boolean> => {
+  const supabase = createClient();
+
+  try {
+    // 1. Mengubah statusAktif menjadi false di tabel Paket
+    const { error: paketError } = await supabase
+      .from("Paket")
+      .update({ statusAktif: false })
+      .eq("id", id);
+
+    if (paketError) {
+      console.error("Error updating Paket status:", paketError);
+      return false;
+    }
+
+    // 2. Mengubah statusAktif menjadi false di tabel Keuangan untuk paket_id yang sama
+    const { error: keuanganError } = await supabase
+      .from("Keuangan")
+      .update({ statusAktif: false })
+      .eq("paket_id", id);
+
+    if (keuanganError) {
+      console.error("Error updating Keuangan status:", keuanganError);
+      return false;
+    }
+    revalidatePath("/cms");
+    return true;
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    return false;
+  }
+};
 
 // supporting function
 export const sanitizeFolderName = (name: string): string => {

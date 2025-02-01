@@ -21,11 +21,10 @@ export const getKeuanganAction = async (): Promise<KeuanganInterface[]> => {
   const { data, error } = await supabase.from("Keuangan").select(`
     *,
     Jamaah (
-      id,
-      nama,
-      ayahKandung,
-      noTelp,
-      varianKamar
+      *
+    ),
+    Paket (
+      *
     )
   `);
 
@@ -65,13 +64,12 @@ export const getKeuanganActionCabang = async (
       .from("Keuangan")
       .select(`*,
       Jamaah (
-      id,
-      nama,
-      ayahKandung,
-      noTelp,
-      varianKamar
-    )
-      `)
+        *
+      ),
+      Paket (
+        *
+      )
+    `)
       .in("jamaah_id", jamaahIdArray);
 
     if (error) {
@@ -84,6 +82,7 @@ export const getKeuanganActionCabang = async (
     return [];
   }
 };
+
 
 /**
  * Fetch a Keuangan by ID with relasi Jamaah, Paket, Hotel, and Cicilan.
@@ -104,8 +103,7 @@ export const getKeuanganByIdAction = async (id: number) => {
         id,
         nama,
         ayahKandung,
-        noTelp,
-        varianKamar
+        noTelp
       ),
       Paket (
         id,
@@ -179,9 +177,8 @@ export const createKeuaganAction = async (formValues: KeuanganInterface) => {
     .from("Keuangan")
     .insert({
       jamaah_id: formValues.Jamaah.id, // Relasi ke Jamaah
+      varianKamar: formValues.varianKamar,
       metodePembayaran: formValues.metodePembayaran,
-      namaPaket: nama, // Mengirimkan namaPaket
-      jenisPaket: jenis, // Mengirimkan jenisPaket
       paket_id: formValues.Paket.id, // Relasi ke Paket
       uangMuka: formValues.uangMuka,
       totalTagihan: formValues.totalTagihan,
@@ -191,6 +188,9 @@ export const createKeuaganAction = async (formValues: KeuanganInterface) => {
       banyaknyaCicilan: formValues.banyaknyaCicilan,
       catatanPembayaran: formValues.catatanPembayaran,
       status: formValues.status,
+      statusPenjadwalan: formValues.statusPenjadwalan,
+      kursiRoda: formValues.kursiRoda,
+      statusAktif: formValues.statusAktif
     })
     .select("id") // Ambil ID Keuangan yang baru dibuat
     .single();
@@ -223,8 +223,6 @@ export const updateKeuanganAction = async (formValues: KeuanganInterface) => {
     .from("Keuangan")
     .update({
       metodePembayaran: formValues.metodePembayaran,
-      namaPaket: formValues.namaPaket,
-      jenisPaket: formValues.jenisPaket,
       uangMuka: formValues.uangMuka ?? 0,
       totalTagihan: formValues.totalTagihan ?? 0,
       sisaTagihan: formValues.sisaTagihan ?? 0,
@@ -273,6 +271,23 @@ export const deleteKeuanganAction = async (keuanganId: number) => {
   return { success: true };
 };
 
+
+export const deleteStatusAktifAction = async (keuanganId: number) => {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("Keuangan")
+    .update({ statusAktif: false })
+    .eq("id", keuanganId);
+  if (error) {
+    console.error("Error deleting keuangan:", error.message);
+    return { success: false, error: error.message };
+  }
+  console.log(`Keuangan with ID ${keuanganId} deleted successfully`);
+  revalidatePath("/keuangan");
+  return { success: true };
+}
+
+
 /**
  * Fetch all cicilan data for the given keuanganId.
  * If there is an error, return an empty array.
@@ -291,6 +306,7 @@ export const getCicilanAction = async (keuanganId: number) => {
   }
   return data; // Kembalikan data langsung sebagai array
 };
+
 
 /**
  * Create a new cicilan
@@ -526,4 +542,22 @@ export const getFileUrl = async (keuanganId: number, cicilanKe: number) => {
   console.log("File URL:", data.lampiran);
 
   return { success: true, data };
+};
+
+
+export const getVisaUrl = async (jamaah_id: string): Promise<string | null> => {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("jenis_dokumen")
+    .select("file")
+    .eq("jamaah_id", jamaah_id)
+    .eq("nama_dokumen", "Visa")
+    .single();
+
+  if (error) {
+    console.error("Error fetching visa URL:", error);
+    return null; // Pastikan mengembalikan null jika ada error
+  }
+
+  return data?.file || null; // Mengembalikan URL atau null jika tidak ada data
 };

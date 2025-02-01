@@ -1,7 +1,7 @@
 "use client";
 
 // React Imports
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import TablePagination from "@mui/material/TablePagination";
 
@@ -46,9 +46,9 @@ import {
 } from "@mui/material";
 import { PaketInterface } from "../../../type";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/libs/supabase/client";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
+import { deleteStatusAktifPaketAction, publishCMSAction } from "@/app/(DashboardLayout)/cms/action";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -151,6 +151,13 @@ const CMSTable = ({ data }: TableProps<PaketInterface>) => {
   const [tableData, setTableData] = useState<PaketInterface[]>(data); // Local state to manage table data
   const router = useRouter();
 
+  console.log("Table data:", tableData);
+
+    // Sync local state with parent data
+    useEffect(() => {
+      setTableData(data);
+    }, [data]);
+
   const handleDialogOpen = (id: number, type: "publish" | "unpublish") => {
     setSelectedId(id);
     setActionType(type);
@@ -172,96 +179,32 @@ const CMSTable = ({ data }: TableProps<PaketInterface>) => {
   };
 
   const handlePublishToggle = async (id: number, currentStatus: boolean) => {
-    const supabase = createClient();
-
     try {
-      const { data, error } = await supabase
-        .from("Paket")
-        .update({ publish: !currentStatus }) // Toggle the publish status
-        .eq("id", id); // Match the row by its id
-
-      if (error) {
-        console.error("Error updating publish status:", error);
+      const result = await publishCMSAction(id, currentStatus);
+      
+      if (result) {
+        toast.success("Status Publikasi diperbarui.");
+      } else {
         toast.error("Failed to update publish status.");
-        return; // Hentikan eksekusi jika ada error
       }
-
-      console.log("Publish status updated successfully:", data);
-      toast.success("Publish status updated successfully.");
-
-      // Refresh halaman atau data
-      // Solusi alternatif untuk client-side:
-      // Fetch ulang data dari Supabase dan update state lokal
-      const { data: updatedData, error: fetchError } = await supabase
-        .from("Paket")
-        .select("*");
-
-      if (fetchError) {
-        console.error("Error fetching updated data:", fetchError);
-        toast.error("Failed to fetch updated data.");
-        return;
-      }
-
-      setTableData(updatedData); // Update state dengan data terbaru
-    } catch (err) {
-      console.error("Unexpected error:", err);
+    } catch (error) {
+      console.error("Unexpected error:", error);
       toast.error("An unexpected error occurred.");
     }
   };
+  
 
-  const handleDelete = async () => {
-    if (!selectedId || !selectedNama) return;
-  
-    const supabase = createClient();
-  
+  const handleDelete = async (id: number) => {
     try {
-      // 1. Menghapus data dari tabel Paket
-      const { error: paketError } = await supabase
-        .from("Paket")
-        .delete()
-        .eq("id", selectedId);
-      if (paketError) {
-        console.error("Error deleting data:", paketError);
-        toast.error("Failed to delete item.");
-        return;
-      }
-  
-      console.log("selectedNama:", selectedNama);
+      const result = await deleteStatusAktifPaketAction(id);
       
-      // 2. Menghapus folder di Supabase Storage
-      const { data: files, error: listError } = await supabase.storage
-        .from("Paket") // Nama bucket
-        .remove([`/${selectedNama}`]);
-  
-      if (listError) {
-        console.error("Error listing files:", listError);
-        toast.error("Failed to list files for deletion.");
-        return;
+      if (result) {
+        toast.success("Paket successfully deactivated.");
+      } else {
+        toast.error("Failed to deactivate Paket.");
       }
-  
-      if (files && files.length > 0) {
-        const filePaths = files.map((file) => `Paket/${selectedNama}/${file.name}`); // Path lengkap file
-        const { error: deleteError } = await supabase.storage
-          .from("Paket") // Nama bucket
-          .remove(filePaths); // Menghapus file berdasarkan path
-  
-        if (deleteError) {
-          console.error("Error deleting files:", deleteError);
-          toast.error("Failed to delete related files.");
-          return;
-        }
-      }
-  
-      toast.success("Item deleted successfully.");
-      
-      // 3. Mengupdate data di tableData setelah item dihapus
-      const updatedData = tableData.filter((item) => item.id !== selectedId);
-      setTableData(updatedData);
-  
-      // Menutup dialog setelah penghapusan selesai
-      handleDialogClose();
-    } catch (err) {
-      console.error("Unexpected error:", err);
+    } catch (error) {
+      console.error("Unexpected error:", error);
       toast.error("An unexpected error occurred.");
     }
   };
@@ -537,7 +480,7 @@ const CMSTable = ({ data }: TableProps<PaketInterface>) => {
             Batal
           </Button>
           <Button
-            onClick={handleDelete} // Memanggil handleDelete tanpa parameter karena sudah diset sebelumnya
+            onClick={() => handleDelete(selectedId || 0)} // Memanggil handleDelete tanpa parameter karena sudah diset sebelumnya
             variant="contained"
             color="primary"
             sx={{ color: "#fff" }}

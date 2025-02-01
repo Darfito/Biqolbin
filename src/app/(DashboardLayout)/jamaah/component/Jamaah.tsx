@@ -31,6 +31,7 @@ const Jamaah = ({ paketData, jamaahData, cabang_id }: JamaahProps) => {
   const [selectedYear, setSelectedYear] = useState<string | null>(
     new Date().getFullYear().toString()
   );
+  const [selectedStatus, setSelectedStatus] = useState<boolean>(true);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -41,70 +42,34 @@ const Jamaah = ({ paketData, jamaahData, cabang_id }: JamaahProps) => {
     return null; // Jangan render apa-apa sampai komponen dimuat di klien
   }
 
-  console.log("jamaah data", jamaahData);
+  console.log("jamaah data ", jamaahData);
 
   const filteredJamaahData = jamaahData.filter((jamaah) => {
     if (!jamaah.created_at) return false;
 
     const year = new Date(jamaah.created_at).getFullYear().toString();
-    return year === selectedYear;
+    return year === selectedYear && jamaah.statusAktif === selectedStatus;
   });
 
-  console.log("jamaah terfilter", filteredJamaahData);
+  console.log("jamaah terfilter di page jamaah", filteredJamaahData);
 
-  const totalJamaah = jamaahData.length;
-  const belumBerangkat = jamaahData.filter(
-    (jamaah) => jamaah.status === "Berangkat"
-  ).length;
-  const berangkat = jamaahData.filter(
-    (jamaah) => jamaah.status === "Berangkat"
-  ).length;
-  const selesai = jamaahData.filter(
-    (jamaah) => jamaah.status === "Selesai"
-  ).length;
-
-  const dynamicScoreCardJamaah = [
-    {
-      title: "Total Jamaah",
-      total: totalJamaah,
-      color: "#3E74FF",
-      icon: IconUser,
-    },
-    {
-      title: "Belum Berangkat",
-      total: belumBerangkat,
-      color: "#F54F63",
-      icon: IconLuggage,
-    },
-    {
-      title: "Berangkat",
-      total: berangkat,
-      color: "#ADD8E6",
-      icon: IconPlaneInflight,
-    },
-    {
-      title: "Selesai",
-      total: selesai,
-      color: "#4CAF50",
-      icon: IconPlaneArrival,
-    },
-  ];
-
+  
   console.log("Paket data:", paketData);
   console.log("Jamaah data:", jamaahData);
-
+  
   return (
     <>
       <CustomHeader
         titleModule={"Jamaah"}
         selectedFilter={selectedYear || ""}
-        handleFilterChange={(year: string) => setSelectedYear(year)}
-      />
+        handleFilterChange={(year: string) => setSelectedYear(year)} 
+        selectedStatus={selectedStatus} 
+        handleStatusChange={() => setSelectedStatus((prev) => !prev)}/>
       <Box
         sx={{
           width: "100%",
         }}
-      ></Box>
+        ></Box>
       <Grid
         sx={{
           justifyContent: "center",
@@ -113,20 +78,7 @@ const Jamaah = ({ paketData, jamaahData, cabang_id }: JamaahProps) => {
         }}
         container
         spacing={3}
-      >
-        {dynamicScoreCardJamaah.map((data, index) => {
-          const IconComponent = data.icon; // Ambil komponen icon langsung
-          return (
-            <Grid item sm={12} md={5} lg={3} key={index}>
-              <ScoreCard
-                title={data.title}
-                total={data.total}
-                color={data.color}
-                icon={IconComponent} // Gunakan komponen React langsung
-              />
-            </Grid>
-          );
-        })}
+        >
       </Grid>
       <PageContainer title="Jamaah">
         <Box sx={{ margin: "20px", display: "flex", justifyContent: "end" }}>
@@ -141,3 +93,54 @@ const Jamaah = ({ paketData, jamaahData, cabang_id }: JamaahProps) => {
 };
 
 export default Jamaah;
+
+// const totalJamaah = jamaahData.length;
+// const belumBerangkat = jamaahData.filter(
+//   (jamaah) => jamaah.status === "Berangkat"
+// ).length;
+// const berangkat = jamaahData.filter(
+  //   (jamaah) => jamaah.status === "Berangkat"
+  // ).length;
+  // const selesai = jamaahData.filter(
+    //   (jamaah) => jamaah.status === "Selesai"
+    // ).length;
+    
+    // const dynamicScoreCardJamaah = [
+      //   {
+        //     title: "Total Jamaah",
+        //     total: totalJamaah,
+        //     color: "#3E74FF",
+        //     icon: IconUser,
+        //   },
+        //   {
+          //     title: "Belum Berangkat",
+//     total: belumBerangkat,
+//     color: "#F54F63",
+//     icon: IconLuggage,
+//   },
+//   {
+//     title: "Berangkat",
+//     total: berangkat,
+//     color: "#ADD8E6",
+//     icon: IconPlaneInflight,
+//   },
+//   {
+//     title: "Selesai",
+//     total: selesai,
+//     color: "#4CAF50",
+//     icon: IconPlaneArrival,
+//   },
+// ];
+{/* {dynamicScoreCardJamaah.map((data, index) => {
+  const IconComponent = data.icon; // Ambil komponen icon langsung
+  return (
+    <Grid item sm={12} md={5} lg={3} key={index}>
+    <ScoreCard
+    title={data.title}
+    total={data.total}
+    color={data.color}
+    icon={IconComponent} // Gunakan komponen React langsung
+    />
+    </Grid>
+    );
+    })} */}
