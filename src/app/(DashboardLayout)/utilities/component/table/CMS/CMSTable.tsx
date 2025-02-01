@@ -46,10 +46,9 @@ import {
 } from "@mui/material";
 import { PaketInterface } from "../../../type";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/libs/supabase/client";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
-import { deletePaketAction, publishCMSAction } from "@/app/(DashboardLayout)/cms/action";
+import { deleteStatusAktifPaketAction, publishCMSAction } from "@/app/(DashboardLayout)/cms/action";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -197,7 +196,7 @@ const CMSTable = ({ data }: TableProps<PaketInterface>) => {
 
   const handleDelete = async (id: number) => {
     try {
-      const result = await deletePaketAction(id);
+      const result = await deleteStatusAktifPaketAction(id);
       
       if (result) {
         toast.success("Paket successfully deactivated.");

@@ -40,30 +40,6 @@ import { KontakDaruratSection } from "./KontakDaruratHandler";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { createJamaahAction } from "../action";
 
-interface FormErrors {
-  id?: string;
-  NIK: string;
-  nama?: string;
-  tanggalLahir?: string;
-  ayahKandung?: string;
-  noTelp?: string;
-  kontakDarurat?: string;
-  email?: string;
-  jenisKelamin?: string;
-  tempatLahir?: string;
-  pernikahan?: string;
-  alamat?: string;
-  // varianKamar?: string;
-  kewarganegaraan?: string;
-  pekerjaan?: string;
-  // kursiRoda?: string;
-  riwayatPenyakit?: string;
-  jenisDokumen?: string[];
-  jenisPaket?: string;
-  // berangkat?: string;
-  // selesai?: string;
-  // status?: string;
-}
 
 // Valibot Schema
 const formSchema = v.object({
@@ -123,17 +99,12 @@ type FormType = {
   pernikahan: boolean;
   provinsi: string;
   alamat: string;
-  // varianKamar: TipeKamar;
   kewarganegaraan: boolean;
   pekerjaan: string;
-  // kursiRoda: boolean;
   riwayatPenyakit: string;
   jenisDokumen: JenisDokumen[];
-  // jenisPaket: PaketInterface;
-  // berangkat: string;
-  // selesai: string;
-  // status: StatusKepergian;
   cabang_id: number;
+  statusAktif: boolean
 };
 
 type FormJamaahProps = {
@@ -141,7 +112,7 @@ type FormJamaahProps = {
   cabang_id: number;
 };
 
-export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
+export default function FormJamaah({ cabang_id }: FormJamaahProps) {
   const [open, setOpen] = useState(false);
 
   const [formValues, setFormValues] = useState<FormType>({
@@ -160,46 +131,13 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
     pernikahan: false,
     provinsi: "",
     alamat: "",
-    // varianKamar: TipeKamar.DOUBLE,
     kewarganegaraan: true,
     pekerjaan: "",
-    // kursiRoda: false,
     riwayatPenyakit: "",
     jenisDokumen: [],
-    // jenisPaket: {
-    //   id: 0, // Mengambil hanya properti yang relevan
-    //   nama: "",
-    //   jenis: JenisPaket.REGULAR,
-    //   maskapai: Maskapai.SAUDIA_ARABIA,
-    //   customMaskapai: "",
-    //   jenisPenerbangan: JenisPenerbangan.DIRECT,
-    //   noPenerbangan: "",
-    //   keretaCepat: false,
-    //   tglKeberangkatan: "",
-    //   tglKepulangan: "",
-    //   fasilitas: [],
-    //   publish: false,
-    //   namaMuthawif: "",
-    //   noTelpMuthawif: "",
-    //   Hotel: [],
-    //   gambar_url: "",
-    //   hargaDouble: 0,
-    //   hargaTriple: 0,
-    //   hargaQuad: 0,
-    // },
     cabang_id: cabang_id || 0,
+    statusAktif: true
   });
-  // const [formErrors, setFormErrors] = useState<FormErrors>({});
-
-  // useEffect(() => {
-  //   if (formValues.jenisPaket) {
-  //     setFormValues((prev) => ({
-  //       ...prev,
-  //       berangkat: formValues.jenisPaket.tglKeberangkatan || "",
-  //       selesai: formValues.jenisPaket.tglKepulangan || "",
-  //     }));
-  //   }
-  // }, [formValues.jenisPaket]);
 
   const handleContactChange = (
     index: number,
@@ -298,34 +236,12 @@ export default function FormJamaah({ paketData, cabang_id }: FormJamaahProps) {
       pernikahan: false,
       provinsi: "",
       alamat: "",
-      // varianKamar: TipeKamar.DOUBLE,
       kewarganegaraan: true,
       pekerjaan: "",
-      // kursiRoda: false,
       riwayatPenyakit: "",
       jenisDokumen: [],
-      // jenisPaket: {
-      //   id: 0, // Mengambil hanya properti yang relevan
-      //   nama: "",
-      //   jenis: JenisPaket.REGULAR,
-      //   maskapai: Maskapai.SAUDIA_ARABIA,
-      //   customMaskapai: "",
-      //   jenisPenerbangan: JenisPenerbangan.DIRECT,
-      //   noPenerbangan: "",
-      //   keretaCepat: false,
-      //   tglKeberangkatan: "",
-      //   tglKepulangan: "",
-      //   fasilitas: [],
-      //   publish: false,
-      //   namaMuthawif: "",
-      //   noTelpMuthawif: "",
-      //   Hotel: [],
-      //   gambar_url: "",
-      //   hargaDouble: 0,
-      //   hargaTriple: 0,
-      //   hargaQuad: 0,
-      // },
       cabang_id: cabang_id || 0,
+      statusAktif: true
     });
   };
 

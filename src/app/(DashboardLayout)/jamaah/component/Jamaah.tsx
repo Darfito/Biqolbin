@@ -31,6 +31,7 @@ const Jamaah = ({ paketData, jamaahData, cabang_id }: JamaahProps) => {
   const [selectedYear, setSelectedYear] = useState<string | null>(
     new Date().getFullYear().toString()
   );
+  const [selectedStatus, setSelectedStatus] = useState<boolean>(true);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -47,7 +48,7 @@ const Jamaah = ({ paketData, jamaahData, cabang_id }: JamaahProps) => {
     if (!jamaah.created_at) return false;
 
     const year = new Date(jamaah.created_at).getFullYear().toString();
-    return year === selectedYear;
+    return year === selectedYear && jamaah.statusAktif === selectedStatus;
   });
 
   console.log("jamaah terfilter di page jamaah", filteredJamaahData);
@@ -61,8 +62,9 @@ const Jamaah = ({ paketData, jamaahData, cabang_id }: JamaahProps) => {
       <CustomHeader
         titleModule={"Jamaah"}
         selectedFilter={selectedYear || ""}
-        handleFilterChange={(year: string) => setSelectedYear(year)}
-        />
+        handleFilterChange={(year: string) => setSelectedYear(year)} 
+        selectedStatus={selectedStatus} 
+        handleStatusChange={() => setSelectedStatus((prev) => !prev)}/>
       <Box
         sx={{
           width: "100%",

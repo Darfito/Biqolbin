@@ -51,6 +51,7 @@ type FormType = {
   varianKamar: TipeKamar;
   statusPenjadwalan: StatusKepergian;
   kursiRoda: boolean;
+  statusAktif: boolean;
 };
 
 // Valibot Schema
@@ -123,6 +124,7 @@ export default function FormKeuangan({
       riwayatPenyakit: "",
       jenisDokumen: [],
       provinsi: "",
+      statusAktif: true
     },
     Paket: {
       id: 0, // Mengambil hanya properti yang relevan
@@ -154,7 +156,8 @@ export default function FormKeuangan({
     status: StatusType.BELUM_BAYAR,
     varianKamar: TipeKamar.PILIHVARIANKAMAR,
     statusPenjadwalan: "Belum Dijadwalkan",
-    kursiRoda: false
+    kursiRoda: false,
+    statusAktif: true,
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
 
@@ -361,6 +364,7 @@ export default function FormKeuangan({
         jenisDokumen: [],
         NIK: 0,
         provinsi: "",
+        statusAktif: true
       },
       Paket: {
         id: 0, // Mengambil hanya properti yang relevan
@@ -393,6 +397,7 @@ export default function FormKeuangan({
       varianKamar: TipeKamar.PILIHVARIANKAMAR,
       statusPenjadwalan: "Belum Dijadwalkan",
       kursiRoda: false,
+      statusAktif: true,
     });
 
     // Reset method selection

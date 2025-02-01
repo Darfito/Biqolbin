@@ -297,7 +297,7 @@ export const publishCMSAction = async (
   }
 };
 
-export const deletePaketAction = async (id: number): Promise<boolean> => {
+export const deleteStatusAktifPaketAction = async (id: number): Promise<boolean> => {
   const supabase = createClient();
 
   try {

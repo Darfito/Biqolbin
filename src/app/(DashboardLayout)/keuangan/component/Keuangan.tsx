@@ -31,7 +31,7 @@ const Keuangan = ({ paketData, jamaahData, keuanganData }: KeuanganProps) => {
   const [selectedYear, setSelectedYear] = useState<string | null>(
     new Date().getFullYear().toString()
   );
-
+  const [selectedStatus, setSelectedStatus] = useState<boolean>(true);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -49,7 +49,7 @@ const Keuangan = ({ paketData, jamaahData, keuanganData }: KeuanganProps) => {
 
     // Parsing dan mendapatkan tahun dari created_at
     const year = new Date(keuangan.created_at).getFullYear().toString();
-    return year === selectedYear;
+    return year === selectedYear && keuangan.statusAktif === selectedStatus;
   });
 
   // Statistik berdasarkan data keuangan yang difilter
@@ -91,7 +91,8 @@ const Keuangan = ({ paketData, jamaahData, keuanganData }: KeuanganProps) => {
         titleModule={"Daftar Umroh & Keuangan"}
         selectedFilter={selectedYear || ""}
         handleFilterChange={(year: string) => setSelectedYear(year)} // Fungsi untuk mengubah tahun
-      />
+        selectedStatus={selectedStatus}
+        handleStatusChange={() => setSelectedStatus((prev) => !prev)}/>
       <Box
         sx={{
           width: "100%",

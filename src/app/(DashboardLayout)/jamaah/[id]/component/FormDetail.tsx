@@ -6,10 +6,8 @@ import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCa
 import {
   Box,
   Grid,
-  MenuItem,
   Button,
   FormControlLabel,
-  Checkbox,
   Typography,
   FormControl,
   FormLabel,
@@ -25,15 +23,10 @@ import * as v from "valibot";
 import {
   JamaahInterface,
   JenisKelamin,
-  JenisPaket,
-  JenisPenerbangan,
   KontakDaruratRelation,
   KontakDaruratType,
-  Maskapai,
   PaketInterface,
   provinces,
-  StatusKepergian,
-  TipeKamar,
 } from "@/app/(DashboardLayout)/utilities/type";
 import { updateJamaahAction } from "../../action";
 import { toast } from "react-toastify";
@@ -52,21 +45,15 @@ interface FormErrors {
   ayahKandung?: string;
   tanggalLahir?: string;
   noTelp?: string;
-  // kontakDarurat?: string[];
   email?: string;
   jenisKelamin?: string;
   tempatLahir?: string;
   pernikahan?: string;
   alamat?: string;
-  // varianKamar?: string;
   kewarganegaraan?: string;
   pekerjaan?: string;
   provinsi?: string;
-  // kursiRoda?: string;
   riwayatPenyakit?: string;
-  // berangkat?: string;
-  // selesai?: string;
-  // status?: string;
 }
 
 const formSchema = v.object({
@@ -113,36 +100,11 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
       pernikahan: false,
       provinsi: "",
       alamat: "",
-      // varianKamar: TipeKamar.DOUBLE,
       kewarganegaraan: true,
       pekerjaan: "",
-      // kursiRoda: false,
       riwayatPenyakit: "",
       jenisDokumen: [],
-      // jenisPaket: {
-      //   id: 0, // Mengambil hanya properti yang relevan
-      //   nama: "",
-      //   jenis: JenisPaket.REGULAR,
-      //   maskapai: Maskapai.SAUDIA_ARABIA,
-      //   customMaskapai: "",
-      //   jenisPenerbangan: JenisPenerbangan.DIRECT,
-      //   noPenerbangan: "",
-      //   keretaCepat: false,
-      //   tglKeberangkatan: "",
-      //   tglKepulangan: "",
-      //   fasilitas: [],
-      //   publish: false,
-      //   namaMuthawif: "",
-      //   noTelpMuthawif: "",
-      //   Hotel: [],
-      //   gambar_url: "",
-      //   hargaDouble: 0,
-      //   hargaTriple: 0,
-      //   hargaQuad: 0,
-      // },
-      // berangkat: "",
-      // selesai: "",
-      // status: "Dijadwalkan",
+      statusAktif: true
     }
   );
 

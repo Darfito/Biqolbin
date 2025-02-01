@@ -34,6 +34,7 @@ export const mapJamaahData = (data: any): JamaahInterface[] => {
     pekerjaan: item.pekerjaan,
     riwayatPenyakit: item.riwayatPenyakit,
     jenisDokumen: item.jenisDokumen || [],
+    statusAktif: item.statusAktif,
   }));
 };
 
@@ -117,31 +118,6 @@ export const getJamaahCabangAction = async (cabang:number): Promise<JamaahInterf
 };
 
 
-// Paket (
-//   id,
-//   nama,
-//   maskapai,
-//   customMaskapai,
-//   noPenerbangan,
-//   jenisPenerbangan,
-//   keretaCepat,
-//   hargaDouble,
-//   hargaTriple,
-//   hargaQuad,
-//   tglKeberangkatan,
-//   tglKepulangan,
-//   fasilitas,
-//   namaMuthawif,
-//   noTelpMuthawif,
-//   jenis,
-//   Hotel (
-//     id,
-//     namaHotel,
-//     alamatHotel,
-//     ratingHotel,
-//     tanggalCheckIn,
-//     tanggalCheckOut
-//   )
 
 
 export const createJamaahAction = async (formValues: JamaahInterface) => {
@@ -166,12 +142,7 @@ export const createJamaahAction = async (formValues: JamaahInterface) => {
         kewarganegaraan: formValues.kewarganegaraan,
         pekerjaan: formValues.pekerjaan,
         riwayatPenyakit: formValues.riwayatPenyakit,
-        // paket_id: formValues.jenisPaket.id, // Relasi ke Paket
-        // kursiRoda: formValues.kursiRoda,
-        // status: formValues.status,
-        // varianKamar: formValues.varianKamar,
-        // berangkat: formValues.berangkat,
-        // selesai: formValues.selesai,
+        statusAktif: formValues.statusAktif,
         cabang_id: formValues.cabang_id,
       })
       .select("id") // Ambil ID Jamaah yang baru dibuat
@@ -261,12 +232,7 @@ export const updateJamaahAction = async (jamaahData: JamaahInterface) => {
         alamat: jamaahData.alamat,
         kewarganegaraan: jamaahData.kewarganegaraan,
         pekerjaan: jamaahData.pekerjaan,
-        // kursiRoda: jamaahData.kursiRoda,
         riwayatPenyakit: jamaahData.riwayatPenyakit,
-        // status: jamaahData.status,
-        // varianKamar: jamaahData.varianKamar,
-        // berangkat: jamaahData.berangkat,
-        // selesai: jamaahData.selesai,
       })
       .eq("id", jamaahData.id)
       .select()
@@ -410,6 +376,40 @@ export const deleteJamaahAction = async (jamaahId: number) => {
   return { success: true };
 };
 
+export const deleteStatusAktifAction = async (jamaahId: string) => {
+  const supabase = createClient();
+
+  // Update statusAktif di tabel Jamaah
+  const { error: jamaahError } = await supabase
+    .from("Jamaah")
+    .update({ statusAktif: false })
+    .eq("id", jamaahId);
+
+  if (jamaahError) {
+    console.error("Error updating Jamaah statusAktif:", jamaahError.message);
+    return { success: false, error: jamaahError.message };
+  }
+
+  // Update statusAktif di tabel Keuangan untuk row yang memiliki jamaah_id yang sama
+  const { error: keuanganError } = await supabase
+    .from("Keuangan")
+    .update({ statusAktif: false })
+    .eq("jamaah_id", jamaahId);
+
+  if (keuanganError) {
+    console.error("Error updating Keuangan statusAktif:", keuanganError.message);
+    return { success: false, error: keuanganError.message };
+  }
+
+  console.log(`Jamaah and related Keuangan records updated successfully for ID ${jamaahId}`);
+
+  // Revalidate halaman /jamaah setelah perubahan data
+  revalidatePath("/jamaah");
+
+  return { success: true };
+};
+
+
 
 export const getFileUrl = async (jamaahId: string, namaDokumen: string) => {
   const supabase = createClient();
@@ -475,3 +475,28 @@ export const deleteFileUrl = async (jamaahId: string, namaDokumen: string) => {
   }
 };
 
+// Paket (
+//   id,
+//   nama,
+//   maskapai,
+//   customMaskapai,
+//   noPenerbangan,
+//   jenisPenerbangan,
+//   keretaCepat,
+//   hargaDouble,
+//   hargaTriple,
+//   hargaQuad,
+//   tglKeberangkatan,
+//   tglKepulangan,
+//   fasilitas,
+//   namaMuthawif,
+//   noTelpMuthawif,
+//   jenis,
+//   Hotel (
+//     id,
+//     namaHotel,
+//     alamatHotel,
+//     ratingHotel,
+//     tanggalCheckIn,
+//     tanggalCheckOut
+//   )

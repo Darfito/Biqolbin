@@ -38,7 +38,7 @@ export interface KeuanganInterface {
   Cicilan?: CicilanType[];
   paket_id?: number;
   statusPenjadwalan: StatusKepergian;
-  statusAktif?: boolean;
+  statusAktif: boolean;
   varianKamar: TipeKamar;
   kursiRoda: boolean;
 }
@@ -141,15 +141,9 @@ export interface JamaahInterface {
   alamat: string;
   kewarganegaraan: boolean;
   pekerjaan: string;
-  // kursiRoda: boolean;
   riwayatPenyakit: string;
   jenisDokumen: JenisDokumen[];
-  // jenisPaket?: PaketInterface;
-  // varianKamar: TipeKamar;
-  // berangkat: string; // tanggal berangkat dari paket
-  // selesai: string; // tanggal pulang dari paket
-  // status: StatusKepergian;
-  // paket_id?: number;
+  statusAktif: boolean;
 }
 
 // ! INTERFACE USER

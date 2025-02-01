@@ -189,7 +189,8 @@ export const createKeuaganAction = async (formValues: KeuanganInterface) => {
       catatanPembayaran: formValues.catatanPembayaran,
       status: formValues.status,
       statusPenjadwalan: formValues.statusPenjadwalan,
-      kursiRoda: formValues.kursiRoda
+      kursiRoda: formValues.kursiRoda,
+      statusAktif: formValues.statusAktif
     })
     .select("id") // Ambil ID Keuangan yang baru dibuat
     .single();
@@ -270,6 +271,23 @@ export const deleteKeuanganAction = async (keuanganId: number) => {
   return { success: true };
 };
 
+
+export const deleteStatusAktifAction = async (keuanganId: number) => {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("Keuangan")
+    .update({ statusAktif: false })
+    .eq("id", keuanganId);
+  if (error) {
+    console.error("Error deleting keuangan:", error.message);
+    return { success: false, error: error.message };
+  }
+  console.log(`Keuangan with ID ${keuanganId} deleted successfully`);
+  revalidatePath("/keuangan");
+  return { success: true };
+}
+
+
 /**
  * Fetch all cicilan data for the given keuanganId.
  * If there is an error, return an empty array.
@@ -288,6 +306,7 @@ export const getCicilanAction = async (keuanganId: number) => {
   }
   return data; // Kembalikan data langsung sebagai array
 };
+
 
 /**
  * Create a new cicilan

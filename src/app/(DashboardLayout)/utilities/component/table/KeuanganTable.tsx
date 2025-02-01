@@ -43,7 +43,7 @@ import { ChevronRight } from "@mui/icons-material";
 import { Autocomplete, Box, Chip, FormControl } from "@mui/material";
 import { KeuanganInterface } from "../../type";
 import ActionButton from "./components/ActionButton";
-import { deleteKeuanganAction } from "@/app/(DashboardLayout)/keuangan/action";
+import { deleteStatusAktifAction } from "@/app/(DashboardLayout)/keuangan/action";
 import ConfirmDialog from "../dialog/ConfirmDialog";
 
 declare module "@tanstack/table-core" {
@@ -276,7 +276,7 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
 
   const handleDelete = async () => {
     if (selectedRow) {
-      const result = await deleteKeuanganAction(selectedRow.id ?? 0); // Eksekusi delete
+      const result = await deleteStatusAktifAction(selectedRow.id ?? 0); // Eksekusi delete
       if (result.success) {
         toast.success(`User with ID ${selectedRow.id} has been deleted.`);
       } else {
