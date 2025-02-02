@@ -20,6 +20,7 @@ import {
 } from "@mui/material";
 import {
   BiayaTambahanType,
+  CicilanType,
   JamaahInterface,
   JenisKelamin,
   JenisPaket,
@@ -64,6 +65,7 @@ type FormType = {
   totalTagihan: number;
   tenggatPembayaran: string;
   sisaTagihan?: number;
+  Cicilan?: CicilanType[];
   banyaknyaCicilan?: number;
   jumlahBiayaPerAngsuran?: number;
   status: StatusType;
@@ -75,6 +77,7 @@ type FormType = {
   statusPenjadwalan: StatusKepergian;
   statusAktif: boolean;
   BiayaTambahan?: BiayaTambahanType[];
+  totalTagihanBaru?: number;
 };
 
 // Valibot Schema
@@ -158,6 +161,16 @@ const initialFormValues: FormType = {
     hargaTriple: 0,
     hargaQuad: 0,
   },
+  Cicilan: [
+    {
+      keuangan_id: 0,
+  id: 0,
+  cicilanKe: 0,
+  nominalCicilan: 0,
+  tanggalPembayaran: "",
+  lampiran: "",
+    }
+  ],
   id: 0,
   metodePembayaran: MetodePembayaranType.TUNAI,
   jenisPaket: "",
@@ -182,6 +195,7 @@ const initialFormValues: FormType = {
       keuangan_id: 0,
     },
   ],
+  totalTagihanBaru: 0,
 };
 
 const FormDetail = ({
@@ -206,6 +220,9 @@ const FormDetail = ({
   const [baseTotalTagihan, setBaseTotalTagihan] = useState<number>(
     keuanganData?.totalTagihan || 0
   );
+  const [previousTotalBiayaTambahan, setPreviousTotalBiayaTambahan] =
+    useState(0);
+  const [latestFormValues, setLatestFormValues] = useState(formValues);
   const handleDialogClose = () => setOpenDialog(false);
   const handleDialogOpen = () => setOpenDialog(true);
   // Gunakan useEffect untuk memperbarui state ketika keuanganData berubah
@@ -235,6 +252,7 @@ const FormDetail = ({
         varianKamar: keuanganData.varianKamar || TipeKamar.PILIHVARIANKAMAR,
         statusAktif: keuanganData.statusAktif || false,
         BiayaTambahan: keuanganData.BiayaTambahan || [],
+        totalTagihanBaru: keuanganData.totalTagihanBaru || 0,
       });
     }
   }, [keuanganData, formValues.id]);
@@ -257,8 +275,11 @@ const FormDetail = ({
       }));
     }
   };
-
   const formatRupiah = (angka: number): string => {
+    if (angka === null || angka === undefined) {
+      return "Rp 0"; // Menangani jika angka null atau undefined
+    }
+  
     return angka.toLocaleString("id-ID", {
       style: "currency",
       currency: "IDR",
@@ -294,7 +315,14 @@ const FormDetail = ({
   };
 
   const handleRemoveBiayaTambahan = (indexToRemove: number) => {
-    if ((formValues.BiayaTambahan?.length ?? 0) > 1) {
+    if (formValues.BiayaTambahan?.length === 1) {
+      // Jika hanya ada satu Biaya Tambahan, hapus semuanya
+      setFormValues((prev) => ({
+        ...prev,
+        BiayaTambahan: [],
+      }));
+    } else if ((formValues.BiayaTambahan?.length ?? 0) > 1) {
+      // Jika lebih dari satu, hapus item berdasarkan index
       setFormValues((prev) => ({
         ...prev,
         BiayaTambahan: prev.BiayaTambahan!.filter(
@@ -303,24 +331,25 @@ const FormDetail = ({
       }));
     }
   };
+  
 
-// Modifikasi handleChangeHarga untuk mengupdate baseTotalTagihan
-const handleChangeHarga = (
-  e: React.ChangeEvent<HTMLInputElement>,
-  type: string
-) => {
-  const value = e.target.value.replace(/[^\d]/g, ""); // Menghapus non-numeric characters
-  const numValue = value === "" ? 0 : Number(value);
+  // Modifikasi handleChangeHarga untuk mengupdate baseTotalTagihan
+  const handleChangeHarga = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: string
+  ) => {
+    const value = e.target.value.replace(/[^\d]/g, ""); // Menghapus non-numeric characters
+    const numValue = value === "" ? 0 : Number(value);
 
-  if (type === 'totalTagihan') {
-    setBaseTotalTagihan(numValue); // Update base total
-  }
+    if (type === "totalTagihan") {
+      setBaseTotalTagihan(numValue); // Update base total
+    }
 
-  setFormValues((prevValues) => ({
-    ...prevValues,
-    [type]: numValue,
-  }));
-};
+    setFormValues((prevValues) => ({
+      ...prevValues,
+      [type]: numValue,
+    }));
+  };
 
   const updateVisaToSupabase = async (foldername: string, file: File) => {
     const supabase = createClient();
@@ -419,58 +448,56 @@ const handleChangeHarga = (
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const calculateAngsuran = () => {
+  useEffect(() => {
+    // Menghitung total biaya tambahan baru
+    const totalBiayaTambahanBaru =
+      formValues.BiayaTambahan?.reduce(
+        (acc, item) => acc + (Number(item.biaya) || 0),
+        0
+      ) ?? 0;
+  
+    console.log("Biaya tambahan baru dihitung:", totalBiayaTambahanBaru);
+  
+    // Tentukan total tagihan baru
+    const newTotalTagihan = totalBiayaTambahanBaru > 0 ? baseTotalTagihan + totalBiayaTambahanBaru : baseTotalTagihan;
+    console.log("Total tagihan yang dihitung:", newTotalTagihan);
+  
+    // Tentukan jumlah angsuran
+    let newJumlahAngsuran = formValues.jumlahBiayaPerAngsuran ?? 0;
     if (
       metode === "Cicilan" &&
-      formValues.totalTagihan &&
-      formValues.uangMuka &&
-      formValues.banyaknyaCicilan
+      formValues.banyaknyaCicilan &&
+      formValues.banyaknyaCicilan > 0
     ) {
-      const jumlahAngsuran =
-        (Number(formValues.totalTagihan) - Number(formValues.uangMuka)) /
-        Number(formValues.banyaknyaCicilan);
-
-      // Round the installment amount to whole number
-      const roundedAngsuran = Math.round(jumlahAngsuran);
-      setFormValues({
-        ...formValues,
-        jumlahBiayaPerAngsuran: roundedAngsuran,
-      });
+      newJumlahAngsuran = Math.round(
+        newTotalTagihan / formValues.banyaknyaCicilan
+      );
     }
-  };
-
-  useEffect(() => {
-    // Hitung total dari BiayaTambahan
-    const totalBiayaTambahan = formValues.BiayaTambahan?.reduce(
-      (acc, item) => acc + (Number(item.biaya) || 0),
+  
+    // Jika sudah ada pembayaran cicilan, kurangi dengan jumlah yang sudah dibayar
+    const jumlahCicilanSudahDibayar = formValues.Cicilan?.reduce(
+      (acc, cicilan) => acc + (Number(cicilan.nominalCicilan) || 0),
       0
     ) ?? 0;
   
-    // Update total tagihan menggunakan baseTotalTagihan
-    const newTotalTagihan = baseTotalTagihan + totalBiayaTambahan;
-    const newSisaTagihan = newTotalTagihan - (formValues.uangMuka || 0);
+    // Tentukan sisa tagihan setelah pembayaran cicilan
+    const newSisaTagihan = newTotalTagihan - jumlahCicilanSudahDibayar;
   
-    // Hitung angsuran jika metode cicilan
-    let newJumlahAngsuran = formValues.jumlahBiayaPerAngsuran ?? 0;
-    if (metode === "Cicilan" && formValues.banyaknyaCicilan && formValues.banyaknyaCicilan > 0) {
-      newJumlahAngsuran = Math.round(newSisaTagihan / formValues.banyaknyaCicilan);
-    }
-  
-    setFormValues(prev => ({
+    // Update formValues
+    setFormValues((prev) => ({
       ...prev,
-      totalTagihan: newTotalTagihan,
-      sisaTagihan: newSisaTagihan,
-      jumlahBiayaPerAngsuran: newJumlahAngsuran
+      totalTagihanBaru: newTotalTagihan, // Update total tagihan dengan biaya tambahan baru atau 0
+      sisaTagihan: newSisaTagihan > 0 ? newSisaTagihan : 0, // Pastikan sisa tagihan tidak negatif
+      jumlahBiayaPerAngsuran: newJumlahAngsuran,
     }));
-  
   }, [
-    baseTotalTagihan,
-    formValues.BiayaTambahan,
-    formValues.uangMuka,
+    baseTotalTagihan, // Memastikan nilai ini tidak berubah kecuali benar-benar diperbarui
+    formValues.BiayaTambahan, // Hanya menghitung biaya tambahan baru
     formValues.banyaknyaCicilan,
-    metode
+    formValues.Cicilan, // Memperhitungkan cicilan yang sudah dibayar
+    metode,
   ]);
+  
 
   const handleOpenModal = () => {
     if (!openModal) {
@@ -498,10 +525,15 @@ const handleChangeHarga = (
     }
   };
 
+  useEffect(() => {
+    setLatestFormValues(formValues);
+  }, [formValues]);
+
+  console.log("data yang mau di update:", latestFormValues);
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     // Kirim data ke parent
     e.preventDefault();
-    console.log("data yang mau di update:", formValues);
+    console.log("data yang mau di update:", latestFormValues);
 
     // Special handling based on payment method
     const methodErrors: FormErrors = {};
@@ -660,7 +692,12 @@ const handleChangeHarga = (
                 label="Total Tagihan"
                 name="totalTagihan"
                 sx={{ mb: 2 }}
-                value={formatRupiah(formValues.totalTagihan)}
+                value={formatRupiah(
+                  formValues.totalTagihanBaru !== undefined &&
+                    formValues.totalTagihanBaru !== 0
+                    ? formValues.totalTagihanBaru
+                    : formValues.totalTagihan ?? 0 // Pastikan selalu angka, jika undefined maka set ke 0
+                )}
                 error={!!formErrors.totalTagihan}
                 helperText={formErrors.totalTagihan}
                 disabled={!isEditing}

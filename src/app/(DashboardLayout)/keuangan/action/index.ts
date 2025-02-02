@@ -233,6 +233,7 @@ export const updateKeuanganAction = async (formValues: KeuanganInterface) => {
       banyaknyaCicilan: formValues.banyaknyaCicilan ?? 0,
       catatanPembayaran: formValues.catatanPembayaran ?? "",
       paket_id: formValues.paket_id ?? 0,
+      totalTagihanBaru: formValues.totalTagihanBaru ?? 0,
     })
     .eq("id", formValues.id)
     .select("id")

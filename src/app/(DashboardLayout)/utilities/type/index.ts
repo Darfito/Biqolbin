@@ -25,6 +25,7 @@ export interface KeuanganInterface {
   metodePembayaran: MetodePembayaranType;
   uangMuka?: number;
   totalTagihan: number;
+  totalTagihanBaru?:number;
   sisaTagihan?: number;
   jumlahBiayaPerAngsuran?: number;
   tenggatPembayaran: string;

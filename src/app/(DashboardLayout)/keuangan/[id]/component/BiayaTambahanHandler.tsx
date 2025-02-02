@@ -76,7 +76,7 @@ export const BiayaTambahanSection = ({
             mb: 2,
           }}
         >
-          {biayaTambahan.length > 1 && isEditing && (
+          {biayaTambahan.length > 0 && isEditing && (
             <Button
               variant="contained"
               color="error"

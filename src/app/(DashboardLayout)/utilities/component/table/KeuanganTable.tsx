@@ -192,6 +192,39 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
     null
   ); // Data yang dipilih
 
+  const handleCloseDialog = () => {
+    setOpen(false); // Tutup dialog
+    setSelectedRow(null); // Reset data
+  };
+
+  const handleCloseUndoDialog = () => {
+    setOpenUndoDialog(false); // Tutup dialog
+    setSelectedRow(null); // Reset data
+  };
+
+  const handleDelete = async () => {
+    if (selectedRow) {
+      const result = await deleteStatusAktifAction(selectedRow.id ?? 0); // Eksekusi delete
+      if (result.success) {
+        toast.success(`User with ID ${selectedRow.id} has been deleted.`);
+      } else {
+        toast.error(`Failed to delete user: ${result.error}`);
+      }
+      handleCloseUndoDialog(); // Tutup dialog setelah selesai
+    }
+  };
+  const handleUndo = async () => {
+    if (selectedRow) {
+      const result = await undoStatusAktifAction(selectedRow.id ?? 0); // Eksekusi delete
+      if (result.success) {
+        toast.success(`User with ID ${selectedRow.id} has been restored.`);
+      } else {
+        toast.error(`Failed to restored user: ${result.error}`);
+      }
+      handleCloseDialog(); // Tutup dialog setelah selesai
+    }
+  };
+
   const columnHelper = createColumnHelper<KeuanganInterface>();
 
   const columns = [
@@ -277,9 +310,17 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
       },
     }),
     columnHelper.accessor("totalTagihan", {
-      cell: (info) => `Rp ${info.getValue().toLocaleString()}`,
+      cell: (info) => {
+        const totalTagihan =
+          info.row.original.totalTagihanBaru !== 0
+            ? info.row.original.totalTagihanBaru ?? 0
+            : info.row.original.totalTagihan ?? 0;
+
+        return `Rp ${totalTagihan.toLocaleString()}`;
+      },
       header: "Total Tagihan",
     }),
+
     columnHelper.accessor("sisaTagihan", {
       cell: (info) => `Rp ${info.getValue()?.toLocaleString()}`,
       header: "Sisa Tagihan",
@@ -328,39 +369,6 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
       enableColumnFilter: false,
     }),
   ];
-
-  const handleCloseDialog = () => {
-    setOpen(false); // Tutup dialog
-    setSelectedRow(null); // Reset data
-  };
-
-  const handleCloseUndoDialog = () => {
-    setOpenUndoDialog(false); // Tutup dialog
-    setSelectedRow(null); // Reset data
-  };
-
-  const handleDelete = async () => {
-    if (selectedRow) {
-      const result = await deleteStatusAktifAction(selectedRow.id ?? 0); // Eksekusi delete
-      if (result.success) {
-        toast.success(`User with ID ${selectedRow.id} has been deleted.`);
-      } else {
-        toast.error(`Failed to delete user: ${result.error}`);
-      }
-      handleCloseUndoDialog(); // Tutup dialog setelah selesai
-    }
-  };
-  const handleUndo = async () => {
-    if (selectedRow) {
-      const result = await undoStatusAktifAction(selectedRow.id ?? 0); // Eksekusi delete
-      if (result.success) {
-        toast.success(`User with ID ${selectedRow.id} has been restored.`);
-      } else {
-        toast.error(`Failed to restored user: ${result.error}`);
-      }
-      handleCloseDialog(); // Tutup dialog setelah selesai
-    }
-  };
 
   const table = useReactTable({
     data: data || [], // Pastikan data selalu berupa array.
