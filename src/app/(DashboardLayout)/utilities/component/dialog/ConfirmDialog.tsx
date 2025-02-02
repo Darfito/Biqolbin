@@ -14,28 +14,36 @@ interface ConfirmDialogProps {
   onConfirm: () => void; // Fungsi untuk mengonfirmasi aksi
   title: string; // Judul dialog
   description: string; // Deskripsi dialog
+  undo: boolean;
 }
 
-const ConfirmDialog= ({
+const ConfirmDialog = ({
   open,
   onClose,
   onConfirm,
   title,
   description,
+  undo,
 }: ConfirmDialogProps) => {
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
-      <Typography>{description}</Typography>
+        <Typography>{description}</Typography>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="primary">
           Batal
         </Button>
-        <Button onClick={onConfirm} color="error" variant="contained">
-          Hapus
-        </Button>
+        {undo === false ? (
+          <Button onClick={onConfirm} color="error" variant="contained">
+            Hapus
+          </Button>
+        ) : (
+          <Button onClick={onConfirm} color="error" variant="contained">
+            Balikkan
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );

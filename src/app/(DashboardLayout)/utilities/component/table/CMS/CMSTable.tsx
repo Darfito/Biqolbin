@@ -48,7 +48,12 @@ import { PaketInterface } from "../../../type";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
-import { deleteStatusAktifPaketAction, publishCMSAction } from "@/app/(DashboardLayout)/cms/action";
+import {
+  deleteStatusAktifPaketAction,
+  publishCMSAction,
+  undoDeleteStatusAktifPaketAction,
+  verificationCMSAction,
+} from "@/app/(DashboardLayout)/cms/action";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -135,33 +140,54 @@ const Filter = ({
 // Mendeklarasikan interface dengan tipe generik T
 interface TableProps<T> {
   data: T[];
+  roleUser: string;
 }
 
-const CMSTable = ({ data }: TableProps<PaketInterface>) => {
+const CMSTable = ({ data, roleUser }: TableProps<PaketInterface>) => {
   // States
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
+  const [openVerificationDialog, setOpenVerificationDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false); // Untuk delete
+  const [openUndoDialog, setOpenUndoDialog] = useState(false); // Untuk delete
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [selectedNama, setSelectedNama] = useState<string | null>(null);
   const [actionType, setActionType] = useState<
     "publish" | "unpublish" | "delete"
   >("publish");
+  const [verificationStatus, setVerificationStatus] = useState<
+    "Verifikasi" | "Ditolak"
+  >("Verifikasi");
   const [tableData, setTableData] = useState<PaketInterface[]>(data); // Local state to manage table data
   const router = useRouter();
 
   console.log("Table data:", tableData);
 
-    // Sync local state with parent data
-    useEffect(() => {
-      setTableData(data);
-    }, [data]);
+  // Sync local state with parent data
+  useEffect(() => {
+    setTableData(data);
+  }, [data]);
 
   const handleDialogOpen = (id: number, type: "publish" | "unpublish") => {
     setSelectedId(id);
     setActionType(type);
     setOpenDialog(true);
+  };
+
+  const handleVerificationStatusChange = (
+    id: number,
+    status: "Verifikasi" | "Ditolak"
+  ) => {
+    setSelectedId(id);
+    setVerificationStatus(status);
+    setOpenVerificationDialog(true);
+  };
+
+  const handleDialogCloseVerification = () => {
+    setOpenVerificationDialog(false);
+    setSelectedId(null);
+    setVerificationStatus("Verifikasi");
   };
 
   const handleDialogDeleteOpen = (id: number, paketNama: string) => {
@@ -178,10 +204,24 @@ const CMSTable = ({ data }: TableProps<PaketInterface>) => {
     setSelectedNama(null);
   };
 
+  const handleUndoOpen = (id: number, paketNama: string) => {
+    setSelectedId(id);
+    setSelectedNama(paketNama);
+    setOpenUndoDialog(true);
+  };
+
+  const handleUndoClose = () => {
+    setOpenUndoDialog(false);
+    setSelectedId(null);
+    setActionType("publish");
+    setOpenDialog(false);
+    setSelectedNama(null);
+  };
+
   const handlePublishToggle = async (id: number, currentStatus: boolean) => {
     try {
       const result = await publishCMSAction(id, currentStatus);
-      
+
       if (result) {
         toast.success("Status Publikasi diperbarui.");
       } else {
@@ -192,16 +232,48 @@ const CMSTable = ({ data }: TableProps<PaketInterface>) => {
       toast.error("An unexpected error occurred.");
     }
   };
-  
+
+  const handleVerificationToggle = async (
+    id: number,
+    currentStatus: boolean
+  ) => {
+    try {
+      const result = await verificationCMSAction(id, currentStatus);
+
+      if (result) {
+        toast.success("Status Verifikasi diperbarui.");
+      } else {
+        toast.error("Failed to update verification status.");
+      }
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      toast.error("An unexpected error occurred.");
+    }
+  };
 
   const handleDelete = async (id: number) => {
     try {
       const result = await deleteStatusAktifPaketAction(id);
-      
+
       if (result) {
         toast.success("Paket successfully deactivated.");
       } else {
         toast.error("Failed to deactivate Paket.");
+      }
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      toast.error("An unexpected error occurred.");
+    }
+  };
+
+  const handleUndo = async (id: number) => {
+    try {
+      const result = await undoDeleteStatusAktifPaketAction(id);
+
+      if (result) {
+        toast.success("Paket successfully activated.");
+      } else {
+        toast.error("Failed to activate Paket.");
       }
     } catch (error) {
       console.error("Unexpected error:", error);
@@ -215,6 +287,14 @@ const CMSTable = ({ data }: TableProps<PaketInterface>) => {
     const isPublishAction = actionType === "publish";
     await handlePublishToggle(selectedId, !isPublishAction); // Status kebalikannya
     handleDialogClose(); // Tutup dialog setelah selesai
+  };
+
+  const handleSaveChangesVerification = async () => {
+    if (!selectedId || !verificationStatus) return;
+
+    const isVerifiedAction = verificationStatus === "Verifikasi";
+    await handleVerificationToggle(selectedId, !isVerifiedAction); // Status kebalikannya
+    handleDialogCloseVerification(); // Tutup dialog setelah selesai
   };
 
   const columnHelper = createColumnHelper<PaketInterface>();
@@ -260,6 +340,25 @@ const CMSTable = ({ data }: TableProps<PaketInterface>) => {
     columnHelper.accessor("action", {
       cell: (info) => (
         <Box sx={{ display: "flex", gap: "0.5rem" }}>
+          {(roleUser === "Superadmin" || roleUser === "Admin") && (
+            <Button
+              variant="contained"
+              onClick={() =>
+                handleVerificationStatusChange(
+                  info.row.original.id ?? 0,
+                  info.row.original.statusVerifikasi ? "Ditolak" : "Verifikasi"
+                )
+              }
+              sx={{
+                color: "#fff",
+                backgroundColor: info.row.original.statusVerifikasi
+                  ? "red"
+                  : "green",
+              }}
+            >
+              {info.row.original.statusVerifikasi ? "Ditolak" : "Verifikasi"}
+            </Button>
+          )}
           <Button
             variant="contained"
             onClick={() =>
@@ -272,9 +371,11 @@ const CMSTable = ({ data }: TableProps<PaketInterface>) => {
               color: "#fff",
               backgroundColor: info.row.original.publish ? "red" : "green",
             }}
+            disabled={!info.row.original.statusVerifikasi} // Jika statusVerifikasi false, tombol disabled
           >
             {info.row.original.publish ? "Unpublish" : "Publish"}
           </Button>
+
           <Button
             onClick={() => handleNavigateToCMS(info.row.original)}
             variant="contained"
@@ -282,19 +383,35 @@ const CMSTable = ({ data }: TableProps<PaketInterface>) => {
           >
             Detail
           </Button>
-          <Button
-            variant="contained"
-            color="error"
-            className="text-white"
-            onClick={() =>
-              handleDialogDeleteOpen(
-                info.row.original.id ?? 0,
-                info.row.original.nama
-              )
-            }
-          >
-            Delete
-          </Button>
+          {info.row.original.statusAktif ? (
+            <Button
+              variant="contained"
+              color="error"
+              className="text-white"
+              onClick={() =>
+                handleDialogDeleteOpen(
+                  info.row.original.id ?? 0,
+                  info.row.original.nama
+                )
+              }
+            >
+              Delete
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              className="text-white"
+              onClick={() =>
+                handleUndoOpen(
+                  info.row.original.id ?? 0,
+                  info.row.original.nama
+                )
+              }
+            >
+              Undo
+            </Button>
+          )}
         </Box>
       ),
       header: "Action",
@@ -419,21 +536,29 @@ const CMSTable = ({ data }: TableProps<PaketInterface>) => {
           }}
         />
       </Box>
-      <Dialog open={openDialog} onClose={handleDialogClose}>
+      {/* Dialog for verifikasi dan ditolak */}
+      <Dialog
+        open={openVerificationDialog}
+        onClose={handleDialogCloseVerification}
+      >
         <DialogTitle>Konfirmasi Aksi</DialogTitle>
         <DialogContent>
           <Typography>
-            {actionType === "publish"
-              ? "Apakah Anda yakin ingin mempublikasikan konten ini?"
-              : "Apakah Anda yakin ingin menutup konten ini?"}
+            {verificationStatus === "Verifikasi"
+              ? "Apakah Anda yakin ingin memverifikasi konten ini?"
+              : "Apakah Anda yakin ingin menolak konten ini?"}
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleDialogClose} variant="contained" color="error">
+          <Button
+            onClick={handleDialogCloseVerification}
+            variant="contained"
+            color="error"
+          >
             Batal
           </Button>
           <Button
-            onClick={handleSaveChanges}
+            onClick={handleSaveChangesVerification}
             variant="contained"
             color="primary"
             sx={{ color: "#fff" }}
@@ -471,9 +596,7 @@ const CMSTable = ({ data }: TableProps<PaketInterface>) => {
       <Dialog open={openDeleteDialog} onClose={handleDialogClose}>
         <DialogTitle>Konfirmasi Hapus</DialogTitle>
         <DialogContent>
-          <Typography>
-            Apakah Anda yakin ingin menghapus item ini?
-          </Typography>
+          <Typography>Apakah Anda yakin ingin menghapus item ini?</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDialogClose} variant="contained" color="error">
@@ -486,6 +609,29 @@ const CMSTable = ({ data }: TableProps<PaketInterface>) => {
             sx={{ color: "#fff" }}
           >
             Hapus
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog for Delete */}
+      <Dialog open={openUndoDialog} onClose={handleUndoClose}>
+        <DialogTitle>Konfirmasi Undo</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Apakah Anda yakin ingin mengembalikan item ini?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleUndoClose} variant="contained" color="error">
+            Batal
+          </Button>
+          <Button
+            onClick={() => handleUndo(selectedId || 0)} // Memanggil handleDelete tanpa parameter karena sudah diset sebelumnya
+            variant="contained"
+            color="primary"
+            sx={{ color: "#fff" }}
+          >
+            Kembalikan
           </Button>
         </DialogActions>
       </Dialog>

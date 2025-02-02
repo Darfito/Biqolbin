@@ -34,7 +34,7 @@ export default async function CMSPage() {
 
   return (
     <>
-      <CMS data={paketData || []} />
+      <CMS data={paketData || []} roleUser={roleUser} />
     </>
   );
 }

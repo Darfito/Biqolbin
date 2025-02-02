@@ -10,9 +10,10 @@ import CustomHeader from "../../layout/header/CustomHeader";
 
 export type CMSPageProps = {
   data: PaketInterface[];
+  roleUser: string;
 };
 
-const CMS = ({ data }: CMSPageProps) => {
+const CMS = ({ data, roleUser }: CMSPageProps) => {
   const [selectedYear, setSelectedYear] = useState<string | null>(
     new Date().getFullYear().toString()
   );
@@ -60,7 +61,7 @@ const CMS = ({ data }: CMSPageProps) => {
           <FormCMS mode="create" />
         </Box>
         <Card sx={{ mt: 3 }}>
-          <CMSTable data={filteredPaketData} />
+          <CMSTable data={filteredPaketData} roleUser={roleUser} />
         </Card>
       </PageContainer>
     </>

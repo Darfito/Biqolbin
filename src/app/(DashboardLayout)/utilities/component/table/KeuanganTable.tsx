@@ -53,9 +53,7 @@ declare module "@tanstack/table-core" {
   interface FilterMeta {
     itemRank: RankingInfo;
   }
-}
-
-const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
+}const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   // Rank the item
   const itemRank = rankItem(row.getValue(columnId), value);
 
@@ -64,9 +62,14 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
     itemRank,
   });
 
-  // Return if the item should be filtered in/out
-  return itemRank.passed;
+  // Log untuk debugging
+  console.log("row value:", row.getValue(columnId));
+  console.log("filter value:", value);
+
+  // Return true only if the full string matches exactly
+  return itemRank.passed && row.getValue(columnId) === value;
 };
+
 
 const Filter = ({
   column,
@@ -84,6 +87,13 @@ const Filter = ({
   // Options for filtering based on column id
   const getColumnOptions = (columnId: string) => {
     switch (columnId) {
+      case "statusPenjadwalan" :
+        return [
+          "Belum Dijadwalkan",
+          "Dijadwalkan",
+          "Berangkat",
+          "Selesai",
+        ]
       case "status":
         return [
           "Semua",
@@ -121,6 +131,8 @@ const Filter = ({
       </FormControl>
     );
   }
+
+
 
   if (typeof firstValue === "number") {
     return (
@@ -204,6 +216,46 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
       cell: (info) => info.getValue(),
       header: "Metode Pembayaran",
     }),
+    columnHelper.accessor("statusPenjadwalan", {
+      id: "statusPenjadwalan",
+      cell: (info) => {
+        const statusPenjadwalan = info.getValue();
+        let chipColor = "";
+
+        switch (statusPenjadwalan) {
+          case "Berangkat":
+            chipColor = "lightblue"; // Biru muda
+            break;
+          case "Selesai":
+            chipColor = "green"; // Hijau
+            break;
+          case "Dijadwalkan":
+            chipColor = "#F18B04"; // Warna khusus untuk Dijadwalkan
+            break;
+          case "Belum Dijadwalkan":
+            chipColor = "red"; // Warna khusus untuk Belum Dijadwalkan
+            break;
+        }
+
+        return (
+          <Chip
+            label={
+              statusPenjadwalan === "Berangkat" ||
+              statusPenjadwalan === "Selesai" ||
+              statusPenjadwalan === "Dijadwalkan"
+                ? statusPenjadwalan
+                : "Belum Dijadwalkan"
+            }
+            sx={{
+              backgroundColor: chipColor,
+              color: "white", // Warna teks putih agar kontras
+              fontWeight: "bold",
+            }}
+          />
+        );
+      },
+      header: "Status Penjadwalan",
+    }),
     columnHelper.accessor("status", {
       id: "status",
       cell: (info) => {
@@ -211,7 +263,7 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
         let chipColor = "";
         if (status === "Lunas") {
           chipColor = "#4CAF50";
-        } else{
+        } else {
           chipColor = "#FF9800";
         }
 
@@ -223,9 +275,9 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
               color: "white", // Warna teks putih agar kontras
               fontWeight: "bold",
             }}
-            />
-        )
-      }
+          />
+        );
+      },
     }),
     columnHelper.accessor("totalTagihan", {
       cell: (info) => `Rp ${info.getValue().toLocaleString()}`,

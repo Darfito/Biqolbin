@@ -23,8 +23,6 @@ export interface KeuanganInterface {
   created_at?: string;
   Jamaah: JamaahInterface;
   Paket: PaketInterface;
-  // namaPaket?: string;
-  // jenisPaket?: string;
   metodePembayaran: MetodePembayaranType;
   uangMuka?: number;
   totalTagihan: number;
@@ -36,12 +34,20 @@ export interface KeuanganInterface {
   status: StatusType;
   action?: string; // Optional field for action
   Cicilan?: CicilanType[];
+  BiayaTambahan?: BiayaTambahanType[];
   paket_id?: number;
   statusPenjadwalan: StatusKepergian;
   statusAktif: boolean;
   varianKamar: TipeKamar;
   kursiRoda: boolean;
 }
+
+export type BiayaTambahanType = {
+  id?: number;
+  nama: string;
+  biaya: number;
+  keuangan_id?: number;
+};
 
 export type CicilanType = {
   keuangan_id?: number;
@@ -91,6 +97,7 @@ export interface PaketInterface {
   Hotel?: HotelType[];
   selectedFile?: File | null;
   statusAktif?: boolean;
+  statusVerifikasi?: boolean;
 }
 
 // ! TYPE HOTEL
