@@ -441,101 +441,6 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
                 sx={{ marginBottom: 2 }}
                 disabled={!isEditing}
               />
-              {/* Jenis Paket */}
-              {/* <Autocomplete
-                fullWidth
-                options={paketData}
-                disabled={!isEditing}
-                getOptionLabel={(option) => option.nama} // Menampilkan nama paket
-                value={
-                  paketData.find((paket) => paket.id === formValues.paket_id) ||
-                  null
-                }
-                onChange={(event, newValue) => {
-                  if (newValue) {
-                    setFormValues({
-                      ...formValues,
-                      jenisPaket: newValue || ({} as PaketInterface),
-                    });
-                  } else {
-                    setFormValues({
-                      ...formValues,
-                      jenisPaket: {} as PaketInterface,
-                    });
-                  }
-                }}
-                renderInput={(params) => (
-                  <CustomTextField
-                    {...params}
-                    label="Jenis Paket"
-                    variant="outlined"
-                    fullWidth
-                    sx={{ marginBottom: 2 }}
-                  />
-                )}
-              /> */}
-              {/* <CustomTextField
-                select
-                fullWidth
-                label="Varian Kamar"
-                value={formValues.varianKamar}
-                onChange={(e: { target: { value: string } }) =>
-                  setFormValues({
-                    ...formValues,
-                    varianKamar: e.target.value as TipeKamar,
-                  })
-                }
-                sx={{ marginBottom: 2 }}
-                disabled={!isEditing}
-              >
-                <MenuItem value={TipeKamar.QUAD}>QUAD</MenuItem>
-                <MenuItem value={TipeKamar.TRIPLE}>TRIPLE</MenuItem>
-                <MenuItem value={TipeKamar.DOUBLE}>DOUBLE</MenuItem>
-              </CustomTextField> */}
-
-              {/* Tanggal Berangkat */}
-              {/* <CustomTextField
-                fullWidth
-                disabled
-                label="Tanggal Berangkat"
-                type="date"
-                value={formValues.berangkat} // Sudah otomatis terisi dari jenisPaket
-                InputLabelProps={{
-                  shrink: true, // Memastikan label tetap di atas
-                }}
-                sx={{ marginBottom: 2 }}
-              /> */}
-              {/* Tanggal Selesai */}
-              {/* <CustomTextField
-                fullWidth
-                disabled
-                label="Tanggal Selesai"
-                type="date"
-                value={formValues.selesai} // Sudah otomatis terisi dari jenisPaket
-                InputLabelProps={{
-                  shrink: true, // Memastikan label tetap di atas
-                }}
-                sx={{ marginBottom: 2 }}
-              /> */}
-
-              {/* <CustomTextField
-                select
-                fullWidth
-                label="Status Perjalanan"
-                value={formValues.status}
-                onChange={(e: { target: { value: string } }) =>
-                  setFormValues({
-                    ...formValues,
-                    status: e.target.value as StatusKepergian,
-                  })
-                }
-                sx={{ marginBottom: 2 }}
-                disabled={!isEditing}
-              >
-                <MenuItem value="Dijadwalkan">Dijadwalkan</MenuItem>
-                <MenuItem value="Berangkat">Berangkat</MenuItem>
-                <MenuItem value="Selesai">Selesai</MenuItem>
-              </CustomTextField> */}
             </Grid>
 
             {/* Kontak Darurat */}
@@ -595,3 +500,100 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
 };
 
 export default FormDetail;
+
+{/* Jenis Paket */}
+{/* <Autocomplete
+  fullWidth
+  options={paketData}
+  disabled={!isEditing}
+  getOptionLabel={(option) => option.nama} // Menampilkan nama paket
+  value={
+    paketData.find((paket) => paket.id === formValues.paket_id) ||
+    null
+  }
+  onChange={(event, newValue) => {
+    if (newValue) {
+      setFormValues({
+        ...formValues,
+        jenisPaket: newValue || ({} as PaketInterface),
+      });
+    } else {
+      setFormValues({
+        ...formValues,
+        jenisPaket: {} as PaketInterface,
+      });
+    }
+  }}
+  renderInput={(params) => (
+    <CustomTextField
+      {...params}
+      label="Jenis Paket"
+      variant="outlined"
+      fullWidth
+      sx={{ marginBottom: 2 }}
+    />
+  )}
+/> */}
+{/* <CustomTextField
+  select
+  fullWidth
+  label="Varian Kamar"
+  value={formValues.varianKamar}
+  onChange={(e: { target: { value: string } }) =>
+    setFormValues({
+      ...formValues,
+      varianKamar: e.target.value as TipeKamar,
+    })
+  }
+  sx={{ marginBottom: 2 }}
+  disabled={!isEditing}
+>
+  <MenuItem value={TipeKamar.QUAD}>QUAD</MenuItem>
+  <MenuItem value={TipeKamar.TRIPLE}>TRIPLE</MenuItem>
+  <MenuItem value={TipeKamar.DOUBLE}>DOUBLE</MenuItem>
+</CustomTextField> */}
+
+{/* Tanggal Berangkat */}
+{/* <CustomTextField
+  fullWidth
+  disabled
+  label="Tanggal Berangkat"
+  type="date"
+  value={formValues.berangkat} // Sudah otomatis terisi dari jenisPaket
+  InputLabelProps={{
+    shrink: true, // Memastikan label tetap di atas
+  }}
+  sx={{ marginBottom: 2 }}
+/> */}
+{/* Tanggal Selesai */}
+{/* <CustomTextField
+  fullWidth
+  disabled
+  label="Tanggal Selesai"
+  type="date"
+  value={formValues.selesai} // Sudah otomatis terisi dari jenisPaket
+  InputLabelProps={{
+    shrink: true, // Memastikan label tetap di atas
+  }}
+  sx={{ marginBottom: 2 }}
+/> */}
+
+{/* <CustomTextField
+  select
+  fullWidth
+  label="Status Perjalanan"
+  value={formValues.status}
+  onChange={(e: { target: { value: string } }) =>
+    setFormValues({
+      ...formValues,
+      status: e.target.value as StatusKepergian,
+    })
+  }
+  sx={{ marginBottom: 2 }}
+  disabled={!isEditing}
+>
+  <MenuItem value="Belum Dijadwalkan">Belum Dijadwalkan</MenuItem>
+  <MenuItem value="Dijadwalkan">Dijadwalkan</MenuItem>
+  <MenuItem value="Berangkat">Berangkat</MenuItem>
+  <MenuItem value="Selesai">Selesai</MenuItem>
+</CustomTextField> */}

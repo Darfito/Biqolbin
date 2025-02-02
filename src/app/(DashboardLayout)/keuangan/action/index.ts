@@ -135,7 +135,8 @@ export const getKeuanganByIdAction = async (id: number) => {
         cicilanKe, 
         nominalCicilan,
         tanggalPembayaran
-      )
+      ),
+      BiayaTambahan(*)
     `
     )
     .eq("id", id)
@@ -219,6 +220,7 @@ export const updateKeuanganAction = async (formValues: KeuanganInterface) => {
     return { success: false, error: "ID tidak ditemukan!" };
   }
 
+  // Mulai transaksi untuk memastikan konsistensi data
   const { data, error } = await supabase
     .from("Keuangan")
     .update({
@@ -230,7 +232,7 @@ export const updateKeuanganAction = async (formValues: KeuanganInterface) => {
       tenggatPembayaran: formValues.tenggatPembayaran,
       banyaknyaCicilan: formValues.banyaknyaCicilan ?? 0,
       catatanPembayaran: formValues.catatanPembayaran ?? "",
-      paket_id: formValues.paket_id ?? 0, // Pastikan paket_id ada
+      paket_id: formValues.paket_id ?? 0,
     })
     .eq("id", formValues.id)
     .select("id")
@@ -243,9 +245,44 @@ export const updateKeuanganAction = async (formValues: KeuanganInterface) => {
 
   console.log(`Keuangan with ID ${formValues.id} updated successfully`);
   console.log("Updated data:", data);
+
+  // **Hapus biaya tambahan lama sebelum menambahkan yang baru**
+  const { error: deleteError } = await supabase
+    .from("BiayaTambahan")
+    .delete()
+    .eq("keuangan_id", formValues.id);
+
+  if (deleteError) {
+    console.error("Error deleting old BiayaTambahan:", deleteError.message);
+    return { success: false, error: deleteError.message };
+  }
+
+  console.log(`Deleted old BiayaTambahan for Keuangan ID: ${formValues.id}`);
+
+  // **Insert biaya tambahan baru jika ada**
+  if (formValues.BiayaTambahan && formValues.BiayaTambahan.length > 0) {
+    const biayaTambahanData = formValues.BiayaTambahan.map((item) => ({
+      nama: item.nama,
+      biaya: item.biaya,
+      keuangan_id: formValues.id, // Hubungkan dengan ID Keuangan yang diperbarui
+    }));
+
+    const { error: insertError } = await supabase
+      .from("BiayaTambahan")
+      .insert(biayaTambahanData);
+
+    if (insertError) {
+      console.error("Error inserting new BiayaTambahan:", insertError.message);
+      return { success: false, error: insertError.message };
+    }
+
+    console.log(`Inserted ${biayaTambahanData.length} new BiayaTambahan`);
+  }
+
   revalidatePath("/keuangan");
   return { success: true };
 };
+
 
 /**
  * Deletes a keuangan record from the Keuangan table based on the given keuanganId.
@@ -283,6 +320,20 @@ export const deleteStatusAktifAction = async (keuanganId: number) => {
     return { success: false, error: error.message };
   }
   console.log(`Keuangan with ID ${keuanganId} deleted successfully`);
+  revalidatePath("/keuangan");
+  return { success: true };
+}
+export const undoStatusAktifAction = async (keuanganId: number) => {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("Keuangan")
+    .update({ statusAktif: true })
+    .eq("id", keuanganId);
+  if (error) {
+    console.error("Error restoring keuangan:", error.message);
+    return { success: false, error: error.message };
+  }
+  console.log(`Keuangan with ID ${keuanganId} restored successfully`);
   revalidatePath("/keuangan");
   return { success: true };
 }

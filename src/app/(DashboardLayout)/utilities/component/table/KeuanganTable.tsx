@@ -43,7 +43,10 @@ import { ChevronRight } from "@mui/icons-material";
 import { Autocomplete, Box, Chip, FormControl } from "@mui/material";
 import { KeuanganInterface } from "../../type";
 import ActionButton from "./components/ActionButton";
-import { deleteStatusAktifAction } from "@/app/(DashboardLayout)/keuangan/action";
+import {
+  deleteStatusAktifAction,
+  undoStatusAktifAction,
+} from "@/app/(DashboardLayout)/keuangan/action";
 import ConfirmDialog from "../dialog/ConfirmDialog";
 
 declare module "@tanstack/table-core" {
@@ -53,7 +56,8 @@ declare module "@tanstack/table-core" {
   interface FilterMeta {
     itemRank: RankingInfo;
   }
-}const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
+}
+const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   // Rank the item
   const itemRank = rankItem(row.getValue(columnId), value);
 
@@ -69,7 +73,6 @@ declare module "@tanstack/table-core" {
   // Return true only if the full string matches exactly
   return itemRank.passed && row.getValue(columnId) === value;
 };
-
 
 const Filter = ({
   column,
@@ -87,13 +90,8 @@ const Filter = ({
   // Options for filtering based on column id
   const getColumnOptions = (columnId: string) => {
     switch (columnId) {
-      case "statusPenjadwalan" :
-        return [
-          "Belum Dijadwalkan",
-          "Dijadwalkan",
-          "Berangkat",
-          "Selesai",
-        ]
+      case "statusPenjadwalan":
+        return ["Belum Dijadwalkan", "Dijadwalkan", "Berangkat", "Selesai"];
       case "status":
         return [
           "Semua",
@@ -131,8 +129,6 @@ const Filter = ({
       </FormControl>
     );
   }
-
-
 
   if (typeof firstValue === "number") {
     return (
@@ -191,6 +187,7 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [open, setOpen] = useState(false); // State untuk dialog
+  const [openUndoDialog, setOpenUndoDialog] = useState(false); // Dialog untuk undo
   const [selectedRow, setSelectedRow] = useState<KeuanganInterface | null>(
     null
   ); // Data yang dipilih
@@ -299,6 +296,10 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
           setSelectedRow(rowData); // Set data pengguna
           setOpen(true); // Buka dialog
         };
+        const handleOpenUndoDialog = (rowData: KeuanganInterface) => {
+          setSelectedRow(rowData); // Set data pengguna
+          setOpenUndoDialog(true); // Buka dialog
+        };
 
         return (
           <Box sx={{ display: "flex", justifyContent: "start" }}>
@@ -308,12 +309,19 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
               actionPath={(rowData) => `/keuangan/${rowData.id}`} // Path dinamis berdasarkan ID Jamaah
             />
 
-            {/* Tombol Delete */}
-            <ActionButton
-              rowData={info.row.original}
-              mode="delete"
-              onDelete={() => handleOpenDialog(info.row.original)} // Buka dialog konfirmasi
-            />
+            {info.row.original.statusAktif ? (
+              <ActionButton
+                rowData={info.row.original}
+                mode="delete"
+                onDelete={() => handleOpenDialog(info.row.original)} // Buka dialog konfirmasi
+              />
+            ) : (
+              <ActionButton
+                rowData={info.row.original}
+                mode="undo"
+                onUndo={() => handleOpenUndoDialog(info.row.original)} // Buka dialog konfirmasi
+              />
+            )}
           </Box>
         );
       },
@@ -326,6 +334,11 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
     setSelectedRow(null); // Reset data
   };
 
+  const handleCloseUndoDialog = () => {
+    setOpenUndoDialog(false); // Tutup dialog
+    setSelectedRow(null); // Reset data
+  };
+
   const handleDelete = async () => {
     if (selectedRow) {
       const result = await deleteStatusAktifAction(selectedRow.id ?? 0); // Eksekusi delete
@@ -333,6 +346,17 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
         toast.success(`User with ID ${selectedRow.id} has been deleted.`);
       } else {
         toast.error(`Failed to delete user: ${result.error}`);
+      }
+      handleCloseUndoDialog(); // Tutup dialog setelah selesai
+    }
+  };
+  const handleUndo = async () => {
+    if (selectedRow) {
+      const result = await undoStatusAktifAction(selectedRow.id ?? 0); // Eksekusi delete
+      if (result.success) {
+        toast.success(`User with ID ${selectedRow.id} has been restored.`);
+      } else {
+        toast.error(`Failed to restored user: ${result.error}`);
       }
       handleCloseDialog(); // Tutup dialog setelah selesai
     }
@@ -461,7 +485,16 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
         onClose={handleCloseDialog}
         onConfirm={handleDelete}
         title="Konfirmasi Penghapusan"
+        undo={false}
         description={`Apakah Anda yakin ingin menghapus item kuangan "${selectedRow?.id}"?`}
+      />
+      <ConfirmDialog
+        open={openUndoDialog}
+        onClose={handleCloseUndoDialog}
+        onConfirm={handleUndo}
+        undo={true}
+        title="Konfirmasi Penghapusan"
+        description={`Apakah Anda yakin ingin mengembalikkan item kuangan "${selectedRow?.id}"?`}
       />
     </Box>
   );

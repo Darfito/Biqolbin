@@ -19,6 +19,7 @@ import {
   FormControlLabel,
 } from "@mui/material";
 import {
+  BiayaTambahanType,
   JamaahInterface,
   JenisKelamin,
   JenisPaket,
@@ -37,6 +38,8 @@ import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 import { getVisaUrl, updateKeuanganAction } from "../../action";
 import FileUploaderSingle from "@/app/(DashboardLayout)/utilities/component/uploader/FileUploaderSingle";
 import { createClient } from "@/libs/supabase/client";
+import { BiayaTambahanSection } from "./BiayaTambahanHandler";
+import { update } from "lodash";
 
 interface FormErrors {
   nama?: string;
@@ -71,6 +74,7 @@ type FormType = {
   visa?: string;
   statusPenjadwalan: StatusKepergian;
   statusAktif: boolean;
+  BiayaTambahan?: BiayaTambahanType[];
 };
 
 // Valibot Schema
@@ -170,6 +174,14 @@ const initialFormValues: FormType = {
   statusPenjadwalan: "Belum Dijadwalkan",
   varianKamar: TipeKamar.PILIHVARIANKAMAR,
   statusAktif: true,
+  BiayaTambahan: [
+    {
+      id: 0,
+      nama: "",
+      biaya: 0,
+      keuangan_id: 0,
+    },
+  ],
 };
 
 const FormDetail = ({
@@ -190,6 +202,9 @@ const FormDetail = ({
   const [uploadedFile, setUploadedFile] = useState<File | null>(null); // State untuk menyimpan file yang diunggah
   const [formValues, setFormValues] = useState<FormType>(
     keuanganData ? { ...initialFormValues, ...keuanganData } : initialFormValues
+  );
+  const [baseTotalTagihan, setBaseTotalTagihan] = useState<number>(
+    keuanganData?.totalTagihan || 0
   );
   const handleDialogClose = () => setOpenDialog(false);
   const handleDialogOpen = () => setOpenDialog(true);
@@ -219,6 +234,7 @@ const FormDetail = ({
           keuanganData.statusPenjadwalan || "Belum Dijadwalkan",
         varianKamar: keuanganData.varianKamar || TipeKamar.PILIHVARIANKAMAR,
         statusAktif: keuanganData.statusAktif || false,
+        BiayaTambahan: keuanganData.BiayaTambahan || [],
       });
     }
   }, [keuanganData, formValues.id]);
@@ -250,26 +266,70 @@ const FormDetail = ({
     });
   };
 
-  const handleChangeHarga = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    type: string
+  const handleBiayaTambahanChange = (
+    index: number,
+    field: string,
+    value: string | number
   ) => {
-    const value = e.target.value.replace(/[^\d]/g, ""); // Menghapus non-numeric characters (selain angka)
+    const updatedBiayaTambahan = [...(formValues.BiayaTambahan ?? [])];
+    updatedBiayaTambahan[index] = {
+      ...updatedBiayaTambahan[index],
+      [field]: value,
+    };
+    setFormValues({ ...formValues, BiayaTambahan: updatedBiayaTambahan });
+  };
 
-    setFormValues((prevValues) => ({
-      ...prevValues,
-      [type]: value === "" ? 0 : Number(value),
+  const handleAddBiayaTambahan = () => {
+    setFormValues((prev) => ({
+      ...prev,
+      BiayaTambahan: [
+        ...(prev.BiayaTambahan ?? []),
+        {
+          id: prev.BiayaTambahan?.length ?? 0,
+          nama: "",
+          biaya: 0,
+        },
+      ],
     }));
   };
 
+  const handleRemoveBiayaTambahan = (indexToRemove: number) => {
+    if ((formValues.BiayaTambahan?.length ?? 0) > 1) {
+      setFormValues((prev) => ({
+        ...prev,
+        BiayaTambahan: prev.BiayaTambahan!.filter(
+          (_, index) => index !== indexToRemove
+        ),
+      }));
+    }
+  };
+
+// Modifikasi handleChangeHarga untuk mengupdate baseTotalTagihan
+const handleChangeHarga = (
+  e: React.ChangeEvent<HTMLInputElement>,
+  type: string
+) => {
+  const value = e.target.value.replace(/[^\d]/g, ""); // Menghapus non-numeric characters
+  const numValue = value === "" ? 0 : Number(value);
+
+  if (type === 'totalTagihan') {
+    setBaseTotalTagihan(numValue); // Update base total
+  }
+
+  setFormValues((prevValues) => ({
+    ...prevValues,
+    [type]: numValue,
+  }));
+};
+
   const updateVisaToSupabase = async (foldername: string, file: File) => {
     const supabase = createClient();
-  
+
     try {
       const fileExtension = file.name.split(".").pop();
       const newFileName = `Visa.${fileExtension}`;
       const filePath = `${foldername}/${newFileName}`;
-  
+
       // Hapus file lama (opsional)
       const { error: removeError } = await supabase.storage
         .from("Dokumen")
@@ -277,34 +337,37 @@ const FormDetail = ({
       if (removeError) {
         console.warn("Tidak bisa menghapus gambar lama:", removeError.message);
       }
-  
+
       // Upload file baru
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("Dokumen")
         .upload(filePath, file, { cacheControl: "3600", upsert: true });
-  
+
       if (uploadError) {
         throw new Error(`Gagal mengunggah gambar: ${uploadError.message}`);
       }
-  
+
       const publicUrl = `${
         process.env.NEXT_PUBLIC_SUPABASE_URL
       }/storage/v1/object/public/Dokumen/${
         uploadData.path
       }?t=${new Date().getTime()}`;
-  
+
       // Cek apakah ada row dengan jamaah_id dan nama_dokumen = "Visa"
       const { data: existingData, error: fetchError } = await supabase
         .from("jenis_dokumen")
         .select("id")
         .eq("jamaah_id", foldername)
         .eq("nama_dokumen", "Visa");
-  
+
       if (fetchError) {
-        console.error("Gagal memeriksa data di jenis_dokumen:", fetchError.message);
+        console.error(
+          "Gagal memeriksa data di jenis_dokumen:",
+          fetchError.message
+        );
         throw new Error(`Gagal memeriksa data: ${fetchError.message}`);
       }
-  
+
       if (!existingData || existingData.length === 0) {
         // Jika tidak ada data dengan jamaah_id dan nama_dokumen = "Visa", buat entri baru
         const { error: insertError } = await supabase
@@ -318,7 +381,7 @@ const FormDetail = ({
               file: publicUrl,
             },
           ]);
-  
+
         if (insertError) {
           throw new Error(`Gagal menyimpan URL gambar: ${insertError.message}`);
         }
@@ -329,22 +392,20 @@ const FormDetail = ({
           .update({ file: publicUrl })
           .eq("jamaah_id", foldername)
           .eq("nama_dokumen", "Visa");
-  
+
         if (updateError) {
           throw new Error(
             `Gagal memperbarui URL gambar: ${updateError.message}`
           );
         }
       }
-  
+
       toast.success("Visa berhasil diupload");
     } catch (error) {
       console.error("Error uploading file:", error);
       toast.error("Gagal mengupload Visa");
     }
   };
-  
-  
 
   const handleFileUpload = async (file: File, jamaah_id: string) => {
     try {
@@ -380,17 +441,35 @@ const FormDetail = ({
   };
 
   useEffect(() => {
-    const jumlahAngsuran =
-      (Number(formValues.totalTagihan) - Number(formValues.uangMuka)) /
-      Number(formValues.banyaknyaCicilan);
-
-    if (formValues.jumlahBiayaPerAngsuran !== Math.round(jumlahAngsuran)) {
-      calculateAngsuran();
+    // Hitung total dari BiayaTambahan
+    const totalBiayaTambahan = formValues.BiayaTambahan?.reduce(
+      (acc, item) => acc + (Number(item.biaya) || 0),
+      0
+    ) ?? 0;
+  
+    // Update total tagihan menggunakan baseTotalTagihan
+    const newTotalTagihan = baseTotalTagihan + totalBiayaTambahan;
+    const newSisaTagihan = newTotalTagihan - (formValues.uangMuka || 0);
+  
+    // Hitung angsuran jika metode cicilan
+    let newJumlahAngsuran = formValues.jumlahBiayaPerAngsuran ?? 0;
+    if (metode === "Cicilan" && formValues.banyaknyaCicilan && formValues.banyaknyaCicilan > 0) {
+      newJumlahAngsuran = Math.round(newSisaTagihan / formValues.banyaknyaCicilan);
     }
+  
+    setFormValues(prev => ({
+      ...prev,
+      totalTagihan: newTotalTagihan,
+      sisaTagihan: newSisaTagihan,
+      jumlahBiayaPerAngsuran: newJumlahAngsuran
+    }));
+  
   }, [
-    formValues.totalTagihan,
+    baseTotalTagihan,
+    formValues.BiayaTambahan,
     formValues.uangMuka,
     formValues.banyaknyaCicilan,
+    metode
   ]);
 
   const handleOpenModal = () => {
@@ -559,22 +638,6 @@ const FormDetail = ({
               </CustomTextField>
               <CustomTextField
                 fullWidth
-                label="Total Tagihan"
-                name="totalTagihan"
-                sx={{ mb: 2 }}
-                value={formatRupiah(formValues.totalTagihan)}
-                error={!!formErrors.totalTagihan}
-                helperText={formErrors.totalTagihan}
-                disabled={!isEditing}
-                onChange={(e: { target: { value: any } }) =>
-                  setFormValues({
-                    ...formValues,
-                    totalTagihan: e.target.value,
-                  })
-                }
-              />
-              <CustomTextField
-                fullWidth
                 label="Tenggat Pembayaran"
                 type="date"
                 sx={{ mb: 2 }}
@@ -594,6 +657,23 @@ const FormDetail = ({
               />
               <CustomTextField
                 fullWidth
+                label="Total Tagihan"
+                name="totalTagihan"
+                sx={{ mb: 2 }}
+                value={formatRupiah(formValues.totalTagihan)}
+                error={!!formErrors.totalTagihan}
+                helperText={formErrors.totalTagihan}
+                disabled={!isEditing}
+                onChange={(e: { target: { value: any } }) =>
+                  setFormValues({
+                    ...formValues,
+                    totalTagihan: e.target.value,
+                  })
+                }
+              />
+
+              <CustomTextField
+                fullWidth
                 label="Uang Muka"
                 name="uangMuka"
                 sx={{ mb: 2 }}
@@ -603,6 +683,19 @@ const FormDetail = ({
                 helperText={formErrors.uangMuka}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   handleChangeHarga(e, "uangMuka")
+                }
+              />
+              <CustomTextField
+                fullWidth
+                label="Sisa Tagihan"
+                name="sisaTagihan"
+                sx={{ mb: 2 }}
+                disabled={!isEditing}
+                value={formatRupiah(formValues.sisaTagihan ?? 0)}
+                error={!!formErrors.sisaTagihan}
+                helperText={formErrors.sisaTagihan}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  handleChangeHarga(e, "sisaTagihan")
                 }
               />
             </Grid>
@@ -639,19 +732,6 @@ const FormDetail = ({
                   />
                 </>
               )}
-              <CustomTextField
-                fullWidth
-                label="Sisa Tagihan"
-                name="sisaTagihan"
-                sx={{ mb: 2 }}
-                disabled={!isEditing}
-                value={formatRupiah(formValues.sisaTagihan ?? 0)}
-                error={!!formErrors.sisaTagihan}
-                helperText={formErrors.sisaTagihan}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  handleChangeHarga(e, "sisaTagihan")
-                }
-              />
               <FormControlLabel
                 control={
                   <Checkbox
@@ -668,6 +748,25 @@ const FormDetail = ({
                 label="Butuh Kursi Roda"
                 sx={{ marginBottom: 2 }}
               />
+              <CustomTextField
+                select
+                fullWidth
+                label="Status Perjalanan"
+                value={formValues.statusPenjadwalan}
+                onChange={(e: { target: { value: string } }) =>
+                  setFormValues({
+                    ...formValues,
+                    statusPenjadwalan: e.target.value as StatusKepergian,
+                  })
+                }
+                sx={{ marginBottom: 2 }}
+                disabled={!isEditing}
+              >
+                <MenuItem value="Belum Dijadwalkan">Belum Dijadwalkan</MenuItem>
+                <MenuItem value="Dijadwalkan">Dijadwalkan</MenuItem>
+                <MenuItem value="Berangkat">Berangkat</MenuItem>
+                <MenuItem value="Selesai">Selesai</MenuItem>
+              </CustomTextField>
               <CustomTextField
                 fullWidth
                 label="Catatan Pembayaran"
@@ -695,10 +794,10 @@ const FormDetail = ({
                 <Button
                   disabled={!isEditing} // Disable if not editing
                   onClick={() => {
-                    if(formValues.Jamaah.id) {
+                    if (formValues.Jamaah.id) {
                       handleOpenViewModal(formValues.Jamaah.id);
-                    } else{
-                      toast.error("Data visa tidak ditemukan")
+                    } else {
+                      toast.error("Data visa tidak ditemukan");
                     }
                   }}
                   variant="contained"
@@ -707,6 +806,15 @@ const FormDetail = ({
                   Lihat Visa
                 </Button>
               </Box>
+            </Grid>
+            <Grid item xs={12}>
+              <BiayaTambahanSection
+                isEditing={isEditing}
+                biayaTambahan={formValues.BiayaTambahan ?? []}
+                handleBiayaTambahanChange={handleBiayaTambahanChange}
+                handleAddBiayaTambahan={handleAddBiayaTambahan}
+                handleBiayaTambahanRemove={handleRemoveBiayaTambahan}
+              />
             </Grid>
           </Grid>
         </Box>
