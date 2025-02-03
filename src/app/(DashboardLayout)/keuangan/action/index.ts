@@ -100,10 +100,7 @@ export const getKeuanganByIdAction = async (id: number) => {
       `
       *,
       Jamaah (
-        id,
-        nama,
-        ayahKandung,
-        noTelp
+        *
       ),
       Paket (
         id,
@@ -530,10 +527,10 @@ export const updateSisaTagihan = async (keuanganId: number) => {
     0
   );
 
-  // 2. Fetch keuangan data untuk totalTagihan
+  // 2. Fetch keuangan data untuk totalTagihan dan totalTagihanBaru
   const { data: keuanganData, error: keuanganError } = await supabase
     .from("Keuangan")
-    .select("totalTagihan")
+    .select("totalTagihan, totalTagihanBaru")
     .eq("id", keuanganId)
     .single();
 
@@ -542,12 +539,16 @@ export const updateSisaTagihan = async (keuanganId: number) => {
     return null;
   }
 
-  const totalTagihan = keuanganData?.totalTagihan || 0;
+  // 3. Gunakan totalTagihanBaru jika tidak null & tidak 0, jika tidak gunakan totalTagihan
+  const totalTagihan =
+    keuanganData?.totalTagihanBaru && keuanganData.totalTagihanBaru !== 0
+      ? keuanganData.totalTagihanBaru
+      : keuanganData?.totalTagihan || 0;
 
-  // 3. Calculate sisaTagihan
+  // 4. Hitung sisaTagihan
   const sisaTagihan = totalTagihan - totalCicilanDibayar;
 
-  // 4. Update sisaTagihan in Keuangan table
+  // 5. Update sisaTagihan di tabel Keuangan
   const { error: updateError } = await supabase
     .from("Keuangan")
     .update({ sisaTagihan })
@@ -560,6 +561,7 @@ export const updateSisaTagihan = async (keuanganId: number) => {
 
   return sisaTagihan;
 };
+
 
 export const updateStatusLunas = async (keuanganId: number) => {
   const supabase = createClient();

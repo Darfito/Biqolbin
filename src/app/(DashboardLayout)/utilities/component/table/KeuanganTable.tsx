@@ -311,16 +311,17 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
     }),
     columnHelper.accessor("totalTagihan", {
       cell: (info) => {
-        const totalTagihan =
-          info.row.original.totalTagihanBaru !== 0
-            ? info.row.original.totalTagihanBaru ?? 0
-            : info.row.original.totalTagihan ?? 0;
-
-        return `Rp ${totalTagihan.toLocaleString()}`;
+        const { totalTagihan = 0, totalTagihanBaru = null } = info.row.original;
+    
+        const displayedTagihan =
+          totalTagihanBaru !== null && totalTagihanBaru !== 0
+            ? totalTagihanBaru
+            : totalTagihan;
+    
+        return `Rp ${displayedTagihan.toLocaleString()}`;
       },
       header: "Total Tagihan",
     }),
-
     columnHelper.accessor("sisaTagihan", {
       cell: (info) => `Rp ${info.getValue()?.toLocaleString()}`,
       header: "Sisa Tagihan",
