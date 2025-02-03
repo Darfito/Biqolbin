@@ -1,3 +1,5 @@
+"use server";
+
 import puppeteer from "puppeteer";
 import { NextRequest, NextResponse } from "next/server";
 
