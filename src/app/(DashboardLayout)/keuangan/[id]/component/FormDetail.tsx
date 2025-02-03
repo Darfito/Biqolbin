@@ -1,6 +1,12 @@
 "use client";
 
-import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import React, {
+  ChangeEvent,
+  FormEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import * as v from "valibot";
 import CustomTextField from "@/app/(DashboardLayout)/components/forms/theme-elements/CustomTextField";
 import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCard";
@@ -41,6 +47,8 @@ import FileUploaderSingle from "@/app/(DashboardLayout)/utilities/component/uplo
 import { createClient } from "@/libs/supabase/client";
 import { BiayaTambahanSection } from "./BiayaTambahanHandler";
 import { update } from "lodash";
+import Kwitansi from "./Kwintansi";
+import { useReactToPrint } from "react-to-print";
 
 interface FormErrors {
   nama?: string;
@@ -164,12 +172,12 @@ const initialFormValues: FormType = {
   Cicilan: [
     {
       keuangan_id: 0,
-  id: 0,
-  cicilanKe: 0,
-  nominalCicilan: 0,
-  tanggalPembayaran: "",
-  lampiran: "",
-    }
+      id: 0,
+      cicilanKe: 0,
+      nominalCicilan: 0,
+      tanggalPembayaran: "",
+      lampiran: "",
+    },
   ],
   id: 0,
   metodePembayaran: MetodePembayaranType.TUNAI,
@@ -209,6 +217,7 @@ const FormDetail = ({
     keuanganData?.metodePembayaran || ""
   );
   const [openModal, setOpenModal] = useState<boolean>(false);
+  const [openModalKwitansi, setOpenModalKwitansi] = useState<boolean>(false);
   const [openViewModal, setOpenViewModal] = useState<boolean>(false);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [openDialog, setOpenDialog] = useState(false);
@@ -256,9 +265,12 @@ const FormDetail = ({
       });
     }
   }, [keuanganData, formValues.id]);
-
+  const printRef = useRef<HTMLDivElement>(null);
   // console.log("Keuangan data di detail:", keuanganData);
-
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: `Kwitansi_${keuanganData?.Jamaah?.nama || "invoice"}`,
+  });
   // Handle metode pembayaran selection
   const handleMetodeChange = (event: ChangeEvent<HTMLInputElement>) => {
     const newMetode = event.target.value as MetodePembayaranType;
@@ -279,7 +291,7 @@ const FormDetail = ({
     if (angka === null || angka === undefined) {
       return "Rp 0"; // Menangani jika angka null atau undefined
     }
-  
+
     return angka.toLocaleString("id-ID", {
       style: "currency",
       currency: "IDR",
@@ -331,7 +343,6 @@ const FormDetail = ({
       }));
     }
   };
-  
 
   // Modifikasi handleChangeHarga untuk mengupdate baseTotalTagihan
   const handleChangeHarga = (
@@ -455,13 +466,16 @@ const FormDetail = ({
         (acc, item) => acc + (Number(item.biaya) || 0),
         0
       ) ?? 0;
-  
+
     console.log("Biaya tambahan baru dihitung:", totalBiayaTambahanBaru);
-  
+
     // Tentukan total tagihan baru
-    const newTotalTagihan = totalBiayaTambahanBaru > 0 ? baseTotalTagihan + totalBiayaTambahanBaru : baseTotalTagihan;
+    const newTotalTagihan =
+      totalBiayaTambahanBaru > 0
+        ? baseTotalTagihan + totalBiayaTambahanBaru
+        : baseTotalTagihan;
     console.log("Total tagihan yang dihitung:", newTotalTagihan);
-  
+
     // Tentukan jumlah angsuran
     let newJumlahAngsuran = formValues.jumlahBiayaPerAngsuran ?? 0;
     if (
@@ -473,16 +487,17 @@ const FormDetail = ({
         newTotalTagihan / formValues.banyaknyaCicilan
       );
     }
-  
+
     // Jika sudah ada pembayaran cicilan, kurangi dengan jumlah yang sudah dibayar
-    const jumlahCicilanSudahDibayar = formValues.Cicilan?.reduce(
-      (acc, cicilan) => acc + (Number(cicilan.nominalCicilan) || 0),
-      0
-    ) ?? 0;
-  
+    const jumlahCicilanSudahDibayar =
+      formValues.Cicilan?.reduce(
+        (acc, cicilan) => acc + (Number(cicilan.nominalCicilan) || 0),
+        0
+      ) ?? 0;
+
     // Tentukan sisa tagihan setelah pembayaran cicilan
     const newSisaTagihan = newTotalTagihan - jumlahCicilanSudahDibayar;
-  
+
     // Update formValues
     setFormValues((prev) => ({
       ...prev,
@@ -497,7 +512,6 @@ const FormDetail = ({
     formValues.Cicilan, // Memperhitungkan cicilan yang sudah dibayar
     metode,
   ]);
-  
 
   const handleOpenModal = () => {
     if (!openModal) {
@@ -982,7 +996,15 @@ const FormDetail = ({
             </Button>
           </DialogActions>
         </Dialog>
+        <Dialog
+          open={openModalKwitansi}
+          onClose={() => setOpenModalKwitansi(false)}
+          fullWidth
+          maxWidth="md"
+        >
+        </Dialog>
       </form>
+      {/* Modal untuk Kwitansi */}
     </DashboardCard>
   );
 };

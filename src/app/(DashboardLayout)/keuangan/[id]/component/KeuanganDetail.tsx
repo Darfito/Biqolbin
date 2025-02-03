@@ -13,7 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import { IconArrowLeft } from "@tabler/icons-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import FormDetail from "./FormDetail";
 import { useRouter } from "next/navigation";
 
@@ -28,6 +28,8 @@ import {
   updateStatusLunas,
 } from "../../action";
 import KeuanganDetailTable from "@/app/(DashboardLayout)/utilities/component/table/KeuanganDetailTable";
+import Kwitansi from "./Kwintansi";
+import { useReactToPrint } from "react-to-print";
 
 interface KeuanganDetailProps {
   id: number;
@@ -57,7 +59,12 @@ const KeuanganDetail = ({
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openConfirmDialog, setOpenConfirmDialog] = useState<boolean>(false); // State untuk dialog konfirmasi
   const [mounted, setMounted] = useState(false);
-
+  const [openModalKwitansi, setOpenModalKwitansi] = useState<boolean>(false);
+  const printRef = useRef<HTMLDivElement>(null);
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: `Kwitansi_${currentData?.Jamaah?.nama || "invoice"}`,
+  });
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -180,7 +187,7 @@ const KeuanganDetail = ({
                 Tandai Lunas
               </Button>
             )}
-            <Button variant="contained" disabled sx={{ color: "white" }}>
+            <Button variant="contained" disabled={(currentData?.status !== "Lunas")} sx={{ color: "white" }} onClick={() => setOpenModalKwitansi(true)}>
               Invoice
             </Button>
           </Box>
@@ -273,12 +280,28 @@ const KeuanganDetail = ({
           </Button>
         </DialogActions>
       </Dialog>
+ {/* Modal untuk Kwitansi */}
+ <Dialog
+          open={openModalKwitansi}
+          onClose={() => setOpenModalKwitansi(false)}
+          fullWidth
+          maxWidth="md"
+        >
+      <DialogContent>
+            <div ref={printRef}>
+            <Kwitansi data={currentData || {} as KeuanganInterface} />
+            </div>
+            <Button
+              onClick={() => handlePrint()}
+              variant="contained"
+              sx={{ marginTop: 2, color: "white" }}
+            >
+              Cetak PDF
+            </Button>
+      </DialogContent>
+      </Dialog>
     </>
   );
 };
 
 export default KeuanganDetail;
-
-{/* {currentData?.status === "Sedang Menabung"
-  ? "Tandai Lunas"
-  : "Tandai Lunas"} */}
