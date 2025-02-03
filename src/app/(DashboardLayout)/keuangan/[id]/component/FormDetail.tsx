@@ -46,8 +46,6 @@ import { getVisaUrl, updateKeuanganAction } from "../../action";
 import FileUploaderSingle from "@/app/(DashboardLayout)/utilities/component/uploader/FileUploaderSingle";
 import { createClient } from "@/libs/supabase/client";
 import { BiayaTambahanSection } from "./BiayaTambahanHandler";
-import { update } from "lodash";
-import Kwitansi from "./Kwintansi";
 import { useReactToPrint } from "react-to-print";
 
 interface FormErrors {
@@ -229,9 +227,6 @@ const FormDetail = ({
   const [baseTotalTagihan, setBaseTotalTagihan] = useState<number>(
     keuanganData?.totalTagihan || 0
   );
-  const [previousTotalBiayaTambahan, setPreviousTotalBiayaTambahan] =
-    useState(0);
-  const [latestFormValues, setLatestFormValues] = useState(formValues);
   const handleDialogClose = () => setOpenDialog(false);
   const handleDialogOpen = () => setOpenDialog(true);
   // Gunakan useEffect untuk memperbarui state ketika keuanganData berubah
@@ -265,12 +260,6 @@ const FormDetail = ({
       });
     }
   }, [keuanganData, formValues.id]);
-  const printRef = useRef<HTMLDivElement>(null);
-  // console.log("Keuangan data di detail:", keuanganData);
-  const handlePrint = useReactToPrint({
-    contentRef: printRef,
-    documentTitle: `Kwitansi_${keuanganData?.Jamaah?.nama || "invoice"}`,
-  });
   // Handle metode pembayaran selection
   const handleMetodeChange = (event: ChangeEvent<HTMLInputElement>) => {
     const newMetode = event.target.value as MetodePembayaranType;
@@ -478,14 +467,19 @@ const FormDetail = ({
 
     // Tentukan jumlah angsuran
     let newJumlahAngsuran = formValues.jumlahBiayaPerAngsuran ?? 0;
+
+    console.log("Jumlah angsuran dihitung:", newJumlahAngsuran);
     if (
       metode === "Cicilan" &&
       formValues.banyaknyaCicilan &&
       formValues.banyaknyaCicilan > 0
     ) {
       newJumlahAngsuran = Math.round(
-        newTotalTagihan / formValues.banyaknyaCicilan
+        formValues.uangMuka !== undefined
+          ? (newTotalTagihan - formValues.uangMuka) / formValues.banyaknyaCicilan
+          : newTotalTagihan / formValues.banyaknyaCicilan
       );
+      
     }
 
     // Jika sudah ada pembayaran cicilan, kurangi dengan jumlah yang sudah dibayar
@@ -495,9 +489,11 @@ const FormDetail = ({
         0
       ) ?? 0;
 
+      console.log("Total tagihan yang dihitung kedua:", newTotalTagihan);
+      console.log("Jumlah cicilan sudah dibayar dihitung:", jumlahCicilanSudahDibayar);
     // Tentukan sisa tagihan setelah pembayaran cicilan
     const newSisaTagihan = newTotalTagihan - jumlahCicilanSudahDibayar;
-
+    console.log("Sisa tagihan dihitung:", newSisaTagihan);
     // Update formValues
     setFormValues((prev) => ({
       ...prev,
@@ -539,15 +535,11 @@ const FormDetail = ({
     }
   };
 
-  useEffect(() => {
-    setLatestFormValues(formValues);
-  }, [formValues]);
-
-  console.log("data yang mau di update:", latestFormValues);
+  console.log("data yang mau di update sebelum di submit:", formValues);
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     // Kirim data ke parent
     e.preventDefault();
-    console.log("data yang mau di update:", latestFormValues);
+    console.log("data yang mau di update:", formValues);
 
     // Special handling based on payment method
     const methodErrors: FormErrors = {};
