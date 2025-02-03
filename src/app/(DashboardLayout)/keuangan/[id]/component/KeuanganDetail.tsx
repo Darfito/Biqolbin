@@ -281,7 +281,7 @@ const KeuanganDetail = ({
         </DialogActions>
       </Dialog>
  {/* Modal untuk Kwitansi */}
- <Dialog
+<Dialog
           open={openModalKwitansi}
           onClose={() => setOpenModalKwitansi(false)}
           fullWidth

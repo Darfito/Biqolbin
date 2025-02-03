@@ -46,8 +46,6 @@ import { getVisaUrl, updateKeuanganAction } from "../../action";
 import FileUploaderSingle from "@/app/(DashboardLayout)/utilities/component/uploader/FileUploaderSingle";
 import { createClient } from "@/libs/supabase/client";
 import { BiayaTambahanSection } from "./BiayaTambahanHandler";
-import { update } from "lodash";
-import Kwitansi from "./Kwintansi";
 import { useReactToPrint } from "react-to-print";
 
 interface FormErrors {
