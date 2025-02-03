@@ -297,6 +297,30 @@ export const publishCMSAction = async (
   }
 };
 
+export const verificationCMSAction = async (id: number, currentStatus: boolean): Promise<boolean> => {
+  const supabase = createClient();
+
+  try {
+    const { data, error } = await supabase
+      .from("Paket")
+      .update({ statusVerifikasi: !currentStatus }) // Toggle the verification status
+      .eq("id", id); // Match the row by its id
+
+      if(error){
+        console.error("Error updating verification status:", error);
+        return false; // Return false if there's an error
+      }
+
+    console.log("Verification status updated successfully:", data);
+    revalidatePath("/cms"); // Refresh halaman setelah update
+
+    return true; // Return true if update is successful
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    return false; // Return false in case of an unexpected error
+  }
+}
+
 export const deleteStatusAktifPaketAction = async (id: number): Promise<boolean> => {
   const supabase = createClient();
 
@@ -304,7 +328,7 @@ export const deleteStatusAktifPaketAction = async (id: number): Promise<boolean>
     // 1. Mengubah statusAktif menjadi false di tabel Paket
     const { error: paketError } = await supabase
       .from("Paket")
-      .update({ statusAktif: false })
+      .update({ statusAktif: false, publish: false })
       .eq("id", id);
 
     if (paketError) {
@@ -329,6 +353,38 @@ export const deleteStatusAktifPaketAction = async (id: number): Promise<boolean>
     return false;
   }
 };
+
+export const undoDeleteStatusAktifPaketAction = async (id: number): Promise<boolean> => {
+  const supabase = createClient();
+  try {
+    const { error: paketError } = await supabase
+      .from("Paket")
+      .update({ statusAktif: true })
+      .eq("id", id);
+
+    if (paketError) {
+      console.error("Error restoring Paket status:", paketError);
+      return false;
+    }
+
+    const { error: keuanganError } = await supabase
+      .from("Keuangan")
+      .update({ statusAktif: true })
+      .eq("paket_id", id);
+
+    if (keuanganError) {
+      console.error("Error restoring Keuangan status:", keuanganError);
+      return false;
+    }
+    
+    revalidatePath("/cms");
+    return true;
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    return false;
+  }
+};
+
 
 // supporting function
 export const sanitizeFolderName = (name: string): string => {

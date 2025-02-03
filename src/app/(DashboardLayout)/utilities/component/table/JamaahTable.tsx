@@ -45,6 +45,7 @@ import ActionButton from "./components/ActionButton";
 import {
   deleteJamaahAction,
   deleteStatusAktifAction,
+  undoDeleteStatusAktifAction,
 } from "@/app/(DashboardLayout)/jamaah/action";
 import ConfirmDialog from "../dialog/ConfirmDialog";
 import dayjs from "dayjs";
@@ -140,12 +141,19 @@ const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
   // States
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
-  const [open, setOpen] = useState(false); // State untuk dialog
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false); // Dialog untuk delete
+  const [openUndoDialog, setOpenUndoDialog] = useState(false); // Dialog untuk undo
   const [selectedRow, setSelectedRow] = useState<JamaahInterface | null>(null); // Data yang dipilih
 
   console.log("Data di JamaahTable:", data);
+
   const handleCloseDialog = () => {
-    setOpen(false); // Tutup dialog
+    setOpenDeleteDialog(false); // Tutup dialog
+    setSelectedRow(null); // Reset data
+  };
+
+  const handleCloseUndoDialog = () => {
+    setOpenUndoDialog(false); // Tutup dialog
     setSelectedRow(null); // Reset data
   };
 
@@ -158,6 +166,21 @@ const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
         toast.error(`Failed to delete user: ${result.error}`);
       }
       handleCloseDialog(); // Tutup dialog setelah selesai
+    }
+  };
+
+  const handleUndo = async () => {
+    if (selectedRow) {
+      console.log("Attempting to restore user with ID:", selectedRow.id); // Add this log
+      const result = await undoDeleteStatusAktifAction(selectedRow.id ?? "");
+      console.log("Restore result:", result); // Add this log to see the full response
+      if (result.success) {
+        toast.success(`User with ID ${selectedRow.id} has been restored.`);
+      } else {
+        console.error("Restore error details:", result); // Add this log
+        toast.error(`Failed to restore user: ${result.error}`);
+      }
+      handleCloseUndoDialog();
     }
   };
 
@@ -176,12 +199,6 @@ const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
       cell: (info) => info.getValue(),
       header: "NIK",
     }),
-    // // Kolom Paket
-    // columnHelper.accessor("jenisPaket.nama", {
-    //   id: "jenisPaket",
-    //   cell: (info) => info.getValue(),
-    //   header: "PAKET",
-    // }),
 
     // Kolom No Telp
 
@@ -240,7 +257,12 @@ const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
       cell: (info) => {
         const handleOpenDialog = (rowData: JamaahInterface) => {
           setSelectedRow(rowData); // Set data pengguna
-          setOpen(true); // Buka dialog
+          setOpenDeleteDialog(true); // Buka dialog
+        };
+
+        const handleOpenUndoDialog = (rowData: JamaahInterface) => {
+          setSelectedRow(rowData); // Set data pengguna
+          setOpenUndoDialog(true); // Buka dialog
         };
 
         return (
@@ -250,13 +272,19 @@ const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
               rowData={info.row.original}
               actionPath={(rowData) => `/jamaah/${rowData.id}`} // Path dinamis berdasarkan ID User
             />
-
-            {/* Tombol Delete */}
-            <ActionButton
-              rowData={info.row.original}
-              mode="delete"
-              onDelete={() => handleOpenDialog(info.row.original)} // Buka dialog konfirmasi
-            />
+            {info.row.original.statusAktif ? (
+              <ActionButton
+                rowData={info.row.original}
+                mode="delete"
+                onDelete={() => handleOpenDialog(info.row.original)} // Buka dialog konfirmasi
+              />
+            ) : (
+              <ActionButton
+                rowData={info.row.original}
+                mode="undo"
+                onUndo={() => handleOpenUndoDialog(info.row.original)} // Buka dialog konfirmasi
+              />
+            )}
           </Box>
         );
       },
@@ -381,54 +409,26 @@ const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
           }}
         />
       </Box>
-      {/* Dialog Konfirmasi */}
+      {/* Dialog Konfirmasi Delete */}
       <ConfirmDialog
-        open={open}
+        open={openDeleteDialog}
         onClose={handleCloseDialog}
         onConfirm={handleDelete}
         title="Konfirmasi Penghapusan"
+        undo={false}
         description={`Apakah Anda yakin ingin menghapus jamaah "${selectedRow?.nama}"?`}
+      />
+      {/* Dialog Konfirmasi Undo */}
+      <ConfirmDialog
+        open={openUndoDialog}
+        onClose={handleCloseUndoDialog}
+        onConfirm={handleUndo}
+        title="Konfirmasi Undo"
+        undo={true}
+        description={`Apakah Anda yakin ingin mengembalikkan jamaah "${selectedRow?.nama}"?`}
       />
     </Box>
   );
 };
 
 export default JamaahTable;
-
-
-// Kolom Status (Berangkat dan Selesai)
-    // columnHelper.accessor("status", {
-      //   id: "status",
-      //   cell: (info) => {
-        //     const status = info.getValue();
-        //     let chipColor = "";
-        
-        //     switch (status) {
-          //       case "Berangkat":
-          //         chipColor = "lightblue"; // Biru muda
-          //         break;
-          //       case "Selesai":
-          //         chipColor = "green"; // Hijau
-          //         break;
-          //       default:
-          //         chipColor = "#F18B04"; // Warna khusus untuk Dijadwalkan
-          //         break;
-          //     }
-          
-          //     return (
-            //       <Chip
-            //         label={
-              //           status === "Berangkat" || status === "Selesai"
-              //             ? status
-              //             : "Dijadwalkan"
-              //         }
-              //         sx={{
-                //           backgroundColor: chipColor,
-                //           color: "white", // Warna teks putih agar kontras
-                //           fontWeight: "bold",
-                //         }}
-                //       />
-                //     );
-                //   },
-                //   header: "Status",
-                // }),

@@ -417,8 +417,7 @@ const KeuanganDetailTable = ({
           onClose={handleCloseDeleteDialog}
           onConfirm={handleDelete}
           title="Konfirmasi Penghapusan"
-          description={`Apakah Anda yakin ingin menghapus cicilan ini?`}
-        />
+          description={`Apakah Anda yakin ingin menghapus cicilan ini?`} undo={false}        />
 
         {/* Form Cicilan Dialog */}
         {openFormCicilan && (

@@ -43,7 +43,10 @@ import { ChevronRight } from "@mui/icons-material";
 import { Autocomplete, Box, Chip, FormControl } from "@mui/material";
 import { KeuanganInterface } from "../../type";
 import ActionButton from "./components/ActionButton";
-import { deleteStatusAktifAction } from "@/app/(DashboardLayout)/keuangan/action";
+import {
+  deleteStatusAktifAction,
+  undoStatusAktifAction,
+} from "@/app/(DashboardLayout)/keuangan/action";
 import ConfirmDialog from "../dialog/ConfirmDialog";
 
 declare module "@tanstack/table-core" {
@@ -54,7 +57,6 @@ declare module "@tanstack/table-core" {
     itemRank: RankingInfo;
   }
 }
-
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   // Rank the item
   const itemRank = rankItem(row.getValue(columnId), value);
@@ -64,8 +66,12 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
     itemRank,
   });
 
-  // Return if the item should be filtered in/out
-  return itemRank.passed;
+  // Log untuk debugging
+  console.log("row value:", row.getValue(columnId));
+  console.log("filter value:", value);
+
+  // Return true only if the full string matches exactly
+  return itemRank.passed && row.getValue(columnId) === value;
 };
 
 const Filter = ({
@@ -84,6 +90,8 @@ const Filter = ({
   // Options for filtering based on column id
   const getColumnOptions = (columnId: string) => {
     switch (columnId) {
+      case "statusPenjadwalan":
+        return ["Belum Dijadwalkan", "Dijadwalkan", "Berangkat", "Selesai"];
       case "status":
         return [
           "Semua",
@@ -179,9 +187,43 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [open, setOpen] = useState(false); // State untuk dialog
+  const [openUndoDialog, setOpenUndoDialog] = useState(false); // Dialog untuk undo
   const [selectedRow, setSelectedRow] = useState<KeuanganInterface | null>(
     null
   ); // Data yang dipilih
+
+  const handleCloseDialog = () => {
+    setOpen(false); // Tutup dialog
+    setSelectedRow(null); // Reset data
+  };
+
+  const handleCloseUndoDialog = () => {
+    setOpenUndoDialog(false); // Tutup dialog
+    setSelectedRow(null); // Reset data
+  };
+
+  const handleDelete = async () => {
+    if (selectedRow) {
+      const result = await deleteStatusAktifAction(selectedRow.id ?? 0); // Eksekusi delete
+      if (result.success) {
+        toast.success(`User with ID ${selectedRow.id} has been deleted.`);
+      } else {
+        toast.error(`Failed to delete user: ${result.error}`);
+      }
+      handleCloseUndoDialog(); // Tutup dialog setelah selesai
+    }
+  };
+  const handleUndo = async () => {
+    if (selectedRow) {
+      const result = await undoStatusAktifAction(selectedRow.id ?? 0); // Eksekusi delete
+      if (result.success) {
+        toast.success(`User with ID ${selectedRow.id} has been restored.`);
+      } else {
+        toast.error(`Failed to restored user: ${result.error}`);
+      }
+      handleCloseDialog(); // Tutup dialog setelah selesai
+    }
+  };
 
   const columnHelper = createColumnHelper<KeuanganInterface>();
 
@@ -204,6 +246,46 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
       cell: (info) => info.getValue(),
       header: "Metode Pembayaran",
     }),
+    columnHelper.accessor("statusPenjadwalan", {
+      id: "statusPenjadwalan",
+      cell: (info) => {
+        const statusPenjadwalan = info.getValue();
+        let chipColor = "";
+
+        switch (statusPenjadwalan) {
+          case "Berangkat":
+            chipColor = "lightblue"; // Biru muda
+            break;
+          case "Selesai":
+            chipColor = "green"; // Hijau
+            break;
+          case "Dijadwalkan":
+            chipColor = "#F18B04"; // Warna khusus untuk Dijadwalkan
+            break;
+          case "Belum Dijadwalkan":
+            chipColor = "red"; // Warna khusus untuk Belum Dijadwalkan
+            break;
+        }
+
+        return (
+          <Chip
+            label={
+              statusPenjadwalan === "Berangkat" ||
+              statusPenjadwalan === "Selesai" ||
+              statusPenjadwalan === "Dijadwalkan"
+                ? statusPenjadwalan
+                : "Belum Dijadwalkan"
+            }
+            sx={{
+              backgroundColor: chipColor,
+              color: "white", // Warna teks putih agar kontras
+              fontWeight: "bold",
+            }}
+          />
+        );
+      },
+      header: "Status Penjadwalan",
+    }),
     columnHelper.accessor("status", {
       id: "status",
       cell: (info) => {
@@ -211,7 +293,7 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
         let chipColor = "";
         if (status === "Lunas") {
           chipColor = "#4CAF50";
-        } else{
+        } else {
           chipColor = "#FF9800";
         }
 
@@ -223,14 +305,22 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
               color: "white", // Warna teks putih agar kontras
               fontWeight: "bold",
             }}
-            />
-        )
-      }
+          />
+        );
+      },
     }),
     columnHelper.accessor("totalTagihan", {
-      cell: (info) => `Rp ${info.getValue().toLocaleString()}`,
+      cell: (info) => {
+        const totalTagihan =
+          info.row.original.totalTagihanBaru !== 0
+            ? info.row.original.totalTagihanBaru ?? 0
+            : info.row.original.totalTagihan ?? 0;
+
+        return `Rp ${totalTagihan.toLocaleString()}`;
+      },
       header: "Total Tagihan",
     }),
+
     columnHelper.accessor("sisaTagihan", {
       cell: (info) => `Rp ${info.getValue()?.toLocaleString()}`,
       header: "Sisa Tagihan",
@@ -247,6 +337,10 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
           setSelectedRow(rowData); // Set data pengguna
           setOpen(true); // Buka dialog
         };
+        const handleOpenUndoDialog = (rowData: KeuanganInterface) => {
+          setSelectedRow(rowData); // Set data pengguna
+          setOpenUndoDialog(true); // Buka dialog
+        };
 
         return (
           <Box sx={{ display: "flex", justifyContent: "start" }}>
@@ -256,35 +350,25 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
               actionPath={(rowData) => `/keuangan/${rowData.id}`} // Path dinamis berdasarkan ID Jamaah
             />
 
-            {/* Tombol Delete */}
-            <ActionButton
-              rowData={info.row.original}
-              mode="delete"
-              onDelete={() => handleOpenDialog(info.row.original)} // Buka dialog konfirmasi
-            />
+            {info.row.original.statusAktif ? (
+              <ActionButton
+                rowData={info.row.original}
+                mode="delete"
+                onDelete={() => handleOpenDialog(info.row.original)} // Buka dialog konfirmasi
+              />
+            ) : (
+              <ActionButton
+                rowData={info.row.original}
+                mode="undo"
+                onUndo={() => handleOpenUndoDialog(info.row.original)} // Buka dialog konfirmasi
+              />
+            )}
           </Box>
         );
       },
       enableColumnFilter: false,
     }),
   ];
-
-  const handleCloseDialog = () => {
-    setOpen(false); // Tutup dialog
-    setSelectedRow(null); // Reset data
-  };
-
-  const handleDelete = async () => {
-    if (selectedRow) {
-      const result = await deleteStatusAktifAction(selectedRow.id ?? 0); // Eksekusi delete
-      if (result.success) {
-        toast.success(`User with ID ${selectedRow.id} has been deleted.`);
-      } else {
-        toast.error(`Failed to delete user: ${result.error}`);
-      }
-      handleCloseDialog(); // Tutup dialog setelah selesai
-    }
-  };
 
   const table = useReactTable({
     data: data || [], // Pastikan data selalu berupa array.
@@ -409,7 +493,16 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
         onClose={handleCloseDialog}
         onConfirm={handleDelete}
         title="Konfirmasi Penghapusan"
+        undo={false}
         description={`Apakah Anda yakin ingin menghapus item kuangan "${selectedRow?.id}"?`}
+      />
+      <ConfirmDialog
+        open={openUndoDialog}
+        onClose={handleCloseUndoDialog}
+        onConfirm={handleUndo}
+        undo={true}
+        title="Konfirmasi Penghapusan"
+        description={`Apakah Anda yakin ingin mengembalikkan item kuangan "${selectedRow?.id}"?`}
       />
     </Box>
   );

@@ -153,6 +153,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
       fasilitas: [] as string[],
       publish: false,
       gambar_url: "",
+      statusAktif: true,
     }
   );
 
@@ -257,6 +258,7 @@ const handleUpload = async (file: File) => {
       noTelpMuthawif: values.noTelpMuthawif,
       fasilitas: Array.isArray(values.fasilitas) ? values.fasilitas : [],
       gambar_url: values.gambar_url,
+      statusAktif: values.statusAktif,
       Hotel: Array.isArray(values.Hotel) ? values.Hotel : [], // Tambahkan properti hotel
     };
   };
@@ -365,6 +367,7 @@ const handleUpload = async (file: File) => {
         fasilitas: [],
         publish: false,
         gambar_url: "",
+        statusAktif: true,
       }
     );
 

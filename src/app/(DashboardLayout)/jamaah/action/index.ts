@@ -411,6 +411,40 @@ export const deleteStatusAktifAction = async (jamaahId: string) => {
 
 
 
+export const undoDeleteStatusAktifAction = async (jamaahId: string) => {
+  const supabase = createClient();
+
+  try {
+    // Update Jamaah table
+    const { error: jamaahError } = await supabase
+      .from("Jamaah")
+      .update({ statusAktif: true })
+      .eq("id", jamaahId);
+
+    if (jamaahError) throw jamaahError;
+
+    // Update Keuangan table
+    const { error: keuanganError } = await supabase
+      .from("Keuangan")
+      .update({ statusAktif: true })
+      .eq("jamaah_id", jamaahId);
+
+    if (keuanganError) throw keuanganError;
+
+    // Revalidate the page after successful updates
+    revalidatePath("/jamaah");
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Error restoring records:", error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to restore records' 
+    };
+  }
+};
+
+
 export const getFileUrl = async (jamaahId: string, namaDokumen: string) => {
   const supabase = createClient();
   const {data, error} = await supabase

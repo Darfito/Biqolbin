@@ -346,8 +346,7 @@ const UserTable = ({ data }: TableProps<UserInterface>) => {
         onClose={handleCloseDialog}
         onConfirm={handleDelete}
         title="Konfirmasi Penghapusan"
-        description={`Apakah Anda yakin ingin menghapus pengguna "${selectedRow?.nama}"?`}
-      />
+        description={`Apakah Anda yakin ingin menghapus pengguna "${selectedRow?.nama}"?`} undo={false}      />
     </Box>
   );
 };

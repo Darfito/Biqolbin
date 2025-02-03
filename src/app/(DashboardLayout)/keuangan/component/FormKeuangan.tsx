@@ -124,7 +124,7 @@ export default function FormKeuangan({
       riwayatPenyakit: "",
       jenisDokumen: [],
       provinsi: "",
-      statusAktif: true
+      statusAktif: true,
     },
     Paket: {
       id: 0, // Mengambil hanya properti yang relevan
@@ -364,7 +364,7 @@ export default function FormKeuangan({
         jenisDokumen: [],
         NIK: 0,
         provinsi: "",
-        statusAktif: true
+        statusAktif: true,
       },
       Paket: {
         id: 0, // Mengambil hanya properti yang relevan
@@ -467,8 +467,8 @@ export default function FormKeuangan({
 
             <Autocomplete
               fullWidth
-              options={paketData}
-              getOptionLabel={(option) => option.nama} // Menampilkan nama paket
+              options={paketData.filter((paket) => paket.statusVerifikasi && paket.publish)} // Hanya paket dengan statusVerifikasi true
+              getOptionLabel={(option) => option.nama}
               value={
                 paketData.find((paket) => paket.id === formValues.Paket.id) ||
                 null
@@ -520,7 +520,9 @@ export default function FormKeuangan({
                 });
               }}
             >
-              <MenuItem value={TipeKamar.PILIHVARIANKAMAR}>Pilih Varian Kamar</MenuItem>
+              <MenuItem value={TipeKamar.PILIHVARIANKAMAR}>
+                Pilih Varian Kamar
+              </MenuItem>
               <MenuItem value={TipeKamar.QUAD}>QUAD</MenuItem>
               <MenuItem value={TipeKamar.TRIPLE}>TRIPLE</MenuItem>
               <MenuItem value={TipeKamar.DOUBLE}>DOUBLE</MenuItem>
