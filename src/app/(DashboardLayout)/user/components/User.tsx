@@ -11,9 +11,14 @@ import { CabangInterface, UserInterface } from "../../utilities/type";
 export type UserPageProps = {
   userData: UserInterface[];
   cabangData: CabangInterface[];
+  cabangUser: number;
 };
 
-const User = ({ userData, cabangData }: UserPageProps) => {
+
+
+const User = ({ userData, cabangData, cabangUser }: UserPageProps) => {
+
+  console.log("cabangUser", cabangUser);
 
   return (
     <>

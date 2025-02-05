@@ -188,7 +188,7 @@ const KeuanganDetail = ({
               </Button>
             )}
             <Button variant="contained" disabled={(currentData?.status !== "Lunas")} sx={{ color: "white" }} onClick={() => setOpenModalKwitansi(true)}>
-              Invoice
+              Kwintansi
             </Button>
           </Box>
         </Box>
