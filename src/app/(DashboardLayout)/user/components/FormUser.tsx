@@ -77,11 +77,16 @@ const formSchema = v.object({
 
 type FormUserProps = {
   cabangData: CabangInterface[];
+  roleUser: string;
+  cabangUser: number;
 };
 
-export default function FormUser({ cabangData }: FormUserProps) {
+export default function FormUser({
+  cabangData,
+  roleUser,
+  cabangUser,
+}: FormUserProps) {
   const [open, setOpen] = useState(false);
-
   const [formValues, setFormValues] = useState<FormType>({
     nama: "",
     email: "",
@@ -102,11 +107,11 @@ export default function FormUser({ cabangData }: FormUserProps) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false); // State untuk visibilitas confirm password
 
   useEffect(() => {
-    setFormValues((prev)=> ({
+    setFormValues((prev) => ({
       ...prev,
-      alamatCabang: formValues.penempatan.alamatCabang || ""
-    }))
-  }, [formValues.penempatan])
+      alamatCabang: formValues.penempatan.alamatCabang || "",
+    }));
+  }, [formValues.penempatan]);
 
   const handleInputChange = (field: keyof UserInterface, value: any) => {
     setFormValues({ ...formValues, [field]: value });
@@ -155,6 +160,26 @@ export default function FormUser({ cabangData }: FormUserProps) {
     // Clear any existing errors
     setFormErrors({});
   };
+
+  useEffect(() => {
+    if (roleUser === "Admin" && cabangUser) {
+      const selectedCabang = cabangData.find(
+        (cabang) => cabang.id === cabangUser
+      );
+      if (selectedCabang) {
+        setFormValues((prev) => ({
+          ...prev,
+          penempatan: selectedCabang,
+        }));
+      }
+    }
+  }, [roleUser, cabangUser, cabangData]);
+
+  // Filter cabang data based on role
+  const filteredCabangData =
+    roleUser === "Admin"
+      ? cabangData.filter((cabang) => cabang.id === cabangUser)
+      : cabangData;
 
   console.log("form values di User:", formValues);
   return (
@@ -299,7 +324,7 @@ export default function FormUser({ cabangData }: FormUserProps) {
               }
             >
               <MenuItem value={Jabatan.Admin}>Admin</MenuItem>
-              <MenuItem value={Jabatan.Superadmin}>Superadmin</MenuItem>
+              {/* <MenuItem value={Jabatan.Superadmin}>Superadmin</MenuItem> */}
               <MenuItem value={Jabatan.DivisiGeneralAffair}>
                 Divisi General Affair
               </MenuItem>
@@ -311,7 +336,7 @@ export default function FormUser({ cabangData }: FormUserProps) {
             {/* Cabang */}
             <Autocomplete
               fullWidth
-              options={cabangData}
+              options={filteredCabangData}
               getOptionLabel={(option) => option.nama}
               value={
                 cabangData.find(
@@ -322,7 +347,7 @@ export default function FormUser({ cabangData }: FormUserProps) {
                 if (newValue) {
                   setFormValues({
                     ...formValues,
-                    penempatan: newValue || ({} as CabangInterface),
+                    penempatan: newValue,
                   });
                 } else {
                   setFormValues({
@@ -331,6 +356,7 @@ export default function FormUser({ cabangData }: FormUserProps) {
                   });
                 }
               }}
+              disabled={roleUser === "Admin"}
               renderInput={(params) => (
                 <CustomTextField
                   {...params}
