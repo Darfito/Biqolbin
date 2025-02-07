@@ -124,8 +124,8 @@ const JamaahDetail = ({
         <Box sx={{ marginTop: "2rem" }}>
           <FormDetail
             isEditing={isEditing}
+            setIsEditing={setIsEditing} 
             jamaahData={currentData}
-            paketData={paketData}
           />
         </Box>
 

@@ -5,8 +5,6 @@ import { createClient } from "@/libs/supabase/server";
 import { revalidatePath } from "next/cache";
 import { JamaahInterface } from "../../utilities/type";
 
-  // Data untuk ScoreCard
-
 
 export const mapJamaahData = (data: any): JamaahInterface[] => {
   return data.map((item: any) => ({
@@ -501,36 +499,12 @@ export const deleteFileUrl = async (jamaahId: string, namaDokumen: string) => {
     if (error) {
       throw new Error(`Gagal menghapus data di kolom 'file': ${error.message}`);
     }
-    revalidatePath(`/jamaah/${jamaahId}`);
+    
+    // revalidatePath(`/jamaah/${jamaahId}`);
+
     return { success: true, message: "Kolom 'file' berhasil dikosongkan." };
   } catch (error: any) {
     console.error("Error in deleteFileUrl:", error.message);
     return { success: false, message: error.message, error };
   }
 };
-
-// Paket (
-//   id,
-//   nama,
-//   maskapai,
-//   customMaskapai,
-//   noPenerbangan,
-//   jenisPenerbangan,
-//   keretaCepat,
-//   hargaDouble,
-//   hargaTriple,
-//   hargaQuad,
-//   tglKeberangkatan,
-//   tglKepulangan,
-//   fasilitas,
-//   namaMuthawif,
-//   noTelpMuthawif,
-//   jenis,
-//   Hotel (
-//     id,
-//     namaHotel,
-//     alamatHotel,
-//     ratingHotel,
-//     tanggalCheckIn,
-//     tanggalCheckOut
-//   )

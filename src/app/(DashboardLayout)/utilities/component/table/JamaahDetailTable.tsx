@@ -1,7 +1,7 @@
 "use client";
 
 // React Imports
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -77,7 +77,10 @@ const JamaahDetailTable = ({
   const [tableData, setTableData] = useState<JenisDokumen[]>(data);
 
   const supabase = createClient();
-
+  useEffect(() => {
+    setTableData(data); // Pastikan tableData selalu sinkron dengan data
+  }, [data]);
+  
   const uploadFileToSupabase = async (
     file: File,
     jamaahId: string,
@@ -212,6 +215,7 @@ const JamaahDetailTable = ({
           )
         );
         toast.success("File berhasil dihapus!");
+        
         return true;
       } else {
         throw new Error(result.message);
@@ -399,7 +403,7 @@ const JamaahDetailTable = ({
       {/* Dialog Upload */}
       {dialogRow && (
         <Dialog open={!!dialogRow} onClose={handleDialogClose}>
-          <DialogTitle>Upload File untuk {dialogRow.nama_dokumen}</DialogTitle>
+          <DialogTitle>Unggah berkas untuk {dialogRow.nama_dokumen}</DialogTitle>
           <DialogContent>
             <FileUploaderSingle
               onFileUpload={(file) => {
@@ -408,7 +412,7 @@ const JamaahDetailTable = ({
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleDialogClose} color="primary">
+            <Button onClick={handleDialogClose} color="error" variant="contained">
               Ya, Batalkan
             </Button>
             <Button
@@ -492,7 +496,7 @@ const JamaahDetailTable = ({
           </p>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} color="primary">
+          <Button onClick={handleCloseDeleteDialog} color="primary" variant="contained" sx={{ color: "white" }}>
             Batal
           </Button>
           <Button
