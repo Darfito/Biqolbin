@@ -20,75 +20,113 @@ const SalesOverview = ({ keuanganData }: SalesOverviewProps) => {
     setMonth(event.target.value);
   };
 
-  const getWeekOfMonth = (date: Date) => {
+  const getWeekOfMonth = (date: Date): number => {
     const dayOfMonth = date.getDate(); // Tanggal hari ini
     const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1).getDay(); // Hari pertama bulan
     const adjustedDate = dayOfMonth + firstDayOfMonth; // Penyesuaian dengan hari pertama bulan
     const weekNumber = Math.ceil(adjustedDate / 7); // Hitung minggu keberapa
-  
+
     // Batasi minggu ke-5 menjadi minggu ke-4
     return weekNumber > 4 ? 4 : weekNumber;
   };
-  
-  
 
   // Filter data keuangan berdasarkan bulan (jika bulan tertentu dipilih)
   const filteredKeuanganData =
     month === "all"
       ? keuanganData // Jika "all", tampilkan semua data
       : keuanganData.filter((item) => {
-        const createdAt = new Date(item.created_at ?? "");
+          const createdAt = new Date(item.created_at ?? "");
           return createdAt.getMonth() + 1 === parseInt(month); // Filter berdasarkan bulan
         });
-        console.log("Month selected:", month);
-        console.log("Filtered Keuangan Data:", filteredKeuanganData);
 
-  // Kategori untuk chart
+  console.log("Month selected:", month);
+  console.log("Filtered Keuangan Data:", filteredKeuanganData);
+
+  // Kategori:
+  // Jika mode "all", kategori adalah format "Month Year" (misalnya "February 2025").
+  // Jika mode bulan tertentu, kategori adalah tetap ["W1", "W2", "W3", "W4"].
   const categories =
-  month === "all"
-    ? Array.from(new Set(filteredKeuanganData.map((item) => 
-      item.created_at &&  new Date(item.created_at).toLocaleString("default", { month: "long", year: "numeric" })
-      ))) // Kategori: Bulan/Tahun
-    : ["W1", "W2", "W3", "W4"]; // Kategori: Mingguan
+    month === "all"
+      ? Array.from(
+          new Set(
+            filteredKeuanganData
+              .map((item) => {
+                if (!item.created_at) return null; // Abaikan item tanpa created_at
+                return new Date(item.created_at).toLocaleString("default", {
+                  month: "long",
+                  year: "numeric",
+                });
+              })
+              .filter((val): val is string => val !== null) // Pastikan hanya string yang tersisa
+          )
+        ).sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+      : ["W1", "W2", "W3", "W4"];
 
+  // Mengelompokkan data berdasarkan kategori
+  const groupedData: { [key: string]: KeuanganInterface[] } = categories.reduce(
+    (acc, category) => {
+      acc[category] = filteredKeuanganData.filter((item) => {
+        if (!item.created_at) return false;
+        if (month === "all") {
+          const itemCategory = new Date(item.created_at).toLocaleString("default", {
+            month: "long",
+            year: "numeric",
+          });
+          return itemCategory === category;
+        } else {
+          const weekNumber = getWeekOfMonth(new Date(item.created_at));
+          return category === `W${weekNumber}`;
+        }
+      });
+      return acc;
+    },
+    {} as { [key: string]: KeuanganInterface[] }
+  );
 
-// Perhitungan Total Earnings (Total Tagihan)
-const totalEarnings = categories.map((_, index) => {
-  if (month === "all") {
-    const filteredByMonth = filteredKeuanganData.filter(
-      (item) =>
-        item.created_at && new Date(item.created_at).getMonth() === index // Filter berdasarkan bulan
-    );
-    return filteredByMonth.reduce((total, item) => total + item.totalTagihan, 0);
-  } else {
-    const filteredByWeek = filteredKeuanganData.filter((item) => {
-      const createdAt = new Date(item.created_at ?? "");
-      const weekNumber = getWeekOfMonth(createdAt); // Gunakan logika baru untuk menghitung minggu
-      console.log("Total Tagihan Created At:", createdAt, "| Week Number:", weekNumber); // Periksa minggu yang dihitung
-      return weekNumber === index + 1; // Sesuaikan minggu dalam loop
+  // Total Earnings (menggunakan totalTagihanBaru jika ada & bukan 0)
+  const totalEarnings = categories.map((category) => {
+    const filteredByCategory = filteredKeuanganData.filter((item) => {
+      if (!item.created_at) return false;
+      if (month === "all") {
+        const itemCategory = new Date(item.created_at).toLocaleString("default", {
+          month: "long",
+          year: "numeric",
+        });
+        return itemCategory === category;
+      } else {
+        // Gunakan fungsi getWeekOfMonth untuk mendapatkan label "W1", "W2", dst.
+        const weekNumber = getWeekOfMonth(new Date(item.created_at));
+        return category === `W${weekNumber}`;
+      }
     });
-    return filteredByWeek.reduce((total, item) => total + item.totalTagihan, 0);
-  }
-});
 
-const totalExpenses = categories.map((_, index) => {
-  if (month === "all") {
-    const filteredByMonth = filteredKeuanganData.filter(
-      (item) =>
-        new Date(item.created_at ?? "").getMonth() === index // Filter berdasarkan bulan
-    );
-    return filteredByMonth.reduce((total, item) => total + (item.sisaTagihan || 0), 0);
-  } else {
-    const filteredByWeek = filteredKeuanganData.filter((item) => {
-      const createdAt = new Date(item.created_at ?? "");
-      const weekNumber = getWeekOfMonth(createdAt); // Gunakan logika baru untuk menghitung minggu
-      console.log("Sisa Tagihan Created At:", createdAt, "| Week Number:", weekNumber); // Periksa minggu yang dihitung
-      return weekNumber === index + 1; // Sesuaikan minggu dalam loop
+    return filteredByCategory.reduce((total, item) => {
+      const tagihan =
+        item.totalTagihanBaru && item.totalTagihanBaru !== 0
+          ? item.totalTagihanBaru
+          : item.totalTagihan;
+      return total + tagihan;
+    }, 0);
+  });
+
+  // Total Expenses (misalnya menggunakan sisaTagihan)
+  const totalExpenses = categories.map((category) => {
+    const filteredByCategory = filteredKeuanganData.filter((item) => {
+      if (!item.created_at) return false;
+      if (month === "all") {
+        const itemCategory = new Date(item.created_at).toLocaleString("default", {
+          month: "long",
+          year: "numeric",
+        });
+        return itemCategory === category;
+      } else {
+        const weekNumber = getWeekOfMonth(new Date(item.created_at));
+        return category === `W${weekNumber}`;
+      }
     });
-    return filteredByWeek.reduce((total, item) => total + (item.sisaTagihan || 0), 0);
-  }
-});
 
+    return filteredByCategory.reduce((total, item) => total + (item.sisaTagihan || 0), 0);
+  });
 
   // Chart color
   const theme = useTheme();
@@ -124,11 +162,8 @@ const totalExpenses = categories.map((_, index) => {
       colors: ["transparent"],
     },
     dataLabels: {
-      enabled: true,
-      formatter: (val: number) => {
-        // Format data label as Rupiah
-        return `Rp. ${val.toLocaleString("id-ID")}`;
-      },
+      enabled: false,
+      formatter: (val: number) => `Rp. ${val.toLocaleString("id-ID")}`,
     },
     legend: {
       show: true,
@@ -154,11 +189,39 @@ const totalExpenses = categories.map((_, index) => {
     tooltip: {
       theme: "dark",
       fillSeriesColor: false,
+      custom: function({ series, seriesIndex, dataPointIndex, w }: any) {
+        const categoryLabel = w.globals.labels[dataPointIndex];
+        const dataForCategory = groupedData[categoryLabel] || [];
+        
+        const totalTagihan = dataForCategory.reduce((sum, item) => {
+          const tagihan =
+            item.totalTagihanBaru && item.totalTagihanBaru !== 0
+              ? item.totalTagihanBaru
+              : item.totalTagihan;
+          return sum + tagihan;
+        }, 0);
+        
+        const totalSisaTagihan = dataForCategory.reduce(
+          (sum, item) => sum + (item.sisaTagihan || 0),
+          0
+        );
+        
+        const metodePembayaranUnik = Array.from(
+          new Set(dataForCategory.map((item) => item.metodePembayaran))
+        );
+        
+        return `
+          <div style="padding:10px;">
+            <strong>${categoryLabel}</strong><br/>
+            Total Jamaah: ${dataForCategory.length}<br/>
+            Total Tagihan: Rp. ${totalTagihan.toLocaleString("id-ID")}<br/>
+            Sisa Tagihan: Rp. ${totalSisaTagihan.toLocaleString("id-ID")}<br/>
+            Metode Pembayaran: ${metodePembayaranUnik.join(", ")}
+          </div>
+        `;
+      },
       y: {
-        formatter: (val: number) => {
-          // Format tooltip as Rupiah
-          return `Rp. ${val.toLocaleString("id-ID")}`;
-        },
+        formatter: (val: number) => `Rp. ${val.toLocaleString("id-ID")}`,
       },
     },
   };

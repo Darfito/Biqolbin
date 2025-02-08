@@ -500,7 +500,7 @@ export const deleteFileUrl = async (jamaahId: string, namaDokumen: string) => {
       throw new Error(`Gagal menghapus data di kolom 'file': ${error.message}`);
     }
     
-    // revalidatePath(`/jamaah/${jamaahId}`);
+    revalidatePath(`/jamaah/${jamaahId}`);
 
     return { success: true, message: "Kolom 'file' berhasil dikosongkan." };
   } catch (error: any) {
