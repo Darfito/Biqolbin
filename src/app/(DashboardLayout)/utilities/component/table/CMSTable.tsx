@@ -29,11 +29,11 @@ import type {
 import type { RankingInfo } from "@tanstack/match-sorter-utils";
 
 // Style Imports
-import styles from "../../../../../styles/table.module.css";
+import styles from "../../../../styles/table.module.css";
 
 // Data Imports
-import TablePaginationComponent from "../../pagination/TablePaginationComponent";
-import CustomTextField from "../../textField/TextField";
+import TablePaginationComponent from "../pagination/TablePaginationComponent";
+import CustomTextField from "../textField/TextField";
 import { ChevronRight } from "@mui/icons-material";
 import {
   Box,
@@ -42,9 +42,11 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
+  Tooltip,
   Typography,
 } from "@mui/material";
-import { PaketInterface } from "../../../type";
+import { PaketInterface } from "../../type";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
@@ -54,6 +56,7 @@ import {
   undoDeleteStatusAktifPaketAction,
   verificationCMSAction,
 } from "@/app/(DashboardLayout)/cms/action";
+import { IconArrowBackUp, IconCheck, IconEditCircle, IconEye, IconEyeOff, IconInfoCircle, IconTrash, IconX } from "@tabler/icons-react";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -341,82 +344,104 @@ const CMSTable = ({ data, roleUser }: TableProps<PaketInterface>) => {
       cell: (info) => (
         <Box sx={{ display: "flex", gap: "0.5rem" }}>
           {(roleUser === "Superadmin" || roleUser === "Admin") && (
-            <Button
-              variant="contained"
-              onClick={() =>
-                handleVerificationStatusChange(
-                  info.row.original.id ?? 0,
-                  info.row.original.statusVerifikasi ? "Ditolak" : "Verifikasi"
-                )
-              }
-              sx={{
-                color: "#fff",
-                backgroundColor: info.row.original.statusVerifikasi
-                  ? "red"
-                  : "green",
-              }}
+            <Tooltip
+              title={info.row.original.statusVerifikasi ? "Ditolak" : "Verifikasi"}
+              arrow
             >
-              {info.row.original.statusVerifikasi ? "Ditolak" : "Verifikasi"}
-            </Button>
+              <IconButton
+                onClick={() =>
+                  handleVerificationStatusChange(
+                    info.row.original.id ?? 0,
+                    info.row.original.statusVerifikasi ? "Ditolak" : "Verifikasi"
+                  )
+                }
+                sx={{
+                  color: "#fff",
+                  backgroundColor: info.row.original.statusVerifikasi
+                    ? "red"
+                    : "green",
+                }}
+              >
+                {info.row.original.statusVerifikasi ? (
+                  <IconX size={20} />
+                ) : (
+                  <IconCheck size={20} />
+                )}
+              </IconButton>
+            </Tooltip>
           )}
-          <Button
-            variant="contained"
-            onClick={() =>
-              handleDialogOpen(
-                info.row.original.id ?? 0,
-                info.row.original.publish ? "unpublish" : "publish"
-              )
-            }
-            sx={{
-              color: "#fff",
-              backgroundColor: info.row.original.publish ? "red" : "green",
-            }}
-            disabled={!info.row.original.statusVerifikasi} // Jika statusVerifikasi false, tombol disabled
+    
+          <Tooltip
+            title={info.row.original.publish ? "Unpublish" : "Publish"}
+            arrow
           >
-            {info.row.original.publish ? "Unpublish" : "Publish"}
-          </Button>
-
-          <Button
-            onClick={() => handleNavigateToCMS(info.row.original)}
-            variant="contained"
-            className="text-white"
-          >
-            Detail
-          </Button>
+            {/* Bungkus dengan <span> karena IconButton yang disabled tidak memicu tooltip */}
+            <span>
+              <IconButton
+                onClick={() =>
+                  handleDialogOpen(
+                    info.row.original.id ?? 0,
+                    info.row.original.publish ? "unpublish" : "publish"
+                  )
+                }
+                sx={{
+                  color: "#fff",
+                  backgroundColor: info.row.original.publish ? "red" : "green",
+                }}
+                disabled={!info.row.original.statusVerifikasi}
+              >
+                {info.row.original.publish ? (
+                  <IconEyeOff size={20} />
+                ) : (
+                  <IconEye size={20} />
+                )}
+              </IconButton>
+            </span>
+          </Tooltip>
+    
+          <Tooltip title="Detail" arrow>
+            <IconButton
+              onClick={() => handleNavigateToCMS(info.row.original)}
+              sx={{ color: "inherit" }}
+            >
+              <IconEditCircle size={20} color="#FFC107"/>
+            </IconButton>
+          </Tooltip>
+    
           {info.row.original.statusAktif ? (
-            <Button
-              variant="contained"
-              color="error"
-              className="text-white"
-              onClick={() =>
-                handleDialogDeleteOpen(
-                  info.row.original.id ?? 0,
-                  info.row.original.nama
-                )
-              }
-            >
-              Delete
-            </Button>
+            <Tooltip title="Delete" arrow>
+              <IconButton
+                onClick={() =>
+                  handleDialogDeleteOpen(
+                    info.row.original.id ?? 0,
+                    info.row.original.nama
+                  )
+                }
+                color="error"
+              >
+                <IconTrash size={20} />
+              </IconButton>
+            </Tooltip>
           ) : (
-            <Button
-              variant="contained"
-              color="primary"
-              className="text-white"
-              onClick={() =>
-                handleUndoOpen(
-                  info.row.original.id ?? 0,
-                  info.row.original.nama
-                )
-              }
-            >
-              Undo
-            </Button>
+            <Tooltip title="Undo" arrow>
+              <IconButton
+                onClick={() =>
+                  handleUndoOpen(
+                    info.row.original.id ?? 0,
+                    info.row.original.nama
+                  )
+                }
+                color="primary"
+              >
+                <IconArrowBackUp size={20} />
+              </IconButton>
+            </Tooltip>
           )}
         </Box>
       ),
       header: "Action",
       enableColumnFilter: false,
-    }),
+    })
   ];
 
   const table = useReactTable({

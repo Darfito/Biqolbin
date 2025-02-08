@@ -3,7 +3,7 @@
 import { Box, Card } from "@mui/material";
 import PageContainer from "../../components/container/PageContainer";
 import FormCMS from "./FormCMS";
-import CMSTable from "../../utilities/component/table/CMS/CMSTable";
+import CMSTable from "../../utilities/component/table/CMSTable";
 import { PaketInterface } from "../../utilities/type";
 import { useState, useEffect } from "react";
 import CustomHeader from "../../layout/header/CustomHeader";
