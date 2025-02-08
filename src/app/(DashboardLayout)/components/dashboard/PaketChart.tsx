@@ -72,7 +72,7 @@ const PaketPieChart = ({ filteredKeuanganData }: PaketPieChartProps) => {
     plotOptions: {
       pie: {
         donut: {
-          size: "65%", // Mengecilkan ukuran donut
+          size: "75%", // Mengecilkan ukuran donut
           labels: {
             show: true,
             total: {
