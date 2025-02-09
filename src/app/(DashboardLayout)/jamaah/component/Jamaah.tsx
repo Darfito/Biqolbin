@@ -11,12 +11,6 @@ import {
   JamaahInterface,
   PaketInterface,
 } from "../../utilities/type";
-import {
-  IconLuggage,
-  IconPlaneArrival,
-  IconPlaneInflight,
-  IconUser,
-} from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import CustomHeader from "../../layout/header/CustomHeader";
 

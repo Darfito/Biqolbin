@@ -56,7 +56,7 @@ export default async function UserPage() {
 
   return (
     <>
-      <User userData={stableUserData} cabangData={stableCabangData} cabangUser={cabangUser} />
+      <User userData={stableUserData} cabangData={stableCabangData} cabangUser={cabangUser} roleUser={roleUser} />
     </>
   );
 }

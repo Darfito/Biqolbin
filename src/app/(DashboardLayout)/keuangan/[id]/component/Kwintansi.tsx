@@ -42,7 +42,7 @@ const Kwitansi = ({ data }: KwitansiProps) => {
             <h1 className="text-center text-xl font-bold mb-4">Kwitansi</h1>
           </div>
           <div className="flex justify-between">
-            <div className="flex flex-col">
+            <div className="flex flex-col w-1/2">
               <p>
                 Kepada: <strong>{data.Jamaah.nama}</strong>
               </p>
@@ -91,7 +91,7 @@ const Kwitansi = ({ data }: KwitansiProps) => {
               ) : (
                 <tr>
                   <td colSpan={3} className="text-center p-2">
-                    Tidak ada cicilan
+                    Tidak ada tambahan biaya
                   </td>
                 </tr>
               )}
@@ -102,7 +102,7 @@ const Kwitansi = ({ data }: KwitansiProps) => {
           </p>
           {/* Tabel Cicilan */}
 
-          <h2 className="text-lg font-semibold mt-4">Rincian Pembayaran</h2>
+          {/* <h2 className="text-lg font-semibold mt-4">Rincian Pembayaran</h2>
           <table className="w-full text-left border-collapse border border-gray-300 mt-2">
             <thead>
               <tr className="border-b bg-gray-200">
@@ -138,7 +138,7 @@ const Kwitansi = ({ data }: KwitansiProps) => {
 
           <p className="text-right font-bold mt-4">
             Total Lunas: Rp {totalTagihanFinal}
-          </p>
+          </p> */}
 
           {/* Tanda Tangan */}
           <div className="w-full flex justify-end">

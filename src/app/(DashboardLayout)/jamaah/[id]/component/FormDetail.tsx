@@ -35,8 +35,8 @@ import { KontakDaruratSection } from "../../component/KontakDaruratHandler";
 
 interface FormDetailProps {
   isEditing: boolean; // Status edit mode
+  setIsEditing: (value: boolean) => void; // Tambahkan ini
   jamaahData?: JamaahInterface | null;
-  paketData: PaketInterface[];
 }
 
 interface FormErrors {
@@ -75,7 +75,7 @@ const formSchema = v.object({
   ),
 });
 
-const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
+const FormDetail = ({ isEditing, jamaahData, setIsEditing }: FormDetailProps) => {
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [formValues, setFormValues] = useState<JamaahInterface>(
@@ -190,6 +190,10 @@ const FormDetail = ({ isEditing, jamaahData, paketData }: FormDetailProps) => {
 
     if (response.success) {
       toast.success("Data berhasil diperbarui"); // Show success toast
+      handleCloseModal(); // Tutup dialog setelah selesai
+      setIsEditing(false);
+    } else {
+      toast.error("Terjadi kesalahan saat memperbarui data");
       handleCloseModal(); // Tutup dialog setelah selesai
     }
   };

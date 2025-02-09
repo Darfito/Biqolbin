@@ -5,7 +5,7 @@ import { Select, MenuItem } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCard";
 import dynamic from "next/dynamic";
-import { JamaahInterface, KeuanganInterface } from "../../utilities/type";
+import { JamaahInterface, KeuanganInterface, StatusType } from "../../utilities/type";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -37,20 +37,44 @@ const GapKeberangkatan = ({ keuanganData }: GapKeberangkatanProps) => {
 
   const categories =
     month === "all"
-      ? Array.from(new Set(
-          filteredData.map(
-            (item) =>
-              item.created_at &&
-              new Date(item.created_at).toLocaleString("default", {
-                month: "long",
-                year: "numeric",
+      ? Array.from(
+          new Set(
+            filteredData
+              .map((item) => {
+                if (!item.created_at) return null;
+                return new Date(item.created_at).toLocaleString("default", {
+                  month: "long",
+                  year: "numeric",
+                });
               })
+              .filter((val): val is string => val !== null)
           )
-        ))
+        ).sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
       : ["W1", "W2", "W3", "W4"];
 
+  // Definisikan groupedData di sini:
+  const groupedData: { [key: string]: KeuanganInterface[] } = categories.reduce(
+    (acc, category) => {
+      acc[category] = filteredData.filter((item) => {
+        if (!item.created_at) return false;
+        if (month === "all") {
+          const itemCategory = new Date(item.created_at).toLocaleString("default", {
+            month: "long",
+            year: "numeric",
+          });
+          return itemCategory === category;
+        } else {
+          const weekNumber = Math.min(Math.ceil(new Date(item.created_at).getDate() / 7), 4);
+          return category === `W${weekNumber}`;
+        }
+      });
+      return acc;
+    },
+    {} as { [key: string]: KeuanganInterface[] }
+  );
+
   const statusCounts: Record<string, number[]> = {
-    'Belum Dijadwalkan': Array(categories.length).fill(0),
+    "Belum Dijadwalkan": Array(categories.length).fill(0),
     Dijadwalkan: Array(categories.length).fill(0),
     Berangkat: Array(categories.length).fill(0),
     Selesai: Array(categories.length).fill(0),
@@ -69,13 +93,20 @@ const GapKeberangkatan = ({ keuanganData }: GapKeberangkatanProps) => {
           )
         : Math.min(Math.ceil(createdAt.getDate() / 7) - 1, 3);
 
-    if (categoryIndex !== -1 && statusCounts[item.statusPenjadwalan] !== undefined) {
+    if (
+      categoryIndex !== -1 &&
+      statusCounts[item.statusPenjadwalan] !== undefined
+    ) {
       statusCounts[item.statusPenjadwalan][categoryIndex]++;
     }
   });
 
   const seriescolumnchart = [
-    { name: "Belum Dijadwalkan", data: statusCounts["Belum Dijadwalkan"], color: error },
+    {
+      name: "Belum Dijadwalkan",
+      data: statusCounts["Belum Dijadwalkan"],
+      color: error,
+    },
     { name: "Dijadwalkan", data: statusCounts.Dijadwalkan, color: primary },
     { name: "Berangkat", data: statusCounts.Berangkat, color: secondary },
     { name: "Selesai", data: statusCounts.Selesai, color: tertiary },
@@ -91,7 +122,58 @@ const GapKeberangkatan = ({ keuanganData }: GapKeberangkatanProps) => {
     legend: { show: true },
     xaxis: { categories },
     yaxis: { tickAmount: 4 },
-    tooltip: { theme: "dark" },
+    tooltip: {
+      theme: "dark",
+      fillSeriesColor: false,
+      custom: function({ series, seriesIndex, dataPointIndex, w }: any) {
+        const categoryLabel = w.globals.labels[dataPointIndex];
+        const dataForCategory = groupedData[categoryLabel] || [];
+    
+        // Kelompokkan data berdasarkan kombinasi status dan metode pembayaran
+        const groupedCombo: Record<string, number> = dataForCategory.reduce((acc, item) => {
+          const key = `${item.status}|${item.metodePembayaran}`;
+          acc[key] = (acc[key] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+    
+        // Buat baris tabel untuk masing-masing kombinasi
+        const tableRows = Object.entries(groupedCombo)
+          .map(([key, count]) => {
+            const [status, metode] = key.split("|");
+            return `
+              <tr>
+                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${status}</td>
+                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${metode}</td>
+                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${count}</td>
+              </tr>
+            `;
+          })
+          .join("");
+    
+        return `
+          <div style="padding:10px; font-size:0.85rem;">
+            <strong>${categoryLabel}</strong><br/>
+            <table style="width:100%; border-collapse: collapse; margin-top:5px;">
+              <thead>
+                <tr>
+                  <th style="border: 1px solid #ccc; padding: 4px;">Status</th>
+                  <th style="border: 1px solid #ccc; padding: 4px;">Metode Pembayaran</th>
+                  <th style="border: 1px solid #ccc; padding: 4px;">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${tableRows}
+              </tbody>
+            </table>
+          </div>
+        `;
+      },
+      y: {
+        formatter: (val: number) => `Rp. ${val.toLocaleString("id-ID")}`,
+      },
+    },
+    
+    
   };
 
   return (
