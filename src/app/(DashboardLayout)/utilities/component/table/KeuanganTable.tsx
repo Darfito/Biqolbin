@@ -332,7 +332,7 @@ const KeuanganTable = ({ data }: TableProps<KeuanganInterface>) => {
     }),
     columnHelper.display({
       id: "action",
-      header: "Detail",
+      header: "Aksi",
       cell: (info) => {
         const handleOpenDialog = (rowData: KeuanganInterface) => {
           setSelectedRow(rowData); // Set data pengguna

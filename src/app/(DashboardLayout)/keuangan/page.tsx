@@ -14,18 +14,26 @@ export default async function KeuanganPage() {
   let keuanganData: KeuanganInterface[] = [];
   let cabangUser = 0;
   let roleUser = "";
+  let idUser = "";
 
   try {
     const userLoginResponse = await getLoggedInUser();
 
     if (userLoginResponse) {
       const userDetails = await getUserById(userLoginResponse.id);
+      console.log("User data: ", userDetails);
       cabangUser = userDetails?.[0].cabang_id || 0;
       roleUser = userDetails?.[0].role || "";
+      idUser = userDetails?.[0].id || "";
     }
 
     paketData = (await getCmsAction()) ?? [];
     jamaahData = await getJamaahAction();
+
+    // Jika bukan Superadmin, filter data jamaah berdasarkan cabangUser
+    if (roleUser !== "Superadmin") {
+      jamaahData = jamaahData.filter((jamaah) => jamaah.cabang_id === cabangUser);
+    }
 
     if (roleUser === "Superadmin") {
       keuanganData = (await getKeuanganAction()) ?? [];
@@ -53,6 +61,7 @@ export default async function KeuanganPage() {
       paketData={stablePaketData}
       jamaahData={stableJamaahData}
       keuanganData={stableKeuanganData}
+      idUser={idUser}
     />
   );
 }

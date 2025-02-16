@@ -25,6 +25,7 @@ export type KeuanganProps = {
   paketData: PaketInterface[];
   jamaahData: JamaahInterface[];
   keuanganData: KeuanganInterface[];
+  idUser: string;
 };
 
 const Keuangan = ({ paketData, jamaahData, keuanganData }: KeuanganProps) => {
@@ -51,6 +52,7 @@ const Keuangan = ({ paketData, jamaahData, keuanganData }: KeuanganProps) => {
     const year = new Date(keuangan.created_at).getFullYear().toString();
     return year === selectedYear && keuangan.statusAktif === selectedStatus;
   });
+  console.log("jamaahData di client", jamaahData);
 
   // Statistik berdasarkan data keuangan yang difilter
   const totalTransaksi = filteredKeuanganData.length;

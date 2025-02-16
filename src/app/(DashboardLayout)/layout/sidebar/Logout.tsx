@@ -29,9 +29,10 @@ export const Logout = ({nama, role} : LogoutProps) => {
         borderRadius: "8px",
         alignItems: "center",
         width: "85%",
+        justifyContent: "center",
       }}
     >
-      <Box sx={{ width: "33%", display: "flex", justifyContent: "center" }}>
+      {/* <Box sx={{ width: "33%", display: "flex", justifyContent: "center" }}>
         <Avatar
           src="/images/profile/user-1.jpg"
           alt="image"
@@ -40,7 +41,7 @@ export const Logout = ({nama, role} : LogoutProps) => {
             height: 40,
           }}
         />
-      </Box>
+      </Box> */}
       <Box sx={{ width: "33%" }}>
             <Typography variant="h6">{nama || "Nama tidak tersedia"}</Typography>
             <Typography variant="subtitle1">{role || "Role tidak tersedia"}</Typography>

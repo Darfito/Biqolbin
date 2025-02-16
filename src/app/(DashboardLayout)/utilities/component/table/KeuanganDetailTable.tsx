@@ -431,7 +431,7 @@ const KeuanganDetailTable = ({
       </Card>
 
       <Dialog open={openDialog} onClose={handleDialogClose}>
-        <DialogTitle>Upload File</DialogTitle>
+        <DialogTitle>Unggah Berkas</DialogTitle>
         <DialogContent>
           <FileUploaderSingle
             onFileUpload={(file) => {

@@ -888,7 +888,7 @@ const FormDetail = ({
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleDialogClose} color="primary">
+            <Button onClick={handleDialogClose} variant="contained" color="error">
               Ya, Batalkan
             </Button>
             <Button

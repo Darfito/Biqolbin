@@ -198,7 +198,7 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
         }}
       >
         <Typography variant="h2" component="h1" mb={3}>
-          CMS
+          Detail Paket
         </Typography>
         <Breadcrumb links={breadcrumbLinks} />
         <Box sx={{ mt: 3 }}>
@@ -728,7 +728,7 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
           )}
         </Card>
         <Dialog open={openDialog} onClose={handleDialogClose}>
-          <DialogTitle>Upload File</DialogTitle>
+          <DialogTitle>Unggah Berkas</DialogTitle>
           <DialogContent>
             <FileUploaderSingle
               onFileUpload={(file) => {
@@ -737,7 +737,7 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleDialogClose} color="primary">
+            <Button onClick={handleDialogClose} variant="contained" color="error">
               Ya, Batalkan
             </Button>
             <Button
