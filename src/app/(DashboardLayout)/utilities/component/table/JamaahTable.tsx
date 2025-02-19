@@ -253,7 +253,7 @@ const JamaahTable = ({ data }: TableProps<JamaahInterface>) => {
     // Kolom Aksi
     columnHelper.display({
       id: "action",
-      header: "Detail",
+      header: "Aksi",
       cell: (info) => {
         const handleOpenDialog = (rowData: JamaahInterface) => {
           setSelectedRow(rowData); // Set data pengguna

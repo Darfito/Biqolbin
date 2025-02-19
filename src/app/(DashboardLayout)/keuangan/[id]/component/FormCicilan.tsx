@@ -169,7 +169,7 @@ const FormCicilan = ({
       <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
         <form onSubmit={handleSubmit}>
           <DialogTitle>
-            {initialData ? "Edit Cicilan" : "Tambah Cicilan"}
+            {initialData?.nominalCicilan !== 0 ? "Edit Cicilan" : "Tambah Cicilan"}
           </DialogTitle>
           <DialogContent
             sx={{

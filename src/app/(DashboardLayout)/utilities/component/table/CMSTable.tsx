@@ -343,7 +343,7 @@ const CMSTable = ({ data, roleUser }: TableProps<PaketInterface>) => {
     columnHelper.accessor("action", {
       cell: (info) => (
         <Box sx={{ display: "flex", gap: "0.5rem" }}>
-          {(roleUser === "Superadmin" || roleUser === "Admin") && (
+          {(roleUser === "Superadmin") && (
             <Tooltip
               title={info.row.original.statusVerifikasi ? "Ditolak" : "Verifikasi"}
               arrow
@@ -439,7 +439,7 @@ const CMSTable = ({ data, roleUser }: TableProps<PaketInterface>) => {
           )}
         </Box>
       ),
-      header: "Action",
+      header: "Aksi",
       enableColumnFilter: false,
     })
   ];

@@ -8,8 +8,6 @@ import {
 import { revalidatePath } from "next/cache";
 
 
-
-
 /**
  * Fetch all Keuangan data from the database.
  * If there is an error, return an empty array.

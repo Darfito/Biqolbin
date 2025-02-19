@@ -33,6 +33,7 @@ export const mapJamaahData = (data: any): JamaahInterface[] => {
     riwayatPenyakit: item.riwayatPenyakit,
     jenisDokumen: item.jenisDokumen || [],
     statusAktif: item.statusAktif,
+    cabang_id: item.cabang_id
   }));
 };
 

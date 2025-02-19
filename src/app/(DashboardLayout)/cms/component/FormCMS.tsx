@@ -425,7 +425,7 @@ const handleUpload = async (file: File) => {
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <form onSubmit={handleSubmit}>
           <DialogTitle>
-            {mode === "create" ? "Tambah Paket" : "Edit Paket"}
+            {mode === "create" ? "Tambah Paket" : "Sunting Paket"}
           </DialogTitle>
           <DialogContent
             sx={{
