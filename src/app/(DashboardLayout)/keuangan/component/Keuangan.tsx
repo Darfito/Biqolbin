@@ -14,12 +14,9 @@ import {
   StatusType,
 } from "../../utilities/type";
 import { IconUser, IconProgress, IconReceipt } from "@tabler/icons-react";
-import dynamic from "next/dynamic";
 import CustomHeader from "../../layout/header/CustomHeader";
 import { useEffect, useState } from "react";
-// const CustomHeader = dynamic(() => import("../../layout/header/CustomHeader"), {
-//   ssr: false,
-// });
+
 
 export type KeuanganProps = {
   paketData: PaketInterface[];
@@ -27,33 +24,27 @@ export type KeuanganProps = {
   keuanganData: KeuanganInterface[];
   idUser: string;
 };
-
 const Keuangan = ({ paketData, jamaahData, keuanganData }: KeuanganProps) => {
   const [selectedYear, setSelectedYear] = useState<string | null>(
     new Date().getFullYear().toString()
   );
   const [selectedStatus, setSelectedStatus] = useState<boolean>(true);
   const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
     setMounted(true);
   }, []);
-
   if (!mounted) {
     return null; // Jangan render apa-apa sampai komponen dimuat di klien
   }
-
   // Filter data keuangan berdasarkan tahun yang dipilih
   const filteredKeuanganData = keuanganData.filter((keuangan) => {
     // Pastikan created_at terdefinisi dan valid
     if (!keuangan.created_at) return false;
-
     // Parsing dan mendapatkan tahun dari created_at
     const year = new Date(keuangan.created_at).getFullYear().toString();
     return year === selectedYear && keuangan.statusAktif === selectedStatus;
   });
   console.log("jamaahData di client", jamaahData);
-
   // Statistik berdasarkan data keuangan yang difilter
   const totalTransaksi = filteredKeuanganData.length;
   const belumLunas = filteredKeuanganData.filter(
@@ -62,7 +53,6 @@ const Keuangan = ({ paketData, jamaahData, keuanganData }: KeuanganProps) => {
   const lunas = filteredKeuanganData.filter(
     (keuangan) => keuangan.status === StatusType.LUNAS
   ).length;
-
   // Konfigurasi score card
   const dynamicScoreCardKeuangan: CardStatsProps[] = [
     {
@@ -84,9 +74,7 @@ const Keuangan = ({ paketData, jamaahData, keuanganData }: KeuanganProps) => {
       icon: IconReceipt,
     },
   ];
-
   console.log("filteredKeuanganData", filteredKeuanganData);
-
   return (
     <>
       <CustomHeader
@@ -123,7 +111,6 @@ const Keuangan = ({ paketData, jamaahData, keuanganData }: KeuanganProps) => {
           );
         })}
       </Grid>
-
       <PageContainer title="Keuangan">
         <Box sx={{ margin: "20px", display: "flex", justifyContent: "end" }}>
           <FormKeuangan paketData={paketData} jamaahData={jamaahData} />
