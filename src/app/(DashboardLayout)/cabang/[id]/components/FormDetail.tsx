@@ -122,6 +122,7 @@ const FormDetail = ({ isEditing, cabangData, role }: FormDetailProps) => {
                 value={formValues.nama}
                 error={!!formErrors.nama}
                 helperText={formErrors.nama}
+                disabled={!isEditing}
                 sx={{ marginBottom: 2 }}
                 onChange={(e: { target: { value: string } }) =>
                   setFormValues({ ...formValues, nama: e.target.value })
@@ -134,6 +135,7 @@ const FormDetail = ({ isEditing, cabangData, role }: FormDetailProps) => {
                 name="alamatCabang"
                 value={formValues.alamatCabang}
                 error={!!formErrors.alamatCabang}
+                disabled={!isEditing}
                 onChange={(e: { target: { value: string } }) =>
                   setFormValues({ ...formValues, alamatCabang: e.target.value })
                 }
@@ -149,6 +151,7 @@ const FormDetail = ({ isEditing, cabangData, role }: FormDetailProps) => {
                 name="cabang_lat"
                 value={formValues.cabang_lat}
                 required
+                disabled={!isEditing}
                 sx={{ marginBottom: 2 }}
                 onChange={(e: { target: { value: number } }) =>
                   setFormValues({ ...formValues, cabang_lat: e.target.value })
@@ -161,6 +164,7 @@ const FormDetail = ({ isEditing, cabangData, role }: FormDetailProps) => {
                 value={formValues.cabang_long}
                 error={!!formErrors.cabang_long}
                 required
+                disabled={!isEditing}
                 onChange={(e: { target: { value: number } }) =>
                   setFormValues({ ...formValues, cabang_long: e.target.value })
                 }
