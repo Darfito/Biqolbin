@@ -57,8 +57,9 @@ const CMS = ({ data, roleUser }: CMSPageProps) => {
       <Box sx={{ width: "100%" }}></Box>
 
       <PageContainer title="CMS">
+        
         <Box sx={{ margin: "20px", display: "flex", justifyContent: "end" }}>
-          <FormCMS mode="create" />
+          <FormCMS mode="create" roleUser={roleUser} />
         </Box>
         <Card sx={{ mt: 3 }}>
           <CMSTable data={filteredPaketData} roleUser={roleUser} />
