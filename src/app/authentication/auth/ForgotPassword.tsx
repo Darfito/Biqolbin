@@ -10,7 +10,7 @@ import {
 
 import CustomTextField from "@/app/(DashboardLayout)/components/forms/theme-elements/CustomTextField";
 import { forgotPassword, login } from "../login/action";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 
 interface loginType {
@@ -32,16 +32,15 @@ const ForgotPassword = ({ title, subtitle, subtext }: loginType) => {
     const response = await forgotPassword(formData);
 
     console.log("Response data:", response);
-
+    if (response.success) {
+      toast.success(`Email berhasil dikirim ke ${email}`);
+    }
     if (!response.success) {
       setError(
-        response.error || "Login failed. Please check your email and password."
+        response.error || "Login failed. Please check your email."
       );
       toast.error(response.error || "Login failed. Please try again.");
-    } if (response.success) {
-      setError(""); // Clear error if login is successful
-      toast.success(`Response data: ${JSON.stringify(response)}`);
-    }
+    } 
   };
 
   return (

@@ -33,17 +33,18 @@ const UpdatePassword = ({ title, subtitle, subtext }: loginType) => {
   const supabase = createClient();
 
   useEffect(() => {
-    const hash = window.location.hash;
-    const params = new URLSearchParams(hash.replace("#", "?"));
-    const token = params.get("access_token");
+    const search = window.location.search;
+    const params = new URLSearchParams(search);
+    const token = params.get("access_token"); // Pastikan parameter yang sesuai
     const refreshToken = params.get("refresh_token");
-
-    console.log("hash", hash);
-
+  
+    console.log("search", search);
+  
     if (token && refreshToken) {
       supabase.auth.setSession({ access_token: token, refresh_token: refreshToken });
     }
   }, []);
+  
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
