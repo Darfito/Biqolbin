@@ -192,6 +192,9 @@ const FormDetail = ({ isEditing, jamaahData, setIsEditing }: FormDetailProps) =>
       toast.success("Data berhasil diperbarui"); // Show success toast
       handleCloseModal(); // Tutup dialog setelah selesai
       setIsEditing(false);
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     } else {
       toast.error("Terjadi kesalahan saat memperbarui data");
       handleCloseModal(); // Tutup dialog setelah selesai

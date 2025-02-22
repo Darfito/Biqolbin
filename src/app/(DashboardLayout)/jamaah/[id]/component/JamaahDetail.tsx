@@ -32,7 +32,6 @@ interface JamaahDetailProps {
 }
 
 const JamaahDetail = ({
-  paketData,
   jamaahData,
   breadcrumbLinks,
 }: JamaahDetailProps) => {

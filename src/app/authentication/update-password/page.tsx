@@ -3,14 +3,12 @@ import Link from "next/link";
 import { Grid, Box, Card, Stack, Typography } from "@mui/material";
 // components
 import PageContainer from "@/app/(DashboardLayout)/components/container/PageContainer";
-import Logo from "@/app/(DashboardLayout)/layout/shared/logo/Logo";
-import AuthLogin from "../auth/AuthLogin";
 import UpdatePassword from "../auth/UpdatePassword";
 import { ToastContainer } from "react-toastify";
 
 const UpdatePasswordPage = () => {
   return (
-    <PageContainer title="Login" description="this is Login page">
+    <PageContainer title="Update-Password" description="this is Login page">
 					<ToastContainer />
       <Box
         sx={{

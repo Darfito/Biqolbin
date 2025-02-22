@@ -276,7 +276,7 @@ export const updateKeuanganAction = async (formValues: KeuanganInterface) => {
     console.log(`Inserted ${biayaTambahanData.length} new BiayaTambahan`);
   }
 
-  revalidatePath("/keuangan");
+  // revalidatePath("/keuangan/" + formValues.id);
   return { success: true };
 };
 

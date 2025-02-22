@@ -10,16 +10,17 @@ import {
 
 import CustomTextField from "@/app/(DashboardLayout)/components/forms/theme-elements/CustomTextField";
 import { forgotPassword, login } from "../login/action";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 
 interface loginType {
   title?: string;
   subtitle?: JSX.Element | JSX.Element[] | string;
   subtext?: JSX.Element | JSX.Element[];
+  onSuccess?: (success: boolean) => void;
 }
 
-const ForgotPassword = ({ title, subtitle, subtext }: loginType) => {
+const ForgotPassword = ({ title, subtitle, subtext, onSuccess  }: loginType) => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState(""); // State untuk menangani error
 
@@ -32,15 +33,13 @@ const ForgotPassword = ({ title, subtitle, subtext }: loginType) => {
     const response = await forgotPassword(formData);
 
     console.log("Response data:", response);
-
-    if (!response.success) {
-      setError(
-        response.error || "Login failed. Please check your email and password."
-      );
-      toast.error(response.error || "Login failed. Please try again.");
-    } if (response.success) {
-      setError(""); // Clear error if login is successful
-      toast.success(`Response data: ${JSON.stringify(response)}`);
+    if (response.success) {
+      toast.success(`Email berhasil dikirim ke ${email}`);
+      if (onSuccess) onSuccess(true); // Kirim success ke parent
+    } else {
+      setError(response.error || "Gagal mengirim email. Silakan coba lagi.");
+      toast.error(response.error || "Gagal mengirim email.");
+      if (onSuccess) onSuccess(false); // Kirim false ke parent
     }
   };
 

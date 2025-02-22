@@ -262,7 +262,8 @@ export const updateCmsAction = async (paketData: PaketInterface) => {
     }
 
     // Revalidate CMS path
-    revalidatePath(`/cms/${paketData.id}`);;
+    // console.log("Revalidating CMS path...");
+    // revalidatePath("/");
     return { success: true, data: paketDataUpdated };
   } catch (error) {
     console.error("Error updating Paket:", error);
