@@ -2,14 +2,25 @@
 import { Grid, Box, Card } from "@mui/material";
 // components
 import PageContainer from "@/app/(DashboardLayout)/components/container/PageContainer";
-import Logo from "@/app/(DashboardLayout)/layout/shared/logo/Logo";
 import ForgotPassword from "../auth/ForgotPassword";
-import { ToastContainer } from "react-toastify";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 
 const ForgotPasswordPage = () => {
+  const [isSuccess, setIsSuccess] = useState<boolean | null>(null);
+
+  const handleSuccess = (success: boolean) => {
+    setIsSuccess(success);
+    if (success) {
+      toast.success("Email berhasil dikirim! Silakan periksa inbox Anda.");
+    } else {
+      toast.error("Gagal mengirim email. Silakan coba lagi.");
+    }
+  };
+
   return (
     <PageContainer title="Forgot Password" description="this is Login page">
-          <ToastContainer />
       <Box
         sx={{
           position: "relative",
@@ -45,10 +56,7 @@ const ForgotPasswordPage = () => {
               elevation={9}
               sx={{ p: 4, zIndex: 1, width: "100%", maxWidth: "500px" }}
             >
-              {/* <Box display="flex" alignItems="center" justifyContent="center">
-                <Logo />
-              </Box> */}
-              <ForgotPassword title="Masukkan email Anda!" />
+              <ForgotPassword onSuccess={handleSuccess} title="Masukkan email Anda!" />
             </Card>
           </Grid>
         </Grid>

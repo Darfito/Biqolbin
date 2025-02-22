@@ -3,7 +3,6 @@ import { styled, Container, Box } from "@mui/material";
 import React, { ReactNode, useEffect, useState } from "react";
 import Header from "@/app/(DashboardLayout)/layout/header/Header";
 import Sidebar from "@/app/(DashboardLayout)/layout/sidebar/Sidebar";
-import { ToastContainer } from "react-toastify";
 import { getLoggedInUser, getUserById } from "@/libs/sessions";
 
 const MainWrapper = styled("div")(() => ({
@@ -55,7 +54,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
   return (
     <MainWrapper className="mainwrapper">
-      <ToastContainer />
       {/* ------------------------------------------- */}
       {/* Sidebar */}
       {/* ------------------------------------------- */}

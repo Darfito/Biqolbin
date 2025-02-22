@@ -17,9 +17,10 @@ interface loginType {
   title?: string;
   subtitle?: JSX.Element | JSX.Element[] | string;
   subtext?: JSX.Element | JSX.Element[];
+  onSuccess?: (success: boolean) => void;
 }
 
-const ForgotPassword = ({ title, subtitle, subtext }: loginType) => {
+const ForgotPassword = ({ title, subtitle, subtext, onSuccess  }: loginType) => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState(""); // State untuk menangani error
 
@@ -34,13 +35,12 @@ const ForgotPassword = ({ title, subtitle, subtext }: loginType) => {
     console.log("Response data:", response);
     if (response.success) {
       toast.success(`Email berhasil dikirim ke ${email}`);
+      if (onSuccess) onSuccess(true); // Kirim success ke parent
+    } else {
+      setError(response.error || "Gagal mengirim email. Silakan coba lagi.");
+      toast.error(response.error || "Gagal mengirim email.");
+      if (onSuccess) onSuccess(false); // Kirim false ke parent
     }
-    if (!response.success) {
-      setError(
-        response.error || "Login failed. Please check your email."
-      );
-      toast.error(response.error || "Login failed. Please try again.");
-    } 
   };
 
   return (

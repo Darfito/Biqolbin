@@ -350,7 +350,7 @@ export const updateJamaahAction = async (jamaahData: JamaahInterface) => {
 }
 
     console.log("Jamaah updated successfully:", jamaahDataUpdated);
-    revalidatePath(`/jamaah/${jamaahData.id}`);
+    // revalidatePath(`/jamaah/${jamaahData.id}`);
     return { success: true, data: jamaahDataUpdated };
   } catch (error) {
     console.error("Error updating Jamaah:", error);

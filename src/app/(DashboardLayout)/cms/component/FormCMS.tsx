@@ -38,6 +38,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { createCmsAction, updateCmsAction } from "../action";
 import { createClient } from "@/libs/supabase/client";
 import { HotelSection } from "./HotelHandler";
+import { useRouter } from "next/navigation";
 
 interface FormCMSProps {
   initialValues?: PaketInterface; // Nilai default untuk mengedit
@@ -125,6 +126,9 @@ const FormCMS = ({ initialValues, mode, roleUser }: FormCMSProps) => {
   const [isCustomMaskapai, setIsCustomMaskapai] = useState(false); // Untuk melacak apakah pengguna memilih "Lainnya"
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [newFasilitas, setNewFasilitas] = useState<string>("");
+
+  const router = useRouter();
+
   // const [isUploading, setIsUploading] = useState(false);
   const [formValues, setFormValues] = useState<PaketInterface>(
     initialValues || {
@@ -198,42 +202,48 @@ const FormCMS = ({ initialValues, mode, roleUser }: FormCMSProps) => {
     }));
   };
 
-const uploadImageToSupabase = async (folderName: string, file: File) => {
-  const supabase = createClient();
-  
-  // Ambil ekstensi file asli
-  const fileExtension = file.name.split(".").pop();
-  const newFileName = `${folderName}.${fileExtension}`;
-  const filePath = `${folderName}/${newFileName}`;
+  const uploadImageToSupabase = async (folderName: string, file: File) => {
+    const supabase = createClient();
 
-  const { data, error } = await supabase.storage.from("Paket").upload(filePath, file, { cacheControl: "3600", upsert: true });
-  
-  if (error) {
-    throw new Error(error.message);
-  }
+    // Ambil ekstensi file asli
+    const fileExtension = file.name.split(".").pop();
+    const newFileName = `${folderName}.${fileExtension}`;
+    const filePath = `${folderName}/${newFileName}`;
 
-  return data;
-};
+    const { data, error } = await supabase.storage
+      .from("Paket")
+      .upload(filePath, file, { cacheControl: "3600", upsert: true });
 
-const handleUpload = async (file: File) => {
-  try {
-    const namaPaket = formValues.nama;
-    if (typeof namaPaket !== "string") {
-      throw new Error("Nama paket harus berupa string");
+    if (error) {
+      throw new Error(error.message);
     }
 
-    const folderName = namaPaket;
-    const result = await uploadImageToSupabase(folderName, file);
+    return data;
+  };
 
-    // Buat URL publik setelah upload
-    const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Paket/${result.path}?t=${new Date().getTime()}`;
-    
-    return publicUrl;
-  } catch (error) {
-    console.error("Upload failed:", error);
-    toast.error("Gagal mengunggah gambar!");
-  }
-};
+  const handleUpload = async (file: File) => {
+    try {
+      const namaPaket = formValues.nama;
+      if (typeof namaPaket !== "string") {
+        throw new Error("Nama paket harus berupa string");
+      }
+
+      const folderName = namaPaket;
+      const result = await uploadImageToSupabase(folderName, file);
+
+      // Buat URL publik setelah upload
+      const publicUrl = `${
+        process.env.NEXT_PUBLIC_SUPABASE_URL
+      }/storage/v1/object/public/Paket/${
+        result.path
+      }?t=${new Date().getTime()}`;
+
+      return publicUrl;
+    } catch (error) {
+      console.error("Upload failed:", error);
+      toast.error("Gagal mengunggah gambar!");
+    }
+  };
 
   const serializeFormData = (
     values: PaketInterface,
@@ -279,26 +289,26 @@ const handleUpload = async (file: File) => {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     let publicUrl: string = "";
-  
+
     try {
       // 1. Handle file upload first if there's a new file
       if (formValues.selectedFile) {
-        publicUrl = await handleUpload(formValues.selectedFile) ?? "";
+        publicUrl = (await handleUpload(formValues.selectedFile)) ?? "";
         if (!publicUrl) {
           toast.error("Gagal mengunggah gambar!");
           return;
         }
       }
-  
+
       // 2. Create the data to validate with the new URL if uploaded
       const dataToSubmit = {
         ...formValues,
         gambar_url: publicUrl || formValues.gambar_url, // Use new URL if uploaded, otherwise keep existing
       };
-  
+
       // 3. Validate the complete data
       const result = v.safeParse(formSchema, dataToSubmit);
-  
+
       if (!result.success) {
         const errorMap: Record<string, string> = {};
         result.issues.forEach((issue) => {
@@ -311,10 +321,14 @@ const handleUpload = async (file: File) => {
         console.error("Validation errors:", errorMap);
         return;
       }
-  
+
       // 4. Serialize and submit the data
-      const serializedData = serializeFormData(dataToSubmit, mode, initialValues);
-  
+      const serializedData = serializeFormData(
+        dataToSubmit,
+        mode,
+        initialValues
+      );
+
       if (mode === "create") {
         const { success, error } = await createCmsAction(serializedData);
         if (success) {
@@ -326,8 +340,14 @@ const handleUpload = async (file: File) => {
       } else if (mode === "edit") {
         const { success, error } = await updateCmsAction(serializedData);
         if (success) {
+          console.log("Form berhasil di Update! test toast");
           toast.success("Form berhasil di Update!");
           handleClose();
+
+          // Tambahkan delay untuk memastikan refresh berjalan
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
         } else {
           toast.error(`Error: ${error}`);
         }
@@ -420,15 +440,15 @@ const handleUpload = async (file: File) => {
 
   return (
     <>
-    {roleUser !== "Divisi General Affair" && (
-      <Button
-        sx={{ color: "#fff", minWidth: "150px" }}
-        variant="contained"
-        onClick={handleClickOpen}
-      >
-        {mode === "create" ? "Tambah" : "Sunting"}
-      </Button>
-    ) }
+      {roleUser !== "Divisi General Affair" && (
+        <Button
+          sx={{ color: "#fff", minWidth: "150px" }}
+          variant="contained"
+          onClick={handleClickOpen}
+        >
+          {mode === "create" ? "Tambah" : "Sunting"}
+        </Button>
+      )}
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <form onSubmit={handleSubmit}>
           <DialogTitle>
