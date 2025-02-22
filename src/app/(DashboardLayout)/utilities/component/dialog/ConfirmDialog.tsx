@@ -32,7 +32,7 @@ const ConfirmDialog = ({
         <Typography>{description}</Typography>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="primary">
+        <Button onClick={onClose} variant="contained" sx={{ color: "#fff" }} color="primary">
           Batal
         </Button>
         {undo === false ? (

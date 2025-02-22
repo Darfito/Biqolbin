@@ -56,13 +56,7 @@ const formSchema = v.object({
   // umur: v.number("Umur harus berupa angka dan tidak boleh kosong"),
   noTelp: v.pipe(v.string(), v.nonEmpty("Nomor Telepon harus diisi")),
   role: v.pipe(v.string(), v.nonEmpty("Role harus diisi")),
-  penempatan: v.pipe(v.string(), v.nonEmpty("Penempatan harus diisi")),
   alamatCabang: v.pipe(v.string(), v.nonEmpty("Alamat Cabang harus diisi")),
-  password: v.pipe(
-    v.string(),
-    v.minLength(8, "Password minimal 8 karakter"),
-    v.nonEmpty("Password harus diisi")
-  ),
 });
 
 const FormDetail = ({
