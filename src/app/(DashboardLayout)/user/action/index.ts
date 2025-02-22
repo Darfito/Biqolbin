@@ -5,7 +5,6 @@ import { revalidatePath } from "next/cache";
 import { UserInterface } from "../../utilities/type";
 
 
-
 export const getCabangAction = async () => {
   const supabase = createClient();
   const { data: Cabang, error} = await supabase.from("Cabang").select("*");
@@ -91,14 +90,14 @@ export const updateUserAction = async (UserData: UserInterface) => {
 
   // Memasukkan data ke dalam tabel `User`
   const { data, error } = await supabase
-    .from("User")
+    .from("Users")
     .update({
       email: UserData.email,
       nama: UserData.nama,
       jenisKelamin: UserData.jenisKelamin,
       noTelp: UserData.noTelp,
       role: UserData.role,
-      penempatan: UserData.penempatan,
+      penempatan: UserData.penempatan.nama,
       alamatCabang: UserData.alamatCabang
     })
     .eq("id", UserData.id)
@@ -113,21 +112,28 @@ export const updateUserAction = async (UserData: UserInterface) => {
   return { success: true, data };
 }
 
-
 export const deleteUserAction = async (userId: string) => {
-  const supabase = createClient();
+  const supabase = createClient(); // Pastikan client ini diinisialisasi dengan Service Role Key
 
-  const { error } = await supabase
-    .from("User")
+  // Hapus dari Supabase Auth
+  const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+  if (authError) {
+    console.error("Error deleting user from auth:", authError.message);
+    return { success: false, error: authError.message };
+  }
+
+  // Hapus dari tabel Users di schema public
+  const { error: dbError } = await supabase
+    .from("Users")
     .delete()
     .eq("id", userId);
-
-  if (error) {
-    console.error("Error deleting user:", error.message);
-    return { success: false, error: error.message };
+    
+  if (dbError) {
+    console.error("Error deleting user from database:", dbError.message);
+    return { success: false, error: dbError.message };
   }
+
   console.log(`User with ID ${userId} deleted successfully`);
   revalidatePath("/user");
   return { success: true };
 };
-
