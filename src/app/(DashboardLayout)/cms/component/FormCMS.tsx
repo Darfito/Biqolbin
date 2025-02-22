@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import * as v from "valibot";
 import Button from "@mui/material/Button";
@@ -154,6 +156,7 @@ const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
       publish: false,
       gambar_url: "",
       statusAktif: true,
+      statusVerifikasi: false,
     }
   );
 
@@ -259,6 +262,7 @@ const handleUpload = async (file: File) => {
       fasilitas: Array.isArray(values.fasilitas) ? values.fasilitas : [],
       gambar_url: values.gambar_url,
       statusAktif: values.statusAktif,
+      statusVerifikasi: values.statusVerifikasi,
       Hotel: Array.isArray(values.Hotel) ? values.Hotel : [], // Tambahkan properti hotel
     };
   };

@@ -101,9 +101,9 @@ const formSchema = v.object({
     v.number(),
     v.minValue(0, "Uang muka harus lebih dari atau sama dengan 0")
   ),
-  banyaknyaCicilan: v.optional(
-    v.pipe(v.number(), v.minValue(1, "Banyaknya cicilan harus lebih dari 0"))
-  ),
+  // banyaknyaCicilan: v.optional(
+  //   v.pipe(v.number(), v.minValue(1, "Banyaknya cicilan harus lebih dari 0"))
+  // ),
   jumlahBiayaPerAngsuran: v.optional(
     v.pipe(
       v.number(),
@@ -581,6 +581,7 @@ const FormDetail = ({
         }
       }),
         setFormErrors(errorMap);
+        console.error("Validation errors:", errorMap);
       toast.error("Validation errors:", errorMap);
       return;
     }

@@ -20,7 +20,7 @@ export default async function CMSPage() {
   }
 
   // Daftar role yang diizinkan
-  const allowedRoles = ["Admin", "Superadmin", "Marketing"];
+  const allowedRoles = ["Admin", "Superadmin", "Marketing", "Divisi General Affair"];
 
   // Redirect jika role user tidak diizinkan
   if (!allowedRoles.includes(roleUser)) {

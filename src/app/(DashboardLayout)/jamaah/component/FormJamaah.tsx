@@ -199,7 +199,6 @@ export default function FormJamaah({ cabang_id }: FormJamaahProps) {
     console.log("Form submitted:", formValues);
 
     const response = await createJamaahAction(formValues);
-    toast.success("Form berhasil disubmit!"); // Show success toast
     handleClose();
 
     if (response.success) {

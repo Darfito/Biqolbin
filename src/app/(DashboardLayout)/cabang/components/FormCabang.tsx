@@ -33,8 +33,16 @@ type FormType = {
 const formSchema = v.object({
   nama: v.pipe(v.string(), v.nonEmpty("Nama harus diisi")),
   alamatCabang: v.pipe(v.string(), v.nonEmpty("Alamat Cabang harus diisi")),
-  cabang_lat: v.number(),
-  cabang_long: v.number(),
+  cabang_lat: v.pipe(
+    v.string(),
+    v.transform((val) => parseFloat(val)),
+    v.number()
+  ),
+  cabang_long: v.pipe(
+    v.string(),
+    v.transform((val) => parseFloat(val)),
+    v.number()
+  ),
 });
 
 export default function FormCabang() {
@@ -74,7 +82,7 @@ export default function FormCabang() {
       toast.success("Cabang berhasil ditambahkan!");
       handleClose();
     } else {
-      toast.error(`Gagal menambahkan user: ${cabangInsertResponse.error}`);
+      toast.error(`Gagal menambahkan Cabang: ${cabangInsertResponse.error}`);
     }
   };
 
