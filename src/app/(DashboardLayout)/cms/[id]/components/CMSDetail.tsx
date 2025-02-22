@@ -43,9 +43,10 @@ import useSWR from "swr";
 interface CMSDetailProps {
   id: string;
   breadcrumbLinks: { label: string; href?: string }[];
+  roleUser: string;
 }
 
-const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
+const CMSDetail = ({ id, breadcrumbLinks, roleUser }: CMSDetailProps) => {
   const router = useRouter();
   const [paketDetail, setPaketDetail] = useState<PaketInterface>();
   const [openDialog, setOpenDialog] = useState(false);
@@ -215,7 +216,7 @@ const CMSDetail = ({ id, breadcrumbLinks }: CMSDetailProps) => {
       </Box>
       <PageContainer title="CMS">
         <Box sx={{ margin: "20px", display: "flex", justifyContent: "end" }}>
-          <FormCMS initialValues={paketDetail} mode={"edit"} />
+          <FormCMS initialValues={paketDetail} mode={"edit"} roleUser={roleUser} />
         </Box>
         <Card sx={{ mt: 3, p: 3 }}>
           {paketDetail ? (

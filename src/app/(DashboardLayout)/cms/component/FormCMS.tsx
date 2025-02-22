@@ -42,6 +42,7 @@ import { HotelSection } from "./HotelHandler";
 interface FormCMSProps {
   initialValues?: PaketInterface; // Nilai default untuk mengedit
   mode: "create" | "edit"; // Mode: create atau edit
+  roleUser: string;
 }
 
 interface FormErrors {
@@ -119,7 +120,7 @@ export const formSchema = v.object({
   gambar_url: v.string(),
 });
 
-const FormCMS = ({ initialValues, mode }: FormCMSProps) => {
+const FormCMS = ({ initialValues, mode, roleUser }: FormCMSProps) => {
   const [open, setOpen] = useState(false);
   const [isCustomMaskapai, setIsCustomMaskapai] = useState(false); // Untuk melacak apakah pengguna memilih "Lainnya"
   const [formErrors, setFormErrors] = useState<FormErrors>({});
@@ -419,6 +420,7 @@ const handleUpload = async (file: File) => {
 
   return (
     <>
+    {roleUser !== "Divisi General Affair" && (
       <Button
         sx={{ color: "#fff", minWidth: "150px" }}
         variant="contained"
@@ -426,6 +428,7 @@ const handleUpload = async (file: File) => {
       >
         {mode === "create" ? "Tambah" : "Sunting"}
       </Button>
+    ) }
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <form onSubmit={handleSubmit}>
           <DialogTitle>

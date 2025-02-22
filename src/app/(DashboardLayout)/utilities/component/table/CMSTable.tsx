@@ -342,112 +342,125 @@ const CMSTable = ({ data, roleUser }: TableProps<PaketInterface>) => {
       header: "Tanggal Kepulangan",
       enableColumnFilter: false,
     }),
-...(allowedRoles.includes(roleUser)
+    ...(allowedRoles.includes(roleUser) || roleUser === "Divisi General Affair"
     ? [
         columnHelper.accessor("action", {
           cell: (info) => (
             <Box sx={{ display: "flex", gap: "0.5rem" }}>
-              {roleUser === "Superadmin" && (
-                <Tooltip
-                  title={
-                    info.row.original.statusVerifikasi
-                      ? "Ditolak"
-                      : "Verifikasi"
-                  }
-                  arrow
-                >
+              {roleUser === "Divisi General Affair" ? (
+                <Tooltip title="Detail" arrow>
                   <IconButton
-                    onClick={() =>
-                      handleVerificationStatusChange(
-                        info.row.original.id ?? 0,
-                        info.row.original.statusVerifikasi
-                          ? "Ditolak"
-                          : "Verifikasi"
-                      )
-                    }
-                    sx={{
-                      color: "#fff",
-                      backgroundColor: info.row.original.statusVerifikasi
-                        ? "red"
-                        : "green",
-                    }}
+                    onClick={() => handleNavigateToCMS(info.row.original)}
+                    sx={{ color: "inherit" }}
                   >
-                    {info.row.original.statusVerifikasi ? (
-                      <IconX size={20} />
-                    ) : (
-                      <IconCheck size={20} />
-                    )}
-                  </IconButton>
-                </Tooltip>
-              )}
-
-              <Tooltip
-                title={info.row.original.publish ? "Unpublish" : "Publish"}
-                arrow
-              >
-                {/* Bungkus dengan <span> karena IconButton yang disabled tidak memicu tooltip */}
-                <span>
-                  <IconButton
-                    onClick={() =>
-                      handleDialogOpen(
-                        info.row.original.id ?? 0,
-                        info.row.original.publish ? "unpublish" : "publish"
-                      )
-                    }
-                    sx={{
-                      color: "#fff",
-                      backgroundColor: info.row.original.publish
-                        ? "red"
-                        : "green",
-                    }}
-                    disabled={!info.row.original.statusVerifikasi}
-                  >
-                    {info.row.original.publish ? (
-                      <IconEyeOff size={20} />
-                    ) : (
-                      <IconEye size={20} />
-                    )}
-                  </IconButton>
-                </span>
-              </Tooltip>
-
-              <Tooltip title="Detail" arrow>
-                <IconButton
-                  onClick={() => handleNavigateToCMS(info.row.original)}
-                  sx={{ color: "inherit" }}
-                >
-                  <IconEditCircle size={20} color="#FFC107" />
-                </IconButton>
-              </Tooltip>
-
-              {info.row.original.statusAktif ? (
-                <Tooltip title="Delete" arrow>
-                  <IconButton
-                    onClick={() =>
-                      handleDialogDeleteOpen(
-                        info.row.original.id ?? 0,
-                        info.row.original.nama
-                      )
-                    }
-                    color="error"
-                  >
-                    <IconTrash size={20} />
+                    <IconEye size={20} />
                   </IconButton>
                 </Tooltip>
               ) : (
-                <Tooltip title="Undo" arrow>
-                  <IconButton
-                    onClick={() =>
-                      handleUndoOpen(
-                        info.row.original.id ?? 0,
-                        info.row.original.nama
-                      )
-                    }
-                    color="primary"
+                <>
+                  {roleUser === "Superadmin" && (
+                    <Tooltip
+                      title={
+                        info.row.original.statusVerifikasi
+                          ? "Ditolak"
+                          : "Verifikasi"
+                      }
+                      arrow
+                    >
+                      <IconButton
+                        onClick={() =>
+                          handleVerificationStatusChange(
+                            info.row.original.id ?? 0,
+                            info.row.original.statusVerifikasi
+                              ? "Ditolak"
+                              : "Verifikasi"
+                          )
+                        }
+                        sx={{
+                          color: "#fff",
+                          backgroundColor: info.row.original.statusVerifikasi
+                            ? "red"
+                            : "green",
+                        }}
+                      >
+                        {info.row.original.statusVerifikasi ? (
+                          <IconX size={20} />
+                        ) : (
+                          <IconCheck size={20} />
+                        )}
+                      </IconButton>
+                    </Tooltip>
+                  )}
+  
+                  <Tooltip
+                    title={info.row.original.publish ? "Unpublish" : "Publish"}
+                    arrow
                   >
-                    <IconArrowBackUp size={20} />
-                  </IconButton>
-                </Tooltip>
+                    {/* Bungkus dengan <span> karena IconButton yang disabled tidak memicu tooltip */}
+                    <span>
+                      <IconButton
+                        onClick={() =>
+                          handleDialogOpen(
+                            info.row.original.id ?? 0,
+                            info.row.original.publish ? "unpublish" : "publish"
+                          )
+                        }
+                        sx={{
+                          color: "#fff",
+                          backgroundColor: info.row.original.publish
+                            ? "red"
+                            : "green",
+                        }}
+                        disabled={!info.row.original.statusVerifikasi}
+                      >
+                        {info.row.original.publish ? (
+                          <IconEyeOff size={20} />
+                        ) : (
+                          <IconEye size={20} />
+                        )}
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+  
+                  <Tooltip title="Detail" arrow>
+                    <IconButton
+                      onClick={() => handleNavigateToCMS(info.row.original)}
+                      sx={{ color: "inherit" }}
+                    >
+                      <IconEditCircle size={20} color="#FFC107" />
+                    </IconButton>
+                  </Tooltip>
+  
+                  {info.row.original.statusAktif ? (
+                    <Tooltip title="Delete" arrow>
+                      <IconButton
+                        onClick={() =>
+                          handleDialogDeleteOpen(
+                            info.row.original.id ?? 0,
+                            info.row.original.nama
+                          )
+                        }
+                        color="error"
+                      >
+                        <IconTrash size={20} />
+                      </IconButton>
+                    </Tooltip>
+                  ) : (
+                    <Tooltip title="Undo" arrow>
+                      <IconButton
+                        onClick={() =>
+                          handleUndoOpen(
+                            info.row.original.id ?? 0,
+                            info.row.original.nama
+                          )
+                        }
+                        color="primary"
+                      >
+                        <IconArrowBackUp size={20} />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                </>
               )}
             </Box>
           ),
@@ -456,6 +469,8 @@ const CMSTable = ({ data, roleUser }: TableProps<PaketInterface>) => {
         }),
       ]
     : []),
+  
+  
   ];
 
   const table = useReactTable({

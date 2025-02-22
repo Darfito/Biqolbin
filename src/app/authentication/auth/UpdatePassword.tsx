@@ -38,6 +38,8 @@ const UpdatePassword = ({ title, subtitle, subtext }: loginType) => {
     const token = params.get("access_token");
     const refreshToken = params.get("refresh_token");
 
+    console.log("hash", hash);
+
     if (token && refreshToken) {
       supabase.auth.setSession({ access_token: token, refresh_token: refreshToken });
     }
