@@ -150,6 +150,9 @@ const FormCicilan = ({
             : "Cicilan berhasil ditambahkan!"
         );
         handleClose(); // Tutup dialog setelah berhasil
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
       } else {
         toast.error(
           `Gagal ${
