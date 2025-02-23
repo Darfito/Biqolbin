@@ -216,7 +216,11 @@ const CMSDetail = ({ id, breadcrumbLinks, roleUser }: CMSDetailProps) => {
       </Box>
       <PageContainer title="CMS">
         <Box sx={{ margin: "20px", display: "flex", justifyContent: "end" }}>
-          <FormCMS initialValues={paketDetail} mode={"edit"} roleUser={roleUser} />
+          <FormCMS
+            initialValues={paketDetail}
+            mode={"edit"}
+            roleUser={roleUser}
+          />
         </Box>
         <Card sx={{ mt: 3, p: 3 }}>
           {paketDetail ? (
@@ -261,13 +265,15 @@ const CMSDetail = ({ id, breadcrumbLinks, roleUser }: CMSDetailProps) => {
                   )}
 
                   <Box>
-                    <Button
-                      onClick={handleDialogOpen}
-                      variant="contained"
-                      sx={{ color: "#fff", marginTop: 2 }}
-                    >
-                      Unggah Gambar
-                    </Button>
+                    {roleUser !== "Divisi General Affair" && (
+                      <Button
+                        onClick={handleDialogOpen}
+                        variant="contained"
+                        sx={{ color: "#fff", marginTop: 2 }}
+                      >
+                        Unggah Gambar
+                      </Button>
+                    )}
                   </Box>
                 </Box>
                 <Box
@@ -648,9 +654,7 @@ const CMSDetail = ({ id, breadcrumbLinks, roleUser }: CMSDetailProps) => {
                         >
                           {" "}
                           {/* Menyesuaikan jarak */}
-                          <Typography variant="h6">
-                            Tipe Kamar Quad:
-                          </Typography>
+                          <Typography variant="h6">Tipe Kamar Quad:</Typography>
                           <Typography variant="h6" sx={{ fontWeight: "bold" }}>
                             {new Intl.NumberFormat("id-ID", {
                               style: "currency",
@@ -738,7 +742,11 @@ const CMSDetail = ({ id, breadcrumbLinks, roleUser }: CMSDetailProps) => {
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleDialogClose} variant="contained" color="error">
+            <Button
+              onClick={handleDialogClose}
+              variant="contained"
+              color="error"
+            >
               Ya, Batalkan
             </Button>
             <Button
