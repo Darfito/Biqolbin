@@ -309,22 +309,23 @@ export default function FormKeuangan({
   // Calculate installment (angsuran) if "Cicilan" is selected
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const calculateAngsuran = () => {
-    if (
-      metode === "Cicilan" &&
-      formValues.totalTagihan &&
-      formValues.uangMuka &&
-      formValues.banyaknyaCicilan
-    ) {
-      const jumlahAngsuran =
-        (Number(formValues.totalTagihan) - Number(formValues.uangMuka)) /
-        Number(formValues.banyaknyaCicilan);
-
-      // Round the installment amount to whole number
+    if (metode === "Cicilan" && formValues.totalTagihan && formValues.banyaknyaCicilan) {
+      const totalTagihan = Number(formValues.totalTagihan) || 0;
+      const uangMuka = Number(formValues.uangMuka) || 0; // Jika kosong, dianggap 0
+      const banyaknyaCicilan = Number(formValues.banyaknyaCicilan) || 0;
+  
+      if (banyaknyaCicilan === 0) {
+        console.error("Banyaknya cicilan tidak boleh 0");
+        return;
+      }
+  
+      const jumlahAngsuran = (totalTagihan - uangMuka) / banyaknyaCicilan;
       const roundedAngsuran = Math.round(jumlahAngsuran);
-      setFormValues({
-        ...formValues,
-        jumlahBiayaPerAngsuran: roundedAngsuran,
-      });
+  
+      setFormValues((prevValues) => ({
+        ...prevValues,
+        jumlahBiayaPerAngsuran: isFinite(roundedAngsuran) ? roundedAngsuran : 0,
+      }));
     }
   };
 
