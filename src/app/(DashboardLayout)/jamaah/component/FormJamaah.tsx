@@ -204,6 +204,9 @@ export default function FormJamaah({ cabang_id }: FormJamaahProps) {
     if (response.success) {
       toast.success("Jamaah berhasil ditambahkan!");
       handleClose(); // Tutup dialog setelah berhasil
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     } else {
       toast.error(`Gagal menambahkan Jamaah: ${response.error}`);
     }

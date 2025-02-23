@@ -27,7 +27,7 @@ export const createCabangAction = async (formValues: CabangInterface) => {
     }
 
     console.log("Cabang created successfully");
-    revalidatePath("/cabang");
+    // revalidatePath("/cabang");
     return { success: true, data: cabangData };
   } catch (error) {
     console.error("Error creating cabang:", error);
@@ -55,7 +55,7 @@ export const updateCabangAction = async (formValues: CabangInterface) => {
   }
 
   console.log("Cabang updated:", data);
-  revalidatePath("/cabang");
+  // revalidatePath("/cabang");
   return { success: true, data };
 }
 
@@ -69,6 +69,6 @@ export const deleteCabangAction = async (CabangId: number) => {
     return { success: false, error: error.message };
   }
   console.log(`User with ID ${CabangId} deleted successfully`);
-  revalidatePath("/user");
+  // revalidatePath("/user");
   return { success: true };
 };

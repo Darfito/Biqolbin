@@ -258,6 +258,9 @@ export default function FormKeuangan({
     if (response.success) {
       toast.success("Item Keuangan berhasil ditambahkan!");
       handleClose(); // Tutup dialog setelah berhasil
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     } else {
       toast.error(`Gagal menambahkan Item Keuangan: ${response.error}`);
     }

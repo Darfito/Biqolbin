@@ -95,7 +95,7 @@ export const createCmsAction = async (paketData: PaketInterface) => {
     console.log("Paket created:", PaketData);
 
     // Revalidate the CMS path
-    revalidatePath("/cms");
+    // revalidatePath("/cms");
 
     return { success: true, data: PaketData };
   } catch (error) {

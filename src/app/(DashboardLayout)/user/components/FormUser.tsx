@@ -131,6 +131,9 @@ export default function FormUser({
     if (userInsertResponse.success) {
       toast.success("User berhasil ditambahkan!");
       handleClose();
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     } else {
       toast.error(`Gagal menambahkan user: ${userInsertResponse.error}`);
     }

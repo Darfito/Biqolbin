@@ -81,6 +81,9 @@ export default function FormCabang() {
     if (cabangInsertResponse.success) {
       toast.success("Cabang berhasil ditambahkan!");
       handleClose();
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     } else {
       toast.error(`Gagal menambahkan Cabang: ${cabangInsertResponse.error}`);
     }

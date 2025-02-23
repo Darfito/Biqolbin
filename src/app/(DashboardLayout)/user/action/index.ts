@@ -76,7 +76,7 @@ export const createUserAction = async (formValues: UserInterface) => {
     }
 
     console.log("User created successfully");
-    revalidatePath("/user");
+    // revalidatePath("/user");
     return { success: true };
   } catch (error) {
     console.error("Unexpected error:", error);
@@ -108,7 +108,7 @@ export const updateUserAction = async (UserData: UserInterface) => {
     return { success: false, error: error.message };
   }
   console.log("User updated:", data);
-  revalidatePath("/user");
+  // revalidatePath("/user");
   return { success: true, data };
 }
 
@@ -134,6 +134,6 @@ export const deleteUserAction = async (userId: string) => {
   }
 
   console.log(`User with ID ${userId} deleted successfully`);
-  revalidatePath("/user");
+  // revalidatePath("/user");
   return { success: true };
 };

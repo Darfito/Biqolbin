@@ -197,7 +197,7 @@ export const createKeuaganAction = async (formValues: KeuanganInterface) => {
   }
 
   console.log("Keuangan created:", keuanganData);
-  revalidatePath("/keuangan");
+  // revalidatePath("/keuangan");
   return { success: true, data: keuanganData };
 };
 
@@ -455,7 +455,7 @@ export const updateCicilanAction = async (formValues: any) => {
   }
 
   // Revalidate path (opsional, bergantung pada implementasi routing Anda)
-  revalidatePath(`/keuangan/${formValues.keuangan_id}`);
+  // revalidatePath(`/keuangan/${formValues.keuangan_id}`);
 
   return { success: true, data, updatedSisaTagihan };
 };

@@ -334,6 +334,9 @@ const FormCMS = ({ initialValues, mode, roleUser }: FormCMSProps) => {
         if (success) {
           toast.success("Form berhasil disubmit!");
           handleClose();
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
         } else {
           toast.error(`Error: ${error}`);
         }
