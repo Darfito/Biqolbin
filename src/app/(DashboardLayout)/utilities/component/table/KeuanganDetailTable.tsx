@@ -422,6 +422,7 @@ const KeuanganDetailTable = ({
         {/* Form Cicilan Dialog */}
         {openFormCicilan && (
           <FormCicilan
+            metode={metode}
             open={openFormCicilan}
             handleClose={handleCloseFormCicilan}
             initialData={editData}
