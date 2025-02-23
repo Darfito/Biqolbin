@@ -106,6 +106,9 @@ const FormDetail = ({ isEditing, cabangData, role }: FormDetailProps) => {
     if (response.success) {
       toast.success("Data berhasil diperbarui"); // Show success toast
       handleCloseModal(); // Tutup dialog setelah selesai
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     }
   };
 

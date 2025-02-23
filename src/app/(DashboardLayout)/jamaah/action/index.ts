@@ -192,7 +192,7 @@ export const createJamaahAction = async (formValues: JamaahInterface) => {
     if (dokumenError) throw dokumenError;
 
     console.log("Jamaah created successfully:", jamaahData);
-    revalidatePath("/jamaah");
+    // revalidatePath("/jamaah");
     return { success: true, data: jamaahData };
   } catch (error) {
     console.error("Error creating Jamaah:", error);
@@ -403,7 +403,7 @@ export const deleteStatusAktifAction = async (jamaahId: string) => {
   console.log(`Jamaah and related Keuangan records updated successfully for ID ${jamaahId}`);
 
   // Revalidate halaman /jamaah setelah perubahan data
-  revalidatePath("/jamaah");
+  // revalidatePath("/jamaah");
 
   return { success: true };
 };

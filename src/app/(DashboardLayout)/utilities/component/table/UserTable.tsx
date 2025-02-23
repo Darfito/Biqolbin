@@ -155,6 +155,9 @@ const UserTable = ({ data }: TableProps<UserInterface>) => {
       const result = await deleteUserAction(selectedRow?.id!); // Eksekusi delete
       if (result.success) {
         toast.success(`User with ID ${selectedRow.id} has been deleted.`);
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
       } else {
         toast.error(`Failed to delete user: ${result.error}`);
       }
