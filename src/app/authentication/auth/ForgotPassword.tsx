@@ -34,11 +34,11 @@ const ForgotPassword = ({ title, subtitle, subtext, onSuccess  }: loginType) => 
 
     console.log("Response data:", response);
     if (response.success) {
-      toast.success(`Email berhasil dikirim ke ${email}`);
+      // toast.success(`Email berhasil dikirim ke ${email}`);
       if (onSuccess) onSuccess(true); // Kirim success ke parent
     } else {
       setError(response.error || "Gagal mengirim email. Silakan coba lagi.");
-      toast.error(response.error || "Gagal mengirim email.");
+      // toast.error(response.error || "Gagal mengirim email.");
       if (onSuccess) onSuccess(false); // Kirim false ke parent
     }
   };
