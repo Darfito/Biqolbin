@@ -53,6 +53,7 @@ interface FormCicilanProps {
   initialData?: CicilanType | null;
   currentCicilanKe?: number;
   keuanganId?: number;
+  metode?: string;
 }
 
 const FormCicilan = ({
@@ -61,6 +62,7 @@ const FormCicilan = ({
   initialData,
   currentCicilanKe,
   keuanganId,
+  metode,
 }: FormCicilanProps) => {
   console.log("initialData cicilan:", initialData);
   console.log("cicilan ke:", currentCicilanKe);
@@ -116,10 +118,10 @@ const FormCicilan = ({
   // Handle form submission
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-  
+
     // Validasi data form
     const result = v.safeParse(formSchema, formValues);
-  
+
     if (!result.success) {
       const errorMap: Record<string, string> = {};
       result.issues.forEach((issue) => {
@@ -128,12 +130,12 @@ const FormCicilan = ({
           errorMap[path] = issue.message;
         }
       });
-  
+
       setFormErrors(errorMap);
       console.error("Validation errors:", errorMap);
       return;
     }
-  
+
     try {
       // Tentukan apakah ini operasi create atau update berdasarkan ada/tidaknya id
       let response;
@@ -142,7 +144,7 @@ const FormCicilan = ({
       } else {
         response = await createCicilanAction(formValues);
       }
-  
+
       if (response.success) {
         toast.success(
           formValues.id
@@ -155,9 +157,9 @@ const FormCicilan = ({
         }, 100);
       } else {
         toast.error(
-          `Gagal ${
-            formValues.id ? "memperbarui" : "menambahkan"
-          } cicilan: ${response.error}`
+          `Gagal ${formValues.id ? "memperbarui" : "menambahkan"} cicilan: ${
+            response.error
+          }`
         );
       }
     } catch (error: any) {
@@ -165,14 +167,15 @@ const FormCicilan = ({
       toast.error("Terjadi kesalahan saat memproses form.");
     }
   };
-  
 
   return (
     <>
       <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
         <form onSubmit={handleSubmit}>
           <DialogTitle>
-            {initialData?.nominalCicilan !== 0 ? "Edit Cicilan" : "Tambah Cicilan"}
+            {initialData?.nominalCicilan !== 0
+              ? `Edit ${metode === "Cicilan" ? "Cicilan" : "Pembayaran"}`
+              : `Tambah ${metode === "Cicilan" ? "Cicilan" : "Pembayaran"}`}
           </DialogTitle>
           <DialogContent
             sx={{
@@ -185,14 +188,18 @@ const FormCicilan = ({
           >
             <DialogContentText>
               {initialData
-                ? "Perbarui detail cicilan yang dipilih."
-                : "Masukkan detail cicilan baru."}
+                ? `Perbarui detail ${
+                    metode === "Cicilan" ? "cicilan" : "pembayaran"
+                  } yang dipilih.`
+                : `Masukkan detail ${
+                    metode === "Cicilan" ? "cicilan" : "pembayaran"
+                  } baru.`}
             </DialogContentText>
 
             <CustomTextField
               fullWidth
               disabled
-              label="Cicilan Ke"
+              label={metode === "Cicilan" ? "Cicilan Ke" : "Pembayaran Ke"}
               name="cicilanKe"
               value={formValues.cicilanKe}
               error={!!formErrors.cicilanKe}
@@ -228,7 +235,7 @@ const FormCicilan = ({
 
             <CustomTextField
               fullWidth
-              label="Nominal Cicilan"
+              label={metode === "Cicilan" ? "Nominal Cicilan" : "Nominal Pembayaran"}
               name="nominalCicilan"
               value={formatRupiah(formValues.nominalCicilan)}
               error={!!formErrors.nominalCicilan}
