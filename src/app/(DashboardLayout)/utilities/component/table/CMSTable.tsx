@@ -265,6 +265,7 @@ const CMSTable = ({ data, roleUser }: TableProps<PaketInterface>) => {
       } else {
         toast.error("Failed to deactivate Paket.");
       }
+      handleDialogClose();
     } catch (error) {
       console.error("Unexpected error:", error);
       toast.error("An unexpected error occurred.");
@@ -280,6 +281,7 @@ const CMSTable = ({ data, roleUser }: TableProps<PaketInterface>) => {
       } else {
         toast.error("Failed to activate Paket.");
       }
+      handleUndoClose()
     } catch (error) {
       console.error("Unexpected error:", error);
       toast.error("An unexpected error occurred.");
