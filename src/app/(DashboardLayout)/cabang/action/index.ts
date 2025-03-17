@@ -35,6 +35,23 @@ export const createCabangAction = async (formValues: CabangInterface) => {
   }
 };
 
+export const getCabangByIdAction = async (id: number) => {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("Cabang")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+    if (error) {
+      console.error("Error fetching user data:", error.message);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
+}
+
 export const updateCabangAction = async (formValues: CabangInterface) => {
   const supabase = createClient(); // Membuat instance Supabase client
 

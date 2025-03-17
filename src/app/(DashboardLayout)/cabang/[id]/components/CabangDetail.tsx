@@ -5,7 +5,6 @@ import Breadcrumb from "@/app/(DashboardLayout)/utilities/component/breadcrumb/B
 import {
   Box,
   Button,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -17,48 +16,31 @@ import { IconArrowLeft } from "@tabler/icons-react";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { createClient } from "@/libs/supabase/client";
 
-import { CabangInterface, UserInterface } from "@/app/(DashboardLayout)/utilities/type";
+import { CabangInterface } from "@/app/(DashboardLayout)/utilities/type";
 import FormDetail from "./FormDetail";
 
 interface cabangDetailProps {
-  id: string;
   breadcrumbLinks: { label: string; href?: string }[];
   role: string;
+  CabangData: CabangInterface | null;
 }
 
-const CabangDetail = ({ id, breadcrumbLinks,role }: cabangDetailProps) => {
+const CabangDetail = ({ breadcrumbLinks,role, CabangData }: cabangDetailProps) => {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [currentData, setCurrentData] = useState<CabangInterface | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const [currentData, setCurrentData] = useState<CabangInterface | null>(CabangData);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
-  const supabase = createClient();
 
-  // Fetch user data
   useEffect(() => {
-    const fetchUserData = async () => {
-      if (id && !currentData) {
-        try {
-          const { data, error } = await supabase
-            .from("Cabang")
-            .select("*") // Get all necessary fields, not just 'id'
-            .eq("id", id)
-            .single(); // To get only one user based on the id
+    setMounted(true);
+  }, []);
 
-          if (error) {
-            console.error("Error fetching user:", error);
-          } else {
-            setCurrentData(data); // Set fetched user data
-          }
-        } catch (err) {
-          console.error("Error fetching data:", err);
-        }
-      }
-    };
-
-    fetchUserData();
-  }, [id, currentData, supabase]);
+  if (!mounted) {
+    return null; // Jangan render apa-apa sampai komponen dimuat di klien
+  }
+  
 
   // Toggle the isEditing state
   const handleEditClick = () => {
@@ -70,7 +52,7 @@ const CabangDetail = ({ id, breadcrumbLinks,role }: cabangDetailProps) => {
   };
 
    // Handle dialog actions
-   const handleCancelEdit = () => {
+  const handleCancelEdit = () => {
     setIsEditing(false); // Exit edit mode
     setOpenDialog(false); // Close dialog
   };

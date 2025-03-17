@@ -1,6 +1,11 @@
 import { getLoggedInUser, getUserById } from "@/libs/sessions";
-import { CabangInterface } from "../../utilities/type";
-import { getCabangAction, getUserAction, getUserCabangAction } from "../action";
+import { CabangInterface, UserInterface } from "../../utilities/type";
+import {
+  getCabangAction,
+  getUserAction,
+  getUserActionById,
+  getUserCabangAction,
+} from "../action";
 import UserDetail from "./components/UserDetail";
 
 export default async function DetailUser({
@@ -10,6 +15,7 @@ export default async function DetailUser({
 }) {
   let cabangData: CabangInterface[] = [];
   let roleUser = "";
+  let currentUser: UserInterface | null = null;
 
   try {
     // Ambil data user yang sedang login
@@ -18,6 +24,13 @@ export default async function DetailUser({
     if (userLoginResponse) {
       // Ambil detail user berdasarkan ID
       const userDetails = await getUserById(userLoginResponse.id);
+
+      const userResult = await getUserActionById((await params).id);
+      if (userResult.success) {
+        currentUser = userResult.data;
+      } else {
+        currentUser = null;
+      }
 
       console.log("User data: ", userDetails);
       // Ambil data penempatan cabang dan role user
@@ -30,6 +43,10 @@ export default async function DetailUser({
     console.error("Error fetching data: ", error);
   }
 
+  const stableCurrentUser = currentUser || null;
+
+  console.log("Current User: ", stableCurrentUser);
+
   const breadcrumbLinks = [
     { label: "User", href: "/user" },
     { label: `${(await params).id}` }, // No href for the current page
@@ -37,7 +54,13 @@ export default async function DetailUser({
 
   return (
     <>
-      <UserDetail id={(await params).id} breadcrumbLinks={breadcrumbLinks} role={roleUser} cabangData={cabangData} />
+      <UserDetail
+        id={(await params).id}
+        breadcrumbLinks={breadcrumbLinks}
+        role={roleUser}
+        cabangData={cabangData}
+        userData={stableCurrentUser}
+      />
     </>
   );
 }

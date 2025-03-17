@@ -403,7 +403,7 @@ export const deleteStatusAktifAction = async (jamaahId: string) => {
   console.log(`Jamaah and related Keuangan records updated successfully for ID ${jamaahId}`);
 
   // Revalidate halaman /jamaah setelah perubahan data
-  // revalidatePath("/jamaah");
+  revalidatePath("/jamaah");
 
   return { success: true };
 };
