@@ -90,6 +90,8 @@ const FormDetail = ({
     if (userData) setFormValues(userData);
   }, [userData]);
 
+  console.log("user data", userData);
+
   const handleInputChange = (field: keyof UserInterface, value: any) => {
     setFormValues({ ...formValues, [field]: value });
   };
@@ -128,6 +130,7 @@ const FormDetail = ({
       return;
     }
 
+    console.log("Form Values saat mau masuk update:", formValues);
     const response = await updateUserAction(formValues);
 
     if (response.success) {

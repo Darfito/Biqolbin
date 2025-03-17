@@ -21,7 +21,6 @@ export default async function KeuanganPage() {
 
     if (userLoginResponse) {
       const userDetails = await getUserById(userLoginResponse.id);
-      console.log("User data: ", userDetails);
       cabangUser = userDetails?.[0].cabang_id || 0;
       roleUser = userDetails?.[0].role || "";
       idUser = userDetails?.[0].id || "";

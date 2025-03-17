@@ -5,7 +5,6 @@ import Breadcrumb from "@/app/(DashboardLayout)/utilities/component/breadcrumb/B
 import {
   Box,
   Button,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -26,59 +25,23 @@ interface UserDetailProps {
   breadcrumbLinks: { label: string; href?: string }[];
   role: string;
   cabangData: CabangInterface[];
+  userData: UserInterface | null;
 }
 
-const UserDetail = ({ id, breadcrumbLinks,role,cabangData }: UserDetailProps) => {
+const UserDetail = ({ id, breadcrumbLinks,role,cabangData, userData }: UserDetailProps) => {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [currentData, setCurrentData] = useState<UserInterface | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const [currentData, setCurrentData] = useState<UserInterface | null>(userData);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
-  const supabase = createClient();
 
-  // Fetch user data
   useEffect(() => {
-    const fetchUserData = async () => {
-      if (id && !currentData) {
-        try {
-          const { data, error } = await supabase
-            .from("Users")
-            .select(`
-              id,
-              email,
-              nama,
-              jenisKelamin,
-              noTelp,
-              role,
-              alamatCabang,
-              cabang_id,
-              Cabang (
-                id,
-                nama,
-                alamatCabang,
-                cabang_lat,
-                cabang_long
-              )
-            `)
-            .eq("id", id)
-            .single(); // Memastikan hanya satu pengguna
-  
-          if (error) {
-            console.error("Error fetching user:", error.message);
-          } else {
-            setCurrentData({
-              ...data,
-              // Ambil objek tunggal dari array (jika array) atau langsung assign
-              penempatan: Array.isArray(data?.Cabang) ? data?.Cabang[0] || null : data?.Cabang || null,
-            });
-          }
-        } catch (err) {
-          console.error("Error fetching data:", err);
-        }
-      }
-    };
-  
-    fetchUserData();
-  }, [id, currentData, supabase]);
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null; // Jangan render apa-apa sampai komponen dimuat di klien
+  }
   
 
   // Toggle the isEditing state

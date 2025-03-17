@@ -1,7 +1,6 @@
 'use server';
 
 import { createClient } from "@/libs/supabase/server";
-import { revalidatePath } from "next/cache";
 import { UserInterface } from "../../utilities/type";
 
 
@@ -88,6 +87,7 @@ export const createUserAction = async (formValues: UserInterface) => {
 export const updateUserAction = async (UserData: UserInterface) => {
   const supabase = createClient(); // Membuat instance Supabase client
 
+  console.log("Form Values di updateuser:", UserData);
   // Memasukkan data ke dalam tabel `User`
   const { data, error } = await supabase
     .from("Users")
@@ -98,7 +98,8 @@ export const updateUserAction = async (UserData: UserInterface) => {
       noTelp: UserData.noTelp,
       role: UserData.role,
       penempatan: UserData.penempatan.nama,
-      alamatCabang: UserData.alamatCabang
+      alamatCabang: UserData.alamatCabang,
+      cabang_id: UserData.penempatan.id
     })
     .eq("id", UserData.id)
     .select();
@@ -111,6 +112,59 @@ export const updateUserAction = async (UserData: UserInterface) => {
   // revalidatePath("/user");
   return { success: true, data };
 }
+
+export const getUserActionById = async (
+  id: string
+): Promise<{ success: boolean; data: UserInterface | null; error?: string }> => {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("Users")
+    .select(`
+      id,
+      email,
+      nama,
+      jenisKelamin,
+      noTelp,
+      role,
+      alamatCabang,
+      cabang_id,
+      Cabang (
+        id,
+        nama,
+        alamatCabang,
+        cabang_lat,
+        cabang_long
+      )
+    `)
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    console.error("Error fetching user:", error.message);
+    return { success: false, data: null, error: error.message };
+  }
+
+  if (!data) {
+    return { success: false, data: null, error: "No data returned" };
+  }
+
+  // Transform data sehingga properti "Cabang" dipetakan ke "penempatan"
+  const user: UserInterface = {
+    id: data.id,
+    email: data.email,
+    nama: data.nama,
+    jenisKelamin: data.jenisKelamin,
+    noTelp: data.noTelp,
+    role: data.role,
+    alamatCabang: data.alamatCabang,
+    cabang_id: data.cabang_id,
+    penempatan: Array.isArray(data.Cabang) ? data.Cabang[0] ?? null : data.Cabang ?? null,
+  };
+
+  return { success: true, data: user };
+};
+
 
 export const deleteUserAction = async (userId: string) => {
   const supabase = createClient(); // Pastikan client ini diinisialisasi dengan Service Role Key

@@ -76,6 +76,8 @@ const GlobalFilterDropdown = ({
     prevOpen.current = open;
   }, [open]);
 
+  console.log("selectedFilter:", selectedFilter);
+
   return (
     <>
       <Button
@@ -95,7 +97,7 @@ const GlobalFilterDropdown = ({
           color: "white",
         }}
       >
-        {selectedFilter || "Dummy"}
+        {selectedFilter}
       </Button>
       <Popper
         transition
@@ -149,7 +151,7 @@ const GlobalFilterDropdown = ({
                     Semua Cabang
                   </MenuItem>
                   {data
-                    ?.filter((item) => item.nama !== "Pusat") // Menambahkan filter untuk menghilangkan item dengan nama "Pusat"
+                    ?.filter((item) => item.nama) // Menambahkan filter untuk menghilangkan item dengan nama "Pusat"
                     .map((item, index) => (
                       <MenuItem
                         key={index}

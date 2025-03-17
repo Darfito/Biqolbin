@@ -38,6 +38,8 @@ export default async function DashboardPage() {
 
   const stableCabangData = cabangData || [];
 
+  console.log("stabel cabang data: ", stableCabangData);
+
 
 
 
